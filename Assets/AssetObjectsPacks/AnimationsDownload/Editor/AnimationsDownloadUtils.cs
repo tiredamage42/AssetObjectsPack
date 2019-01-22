@@ -1,31 +1,24 @@
-﻿
-
-
-
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
 namespace AssetObjectsPacks {
     class HumanoidSettingsOverride : AssetPostprocessor {
         /* CHANGE THIS IF YOU CHANGE THE MODEL ON THE DOWNLOADER SCRIPT FOR CHROME */
         const string character_model_name = "ybot";
-
         const string mixamo_download_check = character_model_name + "@-";
-
         const string mixamo_utils_dir = "AnimationsDownload/";
+        const string animations_pack_name = "Animations";
+        const string avatar_path = AssetObjectsEditor.asset_objects_packs_root_directory + mixamo_utils_dir + character_model_name + ".fbx";
 
         bool is_auto_downloaded {
             get {
                 string path = assetPath;
-                string anims_dir = AssetObjectsEditor.GetAssetObjectsDirectory("Animations");
-                if (!path.StartsWith(anims_dir)) 
+                if (!path.StartsWith(AssetObjectsEditor.GetAssetObjectsDirectory(animations_pack_name))) 
                     return false;
                 if (!path.Contains(mixamo_download_check)) 
                     return false;
                 return true;
             }
         }
-        
-        string avatar_path { get { return AssetObjectsEditor.asset_objects_packs_root_directory + mixamo_utils_dir + character_model_name + ".fbx"; } }
         GameObject avatar_model_gameobject { get { return AssetDatabase.LoadAssetAtPath<GameObject>(avatar_path); } }
         Animator animator { get { return avatar_model_gameobject.GetComponent<Animator>(); } }
         Avatar source_avatar { get { return animator.avatar; } }
@@ -36,7 +29,6 @@ namespace AssetObjectsPacks {
             if (!is_auto_downloaded) return;
             ModelImporter importer = assetImporter as ModelImporter;
             importer.animationType = UnityEditor.ModelImporterAnimationType.Human;
-            //Apply the avatar from the resources folder
             importer.sourceAvatar = source_avatar;
         }
         void OnPostprocessModel(GameObject g)
