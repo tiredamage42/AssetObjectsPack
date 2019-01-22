@@ -12,15 +12,23 @@ namespace AssetObjectsPacks {
         bool is_auto_downloaded {
             get {
                 string path = assetPath;
-                if (!path.StartsWith(AssetObjectsEditor.GetAssetObjectsDirectory(animations_pack_name))) 
-                    return false;
                 if (!path.Contains(mixamo_download_check)) 
+                    return false;
+                if (!path.StartsWith(AssetObjectsEditor.GetAssetObjectsDirectory(animations_pack_name))) 
                     return false;
                 return true;
             }
         }
-        GameObject avatar_model_gameobject { get { return AssetDatabase.LoadAssetAtPath<GameObject>(avatar_path); } }
-        Animator animator { get { return avatar_model_gameobject.GetComponent<Animator>(); } }
+        static GameObject avatar_model_gameobject { get { return AssetDatabase.LoadAssetAtPath<GameObject>(avatar_path); } }
+        static Animator _anim;
+        static Animator animator { 
+            get { 
+                if (_anim == null) _anim = avatar_model_gameobject.GetComponent<Animator>();
+                return _anim;
+            } 
+        }
+
+
         Avatar source_avatar { get { return animator.avatar; } }
         /*
             when importing automatically use humanoid rigging and y bot avatar (if auto downloaded)
@@ -28,31 +36,10 @@ namespace AssetObjectsPacks {
         void OnPreprocessModel() {
             if (!is_auto_downloaded) return;
             ModelImporter importer = assetImporter as ModelImporter;
-            importer.animationType = UnityEditor.ModelImporterAnimationType.Human;
-            importer.sourceAvatar = source_avatar;
-        }
-        void OnPostprocessModel(GameObject g)
-        {
-            if (!is_auto_downloaded) return;
-            string file_path = assetPath;
-            string[] dir_name = EditorUtils.DirectoryNameSplit(file_path);
-            //remove file extension
-            string n = dir_name[1].Split('.')[0];
-            string new_name = n.Replace(mixamo_download_check, AssetObjectsEditor.asset_object_key);
-            AssetDatabase.RenameAsset(file_path, new_name);
-            EditorUtility.SetDirty(g);
+            if (importer.animationType != UnityEditor.ModelImporterAnimationType.Human) {
+                importer.animationType = UnityEditor.ModelImporterAnimationType.Human;
+                importer.sourceAvatar = source_avatar;
+            }
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

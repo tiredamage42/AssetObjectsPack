@@ -8,8 +8,10 @@ Mixamo Auto Download Instuctions:
     1.  go to mixamo.com and log in 
     
     2.  for the avatar defenition download the ybot character
-        import the downloaded model to the AssetObjectsPacks root directory (in Unity)
+        import the downloaded model to the same directory as this read me, (in Unity)
         (you can move it after the animations are imported)
+
+        make sure to set the rig on the model as humanoid
 
         NOTE:
             if for some reason you want to change the default avatar defenition for the animations
@@ -25,11 +27,20 @@ Mixamo Auto Download Instuctions:
 
     5.  press enter and wait, (it will take a while, there are over 7,000 animations with all the variations)
 
-    6.  when the downloads are done import them into:
+    6.  when the downloads are done, open the command line and cd into the download directory
+
+    7.  copy and paste the following into the command line to rename all the files:
+         
+            find . -type f -name "ybot@-*" \
+            -exec sh -c 'mv "$0" "${0/ybot@-/@ID-}"' '{}' \;
+
+        (normally the editor will do this automatically, but it's faster for the command line to rename all these animations)
+
+    8.  when the downloads are done being renamed import them into:
+    
             Assets/AssetObjectsPacks/Packs/Animations/AssetObjects/
 
         importing might take a while as well (it's best to do this in batches)
         they'll automatically be set to humanoid,
         with an avatar defenition from the imported model from step 2
-        the animations will also be renamed with valid ids
-
+    
