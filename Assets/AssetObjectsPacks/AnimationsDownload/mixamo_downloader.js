@@ -41,7 +41,6 @@ var InitializeGetRequest = () => {
 }
 
 
-
 // retrieves json.details.gms_hash 
 /*
 name: "Praying"

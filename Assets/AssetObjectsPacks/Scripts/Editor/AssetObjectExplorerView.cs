@@ -10,7 +10,7 @@ namespace AssetObjectsPacks {
         public ExplorerWindowElement(string full_name, GUIContent label_gui, int object_id)
         => (this.full_name, this.label_gui, this.object_id) = (full_name, label_gui, object_id);
     }
-    public class AssetObjectExplorerView<T> : SelectionView<T, ExplorerWindowElement> where T : Object
+    public class AssetObjectExplorerView : SelectionView<ExplorerWindowElement>
     {
         ExplorerWindowElement[] all_asset_objects;
         GUIContent current_path_gui;
@@ -44,8 +44,14 @@ namespace AssetObjectsPacks {
             BuildAssetObjectReferences();
         }
 
-        public void OnEnable (SerializedObject serializedObject, string pack_name, Dictionary<int, string> id2path, System.Action<SerializedProperty> make_instance_default, string[] all_file_paths) {
-            base.OnEnable(serializedObject, pack_name, id2path, make_instance_default);
+        public void OnEnable (
+            SerializedObject serializedObject, 
+            string asset_object_unity_asset_type, 
+            string pack_name, Dictionary<int, string> id2path, 
+            //System.Action<SerializedProperty> make_instance_default, 
+            AssetObjectParamDef[] default_params,
+            string[] all_file_paths) {
+            base.OnEnable(serializedObject, asset_object_unity_asset_type, pack_name, id2path, default_params);//, make_instance_default);
             this.all_file_paths = all_file_paths;
             hidden_ids_list = serializedObject.FindProperty("hidden_ids");
             BuildAssetObjectReferences();
@@ -231,7 +237,7 @@ namespace AssetObjectsPacks {
             for (int i = 0; i < c; i++) {
                 string file_path = all_file_paths[i];
                 int id = AssetObjectsEditor.GetObjectIDFromPath(file_path);
-                string n = AssetObjectsEditor.RemoveIDFromPath(EditorUtils.DirectoryNameSplit(file_path)[1]);
+                string n = AssetObjectsEditor.RemoveIDFromPath(EditorUtils.RemoveDirectory(file_path));
                 all_asset_objects[i] = new ExplorerWindowElement(file_path, new GUIContent(n), id);
             }
         }

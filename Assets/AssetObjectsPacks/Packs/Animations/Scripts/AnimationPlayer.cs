@@ -10,19 +10,26 @@ namespace AssetObjectsPacks.Animations {
 
     [RequireComponent(typeof(Animator))]
     public class AnimationPlayer : AssetObjectEventPlayer
-    <AnimationAssetObject, AnimationEvent, AnimationEventBehavior, AnimationPlayer>
-    {
+    //<AnimationAssetObject, AnimationEvent, AnimationEventBehavior, AnimationPlayer>
+    //<AnimationEvent, AnimationEventBehavior, AnimationPlayer>
+{
 
         //protected override void OnUseAssetObject(AnimInstance asset_object) {
         //    Play(asset_object, false, false);
         //}
 
 
-        float duration_timer, current_duration;
-        Action on_end_use;
-        bool in_use;
+        //float duration_timer, current_duration;
+        //Action on_end_use;
+        //bool in_use;
 
+        Action end_event;
+        //void OnPlayEvent (AssetObject chosen_obj, AssetObjectEvent asset_event, System.Action end_event) {
+        //    this.end_event = end_event;
+        //    Play((AnimationEvent)chosen_obj, asset_event.looped, false);
+        //}
 
+/*
         protected override void OnUseAssetObjectHolder(AnimationEvent asset_object_holder, AnimationAssetObject chosen_obj, Action on_end_use) {
             this.current_duration = asset_object_holder.duration;
             this.on_end_use = on_end_use;
@@ -57,15 +64,20 @@ namespace AssetObjectsPacks.Animations {
             in_use = false;
         }
 
+ */
         void OnOneShotTransitionStart () {
             if (on_one_shot_exit_transition_start != null) {
                 Debug.Log("on one shot transition_out");
                 on_one_shot_exit_transition_start();
             }
-            if (in_use && current_duration < 0) {
-                Debug.Log("On end use anim");
-                EndUse();
+            if (end_event != null) {
+                end_event();
+                end_event = null;
             }
+            //if (in_use && current_duration < 0) {
+            //    Debug.Log("On end use anim");
+            //    EndUse();
+            //}
         }
         /*
         void OnOneShotTransitionEnd () {
@@ -149,7 +161,7 @@ namespace AssetObjectsPacks.Animations {
                 //}
             }
 
-            UpdateUse();
+            //UpdateUse();
         }
 
 
@@ -192,17 +204,19 @@ namespace AssetObjectsPacks.Animations {
 
         
 
-        public void Play (AnimationAssetObject anim, bool loop, bool interrupt_current) {
+        public void Play (AssetObject anim, bool loop, bool interrupt_current) {
             bool mirror = false;
-            if (!loop) {
-                if (anim.mirror_mode == AnimationAssetObject.MirrorMode.Random) {
-                    mirror = UnityEngine.Random.value < .5f;
-                }
-                else if (anim.mirror_mode == AnimationAssetObject.MirrorMode.Mirror) {
-                    mirror = true;
-                }
+            int mirror_mode = anim["Mirror Mode"].intValue;
+            float trans_speed = anim["Transition Speed"].floatValue;
+            float speed = anim["Speed"].floatValue;
+
+            if (mirror_mode == 2) {// AnimationAssetObject.MirrorMode.Random) {
+                mirror = UnityEngine.Random.value < .5f;
             }
-            Play(anim.id, interrupt_current, mirror, loop, anim.transition_speed, anim.speed);
+            else if (mirror_mode == 1) {// AnimationAssetObject.MirrorMode.Mirror) {
+                mirror = true;
+            }
+            Play(anim.id, interrupt_current, mirror, loop, trans_speed, speed);
         }
 
         public void Play (int anim_index, bool interrupt_current, bool mirror, bool loop, float transition_time, float speed) {

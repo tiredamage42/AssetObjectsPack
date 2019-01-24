@@ -1,42 +1,29 @@
-﻿
-//using System.Collections;
-//using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
+using System.Collections.Generic;
 namespace AssetObjectsPacks {
-    public abstract class AssetObjectEventEditor<P> : Editor
-        //where O : AssetObjectInstance, new()
-        where P : Object 
+    public abstract class AssetObjectEventEditor : Editor
     {
         protected abstract string PackName();
         protected abstract string PackFileExtension();
-        protected abstract void MakeAssetObjectInstanceDefault(SerializedProperty obj_instance);
-        protected abstract string[] InstanceFieldNames();
-        protected abstract GUIContent[] InstanceFieldLabels();
+        protected abstract string AssetObjectUnityAssetType();
+        //protected abstract void MakeAssetObjectInstanceDefault(SerializedProperty obj_instance);
+        //protected abstract string[] InstanceFieldNames();
+        //protected abstract GUIContent[] InstanceFieldLabels();
 
-        AssetObjectListGUI<P> oe;
-        AssetObjectListGUI<P> objectExplorer {
+        protected abstract AssetObjectParamDef[] DefaultParameters ();
+
+
+
+        
+        AssetObjectListGUI oe;
+        AssetObjectListGUI objectExplorer {
             get {
                 if (oe == null) {
-                    oe = new AssetObjectListGUI<P>();
-                    /*
-                    (target as AssetObjectHolder).multi_edit_instance = new O();
-
+                    oe = new AssetObjectListGUI();
+                    //objectExplorer.OnEnable(PackName(), AssetObjectUnityAssetType(), PackFileExtension(), MakeAssetObjectInstanceDefault, InstanceFieldNames(), InstanceFieldLabels(), serializedObject, new SerializedObject(this));
+                    objectExplorer.OnEnable(PackName(), AssetObjectUnityAssetType(), PackFileExtension(), DefaultParameters(), serializedObject, new SerializedObject(this));
                     serializedObject.ApplyModifiedProperties();
-
-                    EditorUtility.SetDirty(target);
-                    
-                    serializedObject.Update();
-
-
-                    Debug.Log((target as AssetObjectHolder).multi_edit_instance);
-
-                    SerializedProperty multi_edit_instance = serializedObject.FindProperty("multi_edit_instance");
-                    Debug.Log(multi_edit_instance);
-                     */
-
-
-                    objectExplorer.OnEnable(PackName(), PackFileExtension(), MakeAssetObjectInstanceDefault, InstanceFieldNames(), InstanceFieldLabels(), serializedObject);
                 }
                 return oe;
             }
@@ -48,6 +35,20 @@ namespace AssetObjectsPacks {
         protected void DrawObjectExplorer(int window_height = 256) {
             objectExplorer.Draw(window_height);
         }    
+
+
+        const string sLooped = "looped";
+        const string sDuration = "duration";
+        GUIContent duration_gui = new GUIContent("Duration", "Nagative values for animation duration");
+        
+
+        protected void DrawAssetObjectEvent (int window_height = 256) {
+            EditorGUILayout.PropertyField(serializedObject.FindProperty(sLooped));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty(sDuration), duration_gui);
+            DrawObjectExplorer();
+        }
+
+
     }
 
 }

@@ -2,24 +2,27 @@ Mixamo Auto Download Instuctions:
 
     NOTE: these instructions are only tested on chrome
 
-
     1.  change chrome's default download folder to a new folder
 
     1.  go to mixamo.com and log in 
     
     2.  for the avatar defenition download the ybot character
         import the downloaded model to the same directory as this read me, (in Unity)
-        (you can move it after the animations are imported)
+        
+            Assets/AssetObjectsPacks/AnimationsDownload/
 
+        (you can move it after the animations are imported)
         make sure to set the rig on the model as humanoid
 
         NOTE:
             if for some reason you want to change the default avatar defenition for the animations
             remember to change the name in:
-                AnimationsDownload/Editor/AnimationsDownloadUtils.cs
+
+                Assets/AssetObjectsPacks/AnimationsDownload/Editor/AnimationsDownloadUtils.cs
                 
             in the javascript file, change the character const near the top of the file.
-            to get the new id, download an animation with the new character. the id should show up in the network tab
+            to get the new id, download an animation with the new character. 
+            the id should show up in the network tab
 
     3.  go to the main animations page
 
@@ -34,7 +37,8 @@ Mixamo Auto Download Instuctions:
             find . -type f -name "ybot@-*" \
             -exec sh -c 'mv "$0" "${0/ybot@-/@ID-}"' '{}' \;
 
-        (normally the editor will do this automatically, but it's faster for the command line to rename all these animations)
+        (normally the asset object event editor will do this automatically, 
+        but it's faster for the command line to rename all these animations)
 
     8.  when the downloads are done being renamed import them into:
     

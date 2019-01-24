@@ -5,28 +5,29 @@ using UnityEngine;
 using UnityEditor;
 
 namespace AssetObjectsPacks {
-    public class AssetObjectListGUI<T> where T : Object {
+    public class AssetObjectListGUI {
 
         int selection_view;
         string[] paths_without_ids, all_valid_paths;
         string file_extension, pack_name;
         GUIContent[] tab_guis;
-        public AssetObjectListView<T> list_view = new AssetObjectListView<T>();
-        AssetObjectExplorerView<T> explorer_view = new AssetObjectExplorerView<T>();
+        public AssetObjectListView list_view = new AssetObjectListView();
+        AssetObjectExplorerView explorer_view = new AssetObjectExplorerView();
 
         public void OnEnable(
-            string pack_name, string file_extension, 
-            System.Action<SerializedProperty> make_instance_default, 
-            string[] instance_field_names, GUIContent[] instance_field_labels,
-            SerializedObject serializedObject
+            string pack_name, string asset_object_unity_asset_type, string file_extension, 
+            //System.Action<SerializedProperty> make_instance_default, 
+            AssetObjectParamDef[] default_params,
+            //string[] instance_field_names, GUIContent[] instance_field_labels,
+            SerializedObject serializedObject, SerializedObject editor_so
         ) {
             this.file_extension = file_extension;
             this.pack_name = pack_name;
 
             Dictionary<int, string> id2path;
             string[] all_file_paths = GetAllFilePaths(out id2path);
-            list_view.OnEnable(serializedObject, pack_name, id2path, make_instance_default, instance_field_names, instance_field_labels);
-            explorer_view.OnEnable(serializedObject, pack_name, id2path, make_instance_default, all_file_paths);
+            list_view.OnEnable(serializedObject, editor_so, asset_object_unity_asset_type, pack_name, id2path, default_params);//, make_instance_default, default_params);//, instance_field_names, instance_field_labels);
+            explorer_view.OnEnable(serializedObject, asset_object_unity_asset_type, pack_name, id2path, default_params, all_file_paths);//, make_instance_default, all_file_paths);
 
             tab_guis = new GUIContent[] { new GUIContent("List: " + pack_name), new GUIContent("Explorer") };
             list_view.InitializeView();

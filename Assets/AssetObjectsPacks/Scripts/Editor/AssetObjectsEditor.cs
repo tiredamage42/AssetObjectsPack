@@ -8,6 +8,17 @@ using UnityEngine;
 using UnityEditor;
 using System.IO;
 namespace AssetObjectsPacks {
+
+    [System.Serializable] public class AssetObjectParamDef {
+        public AssetObjectParam parameter;
+        public string hint;
+        public AssetObjectParamDef (AssetObjectParam parameter, string hint) {
+            this.parameter = parameter;
+            this.hint = hint;
+        }
+    }
+
+
     public static class AssetObjectsEditor 
     {
         
@@ -34,7 +45,7 @@ namespace AssetObjectsPacks {
                 text = new TextAsset();
                 AssetDatabase.CreateAsset(text, tags_path);
             }
-            
+
             string content = text.text;
             List<string> all_tags = new List<string>();
             if (content.Length != 0) {
@@ -150,15 +161,17 @@ namespace AssetObjectsPacks {
             
             for (int i = 0; i < l; i++) {
                 string asset_path = paths_without_ids[i];
+
+
+
                 Debug.Log(asset_path);
-                Debug.Log(all_valid_paths[0]);
+
+                string orig_name = asset_path;
+                if (orig_name.Contains("/")) {
+                    orig_name = EditorUtils.RemoveDirectory(asset_path);
+                }
                 
-                string[] dir_name = EditorUtils.DirectoryNameSplit(asset_path);
-                string orig_name = dir_name[1];
-                Debug.Log(orig_name);
                 
-                //string[] sp = asset_path.Split('/');
-                //string orig_name = sp[sp.Length - 1];
                 
                 if (orig_name.Contains(asset_object_key)) {
                     Debug.LogError("asset was already assigned an id: " + orig_name + " (to fix, just delete the '@ID-#-' section)");
@@ -166,7 +179,7 @@ namespace AssetObjectsPacks {
                 }
 
                 string new_name = asset_object_key + new_ids[i] + "-" + orig_name;
-                Debug.Log(new_name);
+                //Debug.Log(new_name);
                 
                 AssetDatabase.RenameAsset(asset_path, new_name);
             }

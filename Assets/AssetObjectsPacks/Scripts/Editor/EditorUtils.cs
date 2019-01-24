@@ -32,10 +32,26 @@ namespace AssetObjectsPacks {
                 if (d.GetType() == t) {
                     return (T)d;
                 }
+            }
+            return null;
+        }
+        public static Object GetAssetAtPath (string path, string type_name) {
+            Object[] data = AssetDatabase.LoadAllAssetsAtPath(path);
+            //System.Type t = typeof(T);
+            int l = data.Length;
+            for (int i = 0; i < l; ++i) {
+                Object d = data[i];
+                if (d.GetType().ToString() == type_name) {
+                    return d;
+                }
+                else {
+                    Debug.Log("mismatch with " + d.GetType().ToString() + " vs. " + type_name);
+                }
                 
             }
             return null;
         }
+        
         public static T[] GetAssetsAtPath<T> (string path) where T : Object {
             System.Type t = typeof(T);
             List<T> ret = new List<T>();
@@ -59,6 +75,14 @@ namespace AssetObjectsPacks {
         }
         const string back_slash = "/";
         const char back_slash_c = '/';
+
+
+        public static string RemoveDirectory (string full_path) {
+            if (!full_path.Contains(back_slash)) {
+                return full_path;
+            }
+            return full_path.Split(back_slash_c).Last();
+        }
          
         public static string[] DirectoryNameSplit(string full_path) {
             if (!full_path.Contains(back_slash)) {

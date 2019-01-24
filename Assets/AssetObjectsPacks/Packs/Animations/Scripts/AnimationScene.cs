@@ -207,7 +207,7 @@ namespace AssetObjectsPacks.Animations {
                     if (cue_active) {
                         //update behaviors
                         for (int i = 0; i < script_cue.behaviors.Length; i++) {
-                            (script_cue.behaviors[i]).UpdateBehavior(this, actor);
+                            ((AnimationEventBehavior)script_cue.behaviors[i]).UpdateBehavior(this, actor);
                         }
                     }
                 }

@@ -15,7 +15,7 @@ namespace AssetObjectsPacks {
         List<TagsListTracker> list_trackers;
         public bool[] keywords_filter;
         SearchKeywordsGUI search_keywords = new SearchKeywordsGUI();
-        AnimationTagsGUI tags_gui = new AnimationTagsGUI();
+        AssetObjectTagsGUI tags_gui = new AssetObjectTagsGUI();
         public delegate List<TagsListTracker> RBLISTTRACKERS();
         public RBLISTTRACKERS rebuild_list_trackers;
         List<SerializedProperty> selected_tags_props = new List<SerializedProperty>();
@@ -71,7 +71,7 @@ namespace AssetObjectsPacks {
         }
         public void OnInteractivePreviewGUI(Rect r, GUIStyle background) {
             if (selected_tags_props.Count != 0) {       
-                tags_gui.OnLabelGUI(selected_tags_props, all_tags);
+                tags_gui.OnInteractivePreviewGUI(selected_tags_props, all_tags);
             }
         }
         void RebuildSelectedTagsProps (List<int> selected_ids) {

@@ -5,10 +5,10 @@ using UnityEngine;
 
 namespace AssetObjectsPacks.Animations {
     public class AnimationEvent : AssetObjectEvent
-    <AnimationAssetObject, AnimationEvent, AnimationEventBehavior, AnimationPlayer>
+    //<AnimationAssetObject, AnimationEvent, AnimationEventBehavior, AnimationPlayer>
+    //<AnimationEvent, AnimationEventBehavior, AnimationPlayer>
+
     {
-        public bool looped;
-        public float duration = -1; // <= 0 for animation duration
         
             
     
