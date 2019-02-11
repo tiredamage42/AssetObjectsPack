@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using AssetObjectsPacks;
 using AssetObjectsPacks.Animations;
 
 public class DummyAI : MonoBehaviour{
@@ -11,16 +12,16 @@ public class DummyAI : MonoBehaviour{
     public int speed;
     public int weapon;
 
-    public AnimationScene idle_scene;
+    public AssetObjectEventPlaylist idle_scene;
 
-    AnimationPlayer animator;
+    AssetObjectEventPlayer animator;
 
     void Awake () {
-        animator = GetComponent<AnimationPlayer>();
+        animator = GetComponent<AssetObjectEventPlayer>();
     }
 
     void Start () {
-        idle_scene.InitializePerformance(new List<AnimationPlayer> { animator }, transform.position, transform.rotation, null);
+        idle_scene.InitializePerformance(new List<AssetObjectEventPlayer> { animator }, transform.position, transform.rotation, null);
     }
 }
 

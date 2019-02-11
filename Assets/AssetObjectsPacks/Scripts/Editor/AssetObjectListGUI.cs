@@ -1,113 +1,64 @@
-﻿
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
+using System;
 
 namespace AssetObjectsPacks {
     public class AssetObjectListGUI {
-
         int selection_view;
-        string[] paths_without_ids, all_valid_paths;
-        string file_extension, pack_name;
+        string[] no_ids;
         GUIContent[] tab_guis;
-        public AssetObjectListView list_view = new AssetObjectListView();
+        AssetObjectListView list_view = new AssetObjectListView();
         AssetObjectExplorerView explorer_view = new AssetObjectExplorerView();
+        AssetObjectPack pack;
 
-        public void OnEnable(
-            string pack_name, string asset_object_unity_asset_type, string file_extension, 
-            //System.Action<SerializedProperty> make_instance_default, 
-            AssetObjectParamDef[] default_params,
-            //string[] instance_field_names, GUIContent[] instance_field_labels,
-            SerializedObject serializedObject, SerializedObject editor_so
-        ) {
-            this.file_extension = file_extension;
-            this.pack_name = pack_name;
+        delegate bool DrawMethod();
+        DrawMethod[] draw_methods;
+        Action<Rect, GUIStyle>[] on_interactive_previews;
+        Action[] on_preview_settings, initialize_views;
 
-            Dictionary<int, string> id2path;
-            string[] all_file_paths = GetAllFilePaths(out id2path);
-            list_view.OnEnable(serializedObject, editor_so, asset_object_unity_asset_type, pack_name, id2path, default_params);//, make_instance_default, default_params);//, instance_field_names, instance_field_labels);
-            explorer_view.OnEnable(serializedObject, asset_object_unity_asset_type, pack_name, id2path, default_params, all_file_paths);//, make_instance_default, all_file_paths);
-
-            tab_guis = new GUIContent[] { new GUIContent("List: " + pack_name), new GUIContent("Explorer") };
-            list_view.InitializeView();
+        public void OnDisable() {
+            explorer_view.OnDisable();
         }
-         public void OnInteractivePreviewGUI(Rect r, GUIStyle background) {
-             if (selection_view == 0) {
-                 list_view.OnInteractivePreviewGUI(r, background);
-             }
-             else {
-                 explorer_view.OnInteractivePreviewGUI(r, background);
+        public void OnEnable(SerializedObject eventPack, AssetObjectPack pack){
+            this.pack = pack;
+            list_view.OnEnable(eventPack, pack);
+            explorer_view.OnEnable(eventPack, pack, GetAllFilePaths());
 
-             }
-         }
-          public void OnPreviewSettings() {
-            if (selection_view == 0) {
-                 list_view.OnPreviewSettings();
-             }
-             else {
-                 explorer_view.OnPreviewSettings();
+            tab_guis = new GUIContent[] { new GUIContent("List: " + pack.name), new GUIContent("Explorer") };
 
-             }
+            draw_methods = new DrawMethod[] { list_view.Draw, explorer_view.Draw };
+            on_interactive_previews = new Action<Rect, GUIStyle>[] { list_view.OnInteractivePreviewGUI, explorer_view.OnInteractivePreviewGUI };
+            on_preview_settings = new Action[] { list_view.OnPreviewSettings, explorer_view.OnPreviewSettings };
+            initialize_views = new Action[] { list_view.InitializeView, explorer_view.InitializeView };
+            
+            initialize_views[selection_view]();
         }
-        public  bool HasPreviewGUI() { 
-            if (selection_view == 0) {
-                 return list_view.HasPreviewGUI();
-             }
-             else {
-                 return explorer_view.HasPreviewGUI();
-
-             }
+        public void OnInteractivePreviewGUI(Rect r, GUIStyle background) {
+            on_interactive_previews[selection_view](r, background);
         }
-
-        
+        public void OnPreviewSettings() {
+            on_preview_settings[selection_view] ();
+        }
         void DrawObjectsWithoutIDsPrompt () {
-            int l = paths_without_ids.Length;
-            if (l == 0) {
-                return;
-            }
-            EditorGUILayout.HelpBox("There are " + l + " " + file_extension + " files without proper IDs.", MessageType.Warning);
+            int l = no_ids.Length;
+            if (l == 0) return;
+            EditorGUILayout.HelpBox("There are " + l + " [" + string.Join(",", pack.fileExtensions) + "] files without proper IDs.", MessageType.Warning);
             if (GUILayout.Button("Generate IDs")) {
-                AssetObjectsEditor.GenerateNewIDs(all_valid_paths, paths_without_ids);
-                all_valid_paths = new string[0];
-                paths_without_ids = new string[0];
-
-
-                Dictionary<int, string> id2path;
-                string[] all_file_paths = GetAllFilePaths(out id2path);
-                list_view.ReinitializePaths(id2path);
-                explorer_view.ReinitializePaths(all_file_paths, id2path);
-
+                AssetObjectsEditor.GenerateNewIDs(explorer_view.all_file_paths, no_ids);
+                explorer_view.ReinitializePaths(GetAllFilePaths());
             }
         }
-
-        string[] GetAllFilePaths (out Dictionary<int, string> id2path) {
-            string[] all_paths = AssetObjectsEditor.GetAllAssetObjectPaths (pack_name, file_extension, false, out paths_without_ids, out id2path);
-            if (paths_without_ids.Length != 0) 
-                all_valid_paths = all_paths;
-            return all_paths;
+        string[] GetAllFilePaths (){
+            return AssetObjectsEditor.GetAllAssetObjectPaths (pack.objectsDirectory, pack.fileExtensions, false, out no_ids);
         }
-        
-        public void Draw (int scroll_view_height){
+        public bool Draw (){
             DrawObjectsWithoutIDsPrompt();
 
             int last_selection_view = selection_view;
             selection_view = GUIUtils.Tabs(tab_guis, selection_view);
-            if (selection_view != last_selection_view) {
-                if (selection_view == 0) 
-                    list_view.InitializeView();
-                else 
-                    explorer_view.InitializeView();
-            }
-            if (selection_view == 0) {
-                list_view.Draw(scroll_view_height);
-            }
-            else {
-                explorer_view.Draw(scroll_view_height);
-            }
-        }
+            if (selection_view != last_selection_view) initialize_views[selection_view]();
+
+            return draw_methods[selection_view]();
+        }   
     }
 }
-
-
-        

@@ -1,40 +1,10 @@
 ﻿
 
+/* 
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 namespace AssetObjectsPacks.Animations {
-
-
-   
-
-
-    /*
-    
-    concern for aiming ?
-
-    cue behaviors : (updates)
-        behavior for slerping to look rotation of cues interest transform or transform of scene
-
-        behavior for ai pathfinding ?
-            update beh {
-                when actor get close to cue's interest trnsform, move it to the next waypoint on path
-            }
-        
-        animation scenes:
-            script:
-                class that contains the roles and cue lists for the scene
-
-            performances:
-                each performance is a runtime instance of the scene playing out (so the scene can be used multiple times)
-
-
-        useage:
-            make animation scene prefab as a template, then initiate that scene at (with actors, position, rotation, on scene end callback)
-    */
-
-    
-
 
     public class AnimationScene : MonoBehaviour {
 
@@ -62,9 +32,9 @@ namespace AssetObjectsPacks.Animations {
         //public int scene_weight = 0; //higher numbers override lower numbers (explosion knockdown > hit reaction)
         public bool isLooped;
         
-        /*
+        /
         maybe make some non interruptable
-        */
+        /
         public void InitializePerformance (List<AnimationPlayer> actors, Vector3 position, Quaternion rotation, System.Action on_end_performance_callback) {
 
             int role_count = roles.Length;
@@ -158,15 +128,7 @@ namespace AssetObjectsPacks.Animations {
                         script_cue.animationScene.InitializePerformance(new List<AnimationPlayer>() {actor}, runtime_interest_transform.position, runtime_interest_transform.rotation, OnSceneEnd);
                         return;
                     }
-                    /*
-                    if (script_cue.duration < 0) {
-                        actor.on_one_shot_exit_transition_start += OnAnimationEnd;
-                    }
-                    else {
-                        duration_timer = 0;
-                    }
-                     */
-                    actor.PlayEvent(script_cue, OnAnimationEnd);
+                    actor.event_player.PlayEvent(script_cue, OnAnimationEnd);
                 }
 
 
@@ -364,7 +326,8 @@ namespace AssetObjectsPacks.Animations {
 
                 
 
-        
+        */
+
 
         
 

@@ -42,7 +42,7 @@ namespace AnimCorpus {
             SerializedObject serializedObject = new SerializedObject(importer);
             new AnimationClipInfoProperties(serializedObject.FindProperty("m_ClipAnimations").GetArrayElementAtIndex(0)).SetEvents(new_events);
             serializedObject.ApplyModifiedProperties();
-            AssetDatabase.ImportAsset((importer.assetPath));
+            AssetDatabase.ImportAsset(importer.assetPath);
         }
         class AnimationClipInfoProperties {
 	        public AnimationClipInfoProperties(SerializedProperty prop) { 

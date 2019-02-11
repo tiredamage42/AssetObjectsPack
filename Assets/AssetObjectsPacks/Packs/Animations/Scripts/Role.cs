@@ -1,6 +1,6 @@
 ﻿
 
-
+/*
 
 using UnityEngine;
 
@@ -17,4 +17,5 @@ namespace AssetObjectsPacks.Animations {
         }
     }
 }
+ */
 

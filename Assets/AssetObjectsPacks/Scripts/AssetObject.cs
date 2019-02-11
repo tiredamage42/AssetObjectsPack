@@ -3,38 +3,65 @@ using UnityEngine;
 namespace AssetObjectsPacks {
     [System.Serializable] public class AssetObjectParam {
 
+        #if UNITY_EDITOR 
+        public const string name_field = "name", param_type_field = "paramType";
+        public const string bool_val_field = "boolValue", float_val_field = "floatValue", int_val_field = "intValue";
+        #endif
+        
         public enum ParamType { Bool, Float, Int };
         public string name;
         public ParamType paramType;
         public bool boolValue;
         public float floatValue;
         public int intValue;
-
         public AssetObjectParam (string name, float default_value) {
             this.name = name;
             this.floatValue = default_value;
             paramType = ParamType.Float;
-            Debug.Log("float!");
         }
         public AssetObjectParam (string name, bool default_value) {
             this.name = name;
             this.boolValue = default_value;
             paramType = ParamType.Bool;
-            Debug.Log("bool!");
         }
         public AssetObjectParam (string name, int default_value) {
             this.name = name;
             this.intValue = default_value;
             paramType = ParamType.Int;
-            Debug.Log("integer!");
         }
     }
 
 
     [System.Serializable] public class AssetObject {
+        #if UNITY_EDITOR 
+        public string obj_file_path;
+
+
+
+        public static readonly AssetObjectParamDef[] base_def_params = new AssetObjectParamDef[] {
+            new AssetObjectParamDef(new AssetObjectParam("Duration", -1), "Nagative values for object duration"),
+            new AssetObjectParamDef(new AssetObjectParam("Looped", false), ""),
+            
+            //"duration", "looped",
+        };
+
+
+        //public const string duration_field = "duration";
+        
+        public const string obj_ref_field = "object_reference", tags_field = "tags", obj_file_path_field = "obj_file_path";
+        //public const string id_field = "id", loop_field = "looped", params_field = "parameters";
+        public const string id_field = "id", params_field = "parameters";
+        
+        #endif
+
+
+        
+        
         public Object object_reference;
         public List<string> tags = new List<string>();
         public int id;
+        public bool looped;
+        public float duration = -1; // <= 0 for animation/audio duration
         public List<AssetObjectParam> parameters = new List<AssetObjectParam>();
         Dictionary<string, AssetObjectParam> param_dict = new Dictionary<string, AssetObjectParam>();
 
@@ -49,10 +76,6 @@ namespace AssetObjectsPacks {
                 return param_dict[paramName];
             }
         }
-
-
-
-
     }
 }
 

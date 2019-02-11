@@ -31,14 +31,35 @@ namespace AssetObjectsPacks {
     public static T Last<T> (this IList<T> a) {
         return a[a.Count - 1];
     }
-    public static IList<T> Slice<T>(this IList<T> x, int a=0, int b=-1) {
-        int l = (b < 0) ? x.Count - a : b;
-        List<T> r = new List<T>();
-        for (int i = 0; i < l; i++) {
-            r.Add( x[a+i] ); 
+    public static T[] ToArray<T> (this ISet<T> s) {
+        T[] r = new T[s.Count];
+        int u = 0;
+        foreach (T t in s) {
+            r[u] = t;
+            u++;
         }
         return r;
     }
+    public static IList<T> Slice<T>(this IList<T> x, int a=0, int b=-1) {
+        if (b < 0) {
+            b = x.Count + b;
+        }
+        //int l = (b < 0) ? x.Count - a : b;
+        List<T> r = new List<T>();
+        for (int i = a; i <= b; i++) r.Add( x[i] ); 
+        return r;
+    }
+
+    public static bool Contains(this int[] a, int e) {
+        int l = a.Length;
+        for (int i = 0; i < l; i++) {
+            if (a[i] == e) {
+                return true;
+            }
+        }
+        return false;
+    }
+        
 
     public static T RandomChoice<T>(this IList<T> l) {
         return l[UnityEngine.Random.Range(0, l.Count)];

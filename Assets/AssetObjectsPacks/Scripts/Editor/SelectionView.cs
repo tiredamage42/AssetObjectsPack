@@ -1,197 +1,323 @@
-﻿
-
-//using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 namespace AssetObjectsPacks {
     public abstract class ListViewElement {
-        public string full_name;
+        public string full_name, file_path;
         public GUIContent label_gui;
         public int object_id;
-        protected void Initialize(string full_name, GUIContent label_gui, int object_id) 
-        => (this.full_name, this.label_gui, this.object_id) = (full_name, label_gui, object_id);
+        protected void Initialize(string file_path, string full_name, GUIContent label_gui, int object_id) 
+        => (this.file_path, this.full_name, this.label_gui, this.object_id) = (file_path, full_name, label_gui, object_id);
     }
     public abstract class SelectionView<L> where L : ListViewElement {
-        protected List<L> all_elements = new List<L>();
-        protected Vector2 scroll_pos;
-        protected List<int> selected_ids = new List<int>();
-        protected List<int> ids_in_set = new List<int>();
-        protected Dictionary<int, string> id2path;
-        protected SerializedProperty targeted_list_prop;
-        //System.Action<SerializedProperty> make_instance_default;
-        Editor preview_editor;
-        string pack_name;
-        protected const string sTags = "tags";
-        protected const string sID = "id";
-        const string sObjRef = "object_reference";
-        protected AssetObjectParamDef[] default_params; 
-            
-
-
+        protected List<L> elements = new List<L>();
+        protected HashSet<L> selected_elements = new HashSet<L>();
+        protected HashSet<int> ids_in_set = new HashSet<int>();
+        protected SerializedProperty ao_list;
+        protected SerializedObject eventPack;
+        Editor preview;
+        AssetObjectPack pack;
         
-        public bool HasPreviewGUI() { 
-            return selected_ids.Count != 0;
+        protected virtual void OnEnable(SerializedObject eventPack, AssetObjectPack pack){
+            this.pack = pack;
+            this.eventPack = eventPack;
+            this.ao_list = eventPack.FindProperty(AssetObjectEventPack.asset_objs_field);
         }
 
-        string asset_object_unity_asset_type;// = "UnityEngine.AnimationClip";
-        
-        protected virtual void OnEnable(
-            SerializedObject serializedObject, 
-            string asset_object_unity_asset_type, 
-            string pack_name, Dictionary<int, string> id2path,
-            AssetObjectParamDef[] default_params 
-            //System.Action<SerializedProperty> make_instance_default
-        ) {
-            this.default_params = default_params;
-            this.id2path = id2path;
-            this.asset_object_unity_asset_type = "UnityEngine." + asset_object_unity_asset_type;
-            this.pack_name = pack_name;
-            //this.make_instance_default = make_instance_default;
-            this.targeted_list_prop = serializedObject.FindProperty("assetObjects");
-        }
+        void ClearSelections(){
+            selected_elements.Clear();
+            OnSelectionChange();
 
-        public virtual void ReinitializePaths (Dictionary<int, string> id2path) {
-            this.id2path = id2path;
         }
-
-        void CheckIDsForSelections (List<int> ids) {
-            if (ids.Count == 1) {
-                if (selected_ids.Contains(ids[0])) {
-                    selected_ids.Remove(ids[0]);
-                    OnSelectionChange();
-                }
-            }
-            else {
-                ClearSelections();
-            }
-        }
-
-        protected virtual void OnAddIDsToSet (List<int> ids) {
-            string asset_load_file_prefix = AssetObjectsEditor.GetAssetObjectsDirectory(pack_name); 
-            int c = ids.Count;
-            for (int i = 0; i < c; i++) {
-                int id = ids[i];
-                ids_in_set.Add(id);
-                string file_path = asset_load_file_prefix + id2path[id];
-                int l = targeted_list_prop.arraySize;
-                targeted_list_prop.InsertArrayElementAtIndex(l);
-                ResetInstance(targeted_list_prop.GetArrayElementAtIndex(l), id, EditorUtils.GetAssetAtPath(file_path, asset_object_unity_asset_type));
-            }
-            CheckIDsForSelections(ids);
+        public void ClearSelectionsAndRebuild() {
+            ClearSelections();
             RebuildAllElements();
         }
+
+        void InitializeIDsInSet() {
+            ids_in_set.Clear();
+            int c = ao_list.arraySize;
+            for (int i = 0; i < c; i++) {
+                ids_in_set.Add(GetObjectIDAtIndex(i));
+            }
+        }
+        public virtual void InitializeView () {
+            InitializeIDsInSet ();
+            ClearSelectionsAndRebuild();
+        }
+
+        protected int GetObjectIDAtIndex(int index) {
+            return ao_list.GetArrayElementAtIndex(index).FindPropertyRelative(AssetObject.id_field).intValue;
+        }
+        protected virtual void OnAddIDsToSet (HashSet<L> elements) {
+            bool reset_i = true;
+            foreach (L el in elements) {
+                ids_in_set.Add(el.object_id);
+
+                Debug.Log(el.file_path);
+                ResetInstance(el.object_id, GetObjectRefForElement(el), el.file_path, reset_i);
+                reset_i = false;
+            }
+            ClearSelectionsAndRebuild();
+        }
+
+        //only need to default first one added, the rest will copy the last one 'inserted' into the
+        //serialized property array
+        void ResetInstance (int obj_id, Object obj_ref, string file_path, bool make_default) {
+            SerializedProperty inst = ao_list.AddNewElement();
+            inst.FindPropertyRelative(AssetObject.id_field).intValue = obj_id;
+            inst.FindPropertyRelative(AssetObject.obj_ref_field).objectReferenceValue = obj_ref;
+            inst.FindPropertyRelative(AssetObject.obj_file_path_field).stringValue = file_path;
+            if (make_default) {
+                inst.FindPropertyRelative(AssetObject.tags_field).ClearArray();
+                MakeAssetObjectInstanceDefault(inst);
+            }
+        } 
 
         protected abstract void RebuildAllElements();
 
-        void InitializeIDsInSet () {
-            ids_in_set.Clear();
-            int l = targeted_list_prop.arraySize;
-            for (int i = 0; i< l; i++) {
-                ids_in_set.Add(targeted_list_prop.GetArrayElementAtIndex(i).FindPropertyRelative(sID).intValue);
-            }
+
+        protected HashSet<int> IDsFromElements(IEnumerable<L> elements) {
+            HashSet<int> ids = new HashSet<int>();
+            foreach (L el in elements) ids.Add(el.object_id);
+            return ids;
         }
-        protected void OnDeleteIDsFromSet (List<int> ids) {
-            CheckIDsForSelections(ids);
-            for (int i = targeted_list_prop.arraySize - 1; i >= 0; i--) {
-                int id = targeted_list_prop.GetArrayElementAtIndex(i).FindPropertyRelative(sID).intValue;
-                if (ids.Contains(id)) {
-                    targeted_list_prop.DeleteArrayElementAtIndex(i);
-                    ids_in_set.Remove(id);
+        
+        protected void OnDeleteIDsFromSet (IEnumerable<L> elements) {
+            HashSet<int> ids = IDsFromElements(elements);
+            foreach(var id in ids) {
+                ids_in_set.Remove(id);
+            }
+            for (int i = ao_list.arraySize - 1; i >= 0; i--) {
+                if (ids.Contains(GetObjectIDAtIndex(i))) ao_list.DeleteArrayElementAtIndex(i);
+            }
+            ClearSelectionsAndRebuild();
+        }
+
+        protected void PaginateElements (List<L> all_shown, int per_page) {
+            shown_elements_count = all_shown.Count;
+            int min, max;
+            pagination.GetIndexRange(out min, out max, per_page, shown_elements_count);
+            elements.AddRange(all_shown.Slice(min, max));
+        }   
+        protected void DrawPaginationGUI (int per_page) {
+            if (pagination.ChangePageGUI (shown_elements_count, per_page)) {
+                ClearSelectionsAndRebuild();
+            }
+
+        }
+
+        protected bool NextPage(int per_page) {
+            if (pagination.NextPage(shown_elements_count, per_page)) {
+                ClearSelectionsAndRebuild();   
+                return true;
+            }
+            return false;
+        }
+        protected bool PreviousPage() {
+            Debug.Log("previous a");
+                
+            if (pagination.PreviousPage()) {
+                Debug.Log("previous");
+                ClearSelectionsAndRebuild();
+                return true;
+            }
+            return false;
+                
+        }
+
+
+
+
+
+            
+        int shown_elements_count;
+        protected GUIUtils.Pagination pagination = new GUIUtils.Pagination();
+
+
+
+        protected void KeyboardInput (out bool enter_pressed, out bool delete_pressed, out bool left_p, out bool right_p){//, int min_index, int max_index) {
+            enter_pressed = false;
+            delete_pressed = false;
+            left_p = false;
+            right_p = false;
+
+            int c = selected_elements.Count;
+
+            Event e = Event.current;
+            if (e.type != EventType.KeyDown) return;
+
+            bool down_p = e.keyCode == KeyCode.DownArrow;
+            bool up_p = e.keyCode == KeyCode.UpArrow;
+            left_p = e.keyCode == KeyCode.LeftArrow;
+            right_p = e.keyCode == KeyCode.RightArrow;
+            delete_pressed = e.keyCode == KeyCode.Backspace;
+            enter_pressed = e.keyCode == KeyCode.Return;
+
+            if (down_p || up_p || left_p || right_p || delete_pressed || enter_pressed) e.Use();    
+            
+            L element_to_select = null;
+
+            if ((down_p || up_p) && c == 0) {
+                hi_selection = lo_selection = down_p ? 0 : elements.Count - 1;
+                element_to_select = elements[hi_selection];
+            }
+            if (c != 0) {
+                bool sel_changed = false;
+                if (down_p) {
+                    if (hi_selection < elements.Count - 1 || (c > 1 && !e.shift)) {
+                        if (hi_selection < elements.Count - 1) {
+
+                            hi_selection++;
+                        }
+                        lo_selection = hi_selection;
+                        sel_changed = true;
+                    }
+                }
+                if (up_p) {
+                    if (lo_selection > 0 || (c > 1 && !e.shift)) {
+                        if (lo_selection > 0) {
+
+                            lo_selection--;
+                        }
+                        hi_selection = lo_selection;
+                        sel_changed = true;
+                    }
+                }
+                if ((down_p || up_p) && sel_changed) {
+                    if (c > 1 && !e.shift) {
+                        selected_elements.Clear();
+                    }
+                    element_to_select = elements[hi_selection];
                 }
             }
-            RebuildAllElements();
+                
+            if (element_to_select != null) OnObjectSelection(element_to_select, false);
+
         }
 
-        public virtual void InitializeView () {
-            ClearSelections();
-            InitializeIDsInSet();
-            RebuildAllElements();
-        }
-
-        protected void OnObjectSelection (int selection_id, bool drawing_selected) {
+        protected void OnObjectSelection (L selection, bool was_selected) {
             Event e = Event.current;
-            if (!e.shift)
-                selected_ids.Clear();
-            if (drawing_selected) {
-                selected_ids.Remove(selection_id);
+            if (e.shift) {
+                selected_elements.Add(selection);
+                RecalculateLowestAndHighestSelections();
+                selected_elements.Clear();
+                for (int i = lo_selection; i <= hi_selection; i++) selected_elements.Add(elements[i]);
+            }
+            else if (e.command || e.control) {
+                if (was_selected) selected_elements.Remove(selection);
+                else selected_elements.Add(selection);
             }
             else {
-                selected_ids.Add(selection_id);
+                selected_elements.Clear();
+                if (!was_selected) selected_elements.Add(selection);
             }
             OnSelectionChange();
         }
-
+        
+        int lo_selection, hi_selection;
+        void RecalculateLowestAndHighestSelections () {
+            lo_selection = int.MaxValue;
+            hi_selection = int.MinValue;
+            int s = selected_elements.Count;
+            if (s == 0) return;
+            
+            int c = elements.Count;
+            for (int i = 0; i < c; i++) {
+                if (selected_elements.Contains(elements[i])) {                    
+                    if (i < lo_selection) 
+                        lo_selection = i;
+                    if (i > hi_selection) 
+                        hi_selection = i;
+                    if (s == 1) break;
+                }
+            }
+        }
+  
+        
         protected virtual void OnSelectionChange() {
+            RecalculateLowestAndHighestSelections();
             RebuildPreviewEditor();        
         }
 
-        protected void ClearSelections() {
-            selected_ids.Clear();
-            OnSelectionChange();
-        }
+        protected void MakeAssetObjectInstanceDefault(SerializedProperty inst) {
+            //inst.FindPropertyRelative(AssetObject.base_params[0]).floatValue = -1;
+            //inst.FindPropertyRelative(AssetObject.base_params[1]).boolValue = false;
 
-        void ResetInstance (SerializedProperty inst, int obj_id, Object obj_ref) {
-            inst.FindPropertyRelative(sTags).ClearArray();
-            inst.FindPropertyRelative(sID).intValue = obj_id;
-            inst.FindPropertyRelative(sObjRef).objectReferenceValue = obj_ref;
-            MakeAssetObjectInstanceDefault(inst);
-        } 
 
-        protected void MakeAssetObjectInstanceDefault(SerializedProperty obj_instance) {
-            SerializedProperty params_list = obj_instance.FindPropertyRelative("parameters");
+            SerializedProperty params_list = inst.FindPropertyRelative(AssetObject.params_field);
             params_list.ClearArray();
-
-            for (int i = 0; i < default_params.Length; i++) {
+            
+            AssetObjectParamDef[] defs = pack.defaultParams;
+            //int l = pack.defaultParameters.Length;
+            int l = defs.Length;
+            
+            for (int i = 0; i < l; i++) {                
+                //AssetObjectParam def_param = pack.defaultParameters[i].parameter;
+                AssetObjectParam def_param = defs[i].parameter;
                 
-                int l = params_list.arraySize;
-                params_list.InsertArrayElementAtIndex(l);
-                
-                SerializedProperty new_param = params_list.GetArrayElementAtIndex(l);
-
-                new_param.FindPropertyRelative("name").stringValue = default_params[i].parameter.name;
-                new_param.FindPropertyRelative("paramType").enumValueIndex = (int)default_params[i].parameter.paramType;
-                switch(default_params[i].parameter.paramType) {
-                case AssetObjectParam.ParamType.Bool:
-                    new_param.FindPropertyRelative("boolValue").boolValue = default_params[i].parameter.boolValue;
-                    break;
-                case AssetObjectParam.ParamType.Float:
-                    new_param.FindPropertyRelative("floatValue").floatValue = default_params[i].parameter.floatValue;
-                    break;
-                case AssetObjectParam.ParamType.Int:
-                    new_param.FindPropertyRelative("intValue").intValue = default_params[i].parameter.intValue;
-                    break;
-                }
+                SerializedProperty new_param = params_list.AddNewElement();
+                new_param.FindPropertyRelative(AssetObjectParam.name_field).stringValue = def_param.name;
+                new_param.FindPropertyRelative(AssetObjectParam.param_type_field).enumValueIndex = (int)def_param.paramType;
+                new_param.FindPropertyRelative(AssetObjectParam.bool_val_field).boolValue = def_param.boolValue;
+                new_param.FindPropertyRelative(AssetObjectParam.float_val_field).floatValue = def_param.floatValue;
+                new_param.FindPropertyRelative(AssetObjectParam.int_val_field).intValue = def_param.intValue;
             }
         }
-
 
         public virtual void OnInteractivePreviewGUI(Rect r, GUIStyle background) {
-            if (preview_editor != null) { 
-                preview_editor.OnInteractivePreviewGUI(r, background); 
-            }
+            if (preview != null) preview.OnInteractivePreviewGUI(r, background); 
         }
         public void OnPreviewSettings() {
-            if (preview_editor != null) 
-                preview_editor.OnPreviewSettings();
+            if (preview != null) preview.OnPreviewSettings();
+        }
+        protected bool SelectionHasDirectories() {
+            foreach (var s in selected_elements) {
+                if (s.object_id == -1) return true;
+            }
+            return false;
         }
 
-        
-        void RebuildPreviewEditor () {
-            if (preview_editor != null) 
-                Editor.DestroyImmediate(preview_editor);
-            int c = selected_ids.Count;
-            if (c == 0) return;
-            Object[] clips = new Object[c];   
-            string asset_load_file_prefix = AssetObjectsEditor.GetAssetObjectsDirectory(pack_name); 
+        Object GetObjectRefForElement(L e) {
+            Object[] all_objects = EditorUtils.GetAssetsAtPath(pack.objectsDirectory + e.file_path, pack.assetType);    
+            // fbx files have extra "preview" clip that was getting in the awy (mixamo)
+            // need to use the last one
+            Object o = all_objects[0];// e.file_path.EndsWith(".fbx") ? all_objects.Last() : all_objects[0];
 
-            for (int i = 0; i < c; i++) {
-                string p = asset_load_file_prefix + id2path[selected_ids[i]];
-                clips[i] = EditorUtils.GetAssetAtPath(p, asset_object_unity_asset_type);
+            if (o.name.Contains("__preview__")) {
+                Debug.LogError("Getting preview");
             }
-            preview_editor = Editor.CreateEditor(clips);
-            preview_editor.HasPreviewGUI();
-            preview_editor.OnInspectorGUI();
+            return o;
+             
+        }
+        void RebuildPreviewEditor () {
+            if (preview != null) Editor.DestroyImmediate(preview);
+            int c = selected_elements.Count;
+            if (c == 0) return;
+            if (SelectionHasDirectories()) return;
+
+
+            HashSet<Object> objs = new HashSet<Object>();   
+            foreach (L s in selected_elements) {
+                objs.Add( GetObjectRefForElement(s) );
+            }
+
+            preview = Editor.CreateEditor(objs.ToArray());
+            preview.HasPreviewGUI();
+            preview.OnInspectorGUI();
+            preview.OnPreviewSettings();
+
+            //auto play single selection for animations
+            //preview_editor.m_AvatarPreview.timeControl.playing = true
+            if (c == 1) {
+                if (pack.assetType == "UnityEngine.AnimationClip") {     
+                    var flags = System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
+                    var avatarPreview = preview.GetType().GetField("m_AvatarPreview", flags).GetValue(preview);
+                    var timeControl = avatarPreview.GetType().GetField("timeControl", flags).GetValue(avatarPreview);
+                    var setter = timeControl.GetType().GetProperty("playing", flags).GetSetMethod(true);
+                    setter.Invoke(timeControl, new object[] { true });
+                }
+            }
         }
     }
 }

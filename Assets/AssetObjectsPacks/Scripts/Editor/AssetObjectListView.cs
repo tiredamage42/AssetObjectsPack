@@ -1,113 +1,69 @@
-﻿
-
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
-using System.Linq;
 namespace AssetObjectsPacks {
-
     public static class PropertyExtensions {
         public static SerializedProperty[] GetRelevantParamsFromAssetObjectInstance (this SerializedProperty ao) {
-            SerializedProperty params_list = ao.FindPropertyRelative("parameters");
-            int l = params_list.arraySize;
-
-            SerializedProperty[] return_props = new SerializedProperty[l];
-            for (int i = 0; i < l; i++) {
-                SerializedProperty param_prop = params_list.GetArrayElementAtIndex(i);
-                SerializedProperty paramType = param_prop.FindPropertyRelative("paramType");
-                AssetObjectParam.ParamType actual_type = (AssetObjectParam.ParamType)paramType.enumValueIndex;
-                SerializedProperty param_to_draw = null;
-                switch(actual_type) {
-                    case AssetObjectParam.ParamType.Bool:
-                    Debug.Log("Drawing bool");
-                        param_to_draw = param_prop.FindPropertyRelative("boolValue");
-                        break;
-                    case AssetObjectParam.ParamType.Float:
-                    Debug.Log("Drawing float");
-                    
-                        param_to_draw = param_prop.FindPropertyRelative("floatValue");
-                        break;
-                    case AssetObjectParam.ParamType.Int:
-                    Debug.Log("Drawing int");
-                    
-                        param_to_draw = param_prop.FindPropertyRelative("intValue");                    
-                        break;
-                }
-                return_props[i] = param_to_draw;
-            }
-
-
-            return return_props;
+            SerializedProperty params_l = ao.FindPropertyRelative(AssetObject.params_field);
+            return new SerializedProperty[0].GenerateArray( i => { return params_l.GetArrayElementAtIndex(i).GetRelevantParamProperty(); } , params_l.arraySize );
         }
     }
 
     public class ListElement : ListViewElement {
         public SerializedProperty[] relevant_props;
-        public ListElement (
-            string full_name, 
-            GUIContent label_gui, 
-            int object_id, 
-            //string[] field_names, 
-            SerializedProperty instance
-        ) {
-            Initialize(full_name, label_gui, object_id);    
+        public SerializedProperty tags_prop;
+        public ListElement (string file_name, string full_name, GUIContent label_gui, int object_id, SerializedProperty instance, SerializedProperty tags_prop) {
+            Initialize(file_name, full_name, label_gui, object_id);    
+            this.tags_prop = tags_prop;
             relevant_props = instance.GetRelevantParamsFromAssetObjectInstance();
-
-            
-            //props = props.GenerateArray(i => { return instance.FindPropertyRelative(field_names[i]); }, field_names.Length);
         }
     }
+
     public class AssetObjectListView : SelectionView<ListElement>
     {
         protected override void OnSelectionChange() {
             base.OnSelectionChange();
-            tag_objects_system.OnSelectionChanged(selected_ids);
+            tags_gui.selection_changed = true;
+            RebuildSelectedTagsProps();
         }
+        void RebuildSelectedTagsProps () {
+            int s = selected_elements.Count;
+            selected_tags_props = new SerializedProperty[s];
+            
+            if (s == 0) return;
+            int u = 0;
+
+            foreach (var e in selected_elements) {
+                selected_tags_props[u] = e.tags_prop;
+                u++;
+            }
+
+        }
+       
         public override void OnInteractivePreviewGUI(Rect r, GUIStyle background) {
             base.OnInteractivePreviewGUI(r, background);
-            tag_objects_system.OnInteractivePreviewGUI(r, background);
+            if (selected_tags_props.Length != 0) tags_gui.OnInteractivePreviewGUI(selected_tags_props, all_tags);
         }
-            
         public class DummyListElement {
             public GUIContent[] labels;
             public GUILayoutOption[] widths;
-            //public string[] names;
             public SerializedProperty[] multi_edit_props;
             public int props_count;
-            public DummyListElement (
-                SerializedProperty multi_edit_instance, 
-                AssetObjectParamDef[] default_params//,
-                //string[] names, 
-                //GUIContent[] labels
-            ){
+            public DummyListElement (SerializedProperty multi_edit_instance, AssetObjectParamDef[] default_params){
                 props_count = default_params.Length;
-                //this.names = names;
-                //this.labels = labels;
 
                 labels = new GUIContent[props_count];
                 widths = new GUILayoutOption[props_count];
-                for (int i = 0; i < props_count; i++) {
 
+                for (int i = 0; i < default_params.Length; i++) {
                     labels[i] = new GUIContent(default_params[i].parameter.name, default_params[i].hint);
                     widths[i] = GUILayout.Width(EditorStyles.label.CalcSize(labels[i]).x);
                 }
 
-
                 multi_edit_props = multi_edit_instance.GetRelevantParamsFromAssetObjectInstance();
-
-                for (int i = 0; i < props_count; i++) {
-                    Debug.Log(multi_edit_props[i]);
-                }
-
-                
-                
-                //multi_edit_props = multi_edit_props.GenerateArray(i => { return multi_edit_instance.FindPropertyRelative(names[i]); }, names.Length);
             }
-
         }
 
-        TagObjectSystem tag_objects_system = new TagObjectSystem();
         DummyListElement dummy_list_element;
         static readonly GUIContent remove_gui = new GUIContent("", "Remove");
         static readonly GUIContent set_values_gui = new GUIContent("","Set Values");
@@ -115,36 +71,55 @@ namespace AssetObjectsPacks {
         static readonly GUIContent remove_selected_gui = new GUIContent("", "Remove Selected");
         static readonly GUIContent editing_shown_gui = new GUIContent("Editing Shown");
         static readonly GUIContent editing_selected_gui = new GUIContent("Editing Selected");
-        static readonly GUIContent name_gui = new GUIContent("Name");
+        
+        GUILayoutOption max_name_width;
+
+        const int max_elements_per_page = 25;
+
+
         
         
         protected override void RebuildAllElements() {
-            all_elements.Clear();
-            int l = targeted_list_prop.arraySize;
+            elements.Clear();
+            
+            int l = ao_list.arraySize;
+            
+            float max_width = 0;
+
+            int keywords_count = search_keywords.keywords.Count;
+            List<ListElement> first_l = new List<ListElement>();
             for (int i = 0; i < l; i++) {
-                SerializedProperty list_instance = targeted_list_prop.GetArrayElementAtIndex(i);
-                int object_id = list_instance.FindPropertyRelative(sID).intValue;
-                string file_path = id2path[object_id];
+                SerializedProperty ao = ao_list.GetArrayElementAtIndex(i);
+                SerializedProperty tags_prop = ao.FindPropertyRelative(AssetObject.tags_field);
+                if (!HasSearchTags(tags_prop, keywords_count)) {
+                    continue;
+                }
+
+                int object_id = ao.FindPropertyRelative(AssetObject.id_field).intValue;
+                string file_path = ao.FindPropertyRelative(AssetObject.obj_file_path_field).stringValue;
+                                
                 string n = AssetObjectsEditor.RemoveIDFromPath(file_path);
-                all_elements.Add(new ListElement(file_path, new GUIContent(n), object_id,
-                 
-                //dummy_list_element.names, 
-                list_instance));
+                GUIContent gui_n = new GUIContent(n);
+
+
+                float w = EditorStyles.toolbarButton.CalcSize(gui_n).x;
+                if (w > max_width) {
+                    max_width = w;
+                }
+
+                first_l.Add(new ListElement(file_path, file_path, gui_n, object_id, ao, tags_prop));
             }
-            tag_objects_system.RebuildListTrackers(selected_ids);
+
+            max_name_width = GUILayout.Width(max_width);
+
+
+            PaginateElements(first_l, max_elements_per_page);
+
+            tags_gui.selection_changed = true;
+            RebuildSelectedTagsProps();            
         }
 
-        List<TagObjectSystem.TagsListTracker> RebuildTagsProperties() {
-            List<TagObjectSystem.TagsListTracker> ret = new List<TagObjectSystem.TagsListTracker>();
-            int l = targeted_list_prop.arraySize;
-            for (int i = 0; i < l; i++) {
-                SerializedProperty anim = targeted_list_prop.GetArrayElementAtIndex(i);
-                SerializedProperty anim_tags_list_prop = anim.FindPropertyRelative(sTags);
-                int anim_id = anim.FindPropertyRelative(sID).intValue;
-                ret.Add(new TagObjectSystem.TagsListTracker(anim_tags_list_prop, anim_id));
-            }
-            return ret;
-        }
+    
         void DrawListInstancePropertyFields(SerializedProperty[] props) {
             int l = props.Length;
             for (int i = 0; i < l; i++) {
@@ -152,67 +127,14 @@ namespace AssetObjectsPacks {
                 GUIUtils.LittleButton(EditorColors.clear_color);
             }
         }
-        void DrawAssetObjectParam (SerializedProperty param_prop, GUILayoutOption width) {
-            SerializedProperty paramType = param_prop.FindPropertyRelative("paramType");
-            AssetObjectParam.ParamType actual_type = (AssetObjectParam.ParamType)paramType.enumValueIndex;
-            SerializedProperty param_to_draw = null;
-            switch(actual_type) {
-                case AssetObjectParam.ParamType.Bool:
-                    param_to_draw = param_prop.FindPropertyRelative("boolValue");
-                    break;
-                case AssetObjectParam.ParamType.Float:
-                    param_to_draw = param_prop.FindPropertyRelative("floatValue");
-                    break;
-                case AssetObjectParam.ParamType.Int:
-                    param_to_draw = param_prop.FindPropertyRelative("intValue");                    
-                    break;
-            }
-            EditorGUILayout.PropertyField(param_to_draw, GUIUtils.blank_content, width);
-
-        }
-
+  
         
-
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        void RemoveShownFromAnimSet () {
-            List<int> ids2delete = new List<int>();
-            for (int i = 0; i < all_elements.Count; i++) {
-                if (tag_objects_system.keywords_filter[i]) {
-                    ids2delete.Add(all_elements[i].object_id);
-                }
-            }
-            OnDeleteIDsFromSet(ids2delete);
-        }
         void SetPropertyAll(int prop_index) {
-            for (int i = 0; i < all_elements.Count; i++) {
-                if (selected_ids.Count == 0 || selected_ids.Contains(all_elements[i].object_id)) {
+            IEnumerable<ListElement> l = elements;
+            if (selected_elements.Count != 0) l = selected_elements;
 
-                    all_elements[i].relevant_props[prop_index].CopyProperty(dummy_list_element.multi_edit_props[prop_index]);
-                    //all_elements[i].props[prop_index].CopyProperty(dummy_list_element.multi_edit_props[prop_index]);
-                
-                
-                }
-            }
+            foreach (ListElement el in l) el.relevant_props[prop_index].CopyProperty(dummy_list_element.multi_edit_props[prop_index]);                      
         }
-        
         void MultipleAnimEditFields () {
             for (int i = 0; i < dummy_list_element.props_count; i++) {
                 EditorGUILayout.PropertyField(dummy_list_element.multi_edit_props[i], GUIUtils.blank_content, dummy_list_element.widths[i]);
@@ -221,25 +143,37 @@ namespace AssetObjectsPacks {
                 }
             }        
         }
-
         void DrawMultipleEditWindow () {
-            EditorGUILayout.BeginVertical(GUI.skin.box);
-            EditorGUILayout.BeginScrollView(Vector2.zero, GUILayout.Height(60));
-            EditorGUILayout.BeginHorizontal();
-            bool editing_all_shown = selected_ids.Count == 0;
-            if (GUIUtils.LittleButton(EditorColors.red_color, editing_all_shown ? remove_shown_gui : remove_selected_gui)) {
-                if (editing_all_shown) 
-                    RemoveShownFromAnimSet();
-                else 
-                    OnDeleteIDsFromSet(selected_ids);
+
+            if (elements.Count == 0) {
+                return;
             }
-            GUIUtils.ScrollWindowElement (editing_all_shown ? editing_shown_gui : editing_selected_gui, false, false, false);
+
+            EditorGUILayout.BeginVertical(GUI.skin.box);
+            EditorGUILayout.Space();
+            search_keywords.DrawTagSearch();
+            EditorGUILayout.Space();
+
+            DrawObjectFieldsTop();
+
+            bool editing_all_shown = selected_elements.Count == 0;
+            
+            EditorGUILayout.BeginHorizontal();
+            if (GUIUtils.LittleButton(EditorColors.red_color, editing_all_shown ? remove_shown_gui : remove_selected_gui)) {
+                if (editing_all_shown) OnDeleteIDsFromSet(elements);
+                else OnDeleteIDsFromSet(selected_elements);
+            }
+
+
+
+
+            
+            GUIContent c = editing_all_shown ? editing_shown_gui : editing_selected_gui;
+            GUIUtils.ScrollWindowElement (c, false, false, false, max_name_width);
             MultipleAnimEditFields();
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.Space();
-            tag_objects_system.DrawTagsSearch();
-            EditorGUILayout.EndScrollView();
-            EditorGUILayout.EndVertical();
+            //EditorGUILayout.EndVertical();
         }
         void DrawListInstancePropertyLabels () {
             for (int i = 0; i < dummy_list_element.props_count; i++) {
@@ -250,70 +184,120 @@ namespace AssetObjectsPacks {
         void DrawObjectFieldsTop () {
             EditorGUILayout.BeginHorizontal();
             GUIUtils.LittleButton(EditorColors.clear_color);
-            GUIUtils.ScrollWindowElement (name_gui, false, false, false);
+            GUIUtils.ScrollWindowElement (GUIContent.none, false, false, false, max_name_width);
+            
             DrawListInstancePropertyLabels();
             EditorGUILayout.EndHorizontal();
         }
-        public void Draw(int scroll_view_height) {
-            DrawMultipleEditWindow();
-            EditorGUILayout.BeginVertical(GUI.skin.box);
-            scroll_pos = EditorGUILayout.BeginScrollView(scroll_pos, GUILayout.Height(scroll_view_height));
-            DrawObjectFieldsTop();
-            for (int i = 0; i < all_elements.Count; i++) {
-                int object_id = all_elements[i].object_id;
-                bool drawing_selected = selected_ids.Contains(object_id);
-                if (!tag_objects_system.keywords_filter[i]) {
-                    if (drawing_selected) {
-                        selected_ids.Remove(object_id);
-                        OnSelectionChange();
-                    }
-                    continue;
+        public bool Draw() {
+            bool changed = false;
+            bool enter_pressed, delete_pressed, right_p, left_p;
+            KeyboardInput(out enter_pressed, out delete_pressed, out left_p, out right_p);
+            if (selected_elements.Count != 0) {
+                if (delete_pressed) {
+                    OnDeleteIDsFromSet(selected_elements);
+                    changed = true;
                 }
+            }
+            if (right_p) {
+                if (NextPage(max_elements_per_page)) {}
+            }
+            if (left_p) {
+                if (PreviousPage()) {}
+                else {}
+            }
+
+            
+            if (elements.Count == 0) {
+                EditorGUILayout.HelpBox("No elements, add some through the explorer view tab", MessageType.Info);
+                return changed;
+            }
+            DrawMultipleEditWindow();
+            DrawListElements();
+            DrawPaginationGUI(max_elements_per_page);
+            return changed;
+        }
+
+        void DrawListElements () {
+            //EditorGUILayout.BeginVertical(GUI.skin.box);
+            for (int i = 0; i < elements.Count; i++) {
+                bool drawing_selected = selected_elements.Contains(elements[i]);
+                
                 EditorGUILayout.BeginHorizontal();
                 bool little_button_pressed = GUIUtils.LittleButton(EditorColors.red_color, remove_gui);
-                bool big_button_pressed = GUIUtils.ScrollWindowElement (all_elements[i].label_gui, drawing_selected, false, false);
-                //DrawListInstancePropertyFields(all_elements[i].props);
-                DrawListInstancePropertyFields(all_elements[i].relevant_props);
-                
+                bool big_button_pressed = GUIUtils.ScrollWindowElement (elements[i].label_gui, drawing_selected, false, false, max_name_width);
+                DrawListInstancePropertyFields(elements[i].relevant_props);
                 EditorGUILayout.EndHorizontal();
-                if (big_button_pressed)
-                    OnObjectSelection(object_id, drawing_selected);
-                if (little_button_pressed)
-                    OnDeleteIDsFromSet(new List<int>() {object_id});
-            }
-            EditorGUILayout.EndScrollView();        
+                
+                
+
+                if (big_button_pressed) OnObjectSelection(elements[i], drawing_selected);
+                if (little_button_pressed) OnDeleteIDsFromSet(new HashSet<ListElement>() {elements[i]});
+            }   
             EditorGUILayout.EndVertical();
         }
-        public void OnEnable (
-            SerializedObject so, SerializedObject editor_as_so, string asset_object_unity_asset_type, string pack_name, 
-            Dictionary<int, string> id2path, 
-            //System.Action<SerializedProperty> make_instance_default, 
-            AssetObjectParamDef[] default_params
-            //string[] instance_field_names, GUIContent[] instance_field_labels
-        ) {
-            base.OnEnable(so, asset_object_unity_asset_type, pack_name, id2path, default_params);//, make_instance_default);
-
+        
+        AssetObjectPack pack;
+        public void OnEnable (SerializedObject eventPack, AssetObjectPack pack){
+            base.OnEnable(eventPack, pack);
+            this.pack = pack;
             
-            Debug.Log("1");
-            SerializedProperty multi_edit_instance = so.FindProperty("multi_edit_instance");
-            //if (multi_edit_l.arraySize == 0) {
-            //    Debug.Log("1a");
-            //    multi_edit_l.InsertArrayElementAtIndex(0);
-            //}
+            SerializedProperty multi_edit_instance = eventPack.FindProperty(AssetObjectEventPack.multi_edit_instance_field);
+            Debug.Log("on list enable");
             
-            Debug.Log("2");
-            //SerializedProperty multi_edit_instance = multi_edit_l.GetArrayElementAtIndex(0);
-            Debug.Log(multi_edit_instance.propertyType);
-            multi_edit_instance.FindPropertyRelative(sTags).ClearArray();
+            Debug.Log(multi_edit_instance);
+            multi_edit_instance.FindPropertyRelative(AssetObject.tags_field).ClearArray();
             MakeAssetObjectInstanceDefault(multi_edit_instance);
-            //make_instance_default(multi_edit_instance);
-            Debug.Log("3");
-            editor_as_so.ApplyModifiedProperties();
+            
+            this.dummy_list_element = new DummyListElement(multi_edit_instance, pack.defaultParams);
 
-                
-            this.dummy_list_element = new DummyListElement(multi_edit_instance, default_params);//, instance_field_names, instance_field_labels);
-            tag_objects_system.OnEnable(pack_name, RebuildTagsProperties, so);                
+            packs_so = new SerializedObject(AssetObjectsManager.instance.packs);
+
+            SerializedProperty packs = packs_so.FindProperty(AssetObjectPacks.packsField);
+            int l = packs.arraySize;
+            for (int i = 0; i < l; i++) {
+                SerializedProperty p = packs.GetArrayElementAtIndex(i);
+                string pack_name = p.FindPropertyRelative(AssetObjectPack.nameField).stringValue;
+                if (pack_name == pack.name) {
+                    all_tags = p.FindPropertyRelative(AssetObjectPack.allTagsField);
+                    break;
+                }
+
+            }
+        
+            search_keywords.OnEnable(OnSearchKeywordsChange, all_tags);
+            tags_gui.OnEnable(OnTagsChanged);          
+        
         }
+
+        
+        void OnSearchKeywordsChange () {
+            pagination.cur_page = 0;
+            ClearSelectionsAndRebuild();
+            search_keywords.RepopulatePopupList(all_tags);
+        }
+        void OnTagsChanged (string changed_tag) {
+            if (!all_tags.Contains(changed_tag)) all_tags.Add(changed_tag);
+            eventPack.ApplyModifiedProperties();
+            packs_so.ApplyModifiedProperties();
+        }
+        bool HasSearchTags (SerializedProperty tags_prop, int keywords_count) {
+            if (keywords_count == 0) return true;
+            for (int i = 0; i < keywords_count; i++) {
+                if (tags_prop.Contains(search_keywords.keywords[i])) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        SearchKeywordsGUI search_keywords = new SearchKeywordsGUI();
+        AssetObjectTagsGUI tags_gui = new AssetObjectTagsGUI();
+        SerializedProperty[] selected_tags_props;
+        SerializedProperty all_tags;
+        SerializedObject packs_so;
+
+        
+        
     }
 }
 

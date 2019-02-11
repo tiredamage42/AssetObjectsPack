@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿/*
+using UnityEngine;
 using UnityEditor;
 
 namespace AssetObjectsPacks.Animations {
@@ -27,3 +28,4 @@ namespace AssetObjectsPacks.Animations {
         }
     }
 }
+ */

@@ -9,10 +9,37 @@ using AssetObjectsPacks;
 namespace AssetObjectsPacks.Animations {
 
     [RequireComponent(typeof(Animator))]
-    public class AnimationPlayer : AssetObjectEventPlayer
-    //<AnimationAssetObject, AnimationEvent, AnimationEventBehavior, AnimationPlayer>
-    //<AnimationEvent, AnimationEventBehavior, AnimationPlayer>
-{
+    public class AnimationPlayer : MonoBehaviour
+    {
+
+        public AssetObjectEventPlayer event_player;
+
+        void InitializeEventPlayer () {
+            event_player = GetComponent<AssetObjectEventPlayer>();
+            event_player.SubscribeToEventVariation("Animation", OnPlayEvent);
+            //event_player.on_play_event = OnPlayEvent;
+        }
+        void OnPlayEvent(AssetObject assetObject, System.Action end_event) {
+            this.end_event = end_event;
+
+
+
+            bool mirror = false;
+            int mirror_mode = assetObject["Mirror Mode"].intValue;
+            float trans_speed = assetObject["Transition Speed"].floatValue;
+            float speed = assetObject["Speed"].floatValue;
+
+            if (mirror_mode == 2) {// AnimationAssetObject.MirrorMode.Random) {
+                mirror = UnityEngine.Random.value < .5f;
+            }
+            else if (mirror_mode == 1) {// AnimationAssetObject.MirrorMode.Mirror) {
+                mirror = true;
+            }
+            Play(assetObject.id, false, mirror, assetObject.looped, trans_speed, speed);
+        
+        }
+
+
 
         //protected override void OnUseAssetObject(AnimInstance asset_object) {
         //    Play(asset_object, false, false);
@@ -66,10 +93,10 @@ namespace AssetObjectsPacks.Animations {
 
  */
         void OnOneShotTransitionStart () {
-            if (on_one_shot_exit_transition_start != null) {
-                Debug.Log("on one shot transition_out");
-                on_one_shot_exit_transition_start();
-            }
+            //if (on_one_shot_exit_transition_start != null) {
+            //    Debug.Log("on one shot transition_out");
+            //    on_one_shot_exit_transition_start();
+            //}
             if (end_event != null) {
                 end_event();
                 end_event = null;
@@ -108,9 +135,9 @@ namespace AssetObjectsPacks.Animations {
         };
         public RuntimeAnimatorController animatorController;
         
-        event Action on_one_shot_exit_transition_start;//, on_one_shot_exit_transition_end;
+        //event Action on_one_shot_exit_transition_start;//, on_one_shot_exit_transition_end;
         //[HideInInspector] 
-        public List<AnimationScene.Performance> current_scenes = new List<AnimationScene.Performance>();
+        //public List<AnimationScene.Performance> current_scenes = new List<AnimationScene.Performance>();
         Animator anim;
         int active_loopset;
         bool playing_one_shot;
@@ -121,10 +148,11 @@ namespace AssetObjectsPacks.Animations {
             anim.avatar = transform.GetChild(0).GetComponent<Animator>().avatar;
             anim.runtimeAnimatorController = animatorController;
             anim.applyRootMotion = true;
+            InitializeEventPlayer();
         }
 
-        Vector3 pos_movement;
-        Quaternion rot_movement;
+        //Vector3 pos_movement;
+        //Quaternion rot_movement;
         //void OnAnimatorMove () {
         //    pos_movement = anim.rootPosition;
         //    rot_movement = anim.rootRotation;
@@ -203,7 +231,7 @@ namespace AssetObjectsPacks.Animations {
         }
 
         
-
+/*
         public void Play (AssetObject anim, bool loop, bool interrupt_current) {
             bool mirror = false;
             int mirror_mode = anim["Mirror Mode"].intValue;
@@ -218,6 +246,7 @@ namespace AssetObjectsPacks.Animations {
             }
             Play(anim.id, interrupt_current, mirror, loop, trans_speed, speed);
         }
+ */
 
         public void Play (int anim_index, bool interrupt_current, bool mirror, bool loop, float transition_time, float speed) {
             if (loop) {

@@ -14,58 +14,43 @@ using Object = UnityEngine.Object;
 namespace AssetObjectsPacks {
 
     public class PopupList : PopupWindowContent {
-        public delegate void OnSelectCallback(ListElement element);
+        public delegate void OnSelectCallback(ListElement element, bool little_button_pressed);
         public enum Gravity { Top, Bottom }
         public class ListElement {
             public GUIContent m_Content;
-            bool m_Selected, m_WasSelected, m_PartiallySelected, m_Enabled;
+            bool m_Selected, m_WasSelected, m_PartiallySelected;
+            //bool m_Selected, m_PartiallySelected;
+            
+            public bool enabled;
             public ListElement(string text, bool selected) {
                 m_Content = new GUIContent(text);
                 if (!string.IsNullOrEmpty(m_Content.text)) {
-                    char[] a = m_Content.text.ToCharArray();
-                    a[0] = char.ToUpper(a[0]);
-                    m_Content.text = new string(a);
+                    //char[] a = m_Content.text.ToCharArray();
+                    //a[0] = char.ToUpper(a[0]);
+                    m_Content.text = text;// new string(a);
                 }
                 m_Selected = selected;
                 m_PartiallySelected = false;
-                m_Enabled = true;
+                enabled = true;
             }
 
             public bool selected{
-                get{
-                    return m_Selected;
-                }
+                get { return m_Selected; }
                 set{
                     m_Selected = value;
-                    if (m_Selected)
-                        m_WasSelected = true;
-                }
-            }
-            public bool enabled{
-                get{
-                    return m_Enabled;
-                }
-                set{
-                    m_Enabled = value;
+                    if (m_Selected) m_WasSelected = true;
                 }
             }
             public bool partiallySelected{
-                get{
-                    return m_PartiallySelected;
-                }
+                get { return m_PartiallySelected; }
                 set{
                     m_PartiallySelected = value;
-                    if (m_PartiallySelected)
-                        m_WasSelected = true;
+                    if (m_PartiallySelected) m_WasSelected = true;
                 }
             }
             public string text{
-                get{
-                    return m_Content.text;
-                }
-                set{
-                    m_Content.text = value;
-                }
+                get { return m_Content.text; }
+                set { m_Content.text = value; }
             }
             public void ResetScore(){
                 m_WasSelected = m_Selected || m_PartiallySelected;
@@ -145,10 +130,13 @@ namespace AssetObjectsPacks {
         string m_EnteredTextCompletion = "";
         string m_EnteredText = "";
         int m_SelectedCompletionIndex = 0;
-        public PopupList(InputData inputData) : this(inputData, null) {}
-        public PopupList(InputData inputData, string initialSelectionLabel){
+        bool draw_remove, draw_search;
+        public PopupList(InputData inputData, bool draw_search, bool draw_remove) : this(inputData, draw_search, draw_remove, null) {}
+        public PopupList(InputData inputData, bool draw_search, bool draw_remove, string initialSelectionLabel){
             m_Data = inputData;
-            m_Data.ResetScores();
+            this.draw_search = draw_search;
+            this.draw_remove = draw_remove;
+            //m_Data.ResetScores();
             SelectNoCompletion();
             m_Gravity = Gravity.Top;
             if (initialSelectionLabel != null){
@@ -162,7 +150,7 @@ namespace AssetObjectsPacks {
         }
         public virtual float GetWindowHeight(){
             int count = (m_Data.m_MaxCount == 0) ? m_Data.GetFilteredCount(m_EnteredText) : m_Data.m_MaxCount;
-            return count * k_LineHeight + 2 * k_Margin + (k_TextFieldHeight);
+            return count * k_LineHeight + 2 * k_Margin + (draw_search ? (k_TextFieldHeight) : 0 );
         }
         public virtual float GetWindowWidth(){
             return 150f;
@@ -173,14 +161,13 @@ namespace AssetObjectsPacks {
         public override void OnGUI(Rect windowRect){
             Event evt = Event.current;
             // We do not use the layout event
-            if (evt.type == EventType.Layout)
-                return;
-            if (s_Styles == null)
-                s_Styles = new Styles();
+            if (evt.type == EventType.Layout) return;
+            if (s_Styles == null) s_Styles = new Styles();
             if (evt.type == EventType.KeyDown && evt.keyCode == KeyCode.Escape){
                 editorWindow.Close();
                 GUIUtility.ExitGUI();
             }
+
             if (m_Gravity == Gravity.Bottom){
                 DrawList(editorWindow, windowRect);
                 DrawCustomTextField(editorWindow, windowRect);
@@ -200,6 +187,8 @@ namespace AssetObjectsPacks {
             bool useEventBeforeTextField = false;
             bool clearText = false;
             string textBeforeEdit = CurrentDisplayedText();
+
+
             // Handle "special" keyboard input
             if (evt.type == EventType.KeyDown){
                 switch (evt.keyCode){
@@ -208,9 +197,12 @@ namespace AssetObjectsPacks {
                     case KeyCode.Tab:
                     case KeyCode.Return:
                         if (textBeforeEdit != ""){
+                            //if (draw_search) {
+
+                            //}
                             // Toggle state
                             if (m_Data.m_OnSelectCallback != null)
-                                m_Data.m_OnSelectCallback(m_Data.NewOrMatchingElement(textBeforeEdit));
+                                m_Data.m_OnSelectCallback(m_Data.NewOrMatchingElement(textBeforeEdit), false);
                             if (evt.keyCode == KeyCode.Tab || evt.keyCode == KeyCode.Comma)
                                 clearText = true;  // to ease multiple entries (it is unlikely that the same filter is used more than once)
                             // Auto close
@@ -237,33 +229,37 @@ namespace AssetObjectsPacks {
                         break;
                 }
             }
-            string textFieldText;
-            // Draw textfield
-            {
-                Rect pos = new Rect(windowRect.x + k_Margin / 2, windowRect.y + (m_Gravity == Gravity.Top ? (k_Margin / 2) : (windowRect.height - k_TextFieldHeight - k_Margin / 2)), windowRect.width - k_Margin - 14, k_TextFieldHeight);   
-                if (useEventBeforeTextField)
-                    evt.Use();  // We have to delay this until after we get the control id, otherwise the id we get is just -1
+            if (draw_search) {
+                string textFieldText;
 
-                textFieldText = EditorGUI.TextField(pos, textBeforeEdit, s_Styles.customTextField);
+                // Draw textfield
+                {
+                    Rect pos = new Rect(windowRect.x + k_Margin / 2, windowRect.y + (m_Gravity == Gravity.Top ? (k_Margin / 2) : (windowRect.height - k_TextFieldHeight - k_Margin / 2)), windowRect.width - k_Margin - 14, k_TextFieldHeight);   
+                    if (useEventBeforeTextField)
+                        evt.Use();  // We have to delay this until after we get the control id, otherwise the id we get is just -1
 
-                Rect buttonRect = pos;
-                buttonRect.x += pos.width;
-                buttonRect.width = 14;
-                // Draw "clear textfield" button (X)
-                if ((GUI.Button(buttonRect, GUIContent.none, textFieldText != "" ? s_Styles.customTextFieldCancelButton : s_Styles.customTextFieldCancelButtonEmpty) && textFieldText != "") || clearText){
-                    textFieldText = "";
-                    enableAutoCompletion = false;
+                    textFieldText = EditorGUI.TextField(pos, textBeforeEdit, s_Styles.customTextField);
+
+                    Rect buttonRect = pos;
+                    buttonRect.x += pos.width;
+                    buttonRect.width = 14;
+                    // Draw "clear textfield" button (X)
+                    if ((GUI.Button(buttonRect, GUIContent.none, textFieldText != "" ? s_Styles.customTextFieldCancelButton : s_Styles.customTextFieldCancelButtonEmpty) && textFieldText != "") || clearText){
+                        textFieldText = "";
+                        enableAutoCompletion = false;
+                    }
+                        
+                }
+                // Handle autocompletion
+                if (textBeforeEdit != textFieldText){
+                    m_EnteredText = textFieldText;
+                    if (enableAutoCompletion)
+                        UpdateCompletion();
+                    else
+                        SelectNoCompletion();
                 }
             }
 
-            // Handle autocompletion
-            if (textBeforeEdit != textFieldText){
-                m_EnteredText = textFieldText;
-                if (enableAutoCompletion)
-                    UpdateCompletion();
-                else
-                    SelectNoCompletion();
-            }
             if (closeWindow)
                 editorWindow.Close();
         }
@@ -308,7 +304,17 @@ namespace AssetObjectsPacks {
             int i = -1;
             foreach (var element in m_Data.GetFilteredList(m_EnteredText)){
                 i++;
-                Rect rect = new Rect(windowRect.x, windowRect.y + k_Margin + i * k_LineHeight + (m_Gravity == Gravity.Top ? k_TextFieldHeight : 0), windowRect.width, k_LineHeight);
+                float y_pos = windowRect.y + k_Margin + i * k_LineHeight + (m_Gravity == Gravity.Top ? (draw_search ? k_TextFieldHeight : 0) : 0);
+                
+                
+                Rect label_rect = new Rect(windowRect.x, y_pos, windowRect.width, k_LineHeight);
+                Rect delete_rect = new Rect();
+                if (draw_remove) {
+
+                    label_rect = new Rect(windowRect.x, y_pos, windowRect.width - k_LineHeight, k_LineHeight);
+                    delete_rect = new Rect(windowRect.x + (windowRect.width - k_LineHeight), y_pos, k_LineHeight, k_LineHeight);
+                }
+                
                 switch (evt.type){
                     case EventType.Repaint:{
                         GUIStyle style = element.partiallySelected ? s_Styles.menuItemMixed : s_Styles.menuItem;
@@ -318,22 +324,51 @@ namespace AssetObjectsPacks {
                         bool isActive = selected;
                         using (new EditorGUI.DisabledScope(!element.enabled)){
                             GUIContent content = element.m_Content;
-                            style.Draw(rect, content, isHover, isActive, selected, focused);
+                            style.Draw(label_rect, content, isHover, isActive, selected, focused);
+                            if (draw_remove) {
+
+                                Color32 orig_bg = GUI.backgroundColor;
+                                GUI.backgroundColor = EditorColors.red_color;
+                                GUI.skin.button.Draw(delete_rect, GUIContent.none, false, true, false, false);
+                                GUI.backgroundColor = orig_bg;
+                            }
+                            
+                            
+
+
+                            //if (GUIUtils.LittleButton(EditorColors.red_color)) {}
+
                         }
                     }
                     break;
                     case EventType.MouseDown:{
-                        if (Event.current.button == 0 && rect.Contains(Event.current.mousePosition) && element.enabled) {
-                            // Toggle state
-                            if (m_Data.m_OnSelectCallback != null)
-                                m_Data.m_OnSelectCallback(element);
-                            evt.Use();
-                            editorWindow.Close();
+                        if (element.enabled && Event.current.button == 0) {
+                            if (label_rect.Contains(Event.current.mousePosition)) {
+                                // Toggle state
+                                if (m_Data.m_OnSelectCallback != null)
+                                    m_Data.m_OnSelectCallback(element, false);
+                                evt.Use();
+                                editorWindow.Close();
+                            }
+                            if (draw_remove) {
+
+                                if (delete_rect.Contains(Event.current.mousePosition)) {
+                                    // Toggle state
+                                    if (m_Data.m_OnSelectCallback != null)
+                                        m_Data.m_OnSelectCallback(element, true);
+                                    evt.Use();
+                                    editorWindow.Close();
+                                }
+                            }
+
                         }
+                        //if (Event.current.button == 0 && rect.Contains(Event.current.mousePosition) && element.enabled) {
+                            
+                        //}
                     }
                     break;
                     case EventType.MouseMove:{
-                        if (rect.Contains(Event.current.mousePosition)){
+                        if (label_rect.Contains(Event.current.mousePosition)){
                             SelectCompletionWithIndex(i);
                             evt.Use();
                         }
@@ -356,16 +391,7 @@ namespace AssetObjectsPacks {
         
         public void OnEnable (Action<string> on_tags_change) {
             this.on_tags_change = on_tags_change;
-            //EditorApplication.projectChanged += InvalidateLabels;
         }
-        //public void OnDisable() {
-            //EditorApplication.projectChanged -= InvalidateLabels;
-        //    SaveTags();
-        //}
-        //public void InvalidateLabels() {
-        //    popup_list_data = null;
-        //    current_tags_props_set = null;
-        //}
         public void SaveTags() {
             if (is_changed && popup_list_data != null && current_tags_props_set != null) {
                 foreach (SerializedProperty tags_prop in current_tags_props_set) {
@@ -385,7 +411,7 @@ namespace AssetObjectsPacks {
                 is_changed = false;
             }
         }
-        public void PopupListCallback(PopupList.ListElement element) {
+        public void PopupListCallback(PopupList.ListElement element, bool little_button_pressed) {
             changed_tag = element.text;
             element.selected = !element.selected;
             change_was_add = element.selected;
@@ -396,7 +422,7 @@ namespace AssetObjectsPacks {
 
         public bool selection_changed;
 
-        void InitTagCaches(List<SerializedProperty> tags_lists, List<string> all_tags) {
+        void InitTagCaches(SerializedProperty[] tags_lists, SerializedProperty all_tags) {
             if (current_tags_props_set == null || selection_changed)
             {
                 List<string> all;
@@ -406,7 +432,11 @@ namespace AssetObjectsPacks {
                     m_OnSelectCallback = PopupListCallback,
                     m_MaxCount = 15
                 };
-                foreach (var tag in all_tags) {
+
+                int l = all_tags.arraySize;
+
+                for (int i =0 ; i < l; i++) {
+                    string tag = all_tags.GetArrayElementAtIndex(i).stringValue;
                     PopupList.ListElement element = popup_list_data.NewOrMatchingElement(tag);
                     element.selected = all.Any(label => string.Equals(label, tag, StringComparison.OrdinalIgnoreCase));
                     element.partiallySelected = partial.Any(label => string.Equals(label, tag, StringComparison.OrdinalIgnoreCase));
@@ -417,7 +447,7 @@ namespace AssetObjectsPacks {
             is_changed = false;
         }
 
-        public void OnInteractivePreviewGUI(List<SerializedProperty> tags_lists, List<string> all_tags)
+        public void OnInteractivePreviewGUI(SerializedProperty[] tags_lists, SerializedProperty all_tags)
         {
             InitTagCaches(tags_lists, all_tags);
             // For the label list as a whole
@@ -445,7 +475,7 @@ namespace AssetObjectsPacks {
             Rect r = GUILayoutUtility.GetRect(labelButton.fixedWidth, labelButton.fixedWidth, labelButton.fixedHeight + bottomPadding, labelButton.fixedHeight + bottomPadding);
             r.x = widthProbeRect.xMax + labelButton.margin.left;
             if (EditorGUI.DropdownButton(r, GUIContent.none, FocusType.Passive, labelButton)) {
-                PopupWindow.Show(r, new PopupList(popup_list_data));
+                PopupWindow.Show(r, new PopupList(popup_list_data, true, false));
             }
             EditorGUILayout.EndHorizontal();
         }
@@ -464,12 +494,12 @@ namespace AssetObjectsPacks {
                 {
                     evt.Use();
                     rt.x = xMax;
-                    PopupWindow.Show(rt, new PopupList(popup_list_data, content.text));
+                    PopupWindow.Show(rt, new PopupList(popup_list_data, true, false, content.text));
                 }
             }
         }
 
-        void GetTagsInLists(List<SerializedProperty> tags_lists, out List<string> all, out List<string> partial) {
+        void GetTagsInLists(SerializedProperty[] tags_lists, out List<string> all, out List<string> partial) {
             all = new List<string>();
             partial = new List<string>();
             Dictionary<string, int> labelAssetCount = new Dictionary<string, int>();
@@ -480,7 +510,7 @@ namespace AssetObjectsPacks {
                 }
             }
             foreach (KeyValuePair<string, int> entry in labelAssetCount) {
-                var list = (entry.Value == tags_lists.Count) ? all : partial;
+                var list = (entry.Value == tags_lists.Length) ? all : partial;
                 list.Add(entry.Key);
             }
         }
@@ -503,7 +533,7 @@ namespace AssetObjectsPacks {
             gui_SearchTags = new GUIContent("Search Tags:");
             gui_initialized = true;
         }
-        public void OnEnable (System.Action on_keywords_change, List<string> all_tags) {
+        public void OnEnable (System.Action on_keywords_change, SerializedProperty all_tags) {
             this.on_keywords_change = on_keywords_change;
             RepopulatePopupList(all_tags);
         }
@@ -521,7 +551,7 @@ namespace AssetObjectsPacks {
                 changed_any_keyword = false;
             }
         }
-        public void AssetLabelListCallback(PopupList.ListElement element) {
+        public void AssetLabelListCallback(PopupList.ListElement element, bool little_button_pressed) {
             changed_keyword = element.text;
             element.selected = !element.selected;
             m_ChangeWasAdd = element.selected;
@@ -529,16 +559,21 @@ namespace AssetObjectsPacks {
             changed_any_keyword = true;
             SaveLabels();
         }
-        public void RepopulatePopupList (List<string> all_tags) {
+        public void RepopulatePopupList (SerializedProperty all_tags) {
             popup_list_data = new PopupList.InputData {
                 m_OnSelectCallback = AssetLabelListCallback,
                 m_MaxCount = 15,
             };
-            foreach (var tag in all_tags) {
+
+            int l = all_tags.arraySize;
+
+            for (int i =0 ; i < l; i++) {
+                string tag = all_tags.GetArrayElementAtIndex(i).stringValue;
                 PopupList.ListElement element = popup_list_data.NewOrMatchingElement(tag);
                 element.selected = keywords.Contains(tag);
                 element.partiallySelected = false;
             }
+
             foreach (string keyword in keywords) {
                 if (!all_tags.Contains(keyword)) {
                     PopupList.ListElement element = popup_list_data.NewOrMatchingElement(keyword);
@@ -551,7 +586,7 @@ namespace AssetObjectsPacks {
             InitializeGUIStuff();
             EditorGUILayout.BeginHorizontal();            
             if (GUILayout.Button(gui_SearchTags)) {
-                PopupWindow.Show(GUILayoutUtility.GetRect(gui_SearchTags, tag_style), new PopupList(popup_list_data));
+                PopupWindow.Show(GUILayoutUtility.GetRect(gui_SearchTags, tag_style), new PopupList(popup_list_data, true, false));
             }
             GUILayout.FlexibleSpace();
             DrawKeywordsList( );
@@ -565,7 +600,7 @@ namespace AssetObjectsPacks {
                 GUI.Label(rt, content, tag_style);
                 if (evt.type == EventType.MouseDown && rt.Contains(evt.mousePosition) && evt.button == 0 && GUI.enabled) {
                     evt.Use();
-                    PopupWindow.Show(rt, new PopupList(popup_list_data, content.text));
+                    PopupWindow.Show(rt, new PopupList(popup_list_data, true, false, content.text));
                 }
             }
         }

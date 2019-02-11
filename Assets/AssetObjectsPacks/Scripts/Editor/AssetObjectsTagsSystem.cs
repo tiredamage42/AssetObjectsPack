@@ -4,6 +4,7 @@ using UnityEditor;
 
 namespace AssetObjectsPacks {
     public class TagObjectSystem {
+        /*
         public class TagsListTracker {
             public SerializedProperty tags_prop;
             public int object_id;
@@ -13,29 +14,44 @@ namespace AssetObjectsPacks {
             }
         }
         List<TagsListTracker> list_trackers;
+         */
+        //public delegate List<TagsListTracker> RBLISTTRACKERS();
+        //public RBLISTTRACKERS rebuild_list_trackers;
+/*
         public bool[] keywords_filter;
         SearchKeywordsGUI search_keywords = new SearchKeywordsGUI();
         AssetObjectTagsGUI tags_gui = new AssetObjectTagsGUI();
-        public delegate List<TagsListTracker> RBLISTTRACKERS();
-        public RBLISTTRACKERS rebuild_list_trackers;
         List<SerializedProperty> selected_tags_props = new List<SerializedProperty>();
-        List<string> all_tags;
-        SerializedObject serializedObject;
+        SerializedProperty all_tags;
+        SerializedObject so, packs_so;
 
-        string pack_name;
-        public void OnEnable (string pack_name, RBLISTTRACKERS rebuild_list_trackers, SerializedObject serializedObject) {
-            this.pack_name = pack_name;
-            this.serializedObject = serializedObject;
-            this.rebuild_list_trackers = rebuild_list_trackers;
-            all_tags = AssetObjectsEditor.LoadAllTags(pack_name);
+        public void OnEnable (AssetObjectPack pack, AssetObjectPacks all_packs, RBLISTTRACKERS rebuild_list_trackers, SerializedObject so) {
+        
+            packs_so = new SerializedObject(all_packs);
+
+            SerializedProperty packs = packs_so.FindProperty(AssetObjectPacks.packs_field);
+            int l = packs.arraySize;
+            for (int i = 0; i < l; i++) {
+                SerializedProperty p = packs.GetArrayElementAtIndex(i);
+                string pack_name = p.FindPropertyRelative(AssetObjectPack.name_field).stringValue;
+                if (pack_name == pack.name) {
+                    all_tags = p.FindPropertyRelative(AssetObjectPack.all_tags_field);
+                }
+
+            }
+            this.so = so;
+            //this.rebuild_list_trackers = rebuild_list_trackers;
+        
             search_keywords.OnEnable(OnSearchKeywordsChange, all_tags);
             tags_gui.OnEnable(OnTagsChanged);
         }
         public void DrawTagsSearch() {
             search_keywords.DrawTagSearch();
         }       
+ */
+        /*
         public void RebuildListTrackers (List<int> selected_ids) {
-            list_trackers = rebuild_list_trackers();
+            //list_trackers = rebuild_list_trackers();
             keywords_filter = new bool[list_trackers.Count];
             UpdateSearchTagsFilter();
             OnSelectionChanged(selected_ids);
@@ -53,6 +69,8 @@ namespace AssetObjectsPacks {
             }
             return false;
         }
+         */
+        /*
         void UpdateSearchTagsFilter() {
             int c = list_trackers.Count;
             int keywords_count = search_keywords.keywords.Count;
@@ -61,13 +79,11 @@ namespace AssetObjectsPacks {
             }
         }
         void OnTagsChanged (string changed_tag) {
-            if (!all_tags.Contains(changed_tag)) {
-                all_tags.Add(changed_tag);
-                AssetObjectsEditor.SaveAllTags(pack_name, all_tags);
-            }
+            if (!all_tags.Contains(changed_tag)) all_tags.Add(changed_tag);
             search_keywords.RepopulatePopupList(all_tags);
             UpdateSearchTagsFilter();
-            serializedObject.ApplyModifiedProperties();
+            so.ApplyModifiedProperties();
+            packs_so.ApplyModifiedProperties();
         }
         public void OnInteractivePreviewGUI(Rect r, GUIStyle background) {
             if (selected_tags_props.Count != 0) {       
@@ -90,6 +106,7 @@ namespace AssetObjectsPacks {
             UpdateSearchTagsFilter();
             search_keywords.RepopulatePopupList(all_tags);
         }
+        */
     }
 }
 

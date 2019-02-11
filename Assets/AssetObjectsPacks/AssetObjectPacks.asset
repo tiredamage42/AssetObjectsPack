@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7644b25885b084d089c30aaab2d5f1c3, type: 3}
+  m_Name: AssetObjectPacks
+  m_EditorClassIdentifier: 
+  packs:
+  - def_params:
+    - parameter:
+        name: Speed
+        paramType: 1
+        boolValue: 0
+        floatValue: 1
+        intValue: 0
+      hint: Speed
+    - parameter:
+        name: Mirror
+        paramType: 2
+        boolValue: 0
+        floatValue: 0
+        intValue: 0
+      hint: 0 = None, 1 = Mirror, 2 = Random
+    - parameter:
+        name: Transition Time
+        paramType: 1
+        boolValue: 0
+        floatValue: 0.1
+        intValue: 0
+      hint: 
+    objectsDirectory: Assets/AssetObjectsPacks/Packs/Animations/AssetObjects/
+    fileExtensions: .fbx
+    all_tags:
+    - ata
+    - another
+    name: Animations
+    assetType: UnityEngine.AnimationClip
+    id: 1
+  - def_params: []
+    objectsDirectory: 
+    fileExtensions: 
+    all_tags:
+    - ata
+    - another
+    name: Sounds
+    assetType: UnityEngine.AudioClip
+    id: 0

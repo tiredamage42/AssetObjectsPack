@@ -24,11 +24,25 @@ namespace AssetObjectsPacks.Animations {
             ScriptableWizard.DisplayWizard<AnimatorControllerBuilder>("Generate Anim Controller", "Generate");
         }
         void OnWizardCreate() {
-            BuildAnimatorController();
+
+            AssetObjectsManager instance = AssetObjectsManager.instance;
+            if (instance != null) {
+                AssetObjectPacks packs = instance.packs;
+                if (packs != null) {
+
+                    for (int i = 0; i < packs.packs.Count; i++) {
+                        if( packs.packs[i].name == animationsPackName) {
+                            BuildAnimatorController(packs.packs[i]);
+                            break;
+                        }
+                    }
+                }
+            }
+
         }
 
         
-        static readonly string save_path = AssetObjectsEditor.GetPackRootDirectory("Animations") + "AnimationsController.controller";
+        //static readonly string save_path = AssetObjectsEditor.GetPackRootDirectory("Animations") + "AnimationsController.controller";
         
         
         [Header("HIGHLY RECOMMENDED")]
@@ -36,7 +50,8 @@ namespace AssetObjectsPacks.Animations {
         public bool usedOnly = true;
         public float exitTransitionDuration = .1f;
 
-
+        public string animationsPackName = "Animations";
+        public string saveDirectory;
 
         public static List<T> FindAssetsByType<T>() where T : UnityEngine.Object {
 
@@ -49,24 +64,42 @@ namespace AssetObjectsPacks.Animations {
             return assets;
         }
 
-        List<AnimationEvent> GetAllCuesInProject() {
-            return FindAssetsByType<AnimationEvent>();
-        }
-
+        
     
         //only add used animations to controller, to avoid adding thousands of states
         List<int> GetAllUsedIDs () {
             List<int> used_ids = new List<int>();
-            List<AnimationEvent> all_cues = GetAllCuesInProject();
-            int l = all_cues.Count;
+            List<AssetObjectEvent> all_events = FindAssetsByType<AssetObjectEvent>();
+            int l = all_events.Count;
             for (int i = 0; i < l; i++) {
-                AnimationEvent c = all_cues[i];
-                int y = c.assetObjects.Count;
-                for (int x = 0; x < y; x++) {
-                    int id = c.assetObjects[x].id;
-                    if (!used_ids.Contains(id)) {
-                        used_ids.Add(id);
+                AssetObjectEvent e = all_events[i];
+                int c = e.eventPacks.Length;
+                for (int x = 0; x < c; x++) {
+                    AssetObjectEventPack ep = e.eventPacks[x];
+                    string k = AssetObjectsManager.instance.packs.FindPackByID( ep.assetObjectPackID).name;
+                    if (k == animationsPackName) {
+
+                        int y = ep.assetObjects.Count;
+                        for (int z = 0; z < y; z++) {
+                            int id = ep.assetObjects[z].id;
+                            if (!used_ids.Contains(id)) {
+                                used_ids.Add(id);
+                            }
+                        }
                     }
+
+                
+
+
+
+
+
+
+
+
+
+
+
                 }
             }
             if (used_ids.Count == 0) {
@@ -78,19 +111,18 @@ namespace AssetObjectsPacks.Animations {
 
 
 
-        void BuildAnimatorController () {
+        void BuildAnimatorController (AssetObjectPack animation_type) {
             List<int> used_ids = new List<int>();
             if (usedOnly) {
                 used_ids = GetAllUsedIDs();
                 if (used_ids.Count == 0) {
-                    Debug.LogError("no scenes saved or no animations specified in scene cues");
                     return;
                 }
             } 
 
 
 
-            string[] file_paths = AssetObjectsEditor.GetAllAssetObjectPaths("Animations", ".fbx", true);
+            string[] file_paths = AssetObjectsEditor.GetAllAssetObjectPaths(animation_type.objectsDirectory, animation_type.fileExtensions, true);
             if (usedOnly) {
                 file_paths = file_paths.Where(f => used_ids.Contains(AssetObjectsEditor.GetObjectIDFromPath(f))).ToArray();
             }
@@ -104,7 +136,7 @@ namespace AssetObjectsPacks.Animations {
                 return;
             }
             ControllerBuild(clip_ids, c);   
-            Debug.Log("Controller built at: " + save_path);         
+            Debug.Log("Controller built at: " + saveDirectory + "AnimationsController.controller");         
         }
         ClipIDPair[] BuildClipIDPairs (string[] file_paths, int c) {
             ClipIDPair[] results = new ClipIDPair[c];
@@ -131,7 +163,7 @@ namespace AssetObjectsPacks.Animations {
         }
         void ControllerBuild (ClipIDPair[] clips, int c) {
             // Create the animator in the project
-            AnimatorController controller = AnimatorController.CreateAnimatorControllerAtPath(save_path);
+            AnimatorController controller = AnimatorController.CreateAnimatorControllerAtPath(saveDirectory + "AnimationsController.controller");
             AddParameters(controller);
 
             AnimatorState[] blend_trees = new AnimatorState[2];

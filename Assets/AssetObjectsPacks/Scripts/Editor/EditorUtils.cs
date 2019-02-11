@@ -6,23 +6,44 @@ using UnityEngine;
 using System.IO;
 using System.Linq;
 using UnityEditor;
+//using System;
 
 namespace AssetObjectsPacks {
     public static class EditorUtils {
+
+        
+        static System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+
+        public static void StartTimer() {
+            stopwatch.Reset();
+            stopwatch.Start();
+        
+        }
+        public static void PrintTimer(string message) {
+            stopwatch.Stop();
+            System.TimeSpan ts = stopwatch.Elapsed;
+            string elapsedTime = string.Format("{0:00}.{1:00}", ts.Seconds, ts.Milliseconds / 10);
+            Debug.Log(message + " :: " + elapsedTime);
+            StartTimer();
+        }
+
         public static string MakeDirectoryIfNone (string directory) {
-            if(!Directory.Exists(directory))
-                Directory.CreateDirectory(directory);
+            if(!Directory.Exists(directory)) Directory.CreateDirectory(directory);
             return directory;
         }
-        public static string[] GetFilePathsInDirectory (string dir, bool include_dir, string file_extenstion, string valid_file_check, bool should_contain, SearchOption search = SearchOption.AllDirectories) {
+        public static string[] GetFilePathsInDirectory (string dir, bool include_dir, string file_extenstions, string valid_file_check, bool should_contain, SearchOption search = SearchOption.AllDirectories) {
             string data_path = Application.dataPath.Substring(0, Application.dataPath.Length - 6);
-            //int sub_index = data_path.Length + (include_dir ? -6 : (1 + dir.Length));//Assets ...;  
-            int sub_index = data_path.Length + (include_dir ? 1 : (1 + dir.Length));//Assets ...;  
-            return Directory.GetFiles(data_path+"/"+dir, "*" + file_extenstion, search)
+            int sub_index = data_path.Length + 1 + (include_dir ? 0 : dir.Length);//Assets ...;  
+            List<string> results = new List<string>();
+            string[] extensions = file_extenstions.Split(',');
+            for (int i = 0; i < extensions.Length; i++) {
+                results.AddRange(Directory.GetFiles(data_path+"/"+dir, "*" + extensions[i], search)
                 .Where(s => s.Contains(valid_file_check) == should_contain)
-                .Select(s => s.Substring(sub_index))
-                .ToArray();
+                .Select(s => s.Substring(sub_index)));
+            }
+            return results.ToArray();
         }
+
         public static T GetAssetAtPath<T> (string path) where T : Object {
             Object[] data = AssetDatabase.LoadAllAssetsAtPath(path);
             System.Type t = typeof(T);
@@ -37,19 +58,26 @@ namespace AssetObjectsPacks {
         }
         public static Object GetAssetAtPath (string path, string type_name) {
             Object[] data = AssetDatabase.LoadAllAssetsAtPath(path);
-            //System.Type t = typeof(T);
             int l = data.Length;
             for (int i = 0; i < l; ++i) {
                 Object d = data[i];
                 if (d.GetType().ToString() == type_name) {
                     return d;
                 }
-                else {
-                    Debug.Log("mismatch with " + d.GetType().ToString() + " vs. " + type_name);
-                }
-                
             }
             return null;
+        }
+        public static Object[] GetAssetsAtPath (string path, string type_name) {
+            List<Object> ret = new List<Object>();
+            Object[] data = AssetDatabase.LoadAllAssetsAtPath(path);
+            int l = data.Length;
+            for (int i = 0; i < l; ++i) {
+                Object d = data[i];
+                if (d.GetType().ToString() == type_name) {
+                    ret.Add(d);
+                }
+            }
+            return ret.ToArray();
         }
         
         public static T[] GetAssetsAtPath<T> (string path) where T : Object {
@@ -59,15 +87,8 @@ namespace AssetObjectsPacks {
             int l = data.Length;
             for (int i = 0; i < l; ++i) {
                 Object d = data[i];
-                if (d == null) {
-                    Debug.Log("null at: " + path);
-
-                }
-                else {
-
-                    if (d.GetType() == t) {
-                        ret.Add((T)d);
-                    }
+                if (d.GetType() == t) {
+                    ret.Add((T)d);
                 }
             }
             return ret.ToArray();
@@ -91,7 +112,9 @@ namespace AssetObjectsPacks {
             }
             string[] sp = full_path.Split(back_slash_c);
             string name = sp.Last();
-            string dir = string.Join(back_slash, sp.Slice(0, sp.Length - 1)) + back_slash;
+            //string dir = string.Join(back_slash, sp.Slice(0, sp.Length - 1)) + back_slash;
+            string dir = string.Join(back_slash, sp.Slice(0, -2)) + back_slash;
+            
             return new string[] {dir, name};
         }
 
@@ -101,7 +124,9 @@ namespace AssetObjectsPacks {
 
         public static bool Contains (this SerializedProperty p, string e, out int at_index) {
             at_index = -1;
-            for (int i = 0; i < p.arraySize; i++) {
+            int a = p.arraySize;
+            
+            for (int i = 0; i < a; i++) {
                 if (p.GetArrayElementAtIndex(i).stringValue == e) {
                     at_index = i;
                     return true;
@@ -111,7 +136,8 @@ namespace AssetObjectsPacks {
         }
         public static bool Contains (this SerializedProperty p, int e, out int at_index) {
             at_index = -1;
-            for (int i = 0; i < p.arraySize; i++) {
+            int a = p.arraySize;
+            for (int i = 0; i < a; i++) {
                 if (p.GetArrayElementAtIndex(i).intValue == e) {
                     at_index = i;
                     return true;
@@ -119,29 +145,36 @@ namespace AssetObjectsPacks {
             }
             return false;
         }
-        
+
+        public static SerializedProperty AddNewElement(this SerializedProperty p) {
+            int l = p.arraySize;
+            p.InsertArrayElementAtIndex(l);
+            return p.GetArrayElementAtIndex(l);
+        }
         public static void Add (this SerializedProperty p, string e) {
-            int c = p.arraySize;
-            p.InsertArrayElementAtIndex(c);
-            p.GetArrayElementAtIndex(c).stringValue = e;
+            p.AddNewElement().stringValue = e;
         }
         public static void Add (this SerializedProperty p, int e) {
-            int c = p.arraySize;
-            p.InsertArrayElementAtIndex(c);
-            p.GetArrayElementAtIndex(c).intValue = e;
+            p.AddNewElement().intValue = e;
         }
 
         public static void Remove (this SerializedProperty p, string e) {
             int i;
-            if (p.Contains(e, out i)) {
-                p.DeleteArrayElementAtIndex(i);
-            }
+            if (p.Contains(e, out i)) p.DeleteArrayElementAtIndex(i);
         }
         public static void Remove (this SerializedProperty p, int e) {
             int i;
-            if (p.Contains(e, out i)) {
-                p.DeleteArrayElementAtIndex(i);
+            if (p.Contains(e, out i)) p.DeleteArrayElementAtIndex(i);
+        }
+        /*
+         */
+
+        public static void RemoveRange(this SerializedProperty p, IList<int> l) {
+            int c = p.arraySize;
+            for (int i = c - 1; i >= 0; i--) {
+                if (l.Contains(p.GetArrayElementAtIndex(i).intValue)) p.DeleteArrayElementAtIndex(i);
             }
+
         }
         public static bool Contains (this SerializedProperty p, string e) {
             int at_index;

@@ -1,12 +1,11 @@
-﻿using System.Collections.Generic;
+﻿/*
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 namespace AssetObjectsPacks.Animations {
+
     [CustomEditor(typeof(AnimationEvent))]
     public class AnimationEventEditor : AssetObjectEventEditor {
-
-       
-
 
         protected override AssetObjectParamDef[] DefaultParameters() {
             return new AssetObjectParamDef[] {
@@ -16,54 +15,6 @@ namespace AssetObjectsPacks.Animations {
             };
         }
 
-
-
-   
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        //public List<AnimationAssetObject> multi_edit_instance = new List<AnimationAssetObject>();      
-
-        protected override string AssetObjectUnityAssetType() {
-            return "AnimationClip";
-        }
-        protected override string PackFileExtension() {
-            return ".fbx";
-        }
-        protected override string PackName() {
-            return "Animations";
-        }
-        /*
-
-        protected override void MakeAssetObjectInstanceDefault(SerializedProperty obj_instance) {
-            obj_instance.FindPropertyRelative(sSpeed).floatValue = 1.0f;
-            obj_instance.FindPropertyRelative(sTransitionSpeed).floatValue = .1f;
-            obj_instance.FindPropertyRelative(sMirrorMode).enumValueIndex = 0;
-        }
-         */
-/*
-        protected override GUIContent[] InstanceFieldLabels() {
-            return new GUIContent[] { new GUIContent("Speed"), new GUIContent("Mirror     "), new GUIContent("Transition Time") };            
-        }
-        protected override string[] InstanceFieldNames() {
-            return new string[] { sSpeed, sMirrorMode, sTransitionSpeed };
-        }
- */
 
         const string sSpeed = "speed";
         const string sTransitionSpeed = "transition_speed";
@@ -81,8 +32,6 @@ namespace AssetObjectsPacks.Animations {
             sSnapSmoothPosTime,
             sSnapSmoothRotTime,
             sAnimationScene,
-            //sLooped,
-            //sDuration, 
         };
         Dictionary<string, SerializedProperty> script_properties = new Dictionary<string, SerializedProperty>(prop_names.Length);
         
@@ -135,6 +84,7 @@ namespace AssetObjectsPacks.Animations {
 
 
 
+ */
 
 
 

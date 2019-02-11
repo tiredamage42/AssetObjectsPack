@@ -22,7 +22,6 @@ namespace AssetObjectsPacks.Animations {
                 return _instance;
             }
         }
-        */
         
         void Update () {
             PerformanceManager.UpdateManager();
@@ -48,6 +47,7 @@ namespace AssetObjectsPacks.Animations {
                 active_performances.Remove(key);
             }
         }
+        */
     }
 }
 

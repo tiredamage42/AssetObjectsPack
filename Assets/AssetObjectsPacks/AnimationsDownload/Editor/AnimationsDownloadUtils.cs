@@ -2,7 +2,8 @@
 using UnityEditor;
 namespace AssetObjectsPacks {
     class HumanoidSettingsOverride : AssetPostprocessor {
-        /* CHANGE THIS IF YOU CHANGE THE MODEL ON THE DOWNLOADER SCRIPT FOR CHROME */
+        /*
+        / CHANGE THIS IF YOU CHANGE THE MODEL ON THE DOWNLOADER SCRIPT FOR CHROME /
         const string character_model_name = "ybot";
         const string mixamo_utils_dir = "AnimationsDownload/";
         const string animations_pack_name = "Animations";
@@ -17,9 +18,9 @@ namespace AssetObjectsPacks {
             } 
         }
         static Avatar source_avatar { get { return animator.avatar; } }
-        /*
+        /
             when importing automatically use humanoid rigging and y bot avatar (if auto downloaded)
-        */
+        /
         void OnPreprocessModel() {
             if (!is_auto_downloaded) return;
             ModelImporter importer = assetImporter as ModelImporter;
@@ -28,5 +29,6 @@ namespace AssetObjectsPacks {
                 importer.sourceAvatar = source_avatar;
             }
         }
+         */
     }
 }
