@@ -1,8 +1,6 @@
 ﻿using UnityEngine;
 using UnityEditor;
-
 namespace AssetObjectsPacks {
-
     [CustomEditor(typeof(AssetObjectEventPlaylist))]
     public class AssetObjectEventPlaylistEditor : Editor {
         GUIContent sync_channels_gui = new GUIContent("Sync Channels", "channels change events at same time when ready as opposed to staggered (whenever last event is done)");

@@ -132,12 +132,12 @@ var downloadAnimation = (character, current_anim, o, pack_name, just_packs) => {
             return downloadAnimLoop(character, { anims: current_anim.motions, page:o.page, pages:o.pages }, current_anim.name, just_packs);
         }
         console.log(log_prefix + 'Skipping pack ', current_anim.name)
-        return Promise.resolve("duplicate");
+        return Promise.resolve("");
     } 
     
     if (just_packs && !pack_name) {
         console.log(log_prefix + 'Skipping Loose anim ', current_anim.name)
-        return Promise.resolve("duplicate");
+        return Promise.resolve("");
     }
         
     var animId = current_anim.id;
@@ -148,7 +148,7 @@ var downloadAnimation = (character, current_anim, o, pack_name, just_packs) => {
     }
     else {
         console.log(log_prefix + "Duplicate:", current_anim.name)
-        return Promise.resolve("duplicate");
+        return Promise.resolve("");
     }
 
     return getProduct(animId)
@@ -226,6 +226,7 @@ var exportVariationLoop = (character, page, pages, variations, gms_hash, start_n
     console.log(log_prefix + "Export:", final_product_name)
 
     //uncomment if you only need to download certain ones
+    
     /*
     if (!needed_indicies.includes(total_animations)) {
         console.log("Skipping Not Needed:", final_product_name);

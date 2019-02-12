@@ -13,42 +13,38 @@ MonoBehaviour:
   m_Name: AssetObjectPacks
   m_EditorClassIdentifier: 
   packs:
-  - def_params:
+  - defParams:
     - parameter:
         name: Speed
         paramType: 1
         boolValue: 0
         floatValue: 1
         intValue: 0
-      hint: Speed
+      hint: 
+    - parameter:
+        name: Transition Time
+        paramType: 1
+        boolValue: 0
+        floatValue: 0.25
+        intValue: 0
+      hint: 
     - parameter:
         name: Mirror
         paramType: 2
         boolValue: 0
         floatValue: 0
         intValue: 0
-      hint: 0 = None, 1 = Mirror, 2 = Random
-    - parameter:
-        name: Transition Time
-        paramType: 1
-        boolValue: 0
-        floatValue: 0.1
-        intValue: 0
-      hint: 
+      hint: 0=None, 1=Mirror, 2=Random
     objectsDirectory: Assets/AssetObjectsPacks/Packs/Animations/AssetObjects/
     fileExtensions: .fbx
-    all_tags:
-    - ata
-    - another
-    name: Animations
     assetType: UnityEngine.AnimationClip
+    allTags: []
+    name: Animations
     id: 1
-  - def_params: []
+  - defParams: []
     objectsDirectory: 
     fileExtensions: 
-    all_tags:
-    - ata
-    - another
-    name: Sounds
     assetType: UnityEngine.AudioClip
+    allTags: []
+    name: Sounds
     id: 0

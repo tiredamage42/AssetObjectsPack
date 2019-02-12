@@ -5,7 +5,7 @@ using UnityEditor;
 /*
     Use to add multiple animation events to multiple animations
 */
-namespace AnimCorpus {
+namespace AssetObjectsPacks.Animations {
     public class AddAnimationEvents : ScriptableWizard {
         [System.Serializable] public struct AnimEvent {
             public float time;
@@ -16,29 +16,28 @@ namespace AnimCorpus {
         }
         public AnimEvent[] new_events = new AnimEvent[0];
 
-        [MenuItem("AnimationCorpus/2. Add Animation Events")]
+        [MenuItem("Animations Pack/Add Animation Events")]
         static void CreateWizard() {
             ScriptableWizard.DisplayWizard<AddAnimationEvents>("Add Animation Events", "Add");
         }
         void OnWizardCreate() {
-            GameObject[] animations = Selection.gameObjects;
-            for (int i = 0; i < animations.Length; i++) {
-                string path = AssetDatabase.GetAssetPath(animations[i]);
-                AddEvents(AssetDatabase.GetAssetPath(animations[i]));
+            for (int i = 0; i < Selection.gameObjects.Length; i++) {
+                AddEvents(AssetDatabase.GetAssetPath(Selection.gameObjects[i]));
             }
         }
         void AddEvents (string file_path) {
             ModelImporter importer = AssetImporter.GetAtPath(file_path) as ModelImporter;
             if (importer == null) {
-                
                 return;
             }
             if (importer.animationType != ModelImporterAnimationType.Human) {
                 Debug.LogError("Avatar must be human!");
                 return;
             }
-            if(importer.clipAnimations.Length == 0)
+            if(importer.clipAnimations.Length == 0) {
+
                 importer.clipAnimations = importer.defaultClipAnimations;        
+            }
             SerializedObject serializedObject = new SerializedObject(importer);
             new AnimationClipInfoProperties(serializedObject.FindProperty("m_ClipAnimations").GetArrayElementAtIndex(0)).SetEvents(new_events);
             serializedObject.ApplyModifiedProperties();
@@ -52,19 +51,17 @@ namespace AnimCorpus {
             SerializedProperty Get(string property) { return m_Property.FindPropertyRelative(property); }
             public void SetEvents(AnimEvent[] newEvents) {
                 SerializedProperty events = Get("events");
-                if (events != null && events.isArray) {
-                    events.ClearArray();
-                    foreach (AnimEvent evt in newEvents) {
-                        events.InsertArrayElementAtIndex(events.arraySize);
-                        int index = events.arraySize - 1;
-                        events.GetArrayElementAtIndex(index).FindPropertyRelative("floatParameter").floatValue = evt.floatValue;
-                        events.GetArrayElementAtIndex(index).FindPropertyRelative("functionName").stringValue = evt.functionName;
-                        events.GetArrayElementAtIndex(index).FindPropertyRelative("intParameter").intValue = evt.intValue;
-                        events.GetArrayElementAtIndex(index).FindPropertyRelative("objectReferenceParameter").objectReferenceValue = null;//evt.objectReferenceParameter;
-                        events.GetArrayElementAtIndex(index).FindPropertyRelative("data").stringValue = evt.stringValue;
-                        events.GetArrayElementAtIndex(index).FindPropertyRelative("time").floatValue = evt.time;
-                    
-                    }
+                events.ClearArray();
+                foreach (AnimEvent evt in newEvents) {
+                    events.InsertArrayElementAtIndex(events.arraySize);
+                    int index = events.arraySize - 1;
+                    events.GetArrayElementAtIndex(index).FindPropertyRelative("floatParameter").floatValue = evt.floatValue;
+                    events.GetArrayElementAtIndex(index).FindPropertyRelative("functionName").stringValue = evt.functionName;
+                    events.GetArrayElementAtIndex(index).FindPropertyRelative("intParameter").intValue = evt.intValue;
+                    events.GetArrayElementAtIndex(index).FindPropertyRelative("objectReferenceParameter").objectReferenceValue = null;//evt.objectReferenceParameter;
+                    events.GetArrayElementAtIndex(index).FindPropertyRelative("data").stringValue = evt.stringValue;
+                    events.GetArrayElementAtIndex(index).FindPropertyRelative("time").floatValue = evt.time;
+                
                 }
             }
             /*

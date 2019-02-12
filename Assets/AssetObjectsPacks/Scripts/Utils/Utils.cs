@@ -2,11 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-#if UNITY_EDITOR
-using System;
-using System.Reflection;
-using System.IO;
-#endif
+
 namespace AssetObjectsPacks {
     public static class StringUtils {
         public static string PadToLength(this string s, int length, string pad = " ") {
@@ -20,16 +16,15 @@ namespace AssetObjectsPacks {
         }
 
         #if UNITY_EDITOR
-
         public static bool IsValidDirectory(this string s) {
             if (s.IsEmpty()) return false;
-            return Directory.Exists(s);
+            return System.IO.Directory.Exists(s);
         }
         public static bool IsValidTypeString(this string s) {
             if (s.IsEmpty()) return false;
             return s.ToType() != null;
         }
-        public static Type ToType(this string s ) {
+        public static System.Type ToType(this string s ) {
             // Try Type.GetType() first. This will work with types defined
             // by the Mono runtime, in the same assembly as the caller, etc.
             var type = System.Type.GetType( s );

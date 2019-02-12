@@ -1,11 +1,8 @@
 ﻿
 
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
 using AssetObjectsPacks;
-using AssetObjectsPacks.Animations;
 
 public class DummyAI : MonoBehaviour{
     public int stance;
@@ -14,14 +11,17 @@ public class DummyAI : MonoBehaviour{
 
     public AssetObjectEventPlaylist idle_scene;
 
-    AssetObjectEventPlayer animator;
+    AssetObjectEventPlayer player;
 
-    void Awake () {
-        animator = GetComponent<AssetObjectEventPlayer>();
+    void OnGrenadeThrow () {
+        Debug.Log("GRENADE!");
     }
 
+    void Awake () {
+        player = GetComponent<AssetObjectEventPlayer>();
+    }
     void Start () {
-        idle_scene.InitializePerformance(new List<AssetObjectEventPlayer> { animator }, transform.position, transform.rotation, null);
+        idle_scene.InitializePerformance(new List<AssetObjectEventPlayer> { player }, transform.position, transform.rotation, null);
     }
 }
 

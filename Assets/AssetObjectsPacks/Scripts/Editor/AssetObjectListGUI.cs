@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using System;
+using System.Collections.Generic;
 
 namespace AssetObjectsPacks {
     public class AssetObjectListGUI {
@@ -21,8 +22,10 @@ namespace AssetObjectsPacks {
         }
         public void OnEnable(SerializedObject eventPack, AssetObjectPack pack){
             this.pack = pack;
-            list_view.OnEnable(eventPack, pack);
-            explorer_view.OnEnable(eventPack, pack, GetAllFilePaths());
+
+            Dictionary<int, string> id2path;
+            explorer_view.OnEnable(eventPack, pack, GetAllFilePaths(out id2path));
+            list_view.OnEnable(eventPack, pack, id2path);
 
             tab_guis = new GUIContent[] { new GUIContent("List: " + pack.name), new GUIContent("Explorer") };
 
@@ -45,11 +48,15 @@ namespace AssetObjectsPacks {
             EditorGUILayout.HelpBox("There are " + l + " [" + string.Join(",", pack.fileExtensions) + "] files without proper IDs.", MessageType.Warning);
             if (GUILayout.Button("Generate IDs")) {
                 AssetObjectsEditor.GenerateNewIDs(explorer_view.all_file_paths, no_ids);
-                explorer_view.ReinitializePaths(GetAllFilePaths());
+            
+                Dictionary<int, string> id2path;
+                explorer_view.ReinitializePaths(GetAllFilePaths(out id2path));
+                list_view.id2path = id2path;
+                
             }
         }
-        string[] GetAllFilePaths (){
-            return AssetObjectsEditor.GetAllAssetObjectPaths (pack.objectsDirectory, pack.fileExtensions, false, out no_ids);
+        string[] GetAllFilePaths (out Dictionary<int, string> id2path){
+            return AssetObjectsEditor.GetAllAssetObjectPaths (pack.objectsDirectory, pack.fileExtensions, false, out no_ids, out id2path);
         }
         public bool Draw (){
             DrawObjectsWithoutIDsPrompt();

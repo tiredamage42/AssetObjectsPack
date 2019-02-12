@@ -1,21 +1,16 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+
 namespace AssetObjectsPacks {
-
-
     [System.Serializable] public class AssetObjectParamDef {
         public AssetObjectParam parameter;
+        
         #if UNITY_EDITOR
         public string hint;
-        #endif
-
         public AssetObjectParamDef (AssetObjectParam parameter, string hint) {
             this.parameter = parameter;
-            #if UNITY_EDITOR
             this.hint = hint;
-            #endif
         }
+        #endif
     }
     [System.Serializable] public class AssetObjectPack {
         #if UNITY_EDITOR
@@ -39,9 +34,6 @@ namespace AssetObjectsPacks {
         public AssetObjectParamDef[] defParams;
         public string objectsDirectory, fileExtensions, assetType;
         public string[] allTags;
-        public const string allTagsField = "allTags", nameField = "name";
-        public const string assetTypeField = "assetType";
-        public const string objectsDirectoryField = "objectsDirectory", fileExtensionsField = "fileExtensions";
         #endif
 
         public string name;
@@ -52,19 +44,14 @@ namespace AssetObjectsPacks {
     [CreateAssetMenu()]
     public class AssetObjectPacks : ScriptableObject
     {
-        #if UNITY_EDITOR
-        public const string packsField = "packs";
-        #endif
-        
-        public List<AssetObjectPack> packs = new List<AssetObjectPack>();
+        public AssetObjectPack[] packs;
         public AssetObjectPack FindPackByID (int id) {
-            int c = packs.Count;
+            int c = packs.Length;
             for (int i = 0; i < c; i++) {
                 if (packs[i].id == id) return packs[i];
             }
             return null;
-        }
-        
+        }   
     }
 }
 

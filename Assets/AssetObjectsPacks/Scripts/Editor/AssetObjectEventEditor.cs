@@ -13,14 +13,11 @@ namespace AssetObjectsPacks {
         Dictionary<string, SerializedProperty> script_properties = new Dictionary<string, SerializedProperty>(prop_names.Length);
         new AssetObjectEvent target;
         
-        GUIContent main_event_gui = new GUIContent("Main Event Pack", "The event pack that determines when the event is done");
-
         static readonly string[] prop_names = new string[] {
             AssetObjectEvent.snap_player_style_field,
             AssetObjectEvent.smooth_pos_time_field,
             AssetObjectEvent.smooth_rot_time_field,
             AssetObjectEvent.playlist_field,
-            AssetObjectEvent.main_pack_index_field,
             AssetObjectEvent.event_packs_field,
         };
 
@@ -38,14 +35,6 @@ namespace AssetObjectsPacks {
             }
         }
 
-        void DrawMainIndexSelection() {
-            int orig_index = script_properties[AssetObjectEvent.main_pack_index_field].intValue;
-            int max = script_properties[AssetObjectEvent.event_packs_field].arraySize - 1;
-            int new_val = EditorGUILayout.IntSlider(main_event_gui, orig_index, 0, max);
-            if (new_val != orig_index) {
-                script_properties[AssetObjectEvent.main_pack_index_field].intValue = new_val;
-            }
-        }
         bool array_fold;
         public override void OnInspectorGUI() {
             //base.OnInspectorGUI();
@@ -62,10 +51,7 @@ namespace AssetObjectsPacks {
             if (target.playlist == null) {
                 EditorGUILayout.Space();
                 EditorGUILayout.Space();
-
                 GUIUtils.ArrayGUI(script_properties[AssetObjectEvent.event_packs_field], ref array_fold);
-
-                DrawMainIndexSelection();
             }
                 
             if (EditorGUI.EndChangeCheck()) {                

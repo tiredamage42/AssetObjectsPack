@@ -6,7 +6,6 @@ using UnityEngine;
 using System.IO;
 using System.Linq;
 using UnityEditor;
-//using System;
 
 namespace AssetObjectsPacks {
     public static class EditorUtils {
@@ -112,7 +111,6 @@ namespace AssetObjectsPacks {
             }
             string[] sp = full_path.Split(back_slash_c);
             string name = sp.Last();
-            //string dir = string.Join(back_slash, sp.Slice(0, sp.Length - 1)) + back_slash;
             string dir = string.Join(back_slash, sp.Slice(0, -2)) + back_slash;
             
             return new string[] {dir, name};

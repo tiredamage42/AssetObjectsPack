@@ -78,6 +78,14 @@ namespace AssetObjectsPacks {
 
 
         
+        bool HasSearchTags (SerializedProperty tags_prop, int keywords_count) {
+            for (int i = 0; i < keywords_count; i++) {
+                if (tags_prop.Contains(search_keywords.keywords[i])) {
+                    return true;
+                }
+            }
+            return false;
+        }
         
         protected override void RebuildAllElements() {
             elements.Clear();
@@ -87,34 +95,32 @@ namespace AssetObjectsPacks {
             float max_width = 0;
 
             int keywords_count = search_keywords.keywords.Count;
+
             List<ListElement> first_l = new List<ListElement>();
             for (int i = 0; i < l; i++) {
                 SerializedProperty ao = ao_list.GetArrayElementAtIndex(i);
                 SerializedProperty tags_prop = ao.FindPropertyRelative(AssetObject.tags_field);
-                if (!HasSearchTags(tags_prop, keywords_count)) {
-                    continue;
-                }
+                
+                if (keywords_count != 0 && !HasSearchTags(tags_prop, keywords_count)) continue;
+                
 
                 int object_id = ao.FindPropertyRelative(AssetObject.id_field).intValue;
-                string file_path = ao.FindPropertyRelative(AssetObject.obj_file_path_field).stringValue;
+                string file_path = id2path[object_id];// ao.FindPropertyRelative(AssetObject.obj_file_path_field).stringValue;
                                 
                 string n = AssetObjectsEditor.RemoveIDFromPath(file_path);
                 GUIContent gui_n = new GUIContent(n);
 
 
                 float w = EditorStyles.toolbarButton.CalcSize(gui_n).x;
-                if (w > max_width) {
-                    max_width = w;
-                }
-
+                if (w > max_width) max_width = w;
+                
                 first_l.Add(new ListElement(file_path, file_path, gui_n, object_id, ao, tags_prop));
             }
 
-            max_name_width = GUILayout.Width(max_width);
+            max_name_width = GUILayout.Width( Mathf.Max(max_width, EditorStyles.toolbarButton.CalcSize(editing_selected_gui).x) );
 
 
             PaginateElements(first_l, max_elements_per_page);
-
             tags_gui.selection_changed = true;
             RebuildSelectedTagsProps();            
         }
@@ -132,26 +138,38 @@ namespace AssetObjectsPacks {
         void SetPropertyAll(int prop_index) {
             IEnumerable<ListElement> l = elements;
             if (selected_elements.Count != 0) l = selected_elements;
-
             foreach (ListElement el in l) el.relevant_props[prop_index].CopyProperty(dummy_list_element.multi_edit_props[prop_index]);                      
         }
         void MultipleAnimEditFields () {
             for (int i = 0; i < dummy_list_element.props_count; i++) {
                 EditorGUILayout.PropertyField(dummy_list_element.multi_edit_props[i], GUIUtils.blank_content, dummy_list_element.widths[i]);
-                if (GUIUtils.LittleButton(EditorColors.white_color, set_values_gui)) {
-                    SetPropertyAll(i);
-                }
+                GUIUtils.LittleButton(EditorColors.clear_color);
             }        
         }
         void DrawMultipleEditWindow () {
-
-            if (elements.Count == 0) {
-                return;
-            }
-
+            //if (elements.Count == 0) return;
+            
             EditorGUILayout.BeginVertical(GUI.skin.box);
             EditorGUILayout.Space();
+
+
+            EditorGUILayout.BeginHorizontal();
+
             search_keywords.DrawTagSearch();
+            GUILayout.FlexibleSpace();
+
+            GUI.enabled = selected_elements.Count != 0;
+            if (GUILayout.Button(import_settings_gui, EditorStyles.miniButton, import_settings_gui.CalcWidth())) {
+                OpenImportSettings();
+            }
+            GUI.enabled = true;
+
+
+
+            EditorGUILayout.EndHorizontal();
+
+
+
             EditorGUILayout.Space();
 
             DrawObjectFieldsTop();
@@ -173,12 +191,15 @@ namespace AssetObjectsPacks {
             MultipleAnimEditFields();
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.Space();
-            //EditorGUILayout.EndVertical();
+            EditorGUILayout.EndVertical();
         }
         void DrawListInstancePropertyLabels () {
             for (int i = 0; i < dummy_list_element.props_count; i++) {
                 EditorGUILayout.LabelField(dummy_list_element.labels[i], dummy_list_element.widths[i]);
-                GUIUtils.LittleButton(EditorColors.clear_color);
+                if (GUIUtils.LittleButton(EditorColors.selected_color, set_values_gui)) {
+                    SetPropertyAll(i);
+                }
+                
             }
         }
         void DrawObjectFieldsTop () {
@@ -207,10 +228,8 @@ namespace AssetObjectsPacks {
                 else {}
             }
 
-            
             if (elements.Count == 0) {
                 EditorGUILayout.HelpBox("No elements, add some through the explorer view tab", MessageType.Info);
-                return changed;
             }
             DrawMultipleEditWindow();
             DrawListElements();
@@ -219,7 +238,7 @@ namespace AssetObjectsPacks {
         }
 
         void DrawListElements () {
-            //EditorGUILayout.BeginVertical(GUI.skin.box);
+            EditorGUILayout.BeginVertical(GUI.skin.box);
             for (int i = 0; i < elements.Count; i++) {
                 bool drawing_selected = selected_elements.Contains(elements[i]);
                 
@@ -228,42 +247,45 @@ namespace AssetObjectsPacks {
                 bool big_button_pressed = GUIUtils.ScrollWindowElement (elements[i].label_gui, drawing_selected, false, false, max_name_width);
                 DrawListInstancePropertyFields(elements[i].relevant_props);
                 EditorGUILayout.EndHorizontal();
-                
-                
 
                 if (big_button_pressed) OnObjectSelection(elements[i], drawing_selected);
                 if (little_button_pressed) OnDeleteIDsFromSet(new HashSet<ListElement>() {elements[i]});
             }   
+
+            EditorGUILayout.Space();
             EditorGUILayout.EndVertical();
         }
-        
+        const string allTagsField = "allTags";
+        const string packsField = "packs";
         AssetObjectPack pack;
-        public void OnEnable (SerializedObject eventPack, AssetObjectPack pack){
+
+        public Dictionary<int, string> id2path;
+        public void OnEnable (SerializedObject eventPack, AssetObjectPack pack, Dictionary<int, string> id2path){
             base.OnEnable(eventPack, pack);
             this.pack = pack;
+            this.id2path = id2path;
             
             SerializedProperty multi_edit_instance = eventPack.FindProperty(AssetObjectEventPack.multi_edit_instance_field);
-            Debug.Log("on list enable");
             
-            Debug.Log(multi_edit_instance);
             multi_edit_instance.FindPropertyRelative(AssetObject.tags_field).ClearArray();
-            MakeAssetObjectInstanceDefault(multi_edit_instance);
+            ReInitializeAssetObjectParameters(multi_edit_instance);
             
             this.dummy_list_element = new DummyListElement(multi_edit_instance, pack.defaultParams);
 
+
+            var all_packs = AssetObjectsManager.instance.packs;
+
             packs_so = new SerializedObject(AssetObjectsManager.instance.packs);
 
-            SerializedProperty packs = packs_so.FindProperty(AssetObjectPacks.packsField);
-            int l = packs.arraySize;
+            int l = all_packs.packs.Length;
+
             for (int i = 0; i < l; i++) {
-                SerializedProperty p = packs.GetArrayElementAtIndex(i);
-                string pack_name = p.FindPropertyRelative(AssetObjectPack.nameField).stringValue;
-                if (pack_name == pack.name) {
-                    all_tags = p.FindPropertyRelative(AssetObjectPack.allTagsField);
+                if (all_packs.packs[i] == pack) {
+                    all_tags = packs_so.FindProperty(packsField).GetArrayElementAtIndex(i).FindPropertyRelative(allTagsField);
                     break;
                 }
-
             }
+
         
             search_keywords.OnEnable(OnSearchKeywordsChange, all_tags);
             tags_gui.OnEnable(OnTagsChanged);          
@@ -281,15 +303,7 @@ namespace AssetObjectsPacks {
             eventPack.ApplyModifiedProperties();
             packs_so.ApplyModifiedProperties();
         }
-        bool HasSearchTags (SerializedProperty tags_prop, int keywords_count) {
-            if (keywords_count == 0) return true;
-            for (int i = 0; i < keywords_count; i++) {
-                if (tags_prop.Contains(search_keywords.keywords[i])) {
-                    return true;
-                }
-            }
-            return false;
-        }
+        
         SearchKeywordsGUI search_keywords = new SearchKeywordsGUI();
         AssetObjectTagsGUI tags_gui = new AssetObjectTagsGUI();
         SerializedProperty[] selected_tags_props;

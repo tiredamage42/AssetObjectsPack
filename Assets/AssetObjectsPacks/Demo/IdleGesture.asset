@@ -1,0 +1,258 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1284b611740a6448d90c4ebacf05b26a, type: 3}
+  m_Name: IdleGesture
+  m_EditorClassIdentifier: 
+  multi_edit_instance:
+    obj_file_path: 
+    object_reference: {fileID: 0}
+    tags: []
+    id: 0
+    parameters:
+    - name: Duration
+      paramType: 1
+      boolValue: 0
+      floatValue: -1
+      intValue: 0
+    - name: Looped
+      paramType: 0
+      boolValue: 0
+      floatValue: 0
+      intValue: 0
+    - name: Speed
+      paramType: 1
+      boolValue: 0
+      floatValue: 1
+      intValue: 0
+    - name: Transition Time
+      paramType: 1
+      boolValue: 0
+      floatValue: 0.25
+      intValue: 0
+    - name: Mirror
+      paramType: 2
+      boolValue: 0
+      floatValue: 0
+      intValue: 0
+  hidden_ids: 
+  assetObjects:
+  - obj_file_path: Gestures/@ID-2963-Looking(LP)(LookingAtSomethingAndShadingEyes).fbx
+    object_reference: {fileID: 7400000, guid: b2e8746fade3745be8d528970e845620, type: 3}
+    tags: []
+    id: 2963
+    parameters:
+    - name: Duration
+      paramType: 1
+      boolValue: 0
+      floatValue: -1
+      intValue: 0
+    - name: Looped
+      paramType: 0
+      boolValue: 0
+      floatValue: 0
+      intValue: 0
+    - name: Speed
+      paramType: 1
+      boolValue: 0
+      floatValue: 1
+      intValue: 0
+    - name: Transition Time
+      paramType: 1
+      boolValue: 0
+      floatValue: 0.25
+      intValue: 0
+    - name: Mirror
+      paramType: 2
+      boolValue: 0
+      floatValue: 0
+      intValue: 0
+  - obj_file_path: Gestures/@ID-3583-QuickInformalBow(LP)(QuickInformalBow).fbx
+    object_reference: {fileID: 7400000, guid: 03906d2cbd821451a9efe0231c8e6bae, type: 3}
+    tags: []
+    id: 3583
+    parameters:
+    - name: Duration
+      paramType: 1
+      boolValue: 0
+      floatValue: -1
+      intValue: 0
+    - name: Looped
+      paramType: 0
+      boolValue: 0
+      floatValue: 0
+      intValue: 0
+    - name: Speed
+      paramType: 1
+      boolValue: 0
+      floatValue: 1
+      intValue: 0
+    - name: Transition Time
+      paramType: 1
+      boolValue: 0
+      floatValue: 0.25
+      intValue: 0
+    - name: Mirror
+      paramType: 2
+      boolValue: 0
+      floatValue: 0
+      intValue: 0
+  - obj_file_path: Gestures/@ID-1590-Agreeing(LP)(AgreeingYes).fbx
+    object_reference: {fileID: 7400000, guid: 9904c4ece4d3c45449c69c391e236717, type: 3}
+    tags: []
+    id: 1590
+    parameters:
+    - name: Duration
+      paramType: 1
+      boolValue: 0
+      floatValue: -1
+      intValue: 0
+    - name: Looped
+      paramType: 0
+      boolValue: 0
+      floatValue: 0
+      intValue: 0
+    - name: Speed
+      paramType: 1
+      boolValue: 0
+      floatValue: 1
+      intValue: 0
+    - name: Transition Time
+      paramType: 1
+      boolValue: 0
+      floatValue: 0.25
+      intValue: 0
+    - name: Mirror
+      paramType: 2
+      boolValue: 0
+      floatValue: 0
+      intValue: 0
+  - obj_file_path: Packs/@ID-0461-Idle(LP)(ActionAdventurePack)(LookingOverBothShoulders).fbx
+    object_reference: {fileID: 7400002, guid: 4307ea520d221413dabfc37dd8f14ae5, type: 3}
+    tags: []
+    id: 461
+    parameters:
+    - name: Duration
+      paramType: 1
+      boolValue: 0
+      floatValue: -1
+      intValue: 0
+    - name: Looped
+      paramType: 0
+      boolValue: 0
+      floatValue: 0
+      intValue: 0
+    - name: Speed
+      paramType: 1
+      boolValue: 0
+      floatValue: 1
+      intValue: 0
+    - name: Transition Time
+      paramType: 1
+      boolValue: 0
+      floatValue: 0.25
+      intValue: 0
+    - name: Mirror
+      paramType: 2
+      boolValue: 0
+      floatValue: 0
+      intValue: 0
+  - obj_file_path: Turning/@ID-1480-LeftTurn(LP)(StandingLeftTurn).fbx
+    object_reference: {fileID: 7400000, guid: 81163667f980e4322b13e6cc7ee8c4a5, type: 3}
+    tags: []
+    id: 1480
+    parameters:
+    - name: Duration
+      paramType: 1
+      boolValue: 0
+      floatValue: -1
+      intValue: 0
+    - name: Looped
+      paramType: 0
+      boolValue: 0
+      floatValue: 0
+      intValue: 0
+    - name: Speed
+      paramType: 1
+      boolValue: 0
+      floatValue: 1
+      intValue: 0
+    - name: Transition Time
+      paramType: 1
+      boolValue: 0
+      floatValue: 0.25
+      intValue: 0
+    - name: Mirror
+      paramType: 2
+      boolValue: 0
+      floatValue: 0
+      intValue: 0
+  - obj_file_path: Turning/@ID-2894-LeftTurn(LP)(StandingLeftTurn).fbx
+    object_reference: {fileID: 7400000, guid: c21e7322a16b7479a9e714f19547579b, type: 3}
+    tags: []
+    id: 2894
+    parameters:
+    - name: Duration
+      paramType: 1
+      boolValue: 0
+      floatValue: -1
+      intValue: 0
+    - name: Looped
+      paramType: 0
+      boolValue: 0
+      floatValue: 0
+      intValue: 0
+    - name: Speed
+      paramType: 1
+      boolValue: 0
+      floatValue: 1
+      intValue: 0
+    - name: Transition Time
+      paramType: 1
+      boolValue: 0
+      floatValue: 0.25
+      intValue: 0
+    - name: Mirror
+      paramType: 2
+      boolValue: 0
+      floatValue: 0
+      intValue: 0
+  - obj_file_path: Grenade/@ID-1269-GrenadeThrow(LP)(ThrowingAGrenadeWhileKneelingPullingPinWithTeeth)(ThrowDistance-0).fbx
+    object_reference: {fileID: 7400002, guid: b92864955e6704960aab7f8fea79a5e1, type: 3}
+    tags: []
+    id: 1269
+    parameters:
+    - name: Duration
+      paramType: 1
+      boolValue: 0
+      floatValue: -1
+      intValue: 0
+    - name: Looped
+      paramType: 0
+      boolValue: 0
+      floatValue: 0
+      intValue: 0
+    - name: Speed
+      paramType: 1
+      boolValue: 0
+      floatValue: 1
+      intValue: 0
+    - name: Transition Time
+      paramType: 1
+      boolValue: 0
+      floatValue: 0.25
+      intValue: 0
+    - name: Mirror
+      paramType: 2
+      boolValue: 0
+      floatValue: 0
+      intValue: 0
+  assetObjectPackID: 1

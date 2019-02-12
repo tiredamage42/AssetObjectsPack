@@ -3,11 +3,13 @@ using UnityEngine;
 using UnityEditor;
 namespace AssetObjectsPacks {
     public abstract class ListViewElement {
-        public string full_name, file_path;
+        public string fullName, file_path;
+
+
         public GUIContent label_gui;
         public int object_id;
-        protected void Initialize(string file_path, string full_name, GUIContent label_gui, int object_id) 
-        => (this.file_path, this.full_name, this.label_gui, this.object_id) = (file_path, full_name, label_gui, object_id);
+        protected void Initialize(string file_path, string fullName, GUIContent label_gui, int object_id) 
+        => (this.file_path, this.fullName, this.label_gui, this.object_id) = (file_path, fullName, label_gui, object_id);
     }
     public abstract class SelectionView<L> where L : ListViewElement {
         protected List<L> elements = new List<L>();
@@ -22,6 +24,7 @@ namespace AssetObjectsPacks {
             this.pack = pack;
             this.eventPack = eventPack;
             this.ao_list = eventPack.FindProperty(AssetObjectEventPack.asset_objs_field);
+            UpdateParameters();
         }
 
         void ClearSelections(){
@@ -67,10 +70,10 @@ namespace AssetObjectsPacks {
             SerializedProperty inst = ao_list.AddNewElement();
             inst.FindPropertyRelative(AssetObject.id_field).intValue = obj_id;
             inst.FindPropertyRelative(AssetObject.obj_ref_field).objectReferenceValue = obj_ref;
-            inst.FindPropertyRelative(AssetObject.obj_file_path_field).stringValue = file_path;
+            //inst.FindPropertyRelative(AssetObject.obj_file_path_field).stringValue = file_path;
             if (make_default) {
                 inst.FindPropertyRelative(AssetObject.tags_field).ClearArray();
-                MakeAssetObjectInstanceDefault(inst);
+                ReInitializeAssetObjectParameters(inst);
             }
         } 
 
@@ -240,25 +243,187 @@ namespace AssetObjectsPacks {
             RebuildPreviewEditor();        
         }
 
-        protected void MakeAssetObjectInstanceDefault(SerializedProperty inst) {
-            //inst.FindPropertyRelative(AssetObject.base_params[0]).floatValue = -1;
-            //inst.FindPropertyRelative(AssetObject.base_params[1]).boolValue = false;
+        void CopyParameter(SerializedProperty orig, SerializedProperty to_copy) {
+            orig.FindPropertyRelative(AssetObjectParam.name_field).CopyProperty(to_copy.FindPropertyRelative(AssetObjectParam.name_field));
+            orig.FindPropertyRelative(AssetObjectParam.param_type_field).CopyProperty(to_copy.FindPropertyRelative(AssetObjectParam.param_type_field));
+            orig.FindPropertyRelative(AssetObjectParam.bool_val_field).CopyProperty(to_copy.FindPropertyRelative(AssetObjectParam.bool_val_field));
+            orig.FindPropertyRelative(AssetObjectParam.float_val_field).CopyProperty(to_copy.FindPropertyRelative(AssetObjectParam.float_val_field));
+            orig.FindPropertyRelative(AssetObjectParam.int_val_field).CopyProperty(to_copy.FindPropertyRelative(AssetObjectParam.int_val_field));
+             
+        }
+        void CopyParameter (SerializedProperty orig, AssetObjectParam to_copy) {
+            orig.FindPropertyRelative(AssetObjectParam.name_field).stringValue = to_copy.name;
+            orig.FindPropertyRelative(AssetObjectParam.param_type_field).enumValueIndex = (int)to_copy.paramType;
+            orig.FindPropertyRelative(AssetObjectParam.bool_val_field).boolValue = to_copy.boolValue;
+            orig.FindPropertyRelative(AssetObjectParam.float_val_field).floatValue = to_copy.floatValue;
+            orig.FindPropertyRelative(AssetObjectParam.int_val_field).intValue = to_copy.intValue;
+        }
 
 
-            SerializedProperty params_list = inst.FindPropertyRelative(AssetObject.params_field);
-            params_list.ClearArray();
-            
-            AssetObjectParamDef[] defs = pack.defaultParams;
-            //int l = pack.defaultParameters.Length;
-            int l = defs.Length;
-            
-            for (int i = 0; i < l; i++) {                
-                //AssetObjectParam def_param = pack.defaultParameters[i].parameter;
-                AssetObjectParam def_param = defs[i].parameter;
                 
+
+
+        void UpdateParameters () {
+            int c = ao_list.arraySize;
+            for (int i = 0; i < c; i++) {
+                UpdateParametersOnAssetObjectIfNeccessary(ao_list.GetArrayElementAtIndex(i));
+            }
+
+
+
+        }
+
+        void UpdateParametersOnAssetObjectIfNeccessary (SerializedProperty inst) {
+            SerializedProperty params_list = inst.FindPropertyRelative(AssetObject.params_field);
+            AssetObjectParamDef[] defs = pack.defaultParams;
+
+
+            int c_p = params_list.arraySize;
+            int c_d = defs.Length;
+
+            //check for parameters to delete
+            List<int> indicies_to_delete = new List<int>();
+            for (int i = 0; i < c_p; i++) {
+                SerializedProperty p = params_list.GetArrayElementAtIndex(i);
+                string param_name = p.FindPropertyRelative(AssetObjectParam.name_field).stringValue;
+
+                bool is_in_default_params = false;
+                for (int d = 0; d < c_d; d++) {
+                    if (defs[d].parameter.name == param_name) {
+                        is_in_default_params = true;
+                        break;
+                    }
+                }
+                if (!is_in_default_params) {
+                    indicies_to_delete.Add(i);
+                }
+            }
+            if (indicies_to_delete.Count != 0) {
+
+                Debug.Log("Deleteing params: " + indicies_to_delete.Count);
+            }
+
+            for (int i = indicies_to_delete.Count -1; i >= 0; i--) {
+                params_list.DeleteArrayElementAtIndex(i);
+            }
+
+            //check for parameters that need adding
+
+            for (int i = 0; i < c_d; i++) {
+                AssetObjectParam def_param = defs[i].parameter;
+                string name_check = def_param.name;
+                
+                bool is_in_params = false;
+                for (int p = 0; p < c_p; p++) {
+                    SerializedProperty para = params_list.GetArrayElementAtIndex(i);
+                    string param_name = para.FindPropertyRelative(AssetObjectParam.name_field).stringValue;
+                    if (name_check == param_name) {
+                        is_in_params = true;
+                        break;
+                    }
+                }
+
+                
+                if (!is_in_params) {
+
+                    Debug.Log("Adding Param: " + def_param.name);
+
                 SerializedProperty new_param = params_list.AddNewElement();
                 new_param.FindPropertyRelative(AssetObjectParam.name_field).stringValue = def_param.name;
                 new_param.FindPropertyRelative(AssetObjectParam.param_type_field).enumValueIndex = (int)def_param.paramType;
+                new_param.FindPropertyRelative(AssetObjectParam.bool_val_field).boolValue = def_param.boolValue;
+                new_param.FindPropertyRelative(AssetObjectParam.float_val_field).floatValue = def_param.floatValue;
+                new_param.FindPropertyRelative(AssetObjectParam.int_val_field).intValue = def_param.intValue;
+                }
+            }
+
+
+            //reorder to same order
+
+
+            //make extra temp parameeter
+            SerializedProperty temp = params_list.AddNewElement();
+
+            for (int d = 0; d < c_d; d++) {
+                AssetObjectParam def_param = defs[d].parameter;
+                string name_check = def_param.name;
+                
+                SerializedProperty current_param = params_list.GetArrayElementAtIndex(d);
+                string param_name = current_param.FindPropertyRelative(AssetObjectParam.name_field).stringValue;
+
+                if (param_name == name_check) continue;
+
+
+                SerializedProperty real_param = null;
+
+                for (int p = d + 1; p < c_p; p++) {
+
+                    SerializedProperty pa = params_list.GetArrayElementAtIndex(d);
+                    string p_name = pa.FindPropertyRelative(AssetObjectParam.name_field).stringValue;
+                    if (p_name == name_check) {
+                        real_param = pa;
+                        break;
+
+                    }
+                }
+
+                //put the current one in temp
+                CopyParameter(temp, current_param);
+
+                //place the real param in the current
+                CopyParameter(current_param, real_param);
+
+                //place temp in old param that was moved
+                CopyParameter(real_param, temp);
+            }
+
+            //delete temp parameter
+            params_list.DeleteArrayElementAtIndex(params_list.arraySize-1);
+
+            //check type changes
+
+
+            for (int i = 0; i < c_d; i++) {
+                AssetObjectParam def_param = defs[i].parameter;
+
+                SerializedProperty current_param = params_list.GetArrayElementAtIndex(i);
+
+                if (current_param.FindPropertyRelative(AssetObjectParam.param_type_field).enumValueIndex != (int)def_param.paramType) {
+                    string param_name = current_param.FindPropertyRelative(AssetObjectParam.name_field).stringValue;
+
+                    Debug.Log("chaging type " + param_name);
+                    CopyParameter(current_param, def_param);
+                }
+                
+            }
+
+        }
+
+        protected static readonly GUIContent import_settings_gui = new GUIContent("Import Settings");
+        
+
+
+        protected void OpenImportSettings () {
+
+            List<Object> objs = new List<Object>(selected_elements.Count);
+            foreach (var el in selected_elements) {
+                objs.Add(AssetDatabase.LoadAssetAtPath(pack.objectsDirectory + el.file_path, typeof(Object)));
+            }
+            Animations.EditImportSettings.CreateWizard(objs.ToArray());
+        }
+
+        protected void ReInitializeAssetObjectParameters(SerializedProperty inst) {
+            SerializedProperty params_list = inst.FindPropertyRelative(AssetObject.params_field);
+            params_list.ClearArray();
+            AssetObjectParamDef[] defs = pack.defaultParams;
+            int l = defs.Length;            
+            for (int i = 0; i < l; i++) {                
+                AssetObjectParam def_param = defs[i].parameter;
+                SerializedProperty new_param = params_list.AddNewElement();
+                new_param.FindPropertyRelative(AssetObjectParam.name_field).stringValue = def_param.name;
+
+                new_param.FindPropertyRelative(AssetObjectParam.param_type_field).enumValueIndex = (int)def_param.paramType;
+                
                 new_param.FindPropertyRelative(AssetObjectParam.bool_val_field).boolValue = def_param.boolValue;
                 new_param.FindPropertyRelative(AssetObjectParam.float_val_field).floatValue = def_param.floatValue;
                 new_param.FindPropertyRelative(AssetObjectParam.int_val_field).intValue = def_param.intValue;
@@ -278,17 +443,23 @@ namespace AssetObjectsPacks {
             return false;
         }
 
-        Object GetObjectRefForElement(L e) {
-            Object[] all_objects = EditorUtils.GetAssetsAtPath(pack.objectsDirectory + e.file_path, pack.assetType);    
-            // fbx files have extra "preview" clip that was getting in the awy (mixamo)
-            // need to use the last one
-            Object o = all_objects[0];// e.file_path.EndsWith(".fbx") ? all_objects.Last() : all_objects[0];
-
-            if (o.name.Contains("__preview__")) {
-                Debug.LogError("Getting preview");
+            
+        // fbx files have extra "preview" clip that was getting in the awy (mixamo)
+        Object FilterOutPreview (Object[] all_objects) {
+            int l = all_objects.Length;
+            for (int i = 0; i < l; i++) {
+                Object o = all_objects[i];
+                if (!o.name.Contains("__preview__")) {
+                    return o;
+                }
             }
-            return o;
-             
+
+            return null;
+
+        }
+
+        Object GetObjectRefForElement(L e) {
+            return FilterOutPreview(EditorUtils.GetAssetsAtPath(pack.objectsDirectory + e.file_path, pack.assetType));  
         }
         void RebuildPreviewEditor () {
             if (preview != null) Editor.DestroyImmediate(preview);

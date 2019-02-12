@@ -6,21 +6,12 @@ Mixamo Auto Download Instuctions:
 
     1.  go to mixamo.com and log in 
     
-    2.  for the avatar defenition download the ybot character
-        import the downloaded model to the same directory as this read me, (in Unity)
-        
-            Assets/AssetObjectsPacks/AnimationsDownload/
-
-        (you can move it after the animations are imported)
+    2.  for the avatar defenition download the ybot character and import it into Unity
         make sure to set the rig on the model as humanoid
 
         NOTE:
             if for some reason you want to change the default avatar defenition for the animations
-            remember to change the name in:
-
-                Assets/AssetObjectsPacks/AnimationsDownload/Editor/AnimationsDownloadUtils.cs
-                
-            in the javascript file, change the character const near the top of the file.
+            remember to change the name in the javascript file, change the character const near the top of the file.
             to get the new id, download an animation with the new character. 
             the id should show up in the network tab
 
@@ -30,7 +21,7 @@ Mixamo Auto Download Instuctions:
 
     5.  press enter and wait, (it will take a while, there are over 7,000 animations with all the variations)
 
-    6.  when the downloads are done, open the command line and cd into the download directory
+    6.  when the downloads are done, open the command line (or terminal) and cd into the download directory
 
     7.  copy and paste the following into the command line to rename all the files:
          
@@ -40,11 +31,7 @@ Mixamo Auto Download Instuctions:
         (normally the asset object event editor will do this automatically, 
         but it's faster for the command line to rename all these animations)
 
-    8.  when the downloads are done being renamed import them into:
+    8.  when the downloads are done being renamed import them into Unity.
     
-            Assets/AssetObjectsPacks/Packs/Animations/AssetObjects/
-
         importing might take a while as well (it's best to do this in batches)
-        they'll automatically be set to humanoid,
-        with an avatar defenition from the imported model from step 2
     

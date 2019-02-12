@@ -1,0 +1,168 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1284b611740a6448d90c4ebacf05b26a, type: 3}
+  m_Name: IdleLoop
+  m_EditorClassIdentifier: 
+  multi_edit_instance:
+    obj_file_path: 
+    object_reference: {fileID: 0}
+    tags: []
+    id: 0
+    parameters:
+    - name: Duration
+      paramType: 1
+      boolValue: 0
+      floatValue: -1
+      intValue: 0
+    - name: Looped
+      paramType: 0
+      boolValue: 0
+      floatValue: 0
+      intValue: 0
+    - name: Speed
+      paramType: 1
+      boolValue: 0
+      floatValue: 1
+      intValue: 0
+    - name: Transition Time
+      paramType: 1
+      boolValue: 0
+      floatValue: 0.25
+      intValue: 0
+    - name: Mirror
+      paramType: 2
+      boolValue: 0
+      floatValue: 0
+      intValue: 0
+  hidden_ids: 
+  assetObjects:
+  - obj_file_path: Idle/@ID-4947-Idle(LP)(StandingShortIdle).fbx
+    object_reference: {fileID: 7400000, guid: 4ecfa3262bfb5433fbb808a405fed9f4, type: 3}
+    tags: []
+    id: 4947
+    parameters:
+    - name: Duration
+      paramType: 1
+      boolValue: 0
+      floatValue: 5
+      intValue: 0
+    - name: Looped
+      paramType: 0
+      boolValue: 1
+      floatValue: 0
+      intValue: 0
+    - name: Speed
+      paramType: 1
+      boolValue: 0
+      floatValue: 1
+      intValue: 0
+    - name: Transition Time
+      paramType: 1
+      boolValue: 0
+      floatValue: 2
+      intValue: 0
+    - name: Mirror
+      paramType: 2
+      boolValue: 0
+      floatValue: 0
+      intValue: 0
+  - obj_file_path: Idle/@ID-5281-StandingIdle(StandingIdle).fbx
+    object_reference: {fileID: 7400000, guid: 9abd854d622ad442294881c993e0b1f8, type: 3}
+    tags: []
+    id: 5281
+    parameters:
+    - name: Duration
+      paramType: 1
+      boolValue: 0
+      floatValue: 5
+      intValue: 0
+    - name: Looped
+      paramType: 0
+      boolValue: 1
+      floatValue: 0
+      intValue: 0
+    - name: Speed
+      paramType: 1
+      boolValue: 0
+      floatValue: 1
+      intValue: 0
+    - name: Transition Time
+      paramType: 1
+      boolValue: 0
+      floatValue: 2
+      intValue: 0
+    - name: Mirror
+      paramType: 2
+      boolValue: 0
+      floatValue: 0
+      intValue: 0
+  - obj_file_path: Idle/@ID-4734-Kneeling(LP)(KneelingOnOneKneeIdle).fbx
+    object_reference: {fileID: 7400000, guid: 21be9dd6dbca546868a5fd0af08731ce, type: 3}
+    tags: []
+    id: 4734
+    parameters:
+    - name: Duration
+      paramType: 1
+      boolValue: 0
+      floatValue: 5
+      intValue: 0
+    - name: Looped
+      paramType: 0
+      boolValue: 1
+      floatValue: 0
+      intValue: 0
+    - name: Speed
+      paramType: 1
+      boolValue: 0
+      floatValue: 1
+      intValue: 0
+    - name: Transition Time
+      paramType: 1
+      boolValue: 0
+      floatValue: 2
+      intValue: 0
+    - name: Mirror
+      paramType: 2
+      boolValue: 0
+      floatValue: 0
+      intValue: 0
+  - obj_file_path: Evades/@ID-1476-Jumping(LP)(JumpingFromActionIdle).fbx
+    object_reference: {fileID: 7400000, guid: 9de94bb319bd84d269f311708325ea6e, type: 3}
+    tags: []
+    id: 1476
+    parameters:
+    - name: Duration
+      paramType: 1
+      boolValue: 0
+      floatValue: 5
+      intValue: 0
+    - name: Looped
+      paramType: 0
+      boolValue: 1
+      floatValue: 0
+      intValue: 0
+    - name: Speed
+      paramType: 1
+      boolValue: 0
+      floatValue: 1
+      intValue: 0
+    - name: Transition Time
+      paramType: 1
+      boolValue: 0
+      floatValue: 1
+      intValue: 0
+    - name: Mirror
+      paramType: 2
+      boolValue: 0
+      floatValue: 0
+      intValue: 0
+  assetObjectPackID: 1

@@ -10,9 +10,9 @@ using UnityEditor;
 
 namespace AssetObjectsPacks {
     public static class EditorColors {
-        public static readonly Color32 red_color = new Color32(255,0,0,255);
-        public static readonly Color32 blue_color = new Color32(100,100,225,255);
-        public static readonly Color32 green_color = new Color32(0,255,0,255);
+        public static readonly Color32 red_color = new Color32(225,25,25,255);
+        public static readonly Color32 blue_color = new Color32(100,125,225,255);
+        public static readonly Color32 green_color = new Color32(38,178,56,255);
         public static readonly Color32 clear_color = new Color32(0,0,0,0);
         public static readonly Color32 white_color = new Color32(255,255,255,255);
         public static readonly Color32 selected_color = blue_color;

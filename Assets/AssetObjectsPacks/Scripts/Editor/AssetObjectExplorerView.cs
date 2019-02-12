@@ -5,8 +5,8 @@ namespace AssetObjectsPacks {
     
 
     public class ExplorerWindowElement : ListViewElement {
-        public ExplorerWindowElement(string file_path, string full_name, GUIContent label_gui) : this(file_path, full_name, label_gui, -1){}
-        public ExplorerWindowElement(string file_path, string full_name, GUIContent label_gui, int object_id) => (this.file_path, this.full_name, this.label_gui, this.object_id) = (file_path, full_name, label_gui, object_id);
+        public ExplorerWindowElement(string file_path, string fullName, GUIContent label_gui) : this(file_path, fullName, label_gui, -1){}
+        public ExplorerWindowElement(string file_path, string fullName, GUIContent label_gui, int object_id) => (this.file_path, this.fullName, this.label_gui, this.object_id) = (file_path, fullName, label_gui, object_id);
     }
     public class AssetObjectExplorerView : SelectionView<ExplorerWindowElement>
     {
@@ -21,13 +21,14 @@ namespace AssetObjectsPacks {
         static readonly GUIContent add_to_cue_gui = new GUIContent("", "Add To Set");
         static readonly GUIContent hide_gui = new GUIContent("", "Hide");
         static readonly GUIContent unhide_gui = new GUIContent("", "Unhide");
+
+        
         const string hidden_suffix = " [HIDDEN]";
 
         public void OnEnable (SerializedObject eventPack, AssetObjectPack pack, string[] all_file_paths) {
             base.OnEnable(eventPack, pack);
             hidden_ids_prop = eventPack.FindProperty(AssetObjectEventPack.hidden_ids_field);
 
-            Debug.Log(hidden_ids_prop);
             InitializeHiddenIDs();
             ReinitializePaths(all_file_paths);
         }
@@ -77,7 +78,7 @@ namespace AssetObjectsPacks {
                         if (selected_elements.Count == 1) {
 
                             foreach (var s in selected_elements) {
-                                MoveExplorer(current_path + s.full_name + "/", 1);
+                                MoveExplorer(current_path + s.fullName + "/", 1);
                                 break;
                             }
                         }
@@ -139,7 +140,7 @@ namespace AssetObjectsPacks {
                 int object_id = elements[i].object_id;
                     
                 if (object_id == -1) {
-                    if (GUIUtils.ScrollWindowElement (elements[i].label_gui, drawing_selected, false, true)) MoveExplorer(current_path + elements[i].full_name + "/", 1);
+                    if (GUIUtils.ScrollWindowElement (elements[i].label_gui, drawing_selected, false, true)) MoveExplorer(current_path + elements[i].fullName + "/", 1);
                 }
                 else {
                     bool is_hidden = false; 
@@ -189,24 +190,43 @@ namespace AssetObjectsPacks {
 
             GUILayout.FlexibleSpace();
             GUIStyle s = EditorStyles.miniButton;
-            if (selected_elements.Count != 0) {
+            
 
-                if (!SelectionHasDirectories()) {
+
+            GUI.enabled = selected_elements.Count != 0;
+            if (GUI.enabled) {
+                GUI.enabled = !SelectionHasDirectories();
+            }
+            //if (selected_elements.Count != 0) {
+
+                //if (!SelectionHasDirectories()) {
                     if (GUILayout.Button(add_selected_gui, s, add_selected_gui.CalcWidth())) {
                         AddSelectionsToSet();
                     }
-                    bool hidden_status;
-                    if (ElementsAreAlltheSameHiddenStatus(selected_elements, out hidden_status)) {
+
+                    if (GUILayout.Button(import_settings_gui, s, import_settings_gui.CalcWidth())) {
+                        OpenImportSettings();
+                    }
+
+
+
+                    bool hidden_status = false;
+                    if (GUI.enabled) {
+                        GUI.enabled = ElementsAreAlltheSameHiddenStatus(selected_elements, out hidden_status);
+                    }
+                    //if (ElementsAreAlltheSameHiddenStatus(selected_elements, out hidden_status)) {
                         GUIContent hide_content = new GUIContent( hidden_status ? "Unhide Selected" : "Hide Selected");
                         if (GUILayout.Button(hide_content,  EditorStyles.miniButtonMid, hide_content.CalcWidth())){
                             ToggleHiddenSelected(selected_elements, hidden_status, false);
                         }
-                    }
-                }
+                    //}
+                //}
 
-            }
+            //}
 
-            if (hidden_ids.Count != 0) {
+
+            GUI.enabled = hidden_ids.Count != 0;
+            //if (hidden_ids.Count != 0) {
                 Color32 orig_bg = GUI.backgroundColor;
                 if (show_hidden) GUI.backgroundColor = EditorColors.selected_color;
                 if (GUILayout.Button(show_hidden_gui, s, show_hidden_gui.CalcWidth())){
@@ -219,7 +239,8 @@ namespace AssetObjectsPacks {
                     hidden_ids.Clear();
                     ClearSelectionsAndRebuild();                
                 }
-            }
+            //}
+            GUI.enabled = true;
             
             EditorGUILayout.EndHorizontal();
         }
@@ -257,8 +278,7 @@ namespace AssetObjectsPacks {
             int last_dir_index = 0;
             int c = all_asset_objects.Length;
 
-            EditorUtils.StartTimer();
-
+            
             List<ExplorerWindowElement> first_l = new List<ExplorerWindowElement>();
             
             for (int i = 0; i < c; i++) {
@@ -266,7 +286,7 @@ namespace AssetObjectsPacks {
                 ExplorerWindowElement ao = all_asset_objects[i];
 
                 if (!current_path.IsEmpty()) {
-                    if (!ao.full_name.StartsWith(current_path)) continue;
+                    if (!ao.fullName.StartsWith(current_path)) continue;
                 }
 
                 if (ids_in_set.Contains(ao.object_id)) continue;
@@ -275,10 +295,10 @@ namespace AssetObjectsPacks {
                     if (hidden_ids.Contains(ao.object_id)) continue;
                 }
                 
-                string name_display = ao.full_name;
+                string name_display = ao.fullName;
                 bool has_directory = name_display.Contains("/");
                 if (has_directory) {
-                    name_display = ao.full_name.Split('/')[window_offset];
+                    name_display = ao.fullName.Split('/')[window_offset];
                     if (used_dir_names.Contains(name_display)) continue;
                     used_dir_names.Add(name_display);
                 }                
@@ -291,7 +311,6 @@ namespace AssetObjectsPacks {
                     first_l.Add(new ExplorerWindowElement(ao.file_path, name_display, ao.label_gui, ao.object_id));
                 } 
             } 
-            EditorUtils.PrintTimer("end build");
 
             PaginateElements(first_l, max_elements_per_page);
 

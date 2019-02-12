@@ -1,19 +1,11 @@
-﻿
-
-
-
-//using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
-using System.IO;
 namespace AssetObjectsPacks {
     public static class AssetObjectsEditor 
     {
         
-
         public const string asset_object_key = "@ID-";  
-        //public const string asset_objects_packs_root_directory = "Assets/AssetObjectsPacks/";
         const string back_slash = "/", dash = "-";
         const char back_slash_c = '/', dash_c = '-', dot_c = '.', comma_c = ',';    
 
@@ -23,12 +15,9 @@ namespace AssetObjectsPacks {
         public static string[] GetAllAssetObjectPaths (string directory, string file_extensions, bool include_dir, out string[] without_ids) {    
             without_ids = EditorUtils.GetFilePathsInDirectory(directory, true, file_extensions, asset_object_key, false);
             string[] paths = EditorUtils.GetFilePathsInDirectory(directory, include_dir, file_extensions, asset_object_key, true);
-            //for (int i = 0; i < 10;i++) {
-            //    Debug.Log(paths[i]);
-            //}
             return paths;
-        
         }
+        
         public static string[] GetAllAssetObjectPaths (string directory, string file_extensions, bool include_dir, out string[] without_ids, out Dictionary<int, string> id2file) {
             string[] f_paths = GetAllAssetObjectPaths(directory, file_extensions, include_dir, out without_ids);
             
@@ -106,8 +95,6 @@ namespace AssetObjectsPacks {
             for (int i = 0; i < l; i++) {
                 string asset_path = paths_without_ids[i];
 
-                Debug.Log(asset_path);
-
                 string orig_name = asset_path;
                 if (orig_name.Contains("/")) {
                     orig_name = EditorUtils.RemoveDirectory(asset_path);
@@ -120,7 +107,7 @@ namespace AssetObjectsPacks {
                 string new_name = asset_object_key + new_ids[i] + "-" + orig_name;                
                 AssetDatabase.RenameAsset(asset_path, new_name);
             }
-            Debug.Log("Animations are now ready to be added to the corpus directory");
+            Debug.Log("Assets are now ready with unique IDs");
         }
 
 

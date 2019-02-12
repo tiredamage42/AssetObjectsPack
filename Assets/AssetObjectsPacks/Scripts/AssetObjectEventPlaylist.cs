@@ -24,13 +24,8 @@ namespace AssetObjectsPacks {
                 
                 if (_channels == null || _channels.Length == 0) {
 
-                    int l = transform.childCount;
+                    _channels = new Channel[0].GenerateArray(i => { return new Channel(transform.GetChild(i)); } , transform.childCount);
 
-                    _channels = new Channel[l];
-
-                    for (int i = 0; i < l; i++) {
-                        _channels[i] = new Channel(transform.GetChild(i));
-                    }
                     //_channels = GetComponentsInChildren<AssetObjectEventPlaylistChannel>();
                 }
                 return _channels;
@@ -91,9 +86,8 @@ namespace AssetObjectsPacks {
             public class PerformanceEvent {
                 Vector3 initial_player_position;
                 Quaternion initial_player_rotation;
-                float smooth_l0, smooth_l1, smooth_l0v, smooth_l1v;//, duration_timer;
+                float smooth_l0, smooth_l1, smooth_l0v, smooth_l1v;
                 public bool event_ready, event_active, event_playing;
-                //AssetObjectEventPlayer player;
                 void CheckReadyTransform (AssetObjectEventPlayer player, Transform runtime_interest_transform, AssetObjectEvent ao_event) {
                     if (event_ready) 
                         return;
@@ -136,7 +130,7 @@ namespace AssetObjectsPacks {
                 }
 
                 public void Play (AssetObjectEventPlayer player, Transform runtime_interest_transform, AssetObjectEvent ao_event) {
-                    Debug.Log("playing evnt!" + ao_event.name);
+                    //Debug.Log("playing evnt!" + ao_event.name);
                     event_playing = true;
                     if (ao_event.playlist != null) {
                         ao_event.playlist.InitializePerformance(new List<AssetObjectEventPlayer>() {player}, runtime_interest_transform.position, runtime_interest_transform.rotation, OnPlaylistEnd);
@@ -153,6 +147,7 @@ namespace AssetObjectsPacks {
                 }
 
                 void OnEventEnd () {
+                    Debug.Log("on event end");
                     Deactivate();
                 }
 
@@ -167,13 +162,7 @@ namespace AssetObjectsPacks {
                     CheckReadyTransform(player, runtime_interest_transform, ao_event);
                     if (!event_ready)
                         return;
-                    //this.player = player;
-                    //if (event_active) {
-                        //update behaviors
-                        //for (int i = 0; i < ao_event.behaviors.Length; i++) {
-                        //    ((AnimationEventBehavior)ao_event.behaviors[i]).UpdateBehavior(this, player);
-                        //}
-                    //}
+                    
                 }
             }
 

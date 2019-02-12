@@ -34,34 +34,20 @@ namespace AssetObjectsPacks {
 
     [System.Serializable] public class AssetObject {
         #if UNITY_EDITOR 
-        public string obj_file_path;
-
-
-
         public static readonly AssetObjectParamDef[] base_def_params = new AssetObjectParamDef[] {
-            new AssetObjectParamDef(new AssetObjectParam("Duration", -1), "Nagative values for object duration"),
+            new AssetObjectParamDef(new AssetObjectParam("Duration", -1.0f), "Nagative values for object duration"),
             new AssetObjectParamDef(new AssetObjectParam("Looped", false), ""),
-            
-            //"duration", "looped",
         };
-
-
-        //public const string duration_field = "duration";
         
-        public const string obj_ref_field = "object_reference", tags_field = "tags", obj_file_path_field = "obj_file_path";
-        //public const string id_field = "id", loop_field = "looped", params_field = "parameters";
+        public const string obj_ref_field = "object_reference", tags_field = "tags";
         public const string id_field = "id", params_field = "parameters";
         
         #endif
-
-
         
-        
+
         public Object object_reference;
         public List<string> tags = new List<string>();
         public int id;
-        public bool looped;
-        public float duration = -1; // <= 0 for animation/audio duration
         public List<AssetObjectParam> parameters = new List<AssetObjectParam>();
         Dictionary<string, AssetObjectParam> param_dict = new Dictionary<string, AssetObjectParam>();
 

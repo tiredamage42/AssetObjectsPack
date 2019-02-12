@@ -588,7 +588,6 @@ namespace AssetObjectsPacks {
             if (GUILayout.Button(gui_SearchTags)) {
                 PopupWindow.Show(GUILayoutUtility.GetRect(gui_SearchTags, tag_style), new PopupList(popup_list_data, true, false));
             }
-            GUILayout.FlexibleSpace();
             DrawKeywordsList( );
             EditorGUILayout.EndHorizontal();
         }
