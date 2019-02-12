@@ -1,10 +1,30 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using System;
+using System.Linq;
 namespace AssetObjectsPacks {
 
     public class AssetObjectEventPlayer : MonoBehaviour
     {
+
+        public AssetObjectParam[] playerParams;
+        Dictionary<string, AssetObjectParam> param_dict = new Dictionary<string, AssetObjectParam>();
+
+        void RebuildDictionary () {
+            param_dict.Clear();
+            for (int i = 0; i < playerParams.Length; i++) param_dict.Add(playerParams[i].name, playerParams[i]);
+        }
+        public AssetObjectParam this [string paramName] {
+            get {
+                if (param_dict.Count != playerParams.Length) {
+                    RebuildDictionary();
+                }
+                return param_dict[paramName];
+            }
+        }
+
+
+
         public List<AssetObjectEventPlaylist.Performance> current_playlists = new List<AssetObjectEventPlaylist.Performance>();
         Dictionary<string, Action<AssetObject, Action>> pack2playevent = new Dictionary<string, Action<AssetObject, Action>>();
 
@@ -65,8 +85,14 @@ namespace AssetObjectsPacks {
                 string k = AssetObjectsManager.instance.packs.FindPackByID( ep.assetObjectPackID).name;
 
 
-                List<AssetObject> objs = new List<AssetObject>(ep.assetObjects);
+
+
+                //List<AssetObject> objs = new List<AssetObject>(ep.assetObjects);
+
+                AssetObject[] objs = ep.assetObjects.Where( ao => ao.PassesConditionCheck( playerParams )  ).ToArray();
                 
+
+                /*
 
                 for (int x = 0; x < asset_object_event.behaviors.Length; x++) {
                     AssetObjectEventBehavior b = asset_object_event.behaviors[x];
@@ -74,6 +100,7 @@ namespace AssetObjectsPacks {
                         objs = asset_object_event.behaviors[i].FilterEventAssets(this, objs);
                     }
                 }
+                 */                
 
                 AssetObject o = objs.RandomChoice();
 

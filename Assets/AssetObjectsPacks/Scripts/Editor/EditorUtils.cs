@@ -36,22 +36,26 @@ namespace AssetObjectsPacks {
             List<string> results = new List<string>();
             string[] extensions = file_extenstions.Split(',');
             for (int i = 0; i < extensions.Length; i++) {
-                results.AddRange(Directory.GetFiles(data_path+"/"+dir, "*" + extensions[i], search)
-                .Where(s => s.Contains(valid_file_check) == should_contain)
-                .Select(s => s.Substring(sub_index)));
+                results.AddRange(
+                    Directory.GetFiles(data_path+"/"+dir, "*" + extensions[i], search)
+                    .Where(s => s.Contains(valid_file_check) == should_contain)
+                    .Select(s => s.Substring(sub_index))
+                );
             }
             return results.ToArray();
         }
 
+        
+        // fbx files have extra "preview" clip that was getting in the awy (mixamo)
         public static T GetAssetAtPath<T> (string path) where T : Object {
             Object[] data = AssetDatabase.LoadAllAssetsAtPath(path);
             System.Type t = typeof(T);
             int l = data.Length;
             for (int i = 0; i < l; ++i) {
                 Object d = data[i];
-                if (d.GetType() == t) {
-                    return (T)d;
-                }
+                if (d.name.Contains("__preview__")) continue;
+                if (d.GetType() != t) continue; 
+                return (T)d;
             }
             return null;
         }
@@ -60,21 +64,23 @@ namespace AssetObjectsPacks {
             int l = data.Length;
             for (int i = 0; i < l; ++i) {
                 Object d = data[i];
-                if (d.GetType().ToString() == type_name) {
-                    return d;
-                }
+                if (d.name.Contains("__preview__")) continue;
+                if (d.GetType().ToString() != type_name) continue;
+                return d;
             }
             return null;
         }
+
+
         public static Object[] GetAssetsAtPath (string path, string type_name) {
             List<Object> ret = new List<Object>();
             Object[] data = AssetDatabase.LoadAllAssetsAtPath(path);
             int l = data.Length;
             for (int i = 0; i < l; ++i) {
                 Object d = data[i];
-                if (d.GetType().ToString() == type_name) {
-                    ret.Add(d);
-                }
+                if (d.name.Contains("__preview__")) continue;
+                if (d.GetType().ToString() != type_name) continue;
+                ret.Add(d);
             }
             return ret.ToArray();
         }
@@ -86,9 +92,9 @@ namespace AssetObjectsPacks {
             int l = data.Length;
             for (int i = 0; i < l; ++i) {
                 Object d = data[i];
-                if (d.GetType() == t) {
-                    ret.Add((T)d);
-                }
+                if (d.name.Contains("__preview__")) continue;
+                if (d.GetType() != t) continue;
+                ret.Add((T)d);
             }
             return ret.ToArray();
                 
@@ -98,9 +104,7 @@ namespace AssetObjectsPacks {
 
 
         public static string RemoveDirectory (string full_path) {
-            if (!full_path.Contains(back_slash)) {
-                return full_path;
-            }
+            if (!full_path.Contains(back_slash)) return full_path;
             return full_path.Split(back_slash_c).Last();
         }
          
@@ -123,7 +127,6 @@ namespace AssetObjectsPacks {
         public static bool Contains (this SerializedProperty p, string e, out int at_index) {
             at_index = -1;
             int a = p.arraySize;
-            
             for (int i = 0; i < a; i++) {
                 if (p.GetArrayElementAtIndex(i).stringValue == e) {
                     at_index = i;
@@ -164,9 +167,6 @@ namespace AssetObjectsPacks {
             int i;
             if (p.Contains(e, out i)) p.DeleteArrayElementAtIndex(i);
         }
-        /*
-         */
-
         public static void RemoveRange(this SerializedProperty p, IList<int> l) {
             int c = p.arraySize;
             for (int i = c - 1; i >= 0; i--) {

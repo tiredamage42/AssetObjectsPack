@@ -405,6 +405,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 9500000, guid: db3c4ce77736a40ef936b7e682c830e0, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 16756efd6e64d4273bf01a3864c9a96c, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: db3c4ce77736a40ef936b7e682c830e0, type: 3}
 --- !u!1 &1138660213 stripped
@@ -425,6 +429,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 454298816c10148b5ac260d72fe247d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerParams: []
   duration_timer: 0
   current_duration: 0
   playing_event: 0
@@ -455,8 +460,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stance: 0
-  speed: 0
-  weapon: 0
+  agitated: 0
   idle_scene: {fileID: 6530837759088218314, guid: 278fa254418434f3c99c4e7a048969ea,
     type: 3}
 --- !u!1001 &3463654638496926178

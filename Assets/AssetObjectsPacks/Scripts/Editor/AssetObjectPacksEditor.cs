@@ -42,7 +42,6 @@ namespace AssetObjectsPacks {
         void InitializeTabNames () {
             tabNames = new GUIContent[0].GenerateArray( i => { return new GUIContent(GetPackName(i)); }, packs.arraySize );
         }
-
         public static bool TypeValid(string typeName, int at_index) {
             return typeName.IsValidTypeString();
         }
@@ -59,32 +58,28 @@ namespace AssetObjectsPacks {
             }
             return file_extensions.StartsWith(".");
         }
-        bool PackNameValid(string name, int ignore_index) {
-            for (int i = 0; i < packs.arraySize; i++) {
+
+
+        delegate string GetNameAtIndex(int index);
+
+        bool NameValid (string name, int ignore_index, int count, GetNameAtIndex get_name) {
+            for (int i = 0; i < count; i++) {
                 if (i == ignore_index) continue;
-                if (GetPackName(i) == name) return false;
+                if (get_name(i) == name) return false;
             }
             return true;
         }
-        bool ParamNameValid(string name, int ignore_index) {
-            for (int i = 0; i < curDefParams.arraySize; i++) {
-                if (i == ignore_index) continue;
-                if (GetCurrentDefParamName(i) == name) return false;
-            }
-            return true;
+        bool PackNameValid(string name, int ignore_index=-1) {
+            return NameValid(name, ignore_index, packs.arraySize, GetPackName);
         }
+        bool ParamNameValid(string name, int ignore_index=-1) {
+            return NameValid(name, ignore_index, curDefParams.arraySize, GetCurrentDefParamName);
+        }
+        
 
         void AddNewPack () {
-            string orig_try_name = "New Pack";
+            string new_name = AppendStringToUnique( "New Pack", PackNameValid );
             
-            string new_name = orig_try_name;
-            int trying = 0;
-            while (!PackNameValid(new_name, -1)) {
-                new_name = orig_try_name + " " + trying.ToString();
-                trying ++;
-            }
-
-            int l = packs.arraySize;
             SerializedProperty new_pack = packs.AddNewElement();
             new_pack.FindPropertyRelative(idField).intValue = AssetObjectsEditor.GenerateNewIDList(1, new int[0].GenerateArray( i => { return GetPackID(i); }, packs.arraySize ))[0];  
             new_pack.FindPropertyRelative(nameField).stringValue = new_name;
@@ -109,9 +104,9 @@ namespace AssetObjectsPacks {
 
             EditorGUILayout.BeginHorizontal();
             if (packs.arraySize != 0) {
-                int last_pack = curPackI;
-                curPackI = GUIUtils.Tabs(tabNames, curPackI);
-                if (curPackI != last_pack) OnPackViewChange();
+                bool changed_pack;
+                curPackI = GUIUtils.Tabs(tabNames, curPackI, out changed_pack);
+                if (changed_pack) OnPackViewChange();
             }
 
             if (GUILayout.Button("Add New Pack", EditorStyles.toolbarButton)) {
@@ -172,12 +167,7 @@ namespace AssetObjectsPacks {
             if (!help_text.IsEmpty()) EditorGUILayout.HelpBox(help_text, MessageType.Error);
             return was_changed;
         }
-        void DrawDefaultParam(SerializedProperty parameter, int index) {
-            DrawStringField(index, parameter, nameField, new GUIContent("Name"), ref propertyNameHelpText, ParamNameValid, AdjustTrim, "Parameter name exists, or is invalid");
-            EditorGUILayout.PropertyField(parameter.FindPropertyRelative(AssetObjectParam.param_type_field));
-            EditorGUILayout.PropertyField(parameter.GetRelevantParamProperty());
-        }
-
+        
         string AdjustNone(string i) { return i; }
         string AdjustTrim(string i) { return i.Trim(); }
         string AdjustObjectDirectoryPath(string dir) {
@@ -219,26 +209,34 @@ namespace AssetObjectsPacks {
             EditorGUILayout.EndVertical();
 
         }
-        void AddNewParameterToCurrent() {
-            string orig_try_name = "New Parameter";
-            string new_name = orig_try_name;
-            int trying = 0;
 
-            while (!ParamNameValid(new_name, -1)) {
-                new_name = orig_try_name + " " + trying.ToString();
+
+        delegate bool ValidCheck (string check_string, int ignore_index=-1);
+        string AppendStringToUnique( string orig_name, ValidCheck valid_check, int max_checks = 900 ) {
+            string new_name = orig_name;
+            int trying = 0;
+            while (!valid_check(new_name) && trying <= max_checks ) {
+                new_name = orig_name + " " + trying.ToString();
                 trying ++;
             }
-            
+            return new_name;
+        }
+
+
+        void AddNewParameterToCurrent() {
+            string new_name = AppendStringToUnique( "New Parameter", ParamNameValid );
             SerializedProperty new_param = curDefParams.AddNewElement();
             SerializedProperty param_default = new_param.FindPropertyRelative(parameterField);
             param_default.FindPropertyRelative(nameField).stringValue = new_name;
             new_param.FindPropertyRelative(hintField).stringValue = string.Empty;
-
         }
+
+
+
         void DrawDefaultParamDef(SerializedProperty defaultParam, int index, out bool delete) {
             EditorGUILayout.BeginHorizontal();
             show_params[index] = EditorGUILayout.Foldout(show_params[index], defaultParam.FindPropertyRelative(parameterField).FindPropertyRelative(nameField).stringValue);
-            delete = GUIUtils.LittleButton(EditorColors.red_color);
+            delete = GUIUtils.SmallButton(EditorColors.red_color, EditorColors.white_color, new GUIContent("D", "Delete Parameter"));
             EditorGUILayout.EndHorizontal();
             if (show_params[index]) {
                 EditorGUI.indentLevel ++;
@@ -247,5 +245,13 @@ namespace AssetObjectsPacks {
                 EditorGUI.indentLevel --;
             }   
         }  
+        void DrawDefaultParam(SerializedProperty parameter, int index) {
+            DrawStringField(index, parameter, nameField, new GUIContent("Name"), ref propertyNameHelpText, ParamNameValid, AdjustTrim, "Parameter name exists, or is invalid");
+            
+            
+            EditorGUILayout.PropertyField(parameter.FindPropertyRelative(AssetObjectParam.param_type_field));
+            EditorGUILayout.PropertyField(parameter.GetRelevantParamProperty());
+        }
+
     }
 }

@@ -13,36 +13,117 @@ namespace AssetObjectsPacks {
         const int max_elements_per_page = 25;
         ExplorerWindowElement[] all_asset_objects;
         string current_path = "";
-        bool show_hidden, gui_initialized;
+        bool show_hidden;
         int window_offset;
-        SerializedProperty hidden_ids_prop;
+        //SerializedProperty hidden_ids_prop;
         public string[] all_file_paths;
-        static readonly GUIContent back_gui = new GUIContent("<< ");
-        static readonly GUIContent add_to_cue_gui = new GUIContent("", "Add To Set");
-        static readonly GUIContent hide_gui = new GUIContent("", "Hide");
-        static readonly GUIContent unhide_gui = new GUIContent("", "Unhide");
+        static readonly GUIContent back_gui = new GUIContent(" << ");
+        static readonly GUIContent add_to_cue_gui = new GUIContent("+", "Add To Set");
+        static readonly GUIContent hide_gui = new GUIContent("H", "Hide");
+        static readonly GUIContent unhide_gui = new GUIContent("U", "Unhide");
 
         
         const string hidden_suffix = " [HIDDEN]";
 
-        public void OnEnable (SerializedObject eventPack, AssetObjectPack pack, string[] all_file_paths) {
-            base.OnEnable(eventPack, pack);
-            hidden_ids_prop = eventPack.FindProperty(AssetObjectEventPack.hidden_ids_field);
+        
 
-            InitializeHiddenIDs();
-            ReinitializePaths(all_file_paths);
+        public override void RealOnEnable(SerializedObject eventPack){
+            base.RealOnEnable(eventPack);
+            //hidden_ids_prop = eventPack.FindProperty(AssetObjectEventPack.hidden_ids_field);
+            //InitializeHiddenIDs();
+
+
+
+            
         }
-        public void OnDisable () {
-            SaveHiddenIDs();
+        public void InitializeWithPack(AssetObjectPack pack, string[] all_file_paths) {
+            base.InitializeWithPack(pack);
+            ReinitializeAssetObjectReferences(all_file_paths);
+
         }
-        public void ReinitializePaths (string[] all_paths){
+
+
+        public override void InitializeView () {
+            InitializeIDsInSet();
+            base.InitializeView();
+
+        }
+        protected HashSet<int> ids_in_set = new HashSet<int>();
+        
+        void InitializeIDsInSet() {
+            ids_in_set.Clear();
+            int c = ao_list.arraySize;
+            for (int i = 0; i < c; i++) {
+                ids_in_set.Add(GetObjectIDAtIndex(i));
+            }
+        }
+        
+        //public void OnDisable () {
+        //    SaveHiddenIDs();
+        //}
+
+        HashSet<int> hiddenIds = new HashSet<int>();
+        void HideIDs(HashSet<ExplorerWindowElement> elements) {
+            foreach (var e in elements) hiddenIds.Add(e.object_id);
+        }
+        void UnhideIDs(HashSet<ExplorerWindowElement> elements) {    
+            foreach (var e in elements) hiddenIds.Remove(e.object_id);
+        }
+
+        /*
+        void SaveHiddenIDs () {
+            hidden_ids_prop.ClearArray();
+            foreach (int id in hidden_ids) hidden_ids_prop.AddNewElement().intValue = id;
+        }
+        void InitializeHiddenIDs() {
+            int c = hidden_ids_prop.arraySize;
+            for (int i = 0; i < c; i++) hidden_ids.Add(hidden_ids_prop.GetArrayElementAtIndex(i).intValue);
+        }
+         */
+        
+
+        public void ReinitializeAssetObjectReferences (string[] all_paths) {
             all_file_paths = all_paths;
-            BuildAssetObjectReferences();
+            
+            int c = all_paths.Length;
+            all_asset_objects = new ExplorerWindowElement[c];
+            for (int i = 0; i < c; i++) {
+                string file_path = all_paths[i];
+                int id = AssetObjectsEditor.GetObjectIDFromPath(file_path);
+                string n = AssetObjectsEditor.RemoveIDFromPath(EditorUtils.RemoveDirectory(file_path));
+                all_asset_objects[i] = new ExplorerWindowElement(file_path, file_path, new GUIContent(n), id);
+            }
         }
-        protected override void OnAddIDsToSet(HashSet<ExplorerWindowElement> add_ids) {
-            UnhideIDs(add_ids);
-            base.OnAddIDsToSet(add_ids);
+        
+        void OnAddIDsToSet (HashSet<ExplorerWindowElement> elements) {
+            UnhideIDs(elements);
+            
+            bool reset_i = true;
+            foreach (ExplorerWindowElement el in elements) {
+                ids_in_set.Add(el.object_id);
+                AddNewAssetObject(el.object_id, GetObjectRefForElement(el), el.file_path, reset_i);
+                reset_i = false;
+            }
+            ClearSelectionsAndRebuild();
         }
+
+        //only need to default first one added, the rest will copy the last one 'inserted' into the
+        //serialized property array
+        void AddNewAssetObject (int obj_id, Object obj_ref, string file_path, bool make_default) {
+            SerializedProperty inst = ao_list.AddNewElement();
+            inst.FindPropertyRelative(AssetObject.id_field).intValue = obj_id;
+            inst.FindPropertyRelative(AssetObject.obj_ref_field).objectReferenceValue = obj_ref;
+            if (make_default) {
+
+                inst.FindPropertyRelative(AssetObject.conditionChecksField).ClearArray();
+                inst.FindPropertyRelative(AssetObject.tags_field).ClearArray();
+                ReInitializeAssetObjectParameters(inst, pack.defaultParams);
+            }
+        } 
+
+
+
+
         void AddSelectionsToSet() {
             if (selected_elements.Count == 0) return;                    
             OnAddIDsToSet(selected_elements);
@@ -106,13 +187,13 @@ namespace AssetObjectsPacks {
 
         bool ElementsAreAlltheSameHiddenStatus(HashSet<ExplorerWindowElement> elements, out bool hidden_status) {
             hidden_status = false;
-            if (elements.Count == 0 || hidden_ids.Count == 0){
+            if (elements.Count == 0 || hiddenIds.Count == 0){
                 return true;
             }
 
             bool was_checked = false;
             foreach (var e in elements) {
-                bool is_hidden = hidden_ids.Contains(e.object_id);
+                bool is_hidden = hiddenIds.Contains(e.object_id);
                 if (!was_checked) {
                     hidden_status = is_hidden;
                     was_checked = true;
@@ -124,12 +205,7 @@ namespace AssetObjectsPacks {
             return true;
         }
 
-        void HideIDs(HashSet<ExplorerWindowElement> elements) {
-            foreach (var e in elements) hidden_ids.Add(e.object_id);
-        }
-        void UnhideIDs(HashSet<ExplorerWindowElement> elements) {    
-            foreach (var e in elements) hidden_ids.Remove(e.object_id);
-        }
+       
 
         void DrawExplorerElements() {
 
@@ -144,12 +220,17 @@ namespace AssetObjectsPacks {
                 }
                 else {
                     bool is_hidden = false; 
-                    if (show_hidden) is_hidden = hidden_ids.Contains(object_id);
+                    if (show_hidden) is_hidden = hiddenIds.Contains(object_id);
 
                     EditorGUILayout.BeginHorizontal();
                     
-                    bool little_button_pressed_0 = GUIUtils.LittleButton(EditorColors.green_color, add_to_cue_gui);
-                    if (GUIUtils.LittleButton(is_hidden ? EditorColors.selected_color : EditorColors.white_color, is_hidden ? unhide_gui : hide_gui)) ToggleHiddenSelected(new HashSet<ExplorerWindowElement>() {element}, is_hidden, false);
+                    bool little_button_pressed_0 = GUIUtils.SmallButton(EditorColors.green_color, EditorColors.black_color, add_to_cue_gui);
+                    if (GUIUtils.SmallButton(
+                        is_hidden ? EditorColors.selected_color : EditorColors.white_color, 
+                        is_hidden ? EditorColors.selected_text_color : EditorColors.black_color, 
+                        is_hidden ? unhide_gui : hide_gui)
+                    ) 
+                        ToggleHiddenSelected(new HashSet<ExplorerWindowElement>() {element}, is_hidden, false);
                     
                     if (GUIUtils.ScrollWindowElement (new GUIContent(elements[i].label_gui.text + (is_hidden ? hidden_suffix : StringUtils.empty)), drawing_selected, is_hidden, false)) OnObjectSelection(element, drawing_selected);
                     
@@ -225,7 +306,7 @@ namespace AssetObjectsPacks {
             //}
 
 
-            GUI.enabled = hidden_ids.Count != 0;
+            GUI.enabled = hiddenIds.Count != 0;
             //if (hidden_ids.Count != 0) {
                 Color32 orig_bg = GUI.backgroundColor;
                 if (show_hidden) GUI.backgroundColor = EditorColors.selected_color;
@@ -236,7 +317,7 @@ namespace AssetObjectsPacks {
                 GUI.backgroundColor = orig_bg;
                 
                 if (GUILayout.Button(reset_hidden_gui, s, reset_hidden_gui.CalcWidth())){
-                    hidden_ids.Clear();
+                    hiddenIds.Clear();
                     ClearSelectionsAndRebuild();                
                 }
             //}
@@ -248,72 +329,43 @@ namespace AssetObjectsPacks {
         GUIContent show_hidden_gui = new GUIContent("Show Hidden");
         GUIContent reset_hidden_gui = new GUIContent("Reset Hidden");
         
-        void BuildAssetObjectReferences () {
+        
 
-            int c = all_file_paths.Length;
-            all_asset_objects = new ExplorerWindowElement[c];
-            
-            for (int i = 0; i < c; i++) {
-                string file_path = all_file_paths[i];
-                int id = AssetObjectsEditor.GetObjectIDFromPath(file_path);
-                string n = AssetObjectsEditor.RemoveIDFromPath(EditorUtils.RemoveDirectory(file_path));
-                all_asset_objects[i] = new ExplorerWindowElement(file_path, file_path, new GUIContent(n), id);
-            }
-        }
-
-        HashSet<int> hidden_ids = new HashSet<int>();
-        void InitializeHiddenIDs() {
-            int c = hidden_ids_prop.arraySize;
-            for (int i = 0; i < c; i++) hidden_ids.Add(hidden_ids_prop.GetArrayElementAtIndex(i).intValue);
-        }
-        void SaveHiddenIDs () {
-            hidden_ids_prop.ClearArray();
-            foreach (int id in hidden_ids) hidden_ids_prop.AddNewElement().intValue = id;
-        }
+        
 
         protected override void RebuildAllElements() {
-
             elements.Clear();
-            HashSet<string> used_dir_names = new HashSet<string>();            
-            int last_dir_index = 0;
+            
+            HashSet<string> usedNames = new HashSet<string>();            
+            List<ExplorerWindowElement> unpaginated = new List<ExplorerWindowElement>();
+            
+            int lastDir = 0;
             int c = all_asset_objects.Length;
-
-            
-            List<ExplorerWindowElement> first_l = new List<ExplorerWindowElement>();
-            
             for (int i = 0; i < c; i++) {
             
                 ExplorerWindowElement ao = all_asset_objects[i];
 
-                if (!current_path.IsEmpty()) {
-                    if (!ao.fullName.StartsWith(current_path)) continue;
-                }
-
+                if (!current_path.IsEmpty() && !ao.fullName.StartsWith(current_path)) continue;
                 if (ids_in_set.Contains(ao.object_id)) continue;
-
-                if (!show_hidden) {
-                    if (hidden_ids.Contains(ao.object_id)) continue;
-                }
+                if (!show_hidden && hiddenIds.Contains(ao.object_id)) continue;
                 
                 string name_display = ao.fullName;
                 bool has_directory = name_display.Contains("/");
                 if (has_directory) {
                     name_display = ao.fullName.Split('/')[window_offset];
-                    if (used_dir_names.Contains(name_display)) continue;
-                    used_dir_names.Add(name_display);
-                }                
-                bool is_directory = !name_display.Contains(".");
-                if (is_directory) {
-                    first_l.Insert(last_dir_index, new ExplorerWindowElement(ao.file_path, name_display, new GUIContent(name_display)));
-                    last_dir_index++;
+                    if (usedNames.Contains(name_display)) continue;
+                    usedNames.Add(name_display);
+                }    
+
+                if (name_display.Contains(".")) { 
+                    unpaginated.Add(new ExplorerWindowElement(ao.file_path, name_display, ao.label_gui, ao.object_id));
+                    continue;
                 }
-                else {
-                    first_l.Add(new ExplorerWindowElement(ao.file_path, name_display, ao.label_gui, ao.object_id));
-                } 
+                //is directory
+                unpaginated.Insert(lastDir, new ExplorerWindowElement(ao.file_path, name_display, new GUIContent(name_display)));
+                lastDir++;   
             } 
-
-            PaginateElements(first_l, max_elements_per_page);
-
+            PaginateElements(unpaginated, max_elements_per_page);
         }
 
         

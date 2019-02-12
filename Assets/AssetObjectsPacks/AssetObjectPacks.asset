@@ -38,13 +38,8 @@ MonoBehaviour:
     objectsDirectory: Assets/AssetObjectsPacks/Packs/Animations/AssetObjects/
     fileExtensions: .fbx
     assetType: UnityEngine.AnimationClip
-    allTags: []
+    allTags:
+    - dfdsfs
+    - dfgd
     name: Animations
     id: 1
-  - defParams: []
-    objectsDirectory: 
-    fileExtensions: 
-    assetType: UnityEngine.AudioClip
-    allTags: []
-    name: Sounds
-    id: 0
