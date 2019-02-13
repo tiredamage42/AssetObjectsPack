@@ -4,18 +4,21 @@ using UnityEditor;
 namespace AssetObjectsPacks {
     public static class PropertyExtensions {
         public static SerializedProperty[] GetRelevantParamsFromAssetObjectInstance (this SerializedProperty ao) {
-            SerializedProperty params_l = ao.FindPropertyRelative(AssetObject.params_field);
-            return new SerializedProperty[0].GenerateArray( i => { return params_l.GetArrayElementAtIndex(i).GetRelevantParamProperty(); } , params_l.arraySize );
+            SerializedProperty parameters = ao.FindPropertyRelative(AssetObject.params_field);
+            return new SerializedProperty[parameters.arraySize].Generate( i => { return SerializedPropertyUtils.Parameters.GetParamProperty(parameters.GetArrayElementAtIndex(i)); } );
         }
     }
 
     public class ListElement : ListViewElement {
-        public SerializedProperty[] relevant_props;
+        //public SerializedProperty[] relevant_props;
         public SerializedProperty tags_prop;
-        public ListElement (string file_name, string full_name, GUIContent label_gui, int object_id, SerializedProperty instance, SerializedProperty tags_prop) {
+        public SerializedProperty ao;
+        public ListElement (string file_name, string full_name, GUIContent label_gui, int object_id, SerializedProperty ao, SerializedProperty tags_prop) 
+            : base(file_name, full_name, label_gui, object_id) {
             Initialize(file_name, full_name, label_gui, object_id);    
             this.tags_prop = tags_prop;
-            relevant_props = instance.GetRelevantParamsFromAssetObjectInstance();
+            this.ao = ao;
+            //relevant_props = ao.GetRelevantParamsFromAssetObjectInstance();
         }
     }
 
@@ -47,20 +50,20 @@ namespace AssetObjectsPacks {
         public class DummyListElement {
             public GUIContent[] labels;
             public GUILayoutOption[] widths;
-            public SerializedProperty[] multi_edit_props;
+            //public SerializedProperty[] multi_edit_props;
             public int props_count;
             public DummyListElement (SerializedProperty multi_edit_instance, AssetObjectParamDef[] default_params){
                 props_count = default_params.Length;
 
+
                 labels = new GUIContent[props_count];
                 widths = new GUILayoutOption[props_count];
-
-                for (int i = 0; i < default_params.Length; i++) {
+                for (int i = 0; i < props_count; i++) {
                     labels[i] = new GUIContent(default_params[i].parameter.name, default_params[i].hint);
                     widths[i] = GUILayout.Width(EditorStyles.label.CalcSize(labels[i]).x);
                 }
 
-                multi_edit_props = multi_edit_instance.GetRelevantParamsFromAssetObjectInstance();
+                //multi_edit_props = multi_edit_instance.GetRelevantParamsFromAssetObjectInstance();
             }
         }
 
@@ -71,10 +74,28 @@ namespace AssetObjectsPacks {
         static readonly GUIContent remove_selected_gui = new GUIContent("D", "Remove Selected");
         static readonly GUIContent editing_shown_gui = new GUIContent("Editing Shown");
         static readonly GUIContent editing_selected_gui = new GUIContent("Editing Selected");
-        
         GUILayoutOption max_name_width;
+         bool show_multi_conditions;
 
-        const int max_elements_per_page = 25;
+        bool[] show_conditions;
+        
+        GUIContent addParameterToConditionalGUI = new GUIContent("Add Parameter +");
+        GUIContent deleteConditionalGUI = new GUIContent("D", "Delete Condition");
+        GUIContent addConditionGUI = new GUIContent("Add Condition +");
+        
+        GUILayoutOption condition_param_width = GUILayout.Width(128);
+        
+
+
+
+
+        const string allTagsField = "allTags";
+        const string packsField = "packs";
+        
+        SerializedProperty multi_edit_instance;
+
+        public Dictionary<int, string> id2path;
+        
 
 
         
@@ -87,25 +108,24 @@ namespace AssetObjectsPacks {
             return false;
         }
         
-        protected override void RebuildAllElements() {
-            elements.Clear();
+        protected override List<ListElement> UnpaginatedListed(string[] all_paths) {
             
             int l = ao_list.arraySize;
             
             float max_width = 0;
 
-            int keywords_count = search_keywords.keywords.Count;
+            //int keywords_count = search_keywords.keywords.Count;
 
-            List<ListElement> first_l = new List<ListElement>();
+            List<ListElement> unpaginated = new List<ListElement>();
             for (int i = 0; i < l; i++) {
                 SerializedProperty ao = ao_list.GetArrayElementAtIndex(i);
                 SerializedProperty tags_prop = ao.FindPropertyRelative(AssetObject.tags_field);
+                //if (keywords_count != 0 && !HasSearchTags(tags_prop, keywords_count)) continue;
                 
-                if (keywords_count != 0 && !HasSearchTags(tags_prop, keywords_count)) continue;
+                int id = ao.FindPropertyRelative(AssetObject.id_field).intValue;
+                string file_path = id2path[id];
                 
 
-                int object_id = ao.FindPropertyRelative(AssetObject.id_field).intValue;
-                string file_path = id2path[object_id];// ao.FindPropertyRelative(AssetObject.obj_file_path_field).stringValue;
                                 
                 string n = AssetObjectsEditor.RemoveIDFromPath(file_path);
                 GUIContent gui_n = new GUIContent(n);
@@ -114,54 +134,138 @@ namespace AssetObjectsPacks {
                 float w = EditorStyles.toolbarButton.CalcSize(gui_n).x;
                 if (w > max_width) max_width = w;
                 
-                first_l.Add(new ListElement(file_path, file_path, gui_n, object_id, ao, tags_prop));
+                unpaginated.Add(new ListElement(file_path, file_path, gui_n, id, ao, tags_prop));
             }
 
             max_name_width = GUILayout.Width( Mathf.Max(max_width, EditorStyles.toolbarButton.CalcSize(editing_selected_gui).x) );
 
-
-            PaginateElements(first_l, max_elements_per_page);
-            tags_gui.selection_changed = true;
-            RebuildSelectedTagsProps();            
+            return unpaginated;
         }
 
-    
+        protected override List<ListElement> UnpaginatedFoldered(string[] all_paths) {
+            HashSet<string> usedNames = new HashSet<string>();            
+            List<ListElement> unpaginated = new List<ListElement>();
+            int lastDir = 0;
+            
+
+
+
+            
+            int l = ao_list.arraySize;
+            
+            float max_width = 0;
+
+            //int keywords_count = search_keywords.keywords.Count;
+
+            for (int i = 0; i < l; i++) {
+                SerializedProperty ao = ao_list.GetArrayElementAtIndex(i);
+                SerializedProperty tags_prop = ao.FindPropertyRelative(AssetObject.tags_field);
+                
+                //if (keywords_count != 0 && !HasSearchTags(tags_prop, keywords_count)) continue;
+                
+
+                int id = ao.FindPropertyRelative(AssetObject.id_field).intValue;
+                string file_path = id2path[id];
+
+                if (!folderView.DisplaysPath(file_path)) continue;
+
+
+                string name_display = folderView.DisplayNameFromPath(file_path);
+                if (usedNames.Contains(name_display)) continue;
+                usedNames.Add(name_display);
+
+                if (name_display.Contains(".")) { 
+                    string name_string = AssetObjectsEditor.RemoveIDFromPath(EditorUtils.RemoveDirectory(file_path));
+                    GUIContent label_gui = new GUIContent( name_string );
+                    
+                    float w = EditorStyles.toolbarButton.CalcSize(label_gui).x;
+                    if (w > max_width) max_width = w;
+                    
+                    unpaginated.Add(new ListElement(file_path, name_display, label_gui, id, ao, tags_prop));
+                    continue;
+                }
+                //is directory
+                unpaginated.Insert(lastDir, new ListElement(file_path, name_display, new GUIContent(name_display), -1, ao, tags_prop));
+                lastDir++;   
+            
+            }
+
+            max_name_width = GUILayout.Width( Mathf.Max(max_width, EditorStyles.toolbarButton.CalcSize(editing_selected_gui).x) );
+
+       
+            return unpaginated;
+        }
+
+        protected override void OnPagination () {
+            show_conditions = new bool[elements.Count];
+        }
+/*
         void DrawListInstancePropertyFields(SerializedProperty[] props) {
             int l = props.Length;
             for (int i = 0; i < l; i++) {
                 EditorGUILayout.PropertyField(props[i], GUIUtils.blank_content, dummy_list_element.widths[i]);
-                GUIUtils.SmallButton(EditorColors.clear_color, EditorColors.clear_color);
+                GUIUtils.SmallButtonClear();
             }
         }
-  
+
+ */
         
-        void MultipleAnimEditFields () {
-            for (int i = 0; i < dummy_list_element.props_count; i++) {
-                EditorGUILayout.PropertyField(dummy_list_element.multi_edit_props[i], GUIUtils.blank_content, dummy_list_element.widths[i]);
-                GUIUtils.SmallButton(EditorColors.clear_color, EditorColors.clear_color);
-            }        
+
+        void DrawParameterFields (SerializedProperty ao) {
+            int l = pack.defaultParams.Length;
+
+            SerializedProperty parameters = ao.FindPropertyRelative(AssetObject.params_field);
+            //return new SerializedProperty[parameters.arraySize].Generate( i => { return SerializedPropertyUtils.Parameters.GetParamProperty(parameters.GetArrayElementAtIndex(i)); } );
+        
+
+            for (int i = 0; i < l; i++) {
+
+                EditorGUILayout.PropertyField(
+                    SerializedPropertyUtils.Parameters.GetParamProperty(parameters.GetArrayElementAtIndex(i)), 
+                    GUIUtils.blank_content, 
+                    dummy_list_element.widths[i]
+                );
+
+                GUIUtils.SmallButtonClear();
+
+
+                
+            }
+
+
         }
-        void DrawMultipleEditWindow () {
+        //void MultipleAnimEditFields () {
+        //    for (int i = 0; i < dummy_list_element.props_count; i++) {
+        //        EditorGUILayout.PropertyField(dummy_list_element.multi_edit_props[i], GUIUtils.blank_content, dummy_list_element.widths[i]);
+        //        GUIUtils.SmallButtonClear();
+        //    }        
+        //}
+
+        void DrawMultipleEditWindow (string[] all_paths) {
             //if (elements.Count == 0) return;
             
-            EditorGUILayout.BeginVertical(GUI.skin.box);
+            DrawToolbar(all_paths);
+
+            GUIUtils.StartBox();
+
             EditorGUILayout.Space();
 
+            //EditorGUILayout.BeginHorizontal();
 
-            EditorGUILayout.BeginHorizontal();
-
-            search_keywords.DrawTagSearch();
-            GUILayout.FlexibleSpace();
-
-            GUI.enabled = selected_elements.Count != 0;
-            if (GUILayout.Button(import_settings_gui, EditorStyles.miniButton, import_settings_gui.CalcWidth())) {
-                OpenImportSettings();
-            }
-            GUI.enabled = true;
+            //search_keywords.DrawTagSearch();
+            //GUILayout.FlexibleSpace();
 
 
 
-            EditorGUILayout.EndHorizontal();
+
+
+
+
+
+            //EditorGUILayout.EndHorizontal();
+
+
+
 
 
 
@@ -172,34 +276,42 @@ namespace AssetObjectsPacks {
             bool editing_all_shown = selected_elements.Count == 0;
             
             EditorGUILayout.BeginHorizontal();
-            if (GUIUtils.SmallButton(EditorColors.red_color, EditorColors.white_color, editing_all_shown ? remove_shown_gui : remove_selected_gui)) {
-                if (editing_all_shown) OnDeleteIDsFromSet(elements);
-                else OnDeleteIDsFromSet(selected_elements);
+            if (GUIUtils.SmallButton(editing_all_shown ? remove_shown_gui : remove_selected_gui, EditorColors.red_color, EditorColors.white_color)) {
+                OnDeleteIDsFromSet( editing_all_shown ? IDSetFromElements(elements) : IDSetFromElements(selected_elements), all_paths);
+                //if (editing_all_shown) 
+                //else OnDeleteIDsFromSet(IDsFromElements(selected_elements), all_paths);
             }
 
-            show_multi_conditionals = GUIUtils.ToggleButton(show_multi_conditionals, new GUIContent("C", "Conditionals"));
+            show_multi_conditions = GUIUtils.SmallToggleButton(showConditionsGUI, show_multi_conditions);
             
-
-
-
-
-
-
+            GUIUtils.ScrollWindowElement (editing_all_shown ? editing_shown_gui : editing_selected_gui, false, false, false, max_name_width);
             
-            GUIContent c = editing_all_shown ? editing_shown_gui : editing_selected_gui;
-            GUIUtils.ScrollWindowElement (c, false, false, false, max_name_width);
-            MultipleAnimEditFields();
+            DrawParameterFields(multi_edit_instance);
+            //MultipleAnimEditFields();
             EditorGUILayout.EndHorizontal();
 
-            DrawConditionals(multi_edit_instance, ref show_multi_conditionals);
+            if (show_multi_conditions) {
+                DrawConditions(multi_edit_instance);
+            }
+
             
             EditorGUILayout.Space();
-            EditorGUILayout.EndVertical();
+
+            GUIUtils.EndBox();
         }
+        void OnDeleteIDsFromSet (HashSet<int> ids, string[] all_paths) {
+            //HashSet<int> ids = IDsFromElements(elements);
+            for (int i = ao_list.arraySize - 1; i >= 0; i--) {
+                if (ids.Contains(GetObjectIDAtIndex(i))) ao_list.DeleteArrayElementAtIndex(i);
+            }
+            ClearSelectionsAndRebuild(all_paths);
+        }
+
+
         void DrawListInstancePropertyLabels () {
             for (int i = 0; i < dummy_list_element.props_count; i++) {
                 EditorGUILayout.LabelField(dummy_list_element.labels[i], dummy_list_element.widths[i]);
-                if (GUIUtils.SmallButton(EditorColors.selected_color, EditorColors.selected_text_color, set_values_gui)) {
+                if (GUIUtils.SmallButton(set_values_gui, EditorColors.selected_color, EditorColors.selected_text_color)) {
                     SetPropertyAll(i);
                 }
                 
@@ -207,210 +319,121 @@ namespace AssetObjectsPacks {
         }
         
         void SetPropertyAll(int prop_index) {
+            
+            SerializedProperty multi_parameters = multi_edit_instance.FindPropertyRelative(AssetObject.params_field);
+            SerializedProperty copy_prop = SerializedPropertyUtils.Parameters.GetParamProperty(multi_parameters.GetArrayElementAtIndex(prop_index));
+            
             IEnumerable<ListElement> l = elements;
             if (selected_elements.Count != 0) l = selected_elements;
-            foreach (ListElement el in l) el.relevant_props[prop_index].CopyProperty(dummy_list_element.multi_edit_props[prop_index]);                      
-        }
 
-        void BeginIndent (int indent_space = 1) {
-            EditorGUILayout.BeginHorizontal();
 
-            for (int i = 0; i < indent_space; i++) {
 
-                GUIUtils.SmallButton(EditorColors.clear_color, EditorColors.clear_color);
 
-                //EditorGUILayout.Space();
+
+
+            foreach (ListElement el in l) {
+
+                SerializedProperty parameters = el.ao.FindPropertyRelative(AssetObject.params_field);
+                SerializedProperty prop = SerializedPropertyUtils.Parameters.GetParamProperty(parameters.GetArrayElementAtIndex(prop_index));
+            
+                prop.CopyProperty( copy_prop );
+            
+          
+            
+
+                //el.relevant_props[prop_index].CopyProperty(dummy_list_element.multi_edit_props[prop_index]);                      
             }
-
-            EditorGUILayout.BeginVertical();
-
-
         }
 
-        void EndIndent () {
+       
 
-            EditorGUILayout.EndVertical();
+        void DrawConditions (SerializedProperty ao) {
+            SerializedProperty conditions = ao.FindPropertyRelative(AssetObject.conditionChecksField);
 
-            
-            EditorGUILayout.EndHorizontal();
-
-
-        }
-
-        bool show_multi_conditionals;
-
-
-
-        void DrawConditionals (SerializedProperty ao, ref bool show_bool) {
-            if (show_bool) {
-            SerializedProperty conditionals_list = ao.FindPropertyRelative(AssetObject.conditionChecksField);
-            
-
-            BeginIndent();
-            EditorGUILayout.BeginVertical(GUI.skin.box);
-
-
+            GUIUtils.BeginIndent();
+            GUIUtils.StartBox (EditorColors.dark_color);
             EditorGUILayout.BeginHorizontal();
+
+            if (GUIUtils.Button(addConditionGUI, true)) {
+                SerializedProperty newCondition = conditions.AddNewElement();
+                newCondition.FindPropertyRelative(AssetObject.paramsToMatchField).ClearArray();
+                DefaultifyConditionParam(newCondition.FindPropertyRelative(AssetObject.paramsToMatchField).AddNewElement());                    
+            }
             
-
-                GUI.enabled = show_bool;
-                GUIContent c = new GUIContent("Add Conditional +");
-                GUILayoutOption w = GUILayout.Width(EditorStyles.miniButton.CalcSize(c).x);
-                if (GUILayout.Button(c, EditorStyles.miniButton, w)) {
-                    SerializedProperty new_conditional = conditionals_list.AddNewElement();
-                    new_conditional.FindPropertyRelative(AssetObject.paramsToMatchField).ClearArray();
-                    new_conditional.FindPropertyRelative(AssetObject.paramsToMatchField).AddNewElement();
-                    
-                }
-                GUI.enabled = true;
-           
-
             EditorGUILayout.EndHorizontal();
 
-            
             List<int> delete_indicies = new List<int>();
-            int l = conditionals_list.arraySize;
+            int l = conditions.arraySize;
             for (int i = 0; i < l; i++) {
                 bool delete;
-                
-                DrawConditional(conditionals_list.GetArrayElementAtIndex(i), i, out delete);
+                DrawConditional(conditions.GetArrayElementAtIndex(i), i, out delete);
                 if(delete) delete_indicies.Add(i);
-
             }
-            for (int i = delete_indicies.Count-1; i >= 0; i--) conditionals_list.DeleteArrayElementAtIndex(delete_indicies[i]);
-
+            for (int i = delete_indicies.Count-1; i >= 0; i--) conditions.DeleteArrayElementAtIndex(delete_indicies[i]);
 
             EditorGUILayout.Space();
 
+            GUIUtils.EndBox ();
 
-
-
-            EditorGUILayout.EndVertical();
-
-            
-
-            EndIndent();
-            }   
-
-            //EditorGUILayout.EndHorizontal();
-            
-            //EditorGUI.indentLevel--;
-
-            
+            GUIUtils.EndIndent();            
         }
+
+
+        void DefaultifyConditionParam (SerializedProperty conditionParam) {
+            conditionParam.FindPropertyRelative(AssetObjectParam.name_field).stringValue = "Parameter Name";
+        }
+
 
         void DrawConditional (SerializedProperty conditional, int i, out bool delete) {
             
-            SerializedProperty paramsToMatchList = conditional.FindPropertyRelative(AssetObject.paramsToMatchField);
-            //EditorGUI.indentLevel++;
+            SerializedProperty conditionParameters = conditional.FindPropertyRelative(AssetObject.paramsToMatchField);
 
-
-            EditorGUILayout.BeginVertical(GUI.skin.box);
-
-
+            GUIUtils.StartBox ();
 
             EditorGUILayout.BeginHorizontal();
-            delete = GUIUtils.SmallButton(EditorColors.red_color, EditorColors.white_color, new GUIContent("D", "Delete Conditional"));
+            delete = GUIUtils.SmallButton(deleteConditionalGUI, EditorColors.red_color, EditorColors.white_color);
 
-            //GUIContent co = new GUIContent("Conditional");
-
-            //EditorGUILayout.LabelField(co, GUILayout.Width(EditorStyles.label.CalcSize(co).x));
-
-
-            GUIContent c = new GUIContent("Add Parameter +");
-            GUILayoutOption w = GUILayout.Width(EditorStyles.miniButton.CalcSize(c).x);
-            if (GUILayout.Button(c, EditorStyles.miniButton, w)) {
-                SerializedProperty new_param = paramsToMatchList.AddNewElement();
-                new_param.FindPropertyRelative(AssetObjectParam.name_field).stringValue = "Param Name";
+            if (GUIUtils.Button(addParameterToConditionalGUI, true)) {
+                DefaultifyConditionParam(conditionParameters.AddNewElement());
             }
             
-            //GUILayout.FlexibleSpace();
-            //show_params[index] = EditorGUILayout.Foldout(show_params[index], defaultParam.FindPropertyRelative(parameterField).FindPropertyRelative(nameField).stringValue);
             EditorGUILayout.EndHorizontal();
 
-
-
-            BeginIndent();
-            
-            
-
-
-
-            //if (GUIUtils.LittleButton(EditorColors.green_color, new GUIContent("", "Add Parameter Check"))) {
-            //    SerializedProperty new_param = paramsToMatchList.AddNewElement();
-            //}
-
-            //DrawParamLabels();
-            
+            GUIUtils.BeginIndent();
+                        
             List<int> delete_indicies = new List<int>();
-            int l = paramsToMatchList.arraySize;
+            int l = conditionParameters.arraySize;
             for (int x = 0; x < l; x++) {
                 bool d;
-                
-                DrawDefaultParamDef(paramsToMatchList.GetArrayElementAtIndex(x), out d);
+                DrawConditionParameter(conditionParameters.GetArrayElementAtIndex(x), out d);
                 if(d) delete_indicies.Add(x);
-
-
-                //draw param
-                
             }
+            for (int x = delete_indicies.Count-1; x >= 0; x--) conditionParameters.DeleteArrayElementAtIndex(delete_indicies[x]);
             
-            for (int x = delete_indicies.Count-1; x >= 0; x--) paramsToMatchList.DeleteArrayElementAtIndex(delete_indicies[x]);
-            
-            //BeginIndent();
-            /*
-            GUIContent c = new GUIContent("Add Parameter +");
-            GUILayoutOption w = GUILayout.Width(EditorStyles.miniButton.CalcSize(c).x);
-            if (GUILayout.Button(c, EditorStyles.miniButton, w)) {
-                SerializedProperty new_param = paramsToMatchList.AddNewElement();
-                new_param.FindPropertyRelative(AssetObjectParam.name_field).stringValue = "Param Name";
-            }
-             */
-            //EndIndent();
+            GUIUtils.EndIndent();
 
-            //EditorGUILayout.Space();
-
-            EndIndent();
-
-
-
-
-            EditorGUILayout.EndVertical();
-
-
-            
+            GUIUtils.EndBox();
 
         }
 
+        GUIContent deleteConditionParameterGUI = new GUIContent("D", "Delete Parameter");
 
-        void DrawDefaultParamDef(SerializedProperty parameter, out bool delete) {
+
+        void DrawConditionParameter(SerializedProperty parameter, out bool delete) {
             EditorGUILayout.BeginHorizontal();
-            //show_params[index] = EditorGUILayout.Foldout(show_params[index], defaultParam.FindPropertyRelative(parameterField).FindPropertyRelative(nameField).stringValue);
-            delete = GUIUtils.SmallButton(EditorColors.red_color, EditorColors.white_color, new GUIContent("D", "Delete Parameter Check"));
-//if (show_params[index]) {
-                //EditorGUI.indentLevel ++;
-                DrawDefaultParam(parameter);
-                //EditorGUI.indentLevel --;
-            //}   
+        
+            delete = GUIUtils.SmallButton(deleteConditionParameterGUI, EditorColors.red_color, EditorColors.white_color);
+            
+            EditorGUILayout.PropertyField(parameter.FindPropertyRelative(AssetObjectParam.name_field), GUIContent.none, condition_param_width );
+            EditorGUILayout.PropertyField(parameter.FindPropertyRelative(AssetObjectParam.param_type_field), GUIContent.none, condition_param_width ) ;
+            EditorGUILayout.PropertyField(SerializedPropertyUtils.Parameters.GetParamProperty(parameter), GUIContent.none, condition_param_width );
+            
             EditorGUILayout.EndHorizontal();
         }  
 
         
         
-        void DrawDefaultParam(SerializedProperty parameter) {
-            //EditorGUILayout.BeginHorizontal();
-            
-            //EditorGUILayout.PropertyField(parameter.FindPropertyRelative(AssetObjectParam.name_field), GUIContent.none, param_labels_widths[0] );
-            //EditorGUILayout.PropertyField(parameter.FindPropertyRelative(AssetObjectParam.param_type_field), GUIContent.none, param_labels_widths[1] ) ;
-            //EditorGUILayout.PropertyField(parameter.GetRelevantParamProperty(), GUIContent.none, param_labels_widths[2]);
-            GUILayoutOption w = GUILayout.Width(128);
-            EditorGUILayout.PropertyField(parameter.FindPropertyRelative(AssetObjectParam.name_field), GUIContent.none, w );
-            EditorGUILayout.PropertyField(parameter.FindPropertyRelative(AssetObjectParam.param_type_field), GUIContent.none, w ) ;
-            EditorGUILayout.PropertyField(parameter.GetRelevantParamProperty(), GUIContent.none, w);
-            
-            //EditorGUILayout.EndHorizontal();
-            
-        }
+        
 
 
 
@@ -418,7 +441,8 @@ namespace AssetObjectsPacks {
 
         void DrawObjectFieldsTop () {
             EditorGUILayout.BeginHorizontal();
-            GUIUtils.SmallButton(EditorColors.clear_color, EditorColors.clear_color);
+            GUIUtils.SmallButtonClear();
+            
             GUIUtils.ScrollWindowElement (GUIContent.none, false, false, false, max_name_width);
             DrawListInstancePropertyLabels();
             EditorGUILayout.EndHorizontal();
@@ -429,86 +453,57 @@ namespace AssetObjectsPacks {
 
 
 
-        public bool Draw() {
+        public bool Draw(string[] all_paths) {
             bool changed = false;
-            bool enter_pressed, delete_pressed, right_p, left_p;
-            KeyboardInput(out enter_pressed, out delete_pressed, out left_p, out right_p);
+            bool enter_pressed, delete_pressed;
+            KeyboardInput(all_paths, out enter_pressed, out delete_pressed);
+
+
             if (selected_elements.Count != 0) {
                 if (delete_pressed) {
-                    OnDeleteIDsFromSet(selected_elements);
+                    OnDeleteIDsFromSet(IDSetFromElements(selected_elements), all_paths);
                     changed = true;
                 }
             }
-            if (right_p) {
-                if (NextPage(max_elements_per_page)) {}
-            }
-            if (left_p) {
-                if (PreviousPage()) {}
-                else {}
-            }
 
+            DrawMultipleEditWindow(all_paths);
             if (elements.Count == 0) {
                 EditorGUILayout.HelpBox("No elements, add some through the explorer view tab", MessageType.Info);
             }
-            DrawMultipleEditWindow();
-            DrawListElements();
-            DrawPaginationGUI(max_elements_per_page);
+            else {
+                DrawElements(all_paths);        
+            }
+            DrawPaginationGUI(all_paths);
             return changed;
         }
 
-        void DrawListElements () {
-            EditorGUILayout.BeginVertical(GUI.skin.box);
-            for (int i = 0; i < elements.Count; i++) {
-                bool drawing_selected = selected_elements.Contains(elements[i]);
-                
-                EditorGUILayout.BeginHorizontal();
-                bool little_button_pressed = GUIUtils.SmallButton(EditorColors.red_color, EditorColors.white_color, remove_gui);
-                bool big_button_pressed = GUIUtils.ScrollWindowElement (elements[i].label_gui, drawing_selected, false, false, max_name_width);
-                DrawListInstancePropertyFields(elements[i].relevant_props);
-                EditorGUILayout.EndHorizontal();
+        GUIContent showConditionsGUI = new GUIContent("C", "Show Conditions");
 
-                if (big_button_pressed) OnObjectSelection(elements[i], drawing_selected);
-                if (little_button_pressed) OnDeleteIDsFromSet(new HashSet<ListElement>() {elements[i]});
-            }   
-
-            EditorGUILayout.Space();
-            EditorGUILayout.EndVertical();
-        }
-        const string allTagsField = "allTags";
-        const string packsField = "packs";
-        
-        SerializedProperty multi_edit_instance;
-
-        public Dictionary<int, string> id2path;
-        //public void OnEnable (SerializedObject eventPack, AssetObjectPack pack, Dictionary<int, string> id2path){
-        //    base.OnEnable(eventPack, pack);
-            //this.id2path = id2path;
-
+        protected override void DrawNonFolderElement(string[] all_paths, ListElement element, bool selected, int index) {
+            EditorGUILayout.BeginHorizontal();
+            bool little_button_pressed = GUIUtils.SmallButton(remove_gui, EditorColors.red_color, EditorColors.white_color);
+            
+            show_conditions[index] = GUIUtils.SmallToggleButton(showConditionsGUI, show_conditions[index]);
             
             
+            bool big_button_pressed = GUIUtils.ScrollWindowElement (element.label_gui, selected, false, false, max_name_width);
             
-/*
-            AssetObjectParamDef[] defs = pack.defaultParams;
-            ReInitializeAssetObjectParameters(multi_edit_instance, defs);
-            this.dummy_list_element = new DummyListElement(multi_edit_instance, defs);
+            DrawParameterFields(element.ao);
+            //DrawListInstancePropertyFields(element.relevant_props);
+            EditorGUILayout.EndHorizontal();
 
-            var all_packs = AssetObjectsManager.instance.packs;
-            packs_so = new SerializedObject(all_packs);
-
-            int l = all_packs.packs.Length;
-            for (int i = 0; i < l; i++) {
-                if (all_packs.packs[i] == pack) {
-                    all_tags = packs_so.FindProperty(packsField).GetArrayElementAtIndex(i).FindPropertyRelative(allTagsField);
-                    break;
-                }
+            if (show_conditions[index]) {
+                DrawConditions(element.ao);
             }
-            search_keywords.OnEnable(OnSearchKeywordsChange, all_tags);
-            tags_gui.OnEnable(OnTagsChanged);          
- */
+
+
+            if (big_button_pressed) OnObjectSelection(element, selected);
+            if (little_button_pressed) OnDeleteIDsFromSet(new HashSet<int>() {element.object_id}, all_paths);
+
+        }
+
 
         
-        //}
-
         public override void RealOnEnable(SerializedObject eventPack){
             base.RealOnEnable(eventPack);
             multi_edit_instance = eventPack.FindProperty(AssetObjectEventPack.multi_edit_instance_field);
@@ -520,7 +515,14 @@ namespace AssetObjectsPacks {
             this.id2path = id2path;
 
             AssetObjectParamDef[] defs = pack.defaultParams;
+
+            //clear conditionals as well
+            multi_edit_instance.FindPropertyRelative(AssetObject.conditionChecksField).ClearArray();
+
             ReInitializeAssetObjectParameters(multi_edit_instance, defs);
+
+
+
             this.dummy_list_element = new DummyListElement(multi_edit_instance, defs);
 
             var all_packs = AssetObjectsManager.instance.packs;
@@ -533,7 +535,7 @@ namespace AssetObjectsPacks {
                     break;
                 }
             }
-            search_keywords.OnEnable(OnSearchKeywordsChange, all_tags);
+            //search_keywords.OnEnable(OnSearchKeywordsChange, all_tags);
             tags_gui.OnEnable(OnTagsChanged);          
 
 
@@ -542,9 +544,10 @@ namespace AssetObjectsPacks {
         
 
         
-        void OnSearchKeywordsChange () {
-            pagination.cur_page = 0;
-            ClearSelectionsAndRebuild();
+        void OnSearchKeywordsChange (string[] all_paths) {
+            paginateView.ResetPage();
+            
+            ClearSelectionsAndRebuild(all_paths);
             search_keywords.RepopulatePopupList(all_tags);
         }
         void OnTagsChanged (string changed_tag) {

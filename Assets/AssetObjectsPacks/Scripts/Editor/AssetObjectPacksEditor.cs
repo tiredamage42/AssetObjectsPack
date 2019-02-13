@@ -40,7 +40,7 @@ namespace AssetObjectsPacks {
             return packs.GetArrayElementAtIndex(index).FindPropertyRelative(idField).intValue;
         }
         void InitializeTabNames () {
-            tabNames = new GUIContent[0].GenerateArray( i => { return new GUIContent(GetPackName(i)); }, packs.arraySize );
+            tabNames = new GUIContent[packs.arraySize].Generate( i => { return new GUIContent(GetPackName(i)); } );
         }
         public static bool TypeValid(string typeName, int at_index) {
             return typeName.IsValidTypeString();
@@ -81,7 +81,7 @@ namespace AssetObjectsPacks {
             string new_name = AppendStringToUnique( "New Pack", PackNameValid );
             
             SerializedProperty new_pack = packs.AddNewElement();
-            new_pack.FindPropertyRelative(idField).intValue = AssetObjectsEditor.GenerateNewIDList(1, new int[0].GenerateArray( i => { return GetPackID(i); }, packs.arraySize ))[0];  
+            new_pack.FindPropertyRelative(idField).intValue = AssetObjectsEditor.GenerateNewIDList(1, new int[packs.arraySize].Generate( i => { return GetPackID(i); } ))[0];  
             new_pack.FindPropertyRelative(nameField).stringValue = new_name;
             new_pack.FindPropertyRelative(objectsDirectoryField).stringValue = string.Empty;
             new_pack.FindPropertyRelative(assetTypeField).stringValue = string.Empty;
@@ -236,7 +236,7 @@ namespace AssetObjectsPacks {
         void DrawDefaultParamDef(SerializedProperty defaultParam, int index, out bool delete) {
             EditorGUILayout.BeginHorizontal();
             show_params[index] = EditorGUILayout.Foldout(show_params[index], defaultParam.FindPropertyRelative(parameterField).FindPropertyRelative(nameField).stringValue);
-            delete = GUIUtils.SmallButton(EditorColors.red_color, EditorColors.white_color, new GUIContent("D", "Delete Parameter"));
+            delete = GUIUtils.SmallButton(new GUIContent("D", "Delete Parameter"), EditorColors.red_color, EditorColors.white_color);
             EditorGUILayout.EndHorizontal();
             if (show_params[index]) {
                 EditorGUI.indentLevel ++;
@@ -247,10 +247,8 @@ namespace AssetObjectsPacks {
         }  
         void DrawDefaultParam(SerializedProperty parameter, int index) {
             DrawStringField(index, parameter, nameField, new GUIContent("Name"), ref propertyNameHelpText, ParamNameValid, AdjustTrim, "Parameter name exists, or is invalid");
-            
-            
             EditorGUILayout.PropertyField(parameter.FindPropertyRelative(AssetObjectParam.param_type_field));
-            EditorGUILayout.PropertyField(parameter.GetRelevantParamProperty());
+            EditorGUILayout.PropertyField(SerializedPropertyUtils.Parameters.GetParamProperty( parameter));
         }
 
     }

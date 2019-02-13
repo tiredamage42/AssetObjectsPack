@@ -11,9 +11,25 @@ namespace AssetObjectsPacks {
 
         public static class Parameters {
 
+            
+
+
+            public static SerializedProperty GetParamProperty(SerializedProperty parameter) {
+                switch((AssetObjectParam.ParamType)parameter.FindPropertyRelative(AssetObjectParam.param_type_field).enumValueIndex) {
+
+                    case AssetObjectParam.ParamType.Bool: return parameter.FindPropertyRelative(AssetObjectParam.bool_val_field);
+                    case AssetObjectParam.ParamType.Float: return parameter.FindPropertyRelative(AssetObjectParam.float_val_field);
+                    case AssetObjectParam.ParamType.Int: return parameter.FindPropertyRelative(AssetObjectParam.int_val_field);
+
+                }
+                return null;
+                    
+            }
+
             public static void CopyParameter(SerializedProperty orig, SerializedProperty to_copy) {
                 orig.FindPropertyRelative(AssetObjectParam.name_field).CopyProperty(to_copy.FindPropertyRelative(AssetObjectParam.name_field));
                 orig.FindPropertyRelative(AssetObjectParam.param_type_field).CopyProperty(to_copy.FindPropertyRelative(AssetObjectParam.param_type_field));
+
                 orig.FindPropertyRelative(AssetObjectParam.bool_val_field).CopyProperty(to_copy.FindPropertyRelative(AssetObjectParam.bool_val_field));
                 orig.FindPropertyRelative(AssetObjectParam.float_val_field).CopyProperty(to_copy.FindPropertyRelative(AssetObjectParam.float_val_field));
                 orig.FindPropertyRelative(AssetObjectParam.int_val_field).CopyProperty(to_copy.FindPropertyRelative(AssetObjectParam.int_val_field));
@@ -21,19 +37,21 @@ namespace AssetObjectsPacks {
             public static void CopyParameter (SerializedProperty orig, AssetObjectParam to_copy) {
                 orig.FindPropertyRelative(AssetObjectParam.name_field).stringValue = to_copy.name;
                 orig.FindPropertyRelative(AssetObjectParam.param_type_field).enumValueIndex = (int)to_copy.paramType;
+
+
                 orig.FindPropertyRelative(AssetObjectParam.bool_val_field).boolValue = to_copy.boolValue;
                 orig.FindPropertyRelative(AssetObjectParam.float_val_field).floatValue = to_copy.floatValue;
                 orig.FindPropertyRelative(AssetObjectParam.int_val_field).intValue = to_copy.intValue;
             }
 
-            public static void UpdateParametersToReflectDefaults (SerializedProperty params_list, AssetObjectParamDef[] defs) {
+            public static void UpdateParametersToReflectDefaults (SerializedProperty parameters, AssetObjectParamDef[] defs) {
             
-                int c_p = params_list.arraySize;
+                int c_p = parameters.arraySize;
                 int c_d = defs.Length;
 
                 //check for parameters to delete
                 for (int i = c_p - 1; i >= 0; i--) {
-                    string param_name = params_list.GetArrayElementAtIndex(i).FindPropertyRelative(AssetObjectParam.name_field).stringValue;
+                    string param_name = parameters.GetArrayElementAtIndex(i).FindPropertyRelative(AssetObjectParam.name_field).stringValue;
                     bool is_in_default_params = false;
                     for (int d = 0; d < c_d; d++) {
                         if (defs[d].parameter.name == param_name) {
@@ -42,7 +60,7 @@ namespace AssetObjectsPacks {
                         }
                     }
                     if (!is_in_default_params) {
-                        params_list.DeleteArrayElementAtIndex(i);
+                        parameters.DeleteArrayElementAtIndex(i);
                         Debug.Log("Deleteing param: " + param_name);
                     }
                 }
@@ -52,13 +70,13 @@ namespace AssetObjectsPacks {
                     AssetObjectParam def_param = defs[i].parameter;
                     bool is_in_params = false;
                     for (int p = 0; p < c_p; p++) {
-                        if (params_list.GetArrayElementAtIndex(i).FindPropertyRelative(AssetObjectParam.name_field).stringValue == def_param.name) {
+                        if (parameters.GetArrayElementAtIndex(i).FindPropertyRelative(AssetObjectParam.name_field).stringValue == def_param.name) {
                             is_in_params = true;
                             break;
                         }
                     }
                     if (!is_in_params) {
-                        CopyParameter(params_list.AddNewElement(), def_param);
+                        CopyParameter(parameters.AddNewElement(), def_param);
                         Debug.Log("Adding Param: " + def_param.name);
                     }
                 }
@@ -66,17 +84,17 @@ namespace AssetObjectsPacks {
                 //reorder to same order
 
                 //make extra temp parameeter
-                SerializedProperty temp = params_list.AddNewElement();
+                SerializedProperty temp = parameters.AddNewElement();
 
                 for (int d = 0; d < c_d; d++) {
                     AssetObjectParam def_param = defs[d].parameter;
-                    SerializedProperty param = params_list.GetArrayElementAtIndex(d);
+                    SerializedProperty param = parameters.GetArrayElementAtIndex(d);
 
                     if (param.FindPropertyRelative(AssetObjectParam.name_field).stringValue == def_param.name) continue;
 
                     SerializedProperty real_param = null;
                     for (int p = d + 1; p < c_p; p++) {
-                        real_param = params_list.GetArrayElementAtIndex(d);
+                        real_param = parameters.GetArrayElementAtIndex(d);
                         if (real_param.FindPropertyRelative(AssetObjectParam.name_field).stringValue == def_param.name) break;
                     }
 
@@ -89,12 +107,12 @@ namespace AssetObjectsPacks {
                 }
 
                 //delete temp parameter
-                params_list.DeleteArrayElementAtIndex(params_list.arraySize-1);
+                parameters.DeleteArrayElementAtIndex(parameters.arraySize-1);
 
                 //check type changes
                 for (int i = 0; i < c_d; i++) {
                     AssetObjectParam def_param = defs[i].parameter;
-                    SerializedProperty param = params_list.GetArrayElementAtIndex(i);
+                    SerializedProperty param = parameters.GetArrayElementAtIndex(i);
                     if (param.FindPropertyRelative(AssetObjectParam.param_type_field).enumValueIndex != (int)def_param.paramType) {
                         CopyParameter(param, def_param);
                         Debug.Log("chaging type " + param.FindPropertyRelative(AssetObjectParam.name_field).stringValue);

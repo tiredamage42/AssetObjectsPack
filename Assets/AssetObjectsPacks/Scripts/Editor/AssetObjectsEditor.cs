@@ -112,16 +112,5 @@ namespace AssetObjectsPacks {
 
 
 
-
-
-        public static SerializedProperty GetRelevantParamProperty(this SerializedProperty parameter) {
-            switch((AssetObjectParam.ParamType)parameter.FindPropertyRelative(AssetObjectParam.param_type_field).enumValueIndex) {
-                case AssetObjectParam.ParamType.Bool: return parameter.FindPropertyRelative(AssetObjectParam.bool_val_field);
-                case AssetObjectParam.ParamType.Float: return parameter.FindPropertyRelative(AssetObjectParam.float_val_field);
-                case AssetObjectParam.ParamType.Int: return parameter.FindPropertyRelative(AssetObjectParam.int_val_field);
-            }
-            return null;
-                
-        }
     }
 }

@@ -2,13 +2,15 @@
 using UnityEngine;
 using UnityEditor;
 namespace AssetObjectsPacks {
-    public abstract class ListViewElement {
+    public class ListViewElement {
         public string fullName, file_path;
         public GUIContent label_gui;
         public int object_id;
+        public ListViewElement(string file_path, string fullName, GUIContent label_gui, int object_id) => (this.file_path, this.fullName, this.label_gui, this.object_id) = (file_path, fullName, label_gui, object_id);
         protected void Initialize(string file_path, string fullName, GUIContent label_gui, int object_id) 
         => (this.file_path, this.fullName, this.label_gui, this.object_id) = (file_path, fullName, label_gui, object_id);
     }
+
     public abstract class SelectionView<L> where L : ListViewElement {
         protected List<L> elements = new List<L>();
         protected HashSet<L> selected_elements = new HashSet<L>();
@@ -16,6 +18,19 @@ namespace AssetObjectsPacks {
         protected SerializedObject eventPack;
         Editor preview;
         protected AssetObjectPack pack;
+
+        
+        protected FoldersView folderView = new FoldersView();
+        protected PaginateView paginateView = new PaginateView();
+
+
+        protected int max_elements_per_page = 25;
+        protected bool foldered;
+
+
+        GUIContent foldersViewGUI = new GUIContent("Folders View");
+        GUIContent importSettingsGUI = new GUIContent("Import Settings");
+        
         
         public virtual void RealOnEnable(SerializedObject eventPack){
             this.eventPack = eventPack;
@@ -24,6 +39,50 @@ namespace AssetObjectsPacks {
         public virtual void InitializeWithPack(AssetObjectPack pack) {
             this.pack = pack;
         }
+        protected HashSet<int> IDSetFromElements (IEnumerable<L> elements) {
+            return new HashSet<int>().Generate(elements, o => { return o.object_id; } );
+        }
+        
+        
+
+        
+        protected abstract void DrawNonFolderElement (string[] all_paths, L element, bool selected, int index);
+        protected void DrawElements (string[] all_paths) {
+
+            GUIUtils.StartBox();
+            for (int i = 0; i < elements.Count; i++) {
+
+                L element = elements[i];
+                bool drawing_selected = selected_elements.Contains(element);
+
+                int object_id = elements[i].object_id;
+                    
+                if (object_id == -1) {
+                    if (GUIUtils.ScrollWindowElement (elements[i].label_gui, drawing_selected, false, true)) {
+                        MoveForwardFolder(elements[i].fullName, all_paths);
+                    }
+                }
+                else {
+                    DrawNonFolderElement(all_paths, element, drawing_selected, i);
+                }       
+            }
+            GUIUtils.EndBox();
+
+        }
+
+        protected virtual void OnPagination () {
+
+        }
+        protected void OnFolderViewChange (string[] all_paths) {
+            paginateView.ResetPage();
+            ClearSelectionsAndRebuild(all_paths);
+        }
+
+        protected void MoveForwardFolder (string addPath, string[] all_paths) {
+            folderView.MoveForward(addPath);
+            OnFolderViewChange(all_paths);
+        }
+
         
 
 
@@ -35,93 +94,108 @@ namespace AssetObjectsPacks {
             selected_elements.Clear();
             OnSelectionChange();
         }
-        public void ClearSelectionsAndRebuild() {
+        public void ClearSelectionsAndRebuild(string[] all_paths) {
             ClearSelections();
-            RebuildAllElements();
+            RebuildAllElements(all_paths);
         }
 
-        public virtual void InitializeView () {
-            ClearSelectionsAndRebuild();
+        public virtual void InitializeView (string[] all_paths) {
+            paginateView.ResetPage();
+            ClearSelectionsAndRebuild(all_paths);
         }
 
         protected int GetObjectIDAtIndex(int index) {
             return ao_list.GetArrayElementAtIndex(index).FindPropertyRelative(AssetObject.id_field).intValue;
         }
         
-
-        protected abstract void RebuildAllElements();
-
-
-        protected HashSet<int> IDsFromElements(IEnumerable<L> elements) {
-            HashSet<int> ids = new HashSet<int>();
-            foreach (L el in elements) ids.Add(el.object_id);
-            return ids;
+        protected abstract List<L> UnpaginatedFoldered(string[] all_paths);
+        protected abstract List<L> UnpaginatedListed(string[] all_paths);
+        
+        protected void RebuildAllElements(string[] all_paths) {
+            elements.Clear();
+            List<L> unpaginated = null;
+            if (foldered) unpaginated = UnpaginatedFoldered(all_paths);
+            else unpaginated = UnpaginatedListed(all_paths);
+            PaginateElements(unpaginated);
+            OnPagination();
         }
         
-        protected void OnDeleteIDsFromSet (IEnumerable<L> elements) {
-            HashSet<int> ids = IDsFromElements(elements);
-            for (int i = ao_list.arraySize - 1; i >= 0; i--) {
-                if (ids.Contains(GetObjectIDAtIndex(i))) ao_list.DeleteArrayElementAtIndex(i);
-            }
-            ClearSelectionsAndRebuild();
-        }
-
-        protected void PaginateElements (List<L> all_shown, int per_page) {
-            shown_elements_count = all_shown.Count;
+        void PaginateElements (List<L> all_shown) {
             int min, max;
-            pagination.GetIndexRange(out min, out max, per_page, shown_elements_count);
+            paginateView.Paginate(all_shown.Count, max_elements_per_page, out min, out max);
             elements.AddRange(all_shown.Slice(min, max));
         }   
-        protected void DrawPaginationGUI (int per_page) {
-            if (pagination.ChangePageGUI (shown_elements_count, per_page)) {
-                ClearSelectionsAndRebuild();
-            }
+        
+        protected virtual void ExtraToolbarButtons(string[] all_paths, bool has_selection, bool selection_has_directories) {}
+        protected void DrawToolbar (string[] all_paths) {
 
-        }
+            GUIUtils.StartBox();
+            EditorGUILayout.BeginHorizontal();
+            bool has_selection = selected_elements.Count != 0;
+            bool selection_has_directories = false;
+            if (has_selection) { selection_has_directories = SelectionHasDirectories(); }
+            if (foldered && folderView.DrawBackButton()) OnFolderViewChange(all_paths);
 
-        protected bool NextPage(int per_page) {
-            if (pagination.NextPage(shown_elements_count, per_page)) {
-                ClearSelectionsAndRebuild();   
-                return true;
-            }
-            return false;
-        }
-        protected bool PreviousPage() {
-                
-            if (pagination.PreviousPage()) {
-                ClearSelectionsAndRebuild();
-                return true;
-            }
-            return false;
-                
-        }
+            bool lastview = foldered;
+            foldered = GUIUtils.ToggleButton(foldersViewGUI, true, foldered);
+            if (foldered != lastview) InitializeView(all_paths);
 
-
-
-
-
+            GUI.enabled = has_selection && !selection_has_directories;
+            if (GUIUtils.Button(importSettingsGUI, true)) OpenImportSettings();
+            GUI.enabled = true;
             
-        int shown_elements_count;
-        protected GUIUtils.Pagination pagination = new GUIUtils.Pagination();
+            ExtraToolbarButtons(all_paths, has_selection, selection_has_directories);
+            
+            EditorGUILayout.EndHorizontal();
+
+            GUIUtils.EndBox();
+
+
+        }
+
+
+        
+        
+        protected void DrawPaginationGUI (string[] all_paths) {
+            if (paginateView.ChangePageGUI ()) ClearSelectionsAndRebuild(all_paths);
+        }
+
+        bool NextPage(string[] all_paths) {
+            if (paginateView.NextPage()) {
+                ClearSelectionsAndRebuild(all_paths);   
+                return true;
+            }
+            return false;
+        }
+        bool PreviousPage(string[] all_paths) {
+            if (paginateView.PreviousPage()) {
+                ClearSelectionsAndRebuild(all_paths);
+                return true;
+            }
+            return false;
+                
+        }
 
 
 
-        protected void KeyboardInput (out bool enter_pressed, out bool delete_pressed, out bool left_p, out bool right_p){//, int min_index, int max_index) {
-            int c = selected_elements.Count;
+
+        protected void KeyboardInput (string[] all_paths, out bool enter_pressed, out bool delete_pressed){
+            delete_pressed = enter_pressed = false;
             Event e = Event.current;
-            left_p = e.keyCode == KeyCode.LeftArrow;
-            right_p = e.keyCode == KeyCode.RightArrow;
-            delete_pressed = e.keyCode == KeyCode.Backspace;
-            enter_pressed = e.keyCode == KeyCode.Return;
-
             if (e.type != EventType.KeyDown) return;
+            
             bool down_p = e.keyCode == KeyCode.DownArrow;
             bool up_p = e.keyCode == KeyCode.UpArrow;
+            bool left_p = e.keyCode == KeyCode.LeftArrow;
+            bool right_p = e.keyCode == KeyCode.RightArrow;
+            delete_pressed = e.keyCode == KeyCode.Backspace;
+            enter_pressed = e.keyCode == KeyCode.Return;
 
             if (down_p || up_p || left_p || right_p || delete_pressed || enter_pressed) e.Use();    
             
             L element_to_select = null;
 
+            int c = selected_elements.Count;
             if ((down_p || up_p) && c == 0) {
                 hi_selection = lo_selection = down_p ? 0 : elements.Count - 1;
                 element_to_select = elements[hi_selection];
@@ -148,7 +222,36 @@ namespace AssetObjectsPacks {
                 }
             }
             if (element_to_select != null) OnObjectSelection(element_to_select, false);
+
+
+            if (right_p) {
+                if (NextPage(all_paths)) {}
+            }
+            if (left_p) {
+                if (PreviousPage(all_paths)) {}
+                else {
+                    if (foldered) {
+                        if (folderView.MoveBackward()) {
+                            OnFolderViewChange(all_paths);
+                        }
+                    }
+                }
+            }      
+
+            if (selected_elements.Count != 0) {
+                
+                if (enter_pressed) {
+                    if (SelectionHasDirectories()) {
+                        if (selected_elements.Count == 1) {
+                            foreach (var s in selected_elements) MoveForwardFolder(s.fullName, all_paths);
+                        }
+                        enter_pressed = false;
+                    }
+                }
+            } 
         }
+
+
 
         protected void OnObjectSelection (L selection, bool was_selected) {
             Event e = Event.current;
@@ -164,7 +267,9 @@ namespace AssetObjectsPacks {
             }
             else {
                 selected_elements.Clear();
-                if (!was_selected) selected_elements.Add(selection);
+                if (!was_selected) {
+                    selected_elements.Add(selection);
+                }
             }
             OnSelectionChange();
         }
@@ -195,25 +300,8 @@ namespace AssetObjectsPacks {
         }
 
         
-
-
-                
-
-
-        
-
-        
-
-        protected static readonly GUIContent import_settings_gui = new GUIContent("Import Settings");
-        
-
-
-        protected void OpenImportSettings () {
-            List<Object> objs = new List<Object>(selected_elements.Count);
-            foreach (var el in selected_elements) {
-                objs.Add(AssetDatabase.LoadAssetAtPath(pack.objectsDirectory + el.file_path, typeof(Object)));
-            }
-            Animations.EditImportSettings.CreateWizard(objs.ToArray());
+        void OpenImportSettings () {
+            Animations.EditImportSettings.CreateWizard(new Object[selected_elements.Count].Generate(selected_elements, e => { return AssetDatabase.LoadAssetAtPath(pack.objectsDirectory + e.file_path, typeof(Object)); } ));
         }
 
         protected void ReInitializeAssetObjectParameters(SerializedProperty ao, AssetObjectParamDef[] defs) {
@@ -238,8 +326,6 @@ namespace AssetObjectsPacks {
             return false;
         }
 
-            
-        
         protected Object GetObjectRefForElement(L e) {
             return EditorUtils.GetAssetAtPath(pack.objectsDirectory + e.file_path, pack.assetType);  
         }
@@ -250,10 +336,15 @@ namespace AssetObjectsPacks {
             if (c == 0) return;
             if (SelectionHasDirectories()) return;
 
-            HashSet<Object> objs = new HashSet<Object>();   
-            foreach (L s in selected_elements) objs.Add( GetObjectRefForElement(s) );
+
+            Object[] objs = new Object[selected_elements.Count].Generate(selected_elements, s => { return GetObjectRefForElement(s); } );
+
+            //HashSet<Object> objs = new HashSet<Object>();   
+            //foreach (L s in selected_elements) objs.Add( GetObjectRefForElement(s) );
             
-            preview = Editor.CreateEditor(objs.ToArray());
+            //preview = Editor.CreateEditor(objs.ToArray());
+            preview = Editor.CreateEditor(objs);
+            
             preview.HasPreviewGUI();
             preview.OnInspectorGUI();
             preview.OnPreviewSettings();

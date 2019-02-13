@@ -135,6 +135,7 @@ namespace AssetObjectsPacks {
             }
             return false;
         }
+        /*
         public static bool Contains (this SerializedProperty p, int e, out int at_index) {
             at_index = -1;
             int a = p.arraySize;
@@ -146,6 +147,7 @@ namespace AssetObjectsPacks {
             }
             return false;
         }
+         */
 
         public static SerializedProperty AddNewElement(this SerializedProperty p) {
             int l = p.arraySize;
@@ -155,14 +157,17 @@ namespace AssetObjectsPacks {
         public static void Add (this SerializedProperty p, string e) {
             p.AddNewElement().stringValue = e;
         }
+        /*
         public static void Add (this SerializedProperty p, int e) {
             p.AddNewElement().intValue = e;
         }
+         */
 
         public static void Remove (this SerializedProperty p, string e) {
             int i;
             if (p.Contains(e, out i)) p.DeleteArrayElementAtIndex(i);
         }
+        /*
         public static void Remove (this SerializedProperty p, int e) {
             int i;
             if (p.Contains(e, out i)) p.DeleteArrayElementAtIndex(i);
@@ -174,14 +179,17 @@ namespace AssetObjectsPacks {
             }
 
         }
+         */
         public static bool Contains (this SerializedProperty p, string e) {
             int at_index;
             return p.Contains(e, out at_index);
         }
+        /*
         public static bool Contains (this SerializedProperty p, int e) {
             int at_index;
             return p.Contains(e, out at_index);
         }
+         */
 
         
         public static void CopyProperty(this SerializedProperty p, SerializedProperty c) {

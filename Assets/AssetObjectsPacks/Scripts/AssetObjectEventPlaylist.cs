@@ -24,7 +24,7 @@ namespace AssetObjectsPacks {
                 
                 if (_channels == null || _channels.Length == 0) {
 
-                    _channels = new Channel[0].GenerateArray(i => { return new Channel(transform.GetChild(i)); } , transform.childCount);
+                    _channels = new Channel[transform.childCount].Generate( i => { return new Channel(transform.GetChild(i)); } );
 
                     //_channels = GetComponentsInChildren<AssetObjectEventPlaylistChannel>();
                 }
