@@ -10,10 +10,6 @@ namespace AssetObjectsPacks {
     {
 
         public static class Parameters {
-
-            
-
-
             public static SerializedProperty GetParamProperty(SerializedProperty parameter) {
                 switch((AssetObjectParam.ParamType)parameter.FindPropertyRelative(AssetObjectParam.param_type_field).enumValueIndex) {
 
@@ -65,6 +61,9 @@ namespace AssetObjectsPacks {
                     }
                 }
 
+                Debug.Log("done deleting excess params");
+
+
                 //check for parameters that need adding
                 for (int i = 0; i < c_d; i++) {
                     AssetObjectParam def_param = defs[i].parameter;
@@ -81,34 +80,40 @@ namespace AssetObjectsPacks {
                     }
                 }
 
+                Debug.Log("done adding params");
+
                 //reorder to same order
 
                 //make extra temp parameeter
                 SerializedProperty temp = parameters.AddNewElement();
 
+
+
                 for (int d = 0; d < c_d; d++) {
                     AssetObjectParam def_param = defs[d].parameter;
-                    SerializedProperty param = parameters.GetArrayElementAtIndex(d);
+                    SerializedProperty parameter = parameters.GetArrayElementAtIndex(d);
 
-                    if (param.FindPropertyRelative(AssetObjectParam.name_field).stringValue == def_param.name) continue;
+                    if (parameter.FindPropertyRelative(AssetObjectParam.name_field).stringValue == def_param.name) continue;
 
+                    Debug.Log("looking for param: " + def_param.name);
                     SerializedProperty real_param = null;
                     for (int p = d + 1; p < c_p; p++) {
-                        real_param = parameters.GetArrayElementAtIndex(d);
+                        real_param = parameters.GetArrayElementAtIndex(p);
                         if (real_param.FindPropertyRelative(AssetObjectParam.name_field).stringValue == def_param.name) break;
                     }
 
                     //put the current one in temp
-                    CopyParameter(temp, param);
+                    CopyParameter(temp, parameter);
                     //place the real param in the current
-                    CopyParameter(param, real_param);
+                    CopyParameter(parameter, real_param);
                     //place temp in old param that was moved
                     CopyParameter(real_param, temp);
                 }
-
+                Debug.Log("done reordering " + parameters.arraySize);
                 //delete temp parameter
                 parameters.DeleteArrayElementAtIndex(parameters.arraySize-1);
-
+                Debug.Log("done reordering 2 " + parameters.arraySize);
+                
                 //check type changes
                 for (int i = 0; i < c_d; i++) {
                     AssetObjectParam def_param = defs[i].parameter;

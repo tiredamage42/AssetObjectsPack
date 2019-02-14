@@ -380,7 +380,7 @@ namespace AssetObjectsPacks {
     }
     
 
-
+/*
     public class AssetObjectTagsGUI {
         const int max_shown_tags = 10;
         Action<string> on_tags_change;
@@ -604,6 +604,8 @@ namespace AssetObjectsPacks {
             }
         }
     }    
+     */
+
 }
 
 

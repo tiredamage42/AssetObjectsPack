@@ -24,7 +24,7 @@ namespace AssetObjectsPacks.Animations {
 
             bool mirror = false;
             int mirror_mode = assetObject["Mirror"].intValue;
-            float trans_speed = assetObject["Transition Time"].floatValue;
+            float trans_speed = assetObject["T.T."].floatValue;
             float speed = assetObject["Speed"].floatValue;
             bool looped = assetObject["Looped"].boolValue;
 
@@ -170,12 +170,12 @@ namespace AssetObjectsPacks.Animations {
 
             if (do_transition) {
 
-                Debug.Log("doing cross fade: " + anim_index);
+                //Debug.Log("doing cross fade: " + anim_index);
 
 
             }
             else{
-                Debug.Log("playing loop: " + anim_index);
+                //Debug.Log("playing loop: " + anim_index);
 
             
 
@@ -186,7 +186,7 @@ namespace AssetObjectsPacks.Animations {
             }
             //if we're doing it in the background of a one shot just change the current active loopset
 
-            Debug.Log("playing loop at loopset: " + active_loopset);
+            //Debug.Log("playing loop at loopset: " + active_loopset);
             anim.SetFloat(p_LoopIndicies[active_loopset], anim_index);
             anim.SetFloat(p_LoopSpeeds[active_loopset], speed);
             anim.SetBool(p_LoopMirrors[active_loopset], mirror);
@@ -194,7 +194,7 @@ namespace AssetObjectsPacks.Animations {
             
             if (do_transition) {
                 string active_loop = "Loops_" + active_loopset.ToString();
-                Debug.Log(active_loop +  " active loop cross fade time");
+                //Debug.Log(active_loop +  " active loop cross fade time");
                 //InterruptAnimation();
                 anim.CrossFadeInFixedTime(
                     active_loop,
@@ -207,7 +207,7 @@ namespace AssetObjectsPacks.Animations {
         }
 
         void PlayAnimation(int anim_index, bool mirror, float transition_time, float speed) {
-            Debug.Log("playing anim " + anim_index.ToString());
+            //Debug.Log("playing anim " + anim_index.ToString());
 
 
 

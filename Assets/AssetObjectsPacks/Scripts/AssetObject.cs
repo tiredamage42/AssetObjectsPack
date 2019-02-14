@@ -94,8 +94,13 @@ namespace AssetObjectsPacks {
         
         public const string obj_ref_field = "object_reference", tags_field = "tags";
         public const string id_field = "id", params_field = "parameters";
-
         public const string conditionChecksField = "conditionChecks";
+        public const string showConditionsField = "showConditions";
+
+        
+        //for custom editor
+        public bool showConditions;
+        
         public const string paramsToMatchField = "paramsToMatch";
         #endif
 
@@ -128,7 +133,13 @@ namespace AssetObjectsPacks {
                     string name = paramsToMatch[i].name;
                     AssetObjectParam check = FindParamByName(name, paramsCheck);
 
+                    //Debug.Log("checking parameter " + name);
+                
+
                     if (check == null || !paramsToMatch[i].MatchesParameter(check)) {
+
+                        //Debug.Log("parameter failed" + name);
+
                         all_params_matched = false;
                         break;
                     }
@@ -143,11 +154,17 @@ namespace AssetObjectsPacks {
 
         public bool PassesConditionCheck (AssetObjectParam[] paramsCheck) {
 
-            if (conditionChecks.Length == 0) return true;
+            if (conditionChecks.Length == 0) {
+                //Debug.Log("[" + id + "] has no conditions");
+                return true;
+            }
 
             for (int i = 0; i < conditionChecks.Length; i++ ) {
 
                 if (conditionChecks[i].ConditionMet(paramsCheck)) {
+
+                    //Debug.Log("[" + id + "] condition " + i +  " met");
+                
                     return true;
                 }
             }

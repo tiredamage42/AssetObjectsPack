@@ -4,7 +4,15 @@ using UnityEditor;
 namespace AssetObjectsPacks {
     public static class AssetObjectsEditor 
     {
-        
+        public static AssetObjectPacks GetAssetObjectsPacksObject () {
+            string[] guids = AssetDatabase.FindAssets("t:"+ typeof(AssetObjectPacks).Name);  
+            if (guids.Length == 0) {
+                Debug.LogError("No Asset Objects Packs Defenitions Object Found");
+                return null;
+            }
+            return AssetDatabase.LoadAssetAtPath<AssetObjectPacks>(AssetDatabase.GUIDToAssetPath(guids[0]));
+        }
+       
         public const string asset_object_key = "@ID-";  
         const string back_slash = "/", dash = "-";
         const char back_slash_c = '/', dash_c = '-', dot_c = '.', comma_c = ',';    

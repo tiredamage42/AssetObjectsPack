@@ -4,30 +4,33 @@ using UnityEditor;
 namespace AssetObjectsPacks {
     public class AssetObjectExplorerView : SelectionView<ListViewElement>
     {
-        HiddenView hiddenView = new HiddenView();
-        GUIContent add2setGUI = new GUIContent("+", "Add To Set");
-        GUIContent hide_gui = new GUIContent("H", "Hide");
-        GUIContent unhide_gui = new GUIContent("U", "Unhide");
-        GUIContent add_selected_gui = new GUIContent("Add Selected");   
-        protected HashSet<int> ids_in_set = new HashSet<int>();
-        const string hidden_suffix = " [HIDDEN]";
-        
-        public override void InitializeView (string[] all_paths) {
-            ids_in_set = ids_in_set.Generate(ao_list.arraySize, i => { return GetObjectIDAtIndex(i); }); 
-            base.InitializeView(all_paths);
-        }
+        //GUIContent add2setGUI = new GUIContent("+", "Add To Set");
+        //GUIContent add_selected_gui = new GUIContent("   Add   ", "Add Selected");   
+        //protected HashSet<int> ids_in_set = new HashSet<int>();
+        //GUIContent hide_gui = new GUIContent("H", "Hide");
+        //GUIContent unhide_gui = new GUIContent("U", "Unhide");
+        //const string hidden_suffix = " [HIDDEN]";
 
-        void OnAddIDsToSet (HashSet<ListViewElement> elements, string[] all_paths) {
-            if (elements.Count == 0) return;
-            hiddenView.UnhideIDs( IDSetFromElements(elements) );
+        
+        
+        //public override void InitializeView (string[] all_paths, HashSet<ListViewElement> selection) {
+        //    ids_in_set = ids_in_set.Generate(ao_list.arraySize, i => { return GetObjectIDAtIndex(i); }); 
+        //    base.InitializeView(all_paths, selection);
+        //}
+/*
+        void AddElementsToSet (HashSet<ListViewElement> elements_to_add, string[] all_paths, HashSet<ListViewElement> selection) {
+            if (elements_to_add.Count == 0) return;
+            //hiddenView.UnhideIDs( IDSetFromElements(elements_to_add) );
             bool reset_i = true;
-            foreach (ListViewElement e in elements) {
+            foreach (ListViewElement e in elements_to_add) {
                 ids_in_set.Add(e.object_id);
                 AddNewAssetObject(e.object_id, GetObjectRefForElement(e), e.file_path, reset_i);
                 reset_i = false;
             }
-            ClearSelectionsAndRebuild(all_paths);
+            ClearSelectionsAndRebuild(all_paths, selection);
         }
+
+
 
         void AddNewAssetObject (int obj_id, Object obj_ref, string file_path, bool make_default) {
             SerializedProperty ao = ao_list.AddNewElement();
@@ -41,38 +44,73 @@ namespace AssetObjectsPacks {
             ReInitializeAssetObjectParameters(ao, pack.defaultParams);
         } 
 
-        public bool Draw (string[] all_paths) {
+
+
+
+//explorer draw
+        public bool Draw (string[] all_paths, HashSet<ListViewElement> selection) {
             bool changed = false;
             bool enter_pressed, delete_pressed;
-            KeyboardInput(all_paths, out enter_pressed, out delete_pressed);
+            KeyboardInput(all_paths, out enter_pressed, out delete_pressed, selection);
 
-            if (selected_elements.Count != 0) {
-                if (delete_pressed) {
-                    if (!SelectionHasDirectories()) {
-                        if (hiddenView.ToggleHiddenSelected(IDSetFromElements( selected_elements ), false, true)) {
-                            ClearSelectionsAndRebuild(all_paths);
-                            changed = true;
-                        }
-                    }
-                }
+            if (selection.Count != 0) {
                 if (enter_pressed) {
-                    OnAddIDsToSet(selected_elements, all_paths);
+                    AddElementsToSet(selection, all_paths, selection);
                     changed = true;
                 }
             }
 
-            DrawToolbar(all_paths);
-            DrawElements(all_paths);
-            DrawPaginationGUI(all_paths);
+            DrawToolbar(all_paths, selection);
+            DrawElements(all_paths, selection);
+            DrawPaginationGUI(all_paths, selection);
             return changed;
         }
+ */
 
-        protected override void DrawNonFolderElement(string[] all_paths, ListViewElement element, bool selected, int index) {
+/*
+        protected override void PreSelectButton(int index) {
+        }
+
+        protected override void NonFolderSecondTier(string[] all_paths, ListViewElement element, int index) {
+                
+        }
+        protected override void PostSelectButton (ListViewElement element, int index) {
+
+        }
+
+ */
+
+/*
+        protected override bool DrawNonFolderElement(ListViewElement element, int index, bool selected, bool hidden, GUILayoutOption element_width) {
+        
         
             EditorGUILayout.BeginHorizontal();
 
-            bool is_hidden = hiddenView.IsHidden(element.object_id);
             
+            bool selected_element = GUIUtils.ScrollWindowElement (element.label_gui, selected, hidden, false, element_width);
+            
+            
+            EditorGUILayout.EndHorizontal();
+
+            return selected_element;
+
+            
+
+        }
+         
+
+        protected override void OnPagination()
+        {
+            max_name_width = GUILayout.ExpandWidth(true);
+        }
+
+
+        protected override void DrawNonFolderElement(string[] all_paths, ListViewElement element, bool selected, bool is_hidden, int index) {
+        
+            EditorGUILayout.BeginHorizontal();
+
+            
+            //bool is_hidden = hiddenView.IsHidden(element.object_id);
             bool add_button_pressed = GUIUtils.SmallButton(add2setGUI, EditorColors.green_color, EditorColors.black_color);
             bool hide_button_pressed = GUIUtils.SmallToggleButton(is_hidden ? unhide_gui : hide_gui, is_hidden) != is_hidden;
             bool obj_selected = GUIUtils.ScrollWindowElement (element.label_gui, selected, is_hidden, false);
@@ -80,6 +118,8 @@ namespace AssetObjectsPacks {
             if (obj_selected) {
                 OnObjectSelection(element, selected);
             }
+
+
             if (add_button_pressed) {
                 OnAddIDsToSet(new HashSet<ListViewElement>() {element}, all_paths);
             }
@@ -91,26 +131,31 @@ namespace AssetObjectsPacks {
             
             EditorGUILayout.EndHorizontal();
         }
-
-        protected override void ExtraToolbarButtons(string[] all_paths, bool has_selection, bool selection_has_directories) {
+        protected override void ExtraToolbarButtons(string[] all_paths, bool has_selection, bool selection_has_directories, HashSet<ListViewElement> selection) {
             GUI.enabled = has_selection && !selection_has_directories;            
             
-            if (GUIUtils.Button(add_selected_gui, true)) OnAddIDsToSet(selected_elements, all_paths);
+            if (GUIUtils.Button(add_selected_gui, true, EditorStyles.miniButton)) AddElementsToSet(selection, all_paths, selection);
             
-            bool toggled_hidden_selected = hiddenView.ToggleHiddenSelectedButton( IDSetFromElements( selected_elements ) );
+            //bool toggled_hidden_selected = hiddenView.ToggleHiddenSelectedButton( IDSetFromElements( selected_elements ) );
             
             GUI.enabled = true;
             
-            bool toggled_show_hidden = hiddenView.ToggleShowHiddenButton();
+            //bool toggled_show_hidden = hiddenView.ToggleShowHiddenButton();
             
-            bool reset_hidden = hiddenView.ResetHiddenButton();
+            //bool reset_hidden = hiddenView.ResetHiddenButton();
             
-            if (toggled_hidden_selected || toggled_show_hidden || reset_hidden) ClearSelectionsAndRebuild(all_paths);
+            //if (toggled_hidden_selected || toggled_show_hidden || reset_hidden) ClearSelectionsAndRebuild(all_paths);
         }
+ */
+/*
+
 
         protected override List<ListViewElement> UnpaginatedFoldered(string[] all_paths) {
             HashSet<string> usedNames = new HashSet<string>();            
             List<ListViewElement> unpaginated = new List<ListViewElement>();
+
+            HashSet<int> ids_in_set = new HashSet<int>().Generate(ao_list.arraySize, i => { return GetObjectIDAtIndex(i); }); 
+            
             
             int lastDir = 0;
             int c = all_paths.Length;
@@ -119,35 +164,27 @@ namespace AssetObjectsPacks {
                 string file_path = all_paths[i];
                 int id = AssetObjectsEditor.GetObjectIDFromPath(file_path);
                 
-                if (!folderView.DisplaysPath(file_path)) continue;
                 if (ids_in_set.Contains(id)) continue;
 
-                bool is_hidden = hiddenView.IsHidden(id);
-
-                if (!hiddenView.showHidden && is_hidden) continue;
-                
-                string name_display = folderView.DisplayNameFromPath(file_path);
-                if (usedNames.Contains(name_display)) continue;
-                usedNames.Add(name_display);
-
-                if (name_display.Contains(".")) { 
-                    string name_string = AssetObjectsEditor.RemoveIDFromPath(EditorUtils.RemoveDirectory(file_path));
-
-                    if (is_hidden) name_string += hidden_suffix;
-
-                    GUIContent label_gui = new GUIContent( name_string );// ao.label_gui;
-                    unpaginated.Add(new ListViewElement(file_path, name_display, label_gui, id));
-                    continue;
+                bool isDirectory;
+                GUIContent gui;
+                if (ElementPassedFolderedView (id, file_path, ref usedNames, out gui, out isDirectory)) {
+                    if (!isDirectory) {
+                        unpaginated.Add(new ListViewElement(file_path, gui.text, gui, id, null));
+                        continue;
+                    }
+                    //is directory
+                    unpaginated.Insert(lastDir, new ListViewElement(file_path, gui.text, gui, -1, null));
+                    lastDir++;   
                 }
-
-                //is directory
-                unpaginated.Insert(lastDir, new ListViewElement(file_path, name_display, new GUIContent(name_display), -1));
-                lastDir++;   
             } 
             return unpaginated;
         }
 
         protected override List<ListViewElement> UnpaginatedListed(string[] all_paths) {
+
+            HashSet<int> ids_in_set = new HashSet<int>().Generate(ao_list.arraySize, i => { return GetObjectIDAtIndex(i); }); 
+            
             int c = all_paths.Length;
             
             List<ListViewElement> unpaginated = new List<ListViewElement>();
@@ -156,12 +193,15 @@ namespace AssetObjectsPacks {
                 int id = AssetObjectsEditor.GetObjectIDFromPath(file_path);
                 
                 if (ids_in_set.Contains(id)) continue;
-                if (!hiddenView.showHidden && hiddenView.IsHidden(id)) continue;
-                
-                string n = AssetObjectsEditor.RemoveIDFromPath(file_path);
-                unpaginated.Add(new ListViewElement(file_path, file_path, new GUIContent(n), id));
+
+                GUIContent gui;
+                if (ElementPassedListedView(id, file_path, out gui)) {
+
+                    unpaginated.Add(new ListViewElement(file_path, file_path, gui, id, null));
+                }
             }
             return unpaginated;
         }        
+ */
     }
 }

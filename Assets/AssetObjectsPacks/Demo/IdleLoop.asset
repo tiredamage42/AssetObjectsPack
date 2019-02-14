@@ -13,30 +13,8 @@ MonoBehaviour:
   m_Name: IdleLoop
   m_EditorClassIdentifier: 
   multi_edit_instance:
-    conditionChecks:
-    - paramsToMatch:
-      - name: 
-        paramType: 0
-        boolValue: 0
-        floatValue: 0
-        intValue: 0
-      - name: Param Name
-        paramType: 0
-        boolValue: 0
-        floatValue: 0
-        intValue: 0
-    - paramsToMatch:
-      - name: 
-        paramType: 0
-        boolValue: 0
-        floatValue: 0
-        intValue: 0
-    - paramsToMatch:
-      - name: 
-        paramType: 0
-        boolValue: 0
-        floatValue: 0
-        intValue: 0
+    showConditions: 0
+    conditionChecks: []
     object_reference: {fileID: 0}
     tags: []
     id: 0
@@ -56,7 +34,7 @@ MonoBehaviour:
       boolValue: 0
       floatValue: 1
       intValue: 0
-    - name: Transition Time
+    - name: T.T.
       paramType: 1
       boolValue: 0
       floatValue: 0.25
@@ -66,6 +44,127 @@ MonoBehaviour:
       boolValue: 0
       floatValue: 0
       intValue: 0
-  hidden_ids: 0105000002050000
-  assetObjects: []
+  hiddenIDs: 
+  assetObjects:
+  - showConditions: 1
+    conditionChecks:
+    - paramsToMatch:
+      - name: Agitated
+        paramType: 0
+        boolValue: 0
+        floatValue: 0
+        intValue: 0
+      - name: Stance
+        paramType: 2
+        boolValue: 0
+        floatValue: 0
+        intValue: 0
+    object_reference: {fileID: 7400000, guid: 16884e09167a340ed90426bc92fb7c60, type: 3}
+    tags: []
+    id: 6270
+    parameters:
+    - name: Duration
+      paramType: 1
+      boolValue: 0
+      floatValue: 5
+      intValue: 0
+    - name: Looped
+      paramType: 0
+      boolValue: 1
+      floatValue: 0
+      intValue: 0
+    - name: Speed
+      paramType: 1
+      boolValue: 0
+      floatValue: 1
+      intValue: 0
+    - name: T.T.
+      paramType: 1
+      boolValue: 0
+      floatValue: 0.25
+      intValue: 0
+    - name: Mirror
+      paramType: 2
+      boolValue: 0
+      floatValue: 0
+      intValue: 0
+  - showConditions: 1
+    conditionChecks:
+    - paramsToMatch:
+      - name: Stance
+        paramType: 2
+        boolValue: 0
+        floatValue: 0
+        intValue: 1
+    object_reference: {fileID: 7400002, guid: 21be9dd6dbca546868a5fd0af08731ce, type: 3}
+    tags: []
+    id: 4734
+    parameters:
+    - name: Duration
+      paramType: 1
+      boolValue: 0
+      floatValue: 5
+      intValue: 0
+    - name: Looped
+      paramType: 0
+      boolValue: 1
+      floatValue: 0
+      intValue: 0
+    - name: Speed
+      paramType: 1
+      boolValue: 0
+      floatValue: 1
+      intValue: 0
+    - name: T.T.
+      paramType: 1
+      boolValue: 0
+      floatValue: 0.25
+      intValue: 0
+    - name: Mirror
+      paramType: 2
+      boolValue: 0
+      floatValue: 0
+      intValue: 0
+  - showConditions: 1
+    conditionChecks:
+    - paramsToMatch:
+      - name: Agitated
+        paramType: 0
+        boolValue: 1
+        floatValue: 0
+        intValue: 0
+      - name: Stance
+        paramType: 2
+        boolValue: 1
+        floatValue: 0
+        intValue: 0
+    object_reference: {fileID: 7400002, guid: 8d3fbcfdbf44d43e8baffecfa97f9f57, type: 3}
+    tags: []
+    id: 463
+    parameters:
+    - name: Duration
+      paramType: 1
+      boolValue: 0
+      floatValue: 5
+      intValue: 0
+    - name: Looped
+      paramType: 0
+      boolValue: 1
+      floatValue: 0
+      intValue: 0
+    - name: Speed
+      paramType: 1
+      boolValue: 0
+      floatValue: 1
+      intValue: 0
+    - name: T.T.
+      paramType: 1
+      boolValue: 0
+      floatValue: 0.25
+      intValue: 0
+    - name: Mirror
+      paramType: 2
+      boolValue: 0
+      floatValue: 0
+      intValue: 0
   assetObjectPackID: 1

@@ -22,12 +22,12 @@ MonoBehaviour:
         intValue: 0
       hint: 
     - parameter:
-        name: Transition Time
+        name: T.T.
         paramType: 1
         boolValue: 0
         floatValue: 0.25
         intValue: 0
-      hint: 
+      hint: Transition Time (s)
     - parameter:
         name: Mirror
         paramType: 2
@@ -43,3 +43,12 @@ MonoBehaviour:
     - dfgd
     name: Animations
     id: 1
+  - defParams: []
+    objectsDirectory: 
+    fileExtensions: 
+    assetType: 
+    allTags:
+    - dfdsfs
+    - dfgd
+    name: New Pack
+    id: 0
