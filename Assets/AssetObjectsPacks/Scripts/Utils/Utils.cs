@@ -18,6 +18,7 @@ namespace AssetObjectsPacks {
         #if UNITY_EDITOR
         public static bool IsValidDirectory(this string s) {
             if (s.IsEmpty()) return false;
+            if (!s.EndsWith("/")) return false;
             return System.IO.Directory.Exists(s);
         }
         public static bool IsValidTypeString(this string s) {

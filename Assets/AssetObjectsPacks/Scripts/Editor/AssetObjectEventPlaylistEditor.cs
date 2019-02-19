@@ -6,8 +6,8 @@ namespace AssetObjectsPacks {
         GUIContent sync_channels_gui = new GUIContent("Sync Channels", "channels change events at same time when ready as opposed to staggered (whenever last event is done)");
         SerializedProperty loop_prop, sync_prop; //, interrupt_prop;
         void OnEnable () {
-            loop_prop = serializedObject.FindProperty("isLooped");
             //interrupt_prop = serializedObject.FindProperty("interruptsOthers");            
+            loop_prop = serializedObject.FindProperty("isLooped");
             sync_prop = serializedObject.FindProperty("syncChannels");
         }
         public override void OnInspectorGUI () {

@@ -25,6 +25,7 @@ namespace AssetObjectsPacks.Animations {
                 AddEvents(AssetDatabase.GetAssetPath(Selection.gameObjects[i]));
             }
         }
+        
         void AddEvents (string file_path) {
             ModelImporter importer = AssetImporter.GetAtPath(file_path) as ModelImporter;
             if (importer == null) {

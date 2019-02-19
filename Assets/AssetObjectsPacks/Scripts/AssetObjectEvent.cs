@@ -11,22 +11,8 @@ namespace AssetObjectsPacks {
         #endif
         
         public AssetObjectEventPlaylist playlist;
-
         public AssetObjectEventPack[] eventPacks;
         
-        
-        AssetObjectEventBehavior[] _b;
-        public AssetObjectEventBehavior[] behaviors {
-            get {
-                if (_b == null) {
-                    _b = GetComponents<AssetObjectEventBehavior>();
-                    if (_b.Length == 0) {
-                        Debug.LogError("no behaviors");
-                    }
-                }
-                return _b;
-            }
-        }
 
         //if the event should wait for the player to snap to the interest transform
         //before being considered ready

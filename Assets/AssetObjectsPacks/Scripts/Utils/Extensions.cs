@@ -1,17 +1,19 @@
 ﻿using System.Collections.Generic;
-//using UnityEngine;
 using System.Linq;
 
 namespace AssetObjectsPacks {
-    public static class Extensions 
-    {
+    public static class Extensions  {
         public delegate T GetMethod<T> (int index);
-      
+
+        public static T First<T> (this HashSet<T> h)  {
+            foreach (T e in h) return e;
+            return default(T);
+        }
         
+        /*
         static IEnumerable<T> Generate<T>(GetMethod<T> get_obj_method, int count) {
             for (int i = 0; i < count; i++) yield return get_obj_method(i);
         }
-        /*
         public static HashSet<T> ToHashSet<T>(this IEnumerable<T> a) {
             HashSet<T> r = new HashSet<T>();
             foreach (T o in a) r.Add(o);
@@ -59,7 +61,6 @@ namespace AssetObjectsPacks {
         public static T[] Generate<T, O> (this T[] h, IList<O> other, TFromO<T,O> t_from_o) {
             int c = other.Count;
             CheckArraySize(ref h, c);
-            
             for (int i = 0; i < c; i++) h[i] = t_from_o( other[i] );
             return h;
         }
@@ -91,42 +92,37 @@ namespace AssetObjectsPacks {
         }
  */
 
-    public static T Last<T> (this IList<T> a) {
-        return a[a.Count - 1];
-    }
-    public static T[] ToArray<T> (this ISet<T> s) {
-        T[] r = new T[s.Count];
-        int u = 0;
-        foreach (T t in s) {
-            r[u] = t;
-            u++;
+        public static T Last<T> (this IList<T> a) {
+            return a[a.Count - 1];
         }
-        return r;
-    }
-    public static IList<T> Slice<T>(this IList<T> x, int a=0, int b=-1) {
-        if (b < 0) {
-            b = x.Count + b;
-        }
-        //int l = (b < 0) ? x.Count - a : b;
-        List<T> r = new List<T>();
-        for (int i = a; i <= b; i++) r.Add( x[i] ); 
-        return r;
-    }
-
-    public static bool Contains(this int[] a, int e) {
-        int l = a.Length;
-        for (int i = 0; i < l; i++) {
-            if (a[i] == e) {
-                return true;
+        public static T[] ToArray<T> (this ISet<T> s) {
+            T[] r = new T[s.Count];
+            int u = 0;
+            foreach (T t in s) {
+                r[u] = t;
+                u++;
             }
+            return r;
         }
-        return false;
-    }
+        public static IList<T> Slice<T>(this IList<T> x, int a=0, int b=-1) {
+            if (b < 0) b = x.Count + b;
+            //int l = (b < 0) ? x.Count - a : b;
+            List<T> r = new List<T>();
+            for (int i = a; i <= b; i++) r.Add( x[i] ); 
+            return r;
+        }
+        public static bool Contains(this int[] a, int e) {
+            int l = a.Length;
+            for (int i = 0; i < l; i++) {
+                if (a[i] == e) return true;
+            }
+            return false;
+        }
         
 
-    public static T RandomChoice<T>(this IList<T> l) {
-        return l[UnityEngine.Random.Range(0, l.Count)];
-    }
+        public static T RandomChoice<T>(this IList<T> l) {
+            return l[UnityEngine.Random.Range(0, l.Count)];
+        }
     }
 
 }

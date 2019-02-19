@@ -244,6 +244,7 @@ var exportVariationLoop = (character, page, pages, variations, gms_hash, start_n
         .then((json) => monitorAnimation(character, json))
 
         //uncomment if you're having performance problems:
+        
         //.then(sleeper(3000))
 
         .then(() => exportVariationLoop(character, page, pages, variations, gms_hash, start_name, has_variations)) //loop

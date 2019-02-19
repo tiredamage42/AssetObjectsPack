@@ -1,8 +1,6 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
-
+﻿using UnityEngine;
 namespace AssetObjectsPacks {
-    [CreateAssetMenu()]
+    [CreateAssetMenu(fileName = "New Asset Object Event", menuName = "Asset Objects Packs/Event", order = 2)]
     [System.Serializable] public class AssetObjectEventPack : ScriptableObject {
 
         #if UNITY_EDITOR
@@ -12,12 +10,11 @@ namespace AssetObjectsPacks {
         
         //used for multi anim editing and defaults in editor explorer
         public AssetObject multi_edit_instance;  
-
         public int[] hiddenIDs;
         #endif
     
-        public List<AssetObject> assetObjects = new List<AssetObject>();
-        public int assetObjectPackID;
+        public AssetObject[] assetObjects;
+        public int assetObjectPackID = -1;
     }
 }
 

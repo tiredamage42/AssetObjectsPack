@@ -1,7 +1,4 @@
-﻿
-
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 namespace AssetObjectsPacks {
     public class AssetObjectEventPlaylist : MonoBehaviour {
@@ -42,10 +39,10 @@ namespace AssetObjectsPacks {
         /*
         maybe make some non interruptable
         */
-        public void InitializePerformance (List<AssetObjectEventPlayer> players, Vector3 position, Quaternion rotation, System.Action on_end_performance_callback) {
+        public void InitializePerformance (AssetObjectEventPlayer[] players, Vector3 position, Quaternion rotation, System.Action on_end_performance_callback) {
 
             int channel_count = channels.Length;
-            int players_count = players.Count;
+            int players_count = players.Length;
             if (channel_count != players_count) {
                 Debug.LogError(name + " requires: " + channel_count + " players, got: " + players_count);
                 return;
@@ -133,7 +130,7 @@ namespace AssetObjectsPacks {
                     //Debug.Log("playing evnt!" + ao_event.name);
                     event_playing = true;
                     if (ao_event.playlist != null) {
-                        ao_event.playlist.InitializePerformance(new List<AssetObjectEventPlayer>() {player}, runtime_interest_transform.position, runtime_interest_transform.rotation, OnPlaylistEnd);
+                        ao_event.playlist.InitializePerformance(new AssetObjectEventPlayer[] {player}, runtime_interest_transform.position, runtime_interest_transform.rotation, OnPlaylistEnd);
                         return;
                     }
                     player.PlayEvent(ao_event, OnEventEnd);
@@ -213,12 +210,12 @@ namespace AssetObjectsPacks {
             Transform performance_root_transform;
             List<Transform> channel_interest_transforms = new List<Transform>();
             System.Action on_performance_done;
-            List<PerformanceChannel> channels = new List<PerformanceChannel>();
-            List<AssetObjectEventPlayer> orig_players;
+            PerformanceChannel[] channels;
+            AssetObjectEventPlayer[] orig_players;
             System.Action orig_performance_done_callback;
 
             public void InterruptPerformance () {
-                for (int i = 0; i < channels.Count; i++) {   
+                for (int i = 0; i < channels.Length; i++) {   
                     channels[i].OnPerformanceEnd(this);
                 }
                 on_performance_done = null;
@@ -229,7 +226,7 @@ namespace AssetObjectsPacks {
             //    this.on_performance_done = null;
             //    this.parent_scene = null;
             //}
-            public void InitializePerformance (AssetObjectEventPlaylist playlist, Vector3 position, Quaternion rotation, List<AssetObjectEventPlayer> players, System.Action on_performance_done) {
+            public void InitializePerformance (AssetObjectEventPlaylist playlist, Vector3 position, Quaternion rotation, AssetObjectEventPlayer[] players, System.Action on_performance_done) {
                 this.on_performance_done = on_performance_done;
                 this.playlist = playlist;
 
@@ -247,11 +244,12 @@ namespace AssetObjectsPacks {
                 
                 
                 int channel_count = playlist.channels.Length;
-                if (channels.Count != channel_count) {
-                    channels.Clear ();
-                    for (int i = 0; i < channel_count; i++) {
-                        channels.Add(new PerformanceChannel());
-                    }
+                if (channels.Length != channel_count) {
+                    channels = new PerformanceChannel[channel_count].Generate( i => { return new PerformanceChannel(); } );
+                    //channels.Clear ();
+                    //for (int i = 0; i < channel_count; i++) {
+                    //    channels.Add(new PerformanceChannel());
+                    //}
                 }
 
                 if (channel_interest_transforms.Count != channel_count) {
@@ -274,7 +272,7 @@ namespace AssetObjectsPacks {
                 bool events_ready_synced = true;
                 bool events_done_synced = true;
                 bool all_done = true;
-                int c = channels.Count;
+                int c = channels.Length;
                 for (int i = 0; i < c; i++) {
                     if (!channels[i].current_event.event_ready) 
                         events_ready_synced = false;

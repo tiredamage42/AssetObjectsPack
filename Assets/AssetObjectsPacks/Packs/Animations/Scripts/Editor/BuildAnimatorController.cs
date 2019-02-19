@@ -20,9 +20,7 @@ namespace AssetObjectsPacks.Animations {
             ScriptableWizard.DisplayWizard<AnimatorControllerBuilder>("Generate Anim Controller", "Generate");
         }
         void OnWizardCreate() {
-            AssetObjectsManager instance = AssetObjectsManager.instance;
-            if (instance == null) return;
-            AssetObjectPacks packs = instance.packs;
+            PacksManager packs = AssetObjectsEditor.GetPackManager();
             if (packs == null) return;
             
             if (!saveDirectory.EndsWith("/")) saveDirectory += "/";
@@ -46,7 +44,7 @@ namespace AssetObjectsPacks.Animations {
             List<AssetObjectEventPack> all_event_packs = new List<AssetObjectEventPack>();
             int l = paths.Length;
             for (int i = 0; i < l; i++) {
-                all_event_packs.AddRange(EditorUtils.GetAssetsAtPath<AssetObjectEventPack>(paths[i]));
+                all_event_packs.Add(EditorUtils.GetAssetAtPath<AssetObjectEventPack>(paths[i]));
             }
             return all_event_packs;
         }
@@ -60,8 +58,9 @@ namespace AssetObjectsPacks.Animations {
             int l = all_event_packs.Count;
             for (int i = 0; i < l; i++) {
                 AssetObjectEventPack ep = all_event_packs[i];
-                if (AssetObjectsManager.instance.packs.FindPackByID( ep.assetObjectPackID ).name == animationsPackName) {
-                    int y = ep.assetObjects.Count;
+                int packIndex;
+                if (AssetObjectsManager.instance.packs.FindPackByID( ep.assetObjectPackID, out packIndex ).name == animationsPackName) {
+                    int y = ep.assetObjects.Length;
                     for (int z = 0; z < y; z++) {
                         int id = ep.assetObjects[z].id;
                         if (!used_ids.Contains(id)) {
@@ -103,26 +102,12 @@ namespace AssetObjectsPacks.Animations {
             Debug.Log("Controller built at: " + saveDirectory + "AnimationsController.controller");         
         }
 
-        // fbx files have extra "preview" clip that was getting in the awy (mixamo)
-        Object FilterOutPreview (Object[] all_objects) {
-            int l = all_objects.Length;
-            for (int i = 0; i < l; i++) {
-                Object o = all_objects[i];
-                if (!o.name.Contains("__preview__")) {
-                    return o;
-                }
-            }
-
-            return null;
-
-        }
-
         ClipIDPair[] BuildClipIDPairs (string[] file_paths, int c) {
             ClipIDPair[] results = new ClipIDPair[c];
             for (int i = 0; i < c; i++) {
                 string f = file_paths[i];
                 
-                AnimationClip clip = (AnimationClip)FilterOutPreview(EditorUtils.GetAssetsAtPath<AnimationClip>(f));
+                AnimationClip clip = EditorUtils.GetAssetAtPath<AnimationClip>(f);
                 if (clip == null) {
                     Debug.LogError("Clip is null: " + f);
                     return null;
@@ -132,15 +117,15 @@ namespace AssetObjectsPacks.Animations {
             return results;
         }
         void AddParameters (AnimatorController controller) {
-            controller.AddParameter(AnimationsPack.p_Mirror, AnimatorControllerParameterType.Bool);
-            controller.AddParameter(AnimationsPack.p_Speed, AnimatorControllerParameterType.Float);
+            controller.AddParameter(CustomAnimator.sMirror, AnimatorControllerParameterType.Bool);
+            controller.AddParameter(CustomAnimator.sSpeed, AnimatorControllerParameterType.Float);
 
-            for (int i = 0; i < AnimationsPack.p_Loop_Indicies.Length; i++) {
-                controller.AddParameter(AnimationsPack.p_Loop_Indicies[i], AnimatorControllerParameterType.Float);
-                controller.AddParameter(AnimationsPack.p_Loop_Mirrors[i], AnimatorControllerParameterType.Bool);
-                controller.AddParameter(AnimationsPack.p_Loop_Speeds[i], AnimatorControllerParameterType.Float);
+            for (int i = 0; i < CustomAnimator.sLoop_Indicies.Length; i++) {
+                controller.AddParameter(CustomAnimator.sLoop_Indicies[i], AnimatorControllerParameterType.Float);
+                controller.AddParameter(CustomAnimator.sLoop_Mirrors[i], AnimatorControllerParameterType.Bool);
+                controller.AddParameter(CustomAnimator.sLoop_Speeds[i], AnimatorControllerParameterType.Float);
             }
-            controller.AddParameter(AnimationsPack.p_ActiveLoopSet, AnimatorControllerParameterType.Int);
+            controller.AddParameter(CustomAnimator.sActiveLoopSet, AnimatorControllerParameterType.Int);
         }
         void ControllerBuild (ClipIDPair[] clips, int c) {
             // Create the animator in the project
@@ -153,7 +138,7 @@ namespace AssetObjectsPacks.Animations {
             int blend_tree_count = 2;
             AnimatorState[] loop_blend_trees = new AnimatorState[blend_tree_count];
             for (int i =0 ; i < blend_tree_count; i++) {
-                loop_blend_trees[i] = AddBlendTree(controller, 0, clips, AnimationsPack.p_Loop_Names[i], AnimationsPack.p_Loop_Mirrors[i], AnimationsPack.p_Loop_Speeds[i], c, AnimationsPack.p_Loop_Indicies[i]);
+                loop_blend_trees[i] = AddBlendTree(controller, 0, clips, CustomAnimator.sLoop_Names[i], CustomAnimator.sLoop_Mirrors[i], CustomAnimator.sLoop_Speeds[i], c, CustomAnimator.sLoop_Indicies[i]);
             }      
             for (int i = 0; i < c; i++) {
                 AddState(controller, 0, clips[i], loop_blend_trees);
@@ -172,12 +157,12 @@ namespace AssetObjectsPacks.Animations {
             AnimatorState state = sm.AddState(state_id.ToString());//, new Vector3(300, 0, 0));
             
             state.mirrorParameterActive = true;
-            state.mirrorParameter = AnimationsPack.p_Mirror;
+            state.mirrorParameter = CustomAnimator.sMirror;
 
             state.speedParameterActive = true;
-            state.speedParameter = AnimationsPack.p_Speed;
+            state.speedParameter = CustomAnimator.sSpeed;
                 
-            state.tag = AnimationsPack.shots_name;
+            state.tag = CustomAnimator.sShots;
             state.motion = clip;
 
             float exit_time = 1.0f - (exitTransitionDuration / clip.length);
@@ -185,7 +170,7 @@ namespace AssetObjectsPacks.Animations {
             int c = blend_trees.Length;
             for (int i = 0; i < c; i++) {
                 AnimatorStateTransition exit_transition = state.AddTransition(blend_trees[i]);
-                exit_transition.AddCondition(UnityEditor.Animations.AnimatorConditionMode.Equals, i, AnimationsPack.p_ActiveLoopSet);
+                exit_transition.AddCondition(UnityEditor.Animations.AnimatorConditionMode.Equals, i, CustomAnimator.sActiveLoopSet);
                 exit_transition.canTransitionToSelf = false;
                 exit_transition.hasExitTime = true;
                 exit_transition.exitTime = exit_time;

@@ -4,13 +4,13 @@ using UnityEditor;
 namespace AssetObjectsPacks {
     public static class AssetObjectsEditor 
     {
-        public static AssetObjectPacks GetAssetObjectsPacksObject () {
-            string[] guids = AssetDatabase.FindAssets("t:"+ typeof(AssetObjectPacks).Name);  
+        public static PacksManager GetPackManager () {
+            string[] guids = AssetDatabase.FindAssets("t:"+ typeof(PacksManager).Name);  
             if (guids.Length == 0) {
-                Debug.LogError("No Asset Objects Packs Defenitions Object Found");
+                Debug.LogError("No PacksManager Object Found");
                 return null;
             }
-            return AssetDatabase.LoadAssetAtPath<AssetObjectPacks>(AssetDatabase.GUIDToAssetPath(guids[0]));
+            return AssetDatabase.LoadAssetAtPath<PacksManager>(AssetDatabase.GUIDToAssetPath(guids[0]));
         }
        
         public const string asset_object_key = "@ID-";  
@@ -20,19 +20,18 @@ namespace AssetObjectsPacks {
         public static string[] GetAllAssetObjectPaths (string directory, string file_extensions, bool include_dir) {    
             return EditorUtils.GetFilePathsInDirectory(directory, include_dir, file_extensions, asset_object_key, true);
         }
-        public static string[] GetAllAssetObjectPaths (string directory, string file_extensions, bool include_dir, out string[] without_ids) {    
-            without_ids = EditorUtils.GetFilePathsInDirectory(directory, true, file_extensions, asset_object_key, false);
-            string[] paths = EditorUtils.GetFilePathsInDirectory(directory, include_dir, file_extensions, asset_object_key, true);
-            return paths;
+        public static string[] GetAllAssetObjectPathsWithoutIDs (string directory, string file_extensions) {
+            return EditorUtils.GetFilePathsInDirectory(directory, true, file_extensions, asset_object_key, false);
         }
         
         public static string[] GetAllAssetObjectPaths (string directory, string file_extensions, bool include_dir, out string[] without_ids, out Dictionary<int, string> id2file) {
-            string[] f_paths = GetAllAssetObjectPaths(directory, file_extensions, include_dir, out without_ids);
+            without_ids = GetAllAssetObjectPathsWithoutIDs(directory, file_extensions);
+            string[] paths = GetAllAssetObjectPaths(directory, file_extensions, include_dir);
             
-            int l = f_paths.Length;
+            int l = paths.Length;
             id2file = new Dictionary<int, string>(l);
-            for (int i = 0; i < l; i++) id2file.Add(GetObjectIDFromPath(f_paths[i]), f_paths[i]);
-            return f_paths;
+            for (int i = 0; i < l; i++) id2file.Add(GetObjectIDFromPath(paths[i]), paths[i]);
+            return paths;
         }
         
         public static int GetObjectIDFromPath(string path) {
@@ -43,15 +42,11 @@ namespace AssetObjectsPacks {
             string directory = StringUtils.empty;
             string file_name = path;
 
-
-
             if (path.Contains(back_slash)) {
 
                 string[] dir_and_name = EditorUtils.DirectoryNameSplit(path);
                 directory = dir_and_name[0];
                 file_name = dir_and_name[1];
-
-                
                 
             }
             //remove file extension
@@ -60,17 +55,11 @@ namespace AssetObjectsPacks {
             //take out id -234-
             string[] split_by_dash = file_name.Split(dash_c);
 
-
             IList<string> sans_id = split_by_dash.Slice(2, -1);
 
-
             file_name = string.Join(dash, sans_id);
-
-
             return directory + file_name;
         }
-
-
 
         static int[] GetExistingIDs (string[] all_valid_paths) {
             int l = all_valid_paths.Length;

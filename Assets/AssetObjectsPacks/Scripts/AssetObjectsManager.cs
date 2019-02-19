@@ -1,11 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace AssetObjectsPacks {
     public class AssetObjectsManager : MonoBehaviour
     {
-        public AssetObjectPacks packs;
+        public PacksManager packs;
 
         static AssetObjectsManager _instance;
         public static AssetObjectsManager instance {

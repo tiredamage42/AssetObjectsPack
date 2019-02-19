@@ -1,0 +1,51 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7644b25885b084d089c30aaab2d5f1c3, type: 3}
+  m_Name: PacksManager
+  m_EditorClassIdentifier: 
+  packs:
+  - defaultParameters:
+    - name: Duration
+      hint: Nagative values for object duration
+      paramType: 1
+      BoolValue: 0
+      FloatValue: -1
+      IntValue: 0
+    - name: Speed
+      hint: 
+      paramType: 1
+      BoolValue: 0
+      FloatValue: 1
+      IntValue: 0
+    - name: Mirror
+      hint: 0=None, 1=Mirror, 2=Random
+      paramType: 1
+      BoolValue: 0
+      FloatValue: -1
+      IntValue: 0
+    - name: Looped
+      hint: 
+      paramType: 1
+      BoolValue: 0
+      FloatValue: -1
+      IntValue: 0
+    - name: Parameter Name
+      hint: Hint
+      paramType: 1
+      BoolValue: 0
+      FloatValue: -1
+      IntValue: 0
+    objectsDirectory: Assets/AssetObjectsPacks/Packs/Animations/AssetObjects/
+    fileExtensions: .fbx
+    assetType: UnityEngine.AnimationClip
+    name: Animations
+    id: 1

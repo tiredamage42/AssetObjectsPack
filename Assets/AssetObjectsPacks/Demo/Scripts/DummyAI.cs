@@ -1,21 +1,13 @@
-﻿
-
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using AssetObjectsPacks;
 
 public class DummyAI : MonoBehaviour{
     public int stance;
     public bool agitated;
 
-
-
     void UpdateParameters () {
-
         player["Stance"].SetValue(stance);
         player["Agitated"].SetValue(agitated);
-        
-        
     }
 
     void Update () {
@@ -28,21 +20,16 @@ public class DummyAI : MonoBehaviour{
     public AssetObjectEventPlaylist idle_scene;
 
     AssetObjectEventPlayer player;
-
-    void OnGrenadeThrow () {
-        Debug.Log("GRENADE!");
-    }
-
     void Awake () {
         player = GetComponent<AssetObjectEventPlayer>();
-
-        player.playerParams = new AssetObjectParam[] {
-             new AssetObjectParam("Stance", 0),
-             new AssetObjectParam("Agitated", false),
+        player.playerParams = new CustomParameter[] {
+             new CustomParameter("Stance", 0, ""),
+             new CustomParameter("Agitated", false, ""),
         };
     }
+    
     void Start () {
-        idle_scene.InitializePerformance(new List<AssetObjectEventPlayer> { player }, transform.position, transform.rotation, null);
+        idle_scene.InitializePerformance(new AssetObjectEventPlayer[] { player }, transform.position, transform.rotation, null);
     }
 }
 
