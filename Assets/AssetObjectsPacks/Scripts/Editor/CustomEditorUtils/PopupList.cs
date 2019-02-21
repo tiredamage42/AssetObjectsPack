@@ -27,8 +27,7 @@ namespace AssetObjectsPacks {
         public GUIStyle menuItem = "MenuItem";
         public GUIStyle background = "grey_border";
         InputData m_Data;
-        const float k_LineHeight = 16;
-        const float k_Margin = 10;
+        const float k_LineHeight = 16, k_Margin = 5;
         int m_SelectedCompletionIndex = 0;
         public PopupList(InputData inputData){
             m_Data = inputData;

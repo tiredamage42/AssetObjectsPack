@@ -18,13 +18,7 @@ namespace AssetObjectsPacks {
         Channel[] _channels;
         public Channel[] channels {
             get {
-                
-                if (_channels == null || _channels.Length == 0) {
-
-                    _channels = new Channel[transform.childCount].Generate( i => { return new Channel(transform.GetChild(i)); } );
-
-                    //_channels = GetComponentsInChildren<AssetObjectEventPlaylistChannel>();
-                }
+                if (_channels == null || _channels.Length == 0) _channels = new Channel[transform.childCount].Generate( i => { return new Channel(transform.GetChild(i)); } );
                 return _channels;
             }
         }
@@ -133,7 +127,7 @@ namespace AssetObjectsPacks {
                         ao_event.playlist.InitializePerformance(new AssetObjectEventPlayer[] {player}, runtime_interest_transform.position, runtime_interest_transform.rotation, OnPlaylistEnd);
                         return;
                     }
-                    player.PlayEvent(ao_event, OnEventEnd);
+                    player.PlayEvents(ao_event.eventPacks, OnEventEnd);
                 }
 
 
@@ -163,7 +157,7 @@ namespace AssetObjectsPacks {
                 }
             }
 
-            public class PerformanceChannel {
+            [System.Serializable] public class PerformanceChannel {
                 public AssetObjectEventPlayer player;
                 public bool channel_active;
                 int event_index;

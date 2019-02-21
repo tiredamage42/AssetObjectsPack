@@ -18,6 +18,11 @@ namespace AssetObjectsPacks {
             StartTimer();
         }
 
+        const string back_slash = "/";
+        const char back_slash_c = '/';
+
+        
+
         public static string[] GetFilePathsInDirectory (string dir, bool include_dir, string file_extenstions, string valid_file_check, bool should_contain, SearchOption search = SearchOption.AllDirectories) {
             string data_path = Application.dataPath.Substring(0, Application.dataPath.Length - 6);
             int cutoff = data_path.Length + 1 + (include_dir ? 0 : dir.Length);//Assets ...;  
@@ -59,8 +64,22 @@ namespace AssetObjectsPacks {
             return null;
         }
 
-        const string back_slash = "/";
-        const char back_slash_c = '/';
+        public static T[] GetAllAssetsOfType<T> () where T : Object {
+            string nm = typeof(T).Name;
+            string[] guids = AssetDatabase.FindAssets("t:"+ typeof(T).Name);  
+            int l = guids.Length;
+            if (l == 0) {
+                Debug.LogWarning("No " + nm + " Objects Found");
+                return null;
+            }
+            T[] r = new T[l];
+            for (int i = 0; i < l; i++) {
+                string path = AssetDatabase.GUIDToAssetPath(guids[i]);
+                r[i] = AssetDatabase.LoadAssetAtPath<T>(path);
+        
+            }
+            return r;
+        }
 
         public static string RemoveDirectory (string full_path) {
             if (!full_path.Contains(back_slash)) return full_path;

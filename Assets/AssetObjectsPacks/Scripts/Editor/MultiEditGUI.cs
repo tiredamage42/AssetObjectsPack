@@ -2,27 +2,33 @@
 using UnityEngine;
 namespace AssetObjectsPacks {
     public static class MultiEditGUI {
-        static readonly GUIContent setValuesGUI = new GUIContent("S","Set Values");
-        public static int DrawMultiEditGUI (EditorProp multiAO, GUIContent[] labels, GUILayoutOption elementWidth, GUILayoutOption[] paramWidths) {
+        static readonly GUIContent multiEditGUI = new GUIContent("<b>Multi-Object Editing</b>","");
+        
+        public static int DrawMultiEditGUI (
+            EditorProp multiAO, 
+            GUIContent[] labels, 
+            GUILayoutOption[] paramWidths, 
+            out bool showParamsChanged, 
+            out bool showConditionsChanged, 
+            out bool multiConditionAdd, 
+            out bool multiConditionReplace
+        ) {
             GUIUtils.StartBox(0);
 
+            GUIUtils.Label(multiEditGUI, false);
+
             int setProp = -1;
-            EditorGUILayout.BeginHorizontal();
+            //EditorGUILayout.BeginHorizontal();
+            //GUIUtils.SmallButtonClear();
+            //GUIUtils.SmallButtonClear();
+            //EditorGUILayout.EndHorizontal();
 
-            GUIUtils.SmallButtonClear();
-            GUIUtils.ScrollWindowElement (GUIUtils.blank_content, false, false, false, elementWidth);    
-            
-            int l = labels.Length;
-            for (int i = 0; i < l; i++) {
-                GUIUtils.Label(labels[i], true);
-                if (GUIUtils.SmallButton(setValuesGUI, EditorColors.selected_color, EditorColors.selected_text_color)) setProp = i;
-            }
-            
-            EditorGUILayout.EndHorizontal();
+            GUIUtils.BeginIndent(2);
+            GUIUtils.EndIndent();
 
-            AssetObjectGUI.DrawAssetObject(multiAO, true, GUIUtils.blank_content, false, false, elementWidth, paramWidths);
-                        
-            GUIUtils.EndBox(0);
+            AssetObjectEditor.GUI.DrawAssetObjectMultiEditView(out showConditionsChanged, out showParamsChanged, multiAO, multiEditGUI, paramWidths, out multiConditionAdd, out multiConditionReplace, out setProp, labels);
+            
+            GUIUtils.EndBox(1);
 
             return setProp;
         }

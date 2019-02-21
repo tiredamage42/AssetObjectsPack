@@ -27,10 +27,9 @@ namespace AssetObjectsPacks {
         public List<AssetObjectEventPlaylist.Performance> current_playlists = new List<AssetObjectEventPlaylist.Performance>();
         Dictionary<string, Action<AssetObject, Action>> pack2playevent = new Dictionary<string, Action<AssetObject, Action>>();
 
-        public void SubscribeToEventVariation(string pack, Action<AssetObject, Action> on_play_event) {
+        public void SubscribeToEventPlay(string pack, Action<AssetObject, Action> on_play_event) {
             pack2playevent[pack] = on_play_event;
         }
-
 
         public Action on_event_end;
         public float duration_timer, current_duration;
@@ -54,7 +53,7 @@ namespace AssetObjectsPacks {
         }
         void EndEventDummy () { }
 
-        public void PlayEvent (AssetObjectEvent asset_object_event, Action on_event_end) {
+        public void PlayEvents (AssetObjectEventPack[] events, Action on_event_end) {
 
             
             if (pack2playevent.Count == 0) {
@@ -68,10 +67,10 @@ namespace AssetObjectsPacks {
             
             duration_timer = 0;
 
-            int l = asset_object_event.eventPacks.Length;
+            int l = events.Length;
 
             for (int i = 0; i < l; i++) {
-                AssetObjectEventPack ep = asset_object_event.eventPacks[i];
+                AssetObjectEventPack ep = events[i];
 
                 int packIndex;
                 

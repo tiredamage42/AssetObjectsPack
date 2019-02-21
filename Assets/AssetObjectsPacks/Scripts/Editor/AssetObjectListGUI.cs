@@ -1,17 +1,12 @@
 ﻿using UnityEngine;
 using UnityEditor;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-
 namespace AssetObjectsPacks {
-
     public class ListViewElement {
-        public string fullName, path;
         public GUIContent gui;
-        public int id;
-        public EditorProp ao;
-        public ListViewElement(string path, string fullName, GUIContent gui, int id, EditorProp ao) => (this.path, this.fullName, this.gui, this.id, this.ao) = (path, fullName, gui, id, ao);
+        public int id, index;
+        public ListViewElement(GUIContent gui, int id, int index) => (this.gui, this.id, this.index) = (gui, id, index);
     }
     
     public class AssetObjectListGUI {
@@ -26,35 +21,36 @@ namespace AssetObjectsPacks {
         }
 
         const int elementsPerPage = 25;
-        const float minElementWidth = 256;
-        static readonly string[] noElementsMsgs = new string[] {
-            "No elements, add some through the project view tab",
-            "No elements in the pack directory",
-        };
         
-        bool isListView { get { return ViewToolbarGUI.listProjectView == 0; } }
-        bool hasSelection { get { return selection.Count != 0; } }        
+        bool isListView { get { return ToolbarGUI.listProjectView == 0; } }
 
-        int page, max_pages, foldersHiearchyOffset, lo_selection, hi_selection;
-        string currentDirectory = "";
-        string[] pathsWithoutIDs, all_file_paths, errorStrings, warningStrings;
         
-        HashSet<ListViewElement> selection = new HashSet<ListViewElement>();
+        bool hasSelection { get { return hi_selection != -1 && lo_selection != -1; } }// selection.Count != 0; } }        
+        
+        //HashSet<ListViewElement> selection = new HashSet<ListViewElement>();
+        //HashSet<int> selection = new HashSet<int>();
+        
         HashSet<int> hiddenIds = new HashSet<int>();
-        AssetObjectPack pack;
         ListViewElement[] elements;
         Editor preview;
-        SerializedObject eventPack;
         Dictionary<int, string> id2path;
-        EditorProp multiEditAO, AOList, hiddenIDsProp, packsProp, packProp, defParamsProp;
+        EditorProp multiEditAO, AOList, hiddenIDsProp;
         GUIContent[] paramlabels;
-        GUIContent folderBackGUI, curPageGUI;
-        GUILayoutOption elementWidth, folderWidth = GUILayout.ExpandWidth(true);
         GUILayoutOption[] paramWidths;
+        GUIContent curPageGUI;
+        string[] allPaths, errorStrings, warningStrings;
+        string objectsDirectory, fileExtensions, assetType, currentDirectory = "";
+        bool initializeAfterPackChange;
+        int page, max_pages, foldersHiearchyOffset, lo_selection = -1, hi_selection = -1, noIDsCount, packIndex;
         
-        void ToggleHiddenSelected () {
+        bool ToggleHiddenSelected () {
+
             bool toggledAny = false;
-            foreach (var e in selection) {
+
+            for (int i = lo_selection; i <= hi_selection; i++) {
+
+            //foreach (var i in selection) {
+                ListViewElement e = elements[i];
                 //dont toggle directories
                 if (e.id == -1) continue;
                 if (hiddenIds.Contains(e.id)) hiddenIds.Remove(e.id);
@@ -65,12 +61,11 @@ namespace AssetObjectsPacks {
                 //save to serialized object
                 hiddenIDsProp.Clear();
                 foreach (int id in hiddenIds) hiddenIDsProp.AddNew().SetValue(id);
-                eventPack.ApplyModifiedProperties();
-                if (!ToolbarGUI.showHidden) ClearSelectionsAndRebuild();
             }
+            return toggledAny && !ToolbarGUI.showHidden;
 
         }
-
+/*
         void RecalculateLowestAndHighestSelections () {
             lo_selection = int.MaxValue;
             hi_selection = int.MinValue;
@@ -78,13 +73,16 @@ namespace AssetObjectsPacks {
             if (s == 0) return;
             int c = elements.Length;
             for (int i = 0; i < c; i++) {
-                if (selection.Contains(elements[i])) {                    
+                if (selection.Contains(i)) {                    
                     if (i < lo_selection) lo_selection = i;
                     if (i > hi_selection) hi_selection = i;
                     if (s == 1) break;
                 }
             }
         }
+*/
+
+        /*
   
         void OnObjectSelection (ListViewElement selected, bool was_selected) {
             Event e = Event.current;
@@ -104,86 +102,157 @@ namespace AssetObjectsPacks {
             }
             OnSelectionChange();
         }
+        */
+
+        /*
+        void OnObjectSelection (int selectedIndex, bool was_selected) {
+            Event e = Event.current;
+            if (e.shift) {
+                selection.Add(selectedIndex);
+                RecalculateLowestAndHighestSelections();
+                selection.Clear();
+                for (int i = lo_selection; i <= hi_selection; i++) selection.Add(i);
+            }
+            else if (e.command || e.control) {
+                if (was_selected) selection.Remove(selectedIndex);
+                else selection.Add(selectedIndex);
+            }
+            else {
+                selection.Clear();
+                if (!was_selected) selection.Add(selectedIndex);
+            }
+            OnSelectionChange();
+        }
+
+         */
+
+        //bool hasSelection;
+        void OnObjectSelection (int selectedIndex){//, bool was_selected) {
+
+            Event e = Event.current;
+            if (e.shift) {
+                if (hasSelection) {
+                    if (selectedIndex < lo_selection) {
+                        lo_selection = selectedIndex;
+                    }
+                    if (selectedIndex > hi_selection) {
+                        hi_selection = selectedIndex;
+                    }
+                }
+                else {
+                    hi_selection = lo_selection = selectedIndex;
+                }
+
+                //selection.Add(selectedIndex);
+                //RecalculateLowestAndHighestSelections();
+                //selection.Clear();
+                //for (int i = lo_selection; i <= hi_selection; i++) selection.Add(i);
+            }
+            else {
+                if (hi_selection == lo_selection && selectedIndex == lo_selection) {
+
+                    hi_selection = lo_selection = -1;
+                }
+                else {
+                    
+                    hi_selection = lo_selection = selectedIndex;
+                }
+
+            }
+            /*
+            else if (e.command || e.control) {
+                if (was_selected) selection.Remove(selectedIndex);
+                else selection.Add(selectedIndex);
+            }
+            else {
+                selection.Clear();
+                if (!was_selected) selection.Add(selectedIndex);
+            }
+            */
+            OnSelectionChange();
+        }
+
+
+
         void OnSelectionChange() {
-            RecalculateLowestAndHighestSelections();
+            //RecalculateLowestAndHighestSelections();
             RebuildPreviewEditor();        
         }
 
+        void ClearSelectionsAndRebuild(bool resetPage) {
+            if (resetPage) page = 0;
+
+            hi_selection = lo_selection = -1;
+            //selection.Clear();
+            OnSelectionChange();
+            RebuildAllElements();
+        }
+
         bool SelectionHasDirectories() {
-            foreach (var s in selection) {
-                if (s.id == -1) return true;
+            if (!hasSelection) return false;
+            for (int i = lo_selection; i <= hi_selection; i++) {
+            //foreach (var s in selection) {
+                if (elements[i].id == -1) return true;
             }
             return false;
         }
 
-        UnityEngine.Object GetObjectRefForElement(ListViewElement e) {
-            return EditorUtils.GetAssetAtPath(pack.objectsDirectory + e.path, pack.assetType);  
+        UnityEngine.Object GetObjectRefForElement(int e) {
+            return EditorUtils.GetAssetAtPath(objectsDirectory + id2path[elements[e].id], assetType);  
         }
     
-        public void RealOnEnable (EditorProp packsProp, SerializedObject eventPack) {
-            this.eventPack = eventPack;
-            this.packsProp = packsProp;
-
+        public void RealOnEnable (SerializedObject eventPack) {
+        
             AOList = new EditorProp ( eventPack.FindProperty(AssetObjectEventPack.asset_objs_field) );
             hiddenIDsProp = new EditorProp ( eventPack.FindProperty(AssetObjectEventPack.hiddenIDsField) );
             multiEditAO = new EditorProp ( eventPack.FindProperty(AssetObjectEventPack.multi_edit_instance_field) );
-        
+             
             hiddenIds = hiddenIds.Generate(hiddenIDsProp.arraySize, i => { return hiddenIDsProp[i].intValue; } );
         }
 
-        public void InitializeWithPack (AssetObjectPack pack, EditorProp packProp) {
-            this.pack = pack;
-            this.packProp = packProp;
-
-            errorStrings = HelpGUI.GetErrorStrings(packsProp, packProp);
-            System.Array.Resize(ref pathsWithoutIDs, 0);
-            if (errorStrings.Length == 0) {
-                InitializeAllFilePaths();
-            }
-            warningStrings = HelpGUI.GetWarningStrings(packsProp, packProp, pathsWithoutIDs);                
+        public void InitializeWithPack (int packIndex) {
+            this.packIndex = packIndex;
+            PacksManagerEditor.GetValues(packIndex, out _, out objectsDirectory, out fileExtensions, out assetType);
+            PacksManagerEditor.GetErrorsAndWarnings (packIndex, out errorStrings, out warningStrings, out noIDsCount);
             
-
-            defParamsProp = null;
             paramlabels = new GUIContent[0];
             paramWidths = new GUILayoutOption[0];
                 
-            //dummy_list_element = null;
-
             if (errorStrings.Length == 0) {
-                defParamsProp = packProp[AssetObjectPack.defaultParametersField];
+
+                InitializeAllFilePaths();
+                
                 int c = AOList.arraySize;
-                for (int i = 0; i < c; i++) AOParameters.UpdateParametersToReflectDefaults(AOList[i][AssetObject.params_field], defParamsProp);
-            
-                //clear conditionals as well
+                for (int i = 0; i < c; i++) PacksManagerEditor.AdjustParametersToPack(AOList[i][AssetObject.params_field], packIndex, false);
+                
+                PacksManagerEditor.AdjustParametersToPack(multiEditAO[AssetObject.params_field], packIndex, true);
                 multiEditAO[AssetObject.conditionChecksField].Clear();
-                AOParameters.ClearAndRebuildParameters(multiEditAO, defParamsProp);//, defs);
-                
-                
-                int props_count = pack.defaultParameters.Length;
-                paramlabels = new GUIContent[props_count];
-                paramWidths = new GUILayoutOption[props_count];
-                for (int i = 0; i < props_count; i++) {
-                    paramlabels[i] = new GUIContent(pack.defaultParameters[i].name, pack.defaultParameters[i].hint);
-                    paramWidths[i] = GUILayout.Width(EditorStyles.label.CalcSize(paramlabels[i]).x);
-                }
-                
-                //dummy_list_element = new DummyListElement(pack.defaultParameters);
+                    
+                paramlabels = PacksManagerEditor.GUI.GetDefaultParamGUIs(packIndex);
             }
-        
-            InitializeView();
-            eventPack.ApplyModifiedProperties();
+            initializeAfterPackChange = true;
+        }
+
+
+        void InitializeAfterPackChange () {
+            if (!initializeAfterPackChange) return;
+            initializeAfterPackChange = false;
+            int props_count = paramlabels.Length;
+            paramWidths = new GUILayoutOption[props_count];
+            for (int i = 0; i < props_count; i++) paramWidths[i] = paramlabels[i].CalcWidth(GUIStyles.label);
+            
+            ClearSelectionsAndRebuild(true);
+            //eventPack.ApplyModifiedProperties();
         }
 
         void RebuildAllElements() {
-            
             HashSet<string> used = new HashSet<string>();            
             int lastDir = 0;
+            HashSet<int> idsInSet = isListView ? null : new HashSet<int>().Generate(AOList.arraySize, i => { return AOList[i][AssetObject.id_field].intValue; }); 
 
-            HashSet<int> idsInSet = isListView ? null : new HashSet<int>().Generate(AOList.arraySize, i => { return GetObjectIDAtIndex(i); }); 
-        
             List<ListViewElement> unpaginated = new List<ListViewElement>();
 
-            int l = isListView ? AOList.arraySize : all_file_paths.Length;
+            int l = isListView ? AOList.arraySize : allPaths.Length;
             for (int i = 0; i < l; i++) {
                 
                 int id;
@@ -194,7 +263,7 @@ namespace AssetObjectsPacks {
                     path = id2path[id];
                 }
                 else {
-                    path = all_file_paths[i];
+                    path = allPaths[i];
                     id = AssetObjectsEditor.GetObjectIDFromPath(path);
                 }
 
@@ -202,7 +271,7 @@ namespace AssetObjectsPacks {
                 if (!ToolbarGUI.showHidden && hiddenIds.Contains(id)) continue;
                 if (!ToolbarGUI.PathPassesSearchFilter(path)) continue;
 
-                if (ViewToolbarGUI.folderedView) {
+                if (ToolbarGUI.folderedView) {
 
                     if (!currentDirectory.IsEmpty() && !path.StartsWith(currentDirectory)) continue;
 
@@ -210,23 +279,25 @@ namespace AssetObjectsPacks {
                     if (path.Contains("/")) name = path.Split('/')[foldersHiearchyOffset];    
 
                     if (name.Contains(".")) { 
-                        name = AssetObjectsEditor.RemoveIDFromPath(name);                        
-                        unpaginated.Add(new ListViewElement(path, name, new GUIContent( name ), id, ao));
+                        unpaginated.Add(new ListViewElement(new GUIContent( AssetObjectsEditor.RemoveIDFromPath(name) ), id, i));
                         continue;
                     }
                         
                     if (used.Contains(name)) continue;
                     used.Add(name);
-                    unpaginated.Insert(lastDir, new ListViewElement(path, name, new GUIContent( name ), -1, null));
+                    unpaginated.Insert(lastDir, new ListViewElement(new GUIContent( name ), -1, i));
                     lastDir++;       
                     continue;
                 }
-                unpaginated.Add(new ListViewElement(path, path, new GUIContent(AssetObjectsEditor.RemoveIDFromPath(path)), id, ao));
+                unpaginated.Add(new ListViewElement(new GUIContent(AssetObjectsEditor.RemoveIDFromPath(path)), id, i));
             }
 
             l = unpaginated.Count;
 
             max_pages = (l / elementsPerPage) + Mathf.Min(1, l % elementsPerPage);
+
+            if (page >= max_pages) page = Mathf.Max(0, max_pages - 1);
+            
             int min = page * elementsPerPage;
             int max = Mathf.Min(min + elementsPerPage, l - 1);
 
@@ -234,45 +305,38 @@ namespace AssetObjectsPacks {
         
             elements = unpaginated.Slice(min, max).ToArray();
 
-            l = elements.Length;
-            float maxWidth = 0;
-            for (int i = 0; i < l; i++) {
-                float w = EditorStyles.toolbarButton.CalcSize(elements[i].gui).x;
-                if (w > maxWidth) maxWidth = w;
-            }
-            elementWidth = !isListView ? GUILayout.ExpandWidth(true) : GUILayout.Width( Mathf.Max(maxWidth, minElementWidth ) );
         }
-        ListViewElement DrawElements (){
+        int DrawElements (bool forListView){
             if (elements.Length == 0) {
-                EditorGUILayout.HelpBox(noElementsMsgs[ViewToolbarGUI.listProjectView], MessageType.Info);
-                return null;
+                EditorGUILayout.HelpBox(new string[] {"Add elements through the project view tab", "No elements in the pack directory" }[ToolbarGUI.listProjectView], MessageType.Info);
+                return -1;
             }
             GUIUtils.StartBox(0);
-            ListViewElement selectedElement = null;
+
+            int selectedIndex = -1;
+
             int l = elements.Length;
             for (int i = 0; i < l; i++) {
                 ListViewElement e = elements[i];
-                bool s = selection.Contains(e);
+
+                
+                bool s = i >= lo_selection && i <= hi_selection;// selection.Contains(i);
                 if (e.id == -1) {
-                    if (GUIUtils.ScrollWindowElement (e.gui, s, false, true, folderWidth)) selectedElement = e;
+                    if (AssetObjectEditor.GUI.AssetObjectDirectoryElement (e.gui, s)) selectedIndex = i;
                 }
                 else {
-                    if (AssetObjectGUI.DrawAssetObject(e.ao, isListView, e.gui, s, hiddenIds.Contains(e.id), elementWidth, paramWidths)) selectedElement = e;
+                    if (forListView) {
+                        if (AssetObjectEditor.GUI.DrawAssetObjectEventView(AOList[e.index], e.gui, s, hiddenIds.Contains(e.id), paramWidths))selectedIndex = i;
+                    }
+                    else {
+                        if (AssetObjectEditor.GUI.DrawAssetObjectProjectView(e.gui, s, hiddenIds.Contains(e.id)))selectedIndex = i;
+                    }
                 }       
             }
-            GUIUtils.EndBox(0);
-            return selectedElement;
+            GUIUtils.EndBox(1);
+            return selectedIndex;
         }
 
-        void AddElementsToSet (HashSet<ListViewElement> elements_to_add) {
-            if (elements_to_add.Count == 0) return;
-            bool reset_i = true;
-            foreach (ListViewElement e in elements_to_add) {
-                AddNewAssetObject(e.id, GetObjectRefForElement(e), reset_i);
-                reset_i = false;
-            }
-            ClearSelectionsAndRebuild();
-        }
         void AddNewAssetObject (int obj_id, UnityEngine.Object obj_ref, bool make_default) {
             EditorProp ao = AOList.AddNew();
             ao[AssetObject.id_field].SetValue ( obj_id );
@@ -282,154 +346,210 @@ namespace AssetObjectsPacks {
             //serialized property array
             if (!make_default) return;
             ao[AssetObject.conditionChecksField].Clear();
-            AOParameters.ClearAndRebuildParameters(ao[AssetObject.params_field], defParamsProp);
+
+            PacksManagerEditor.AdjustParametersToPack(ao[AssetObject.params_field], packIndex, true);                
         }
         
         void InitializeAllFilePaths () {
-            all_file_paths = AssetObjectsEditor.GetAllAssetObjectPaths (pack.objectsDirectory, pack.fileExtensions, false, out pathsWithoutIDs, out id2path);
+            allPaths = AssetObjectsEditor.GetAllAssetObjectPaths (objectsDirectory, fileExtensions, false, out id2path);
         }
         
         public bool Draw (){
+            InitializeAfterPackChange();
+
+            bool lv = isListView;
 
             bool generateNewIDs;
-            HelpGUI.DrawErrorsAndWarnings(errorStrings, warningStrings, pathsWithoutIDs, out generateNewIDs);
+            PacksManagerEditor.GUI.DrawErrorsAndWarnings(errorStrings, warningStrings, noIDsCount, out generateNewIDs);
            
             if (errorStrings.Length != 0) return false;
             
-
             bool folderBack, changedTabView, changedFolderView;
-            ViewToolbarGUI.DrawToolbar(out changedTabView, out folderBack, out changedFolderView, folderBackGUI, EditorStyles.miniButton, foldersHiearchyOffset);
-            
             bool importSettings, toggleHidden,showHiddenToggled, resetHidden, removeOrAdd, searchChanged;
-            ToolbarGUI.DrawToolbar (isListView, EditorStyles.miniButton, hasSelection && !SelectionHasDirectories(), out importSettings, out toggleHidden, out showHiddenToggled, out resetHidden, out removeOrAdd, out searchChanged);
-
+            
+            bool validSelection = hasSelection && !SelectionHasDirectories();
+            ToolbarGUI.DrawToolbar (validSelection, currentDirectory, foldersHiearchyOffset, out importSettings, out removeOrAdd, out searchChanged, out resetHidden, out toggleHidden, out showHiddenToggled, out changedTabView, out folderBack, out changedFolderView);
+        
             bool down, up, left, right, del, ret, h, shift;
             KeyboardInput (out down, out up, out left, out right, out h, out del, out ret, out shift);
-          
-            int setProp = !isListView ? -1 : MultiEditGUI.DrawMultiEditGUI(multiEditAO, paramlabels, elementWidth, paramWidths);
+
+            bool multiConditionAdd = false, multiConditionReplace = false, showParamsChanged = false, showConditionsChanged = false;
+            int setProp = !lv ? -1 : MultiEditGUI.DrawMultiEditGUI(multiEditAO, paramlabels, paramWidths, out showParamsChanged, out showConditionsChanged, out multiConditionAdd, out multiConditionReplace);
+            int selectedElementIndex = DrawElements(lv);
             
-            ListViewElement selectedElement = DrawElements();
-
             bool prevPage, nextPage;
-            PagesGUI.DrawPages (EditorStyles.toolbarButton, out prevPage, out nextPage, curPageGUI);
-
+            PagesGUI.DrawPages (GUIStyles.toolbarButton, out prevPage, out nextPage, curPageGUI);
 
             HandleSelectionAfterKeyboardInput (down, up, shift);
 
             if (hasSelection && ret) {
                 if (SelectionHasDirectories()) {
-                    if (selection.Count == 1) MoveForwardFolder(selection.First().fullName);
+                    int c = selectionCount;
+                    if (c == 1) selectedElementIndex = 0;// = selection.First();
                     ret = false;
                 }
             } 
                 
             bool listChanged = false;
-            
-            if (selectedElement != null) {
-                if (selectedElement.id == -1) {
-                    MoveForwardFolder(selectedElement.fullName);
+            string folderFwdDir = null;
+
+            if (selectedElementIndex != -1) {
+                ListViewElement e = elements[selectedElementIndex];
+                if (e.id == -1) {
+                    folderFwdDir = e.gui.text;
                 }
                 else {
-                    OnObjectSelection(selectedElement, selection.Contains(selectedElement));
+                    OnObjectSelection(selectedElementIndex//, 
+
+                        //selectedElementIndex >= lo_selection && selectedElementIndex <= hi_selection
+                        //selection.Contains(selectedElementIndex)
+                    );
                 }
             }
+            
+            
+            if (multiConditionAdd || multiConditionReplace) EditMultiConditions(multiConditionAdd);
+            if (setProp != -1) SetParameterAll(setProp);
+            if (showParamsChanged || showConditionsChanged) ChangeShowParamsOrConditionsMulti(showParamsChanged);
+            
+            
 
-            SetParameterAll(setProp);
-
-            if (setProp != -1) {
-                listChanged = true;
-            }
-            if (changedTabView || changedFolderView) {
-                InitializeView();
-            }
-            if (importSettings) {
-                OpenImportSettings();
-            }
-            if (resetHidden) {
-                hiddenIDsProp.Clear();
-                hiddenIds.Clear();
-                eventPack.ApplyModifiedProperties();
-                ClearSelectionsAndRebuild();
-            }
+            //if (setProp != -1) listChanged = true;
+            
+            if (importSettings) OpenImportSettings();
+            
 
             if (hasSelection) {
-
-                bool remove = isListView && del;
-                bool add = !isListView && ret;
-
+                bool remove = lv && del;
+                bool add = !lv && ret;
                 if (removeOrAdd || add || remove) {
-                    if (isListView || add) {
-                        DeleteSelectionFromList( );
-                    }
-                    else {
-                        AddElementsToSet( selection );
-                    }
+                    if ((removeOrAdd && lv) || remove) DeleteSelectionFromList( );
+                    if ((removeOrAdd && !lv) || add) AddSelectionToSet( );
                     listChanged = true;
                 }
             }
 
-            if (hasSelection && (toggleHidden || h )) ToggleHiddenSelected();
 
-            if (showHiddenToggled || searchChanged) {
-                ClearSelectionsAndRebuild();
+            bool toggledAnyHidden = (hasSelection && (toggleHidden || h )) && ToggleHiddenSelected();
+            
+            if (resetHidden) {
+                hiddenIDsProp.Clear();
+                hiddenIds.Clear();
             }
+        
+            bool switchedPage = false;     
 
-            if (folderBack) {
-                MoveBackward();
-            } 
+
             if (nextPage || right) {
-                NextPage();
+                if (SwitchPage(1)) switchedPage = true;
             }
             if (prevPage || left) {
-                bool wentPrevious = PreviousPage();
-                if (left && !wentPrevious && ViewToolbarGUI.folderedView) {
-                    MoveBackward();
-                }
+                bool wentPrevious = SwitchPage(-1);
+                if (wentPrevious) switchedPage = true;
+                if (left && !wentPrevious && ToolbarGUI.folderedView) folderBack = true;
             }
+
+            
+            bool movedFolder = (folderBack && MoveFolder()) || (folderFwdDir != null && MoveFolder(folderFwdDir));
+
+                
+            
             
             if (generateNewIDs) {
-                AssetObjectsEditor.GenerateNewIDs(all_file_paths, pathsWithoutIDs);
+                PacksManagerEditor.GenerateIDsForPack(packIndex);
+                PacksManagerEditor.GetErrorsAndWarnings (packIndex, out errorStrings, out warningStrings, out noIDsCount);
                 InitializeAllFilePaths();
-                warningStrings = HelpGUI.GetWarningStrings(packsProp, packProp, pathsWithoutIDs);                
-                InitializeView();
+            }
+            
+            if (movedFolder || changedTabView || changedFolderView || generateNewIDs || toggledAnyHidden || showHiddenToggled || searchChanged || resetHidden || listChanged || switchedPage) {
+                ClearSelectionsAndRebuild(changedTabView || changedFolderView || movedFolder);
             }
             return listChanged;
         }   
 
-        void DeleteSelectionFromList () {
-            HashSet<int> ids = new HashSet<int>().Generate(selection, o => { return o.id; } );
-            for (int i = AOList.arraySize - 1; i >= 0; i--) {
-                if (ids.Contains(GetObjectIDAtIndex(i))) AOList.DeleteAt(i);
+        void ChangeShowParamsOrConditionsMulti (bool showParamsChanged) {
+            string nm = showParamsChanged ? AssetObject.showParamsField : AssetObject.showConditionsField;
+            foreach (var el in GetSelectionOrAll()) AOList[elements[el].index][nm].SetValue( multiEditAO[nm].boolValue );
+        }
+        void SetParameterAll(int index) {
+            foreach (var el in GetSelectionOrAll()) CustomParameterEditor.CopyParameter (AOList[elements[el].index][AssetObject.params_field][index], multiEditAO[AssetObject.params_field][index] );      
+        }
+        void EditMultiConditions(bool multiConditionAdd) {
+            EditorProp multiConditions = multiEditAO[AssetObject.conditionChecksField];
+            int multiCount = multiConditions.arraySize;
+
+
+            
+            
+            
+            foreach (var el in GetSelectionOrAll()) {     
+                EditorProp conditions = AOList[elements[el].index][AssetObject.conditionChecksField];
+                if (!multiConditionAdd) conditions.Clear();
+                
+                for (int i = 0; i < multiCount; i++) {
+                    CustomParameterEditor.CopyParameterList(conditions.AddNew()[AssetObject.paramsToMatchField], multiConditions[i][AssetObject.paramsToMatchField]);
+                }
             }
-            ClearSelectionsAndRebuild();
+            multiConditions.Clear();
         }
 
-        void NextPage() {
-            if (page+1 >= max_pages) return;
-            page++;
-            ClearSelectionsAndRebuild();   
+        
+
+        IEnumerable<int> GetSelectionOrAll () {
+            return ((selectionCount == 0) ? new HashSet<int>().Generate(elements.Length, i => i ) : new HashSet<int>().Generate(selectionCount, i => i + lo_selection )).Where( i => elements[i].id != -1 );
+            //return ((selection.Count == 0) ? new HashSet<int>().Generate(elements.Length, i => i ) : selection).Where( i => elements[i].id != -1 );
+        
+        
         }
-        bool PreviousPage() {
-            if (page-1 < 0) return false;
-            page--;
-            ClearSelectionsAndRebuild();
+
+        void AddSelectionToSet () {
+            //if (selectionCount == 0) return;
+            bool reset_i = true;           
+
+ 
+            for (int i = lo_selection; i <= hi_selection; i++) {
+            //foreach (var i in selection) {
+                AddNewAssetObject(elements[i].id, GetObjectRefForElement(i), reset_i);
+                reset_i = false;
+            }
+        }
+        void DeleteSelectionFromList () {
+            if (selectionCount == 0) return;
+            
+            //HashSet<int> ids = new HashSet<int>().Generate(selection, o => { return elements[o].id; } );
+            HashSet<int> ids = new HashSet<int>().Generate(selectionCount, i => { return elements[i + lo_selection].id; } );
+            
+            for (int i = AOList.arraySize - 1; i >= 0; i--) {
+                if (ids.Contains(AOList[i][AssetObject.id_field].intValue)) AOList.DeleteAt(i);
+            }
+        }
+
+        bool SwitchPage(int offset) {
+            int newVal = page + offset;
+            if (newVal < 0 || newVal >= max_pages) return false;
+            page += offset;
             return true;
         }
-
+        /*
         void HandleSelectionAfterKeyboardInput (bool down, bool up, bool shift) {
-            ListViewElement e = null;
-            int l = elements.Length - 1;
-            int c = selection.Count;
-            if ((down || up) && c == 0) {
-                hi_selection = lo_selection = down ? 0 : l;
-                e = elements[hi_selection];
+            int e = -1;
+            
+            int lastIndex = elements.Length - 1;
+            int selectionCount = this.selectionCount;// selection.Count;
+            
+            
+            if ((down || up) && selectionCount == 0) {
+                hi_selection = lo_selection = down ? 0 : lastIndex;
+                e = hi_selection;
+                //e = elements[hi_selection];
             }
-            if (c != 0) {
+
+            if (selectionCount != 0) {
                 bool changed = false;
-                bool unMulti = c > 1 && !shift;
+                bool unMulti = selectionCount > 1 && !shift;
                 if (down) {
-                    if (hi_selection < l || unMulti) {
-                        if (hi_selection < l) hi_selection++;
+                    if (hi_selection < lastIndex || unMulti) {
+                        if (hi_selection < lastIndex) hi_selection++;
                         lo_selection = hi_selection;
                         changed = true;
                     }
@@ -443,11 +563,64 @@ namespace AssetObjectsPacks {
                 }
                 if ((down || up) && changed) {
                     if (unMulti) selection.Clear();
-                    e = elements[hi_selection];
+                    e = hi_selection;
+
+                    //e = elements[hi_selection];
                 }
             }
-            if (e != null) OnObjectSelection(e, false);
+
+            if (e != -1) OnObjectSelection(e, false);
+
         }
+        */
+
+        void HandleSelectionAfterKeyboardInput (bool down, bool up, bool shift) {
+            //int e = -1;
+            
+            int lastIndex = elements.Length - 1;
+            int selectionCount = this.selectionCount;// selection.Count;
+            
+            
+            bool changed = false;
+            if ((down || up) && selectionCount == 0) {
+                hi_selection = lo_selection = down ? 0 : lastIndex;
+                //e = hi_selection;
+                //e = elements[hi_selection];
+                changed = true;
+            }
+
+            if (selectionCount != 0) {
+                bool unMulti = selectionCount > 1 && !shift;
+                if (down) {
+
+                    
+                    if (hi_selection < lastIndex || unMulti) {
+                        if (hi_selection < lastIndex) hi_selection++;
+                        if (unMulti || !shift) lo_selection = hi_selection;
+                        changed = true;
+                    }
+                }
+                if (up) {
+                    if (lo_selection > 0 || unMulti) {
+                        if (lo_selection > 0) lo_selection--;
+                        if (unMulti || !shift) hi_selection = lo_selection;
+                        changed = true;
+                    }
+                }
+                if ((down || up) && changed) {
+                    //if (unMulti) selection.Clear();
+                    //e = hi_selection;
+
+                    //e = elements[hi_selection];
+                }
+            }
+
+            //if (e != -1) OnObjectSelection(e, false);
+            if (changed) OnSelectionChange();
+
+
+        }
+
 
         void KeyboardInput (out bool down, out bool up, out bool left, out bool right, out bool h, out bool del, out bool ret, out bool shift) {
             down = up = left = right = h = del = ret = shift = false;
@@ -465,68 +638,46 @@ namespace AssetObjectsPacks {
             if (down || up || left || right || del || ret || h) e.Use();              
         }
 
-        void SetParameterAll(int index) {
-            if (index == -1) return;
-            EditorProp copy_prop = multiEditAO[AssetObject.params_field][index];
-            
-            IEnumerable<ListViewElement> l = elements;
-            if (selection.Count != 0) l = selection;
-            foreach (ListViewElement el in l) {     
-                AOParameters.CopyParameter (el.ao[AssetObject.params_field][index], copy_prop );      
+        
+
+        bool MoveFolder(string addPath = null) {
+            bool back = addPath == null;
+            if (back) {
+                if (foldersHiearchyOffset <= 0) return false;
+                currentDirectory = currentDirectory.Substring(0, currentDirectory.Substring(0, currentDirectory.Length-1).LastIndexOf("/") + 1);
             }
-        }
-
-        int GetObjectIDAtIndex(int index) {
-            return AOList[index][AssetObject.id_field].intValue;
-        }
-
-        void InitializeView () {
-            page = 0;
-            ClearSelectionsAndRebuild();
-        }
-        
-        void ClearSelectionsAndRebuild() {
-            selection.Clear();
-            OnSelectionChange();
-            RebuildAllElements();
-        }
-
-        void OnFolderViewChange () {
-            folderBackGUI = new GUIContent( "  <<  " + currentDirectory);
-            InitializeView();
-        }
-
-        void MoveBackward () {
-            if (foldersHiearchyOffset <= 0) return;
-            foldersHiearchyOffset--;
-            string noSlash = currentDirectory.Substring(0, currentDirectory.Length-1);
-            int cutoff = noSlash.LastIndexOf("/") + 1;
-            currentDirectory = currentDirectory.Substring(0, cutoff);
-            OnFolderViewChange();                
-        }
-        
-        void MoveForwardFolder (string addPath) {
-            foldersHiearchyOffset++;
-            currentDirectory += addPath + "/";
-            OnFolderViewChange();
+            else currentDirectory += addPath + "/";
+            foldersHiearchyOffset+= back ? -1 : 1;
+            return true;
         }
 
         void OpenImportSettings () {
-            Animations.EditImportSettings.CreateWizard(new UnityEngine.Object[selection.Count].Generate(selection, e => { return AssetDatabase.LoadAssetAtPath(pack.objectsDirectory + e.path, typeof(UnityEngine.Object)); } ));
+            int c = selectionCount;
+            
+            Animations.EditImportSettings.CreateWizard(
+                //new Object[c].Generate(selection, e => { return AssetDatabase.LoadAssetAtPath(objectsDirectory + id2path[elements[e].id], typeof(Object)); } )
+                new Object[c].Generate(i => { return AssetDatabase.LoadAssetAtPath(objectsDirectory + id2path[elements[i + lo_selection].id], typeof(Object)); } )
+            
+            );
         }
+
+        int selectionCount { get { return hasSelection ? (hi_selection - lo_selection) + 1 : 0; } }
         void RebuildPreviewEditor () {
             if (preview != null) Editor.DestroyImmediate(preview);
-            int c = selection.Count;
+            //int c = selection.Count;
+            int c = selectionCount;
             if (c == 0) return;
             if (SelectionHasDirectories()) return;
-            preview = Editor.CreateEditor(new UnityEngine.Object[c].Generate(selection, s => { return GetObjectRefForElement(s); } ));
+            //preview = Editor.CreateEditor(new UnityEngine.Object[c].Generate(selection, s => { return GetObjectRefForElement(s); } ));
+            preview = Editor.CreateEditor(new UnityEngine.Object[c].Generate(i => { return GetObjectRefForElement(lo_selection + i); } ));
+            
             preview.HasPreviewGUI();
             preview.OnInspectorGUI();
             preview.OnPreviewSettings();
 
             //auto play single selection for animations
             if (c == 1) {
-                if (pack.assetType == "UnityEngine.AnimationClip") {     
+                if (assetType == "UnityEngine.AnimationClip") {     
                     
                     // preview_editor.m_AvatarPreview.timeControl.playing = true
 

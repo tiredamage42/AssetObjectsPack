@@ -1,177 +1,247 @@
 ﻿using UnityEngine;
-using System;
 
 namespace AssetObjectsPacks.Animations {
+
+    /*
+        playlists / cues:
+            have more control over player positioning / syncing multiple events on different players
+
+            Create a playlist:
+
+                Add a playlist component to an empty gameobject
+
+                add an empty gameObject child to this object for each player to be synced:
+
+                    e.g. two characters shaking hands would be two empty gameObjects as children
+
+                under each 'player child' add GameObjects with a Cue component attached
+
+                each cue can hold several events
+                    for example when playing an animation and audio clip for that cue
+                    the first event in the array is the main one that can potentially decide when 
+                    the event is done (and the cue)
+
+
+
+
+
+            to play a playlist at runtime:
+                get a reference to the playlist component ( can be a prefab )
+
+                then call:
+                    InitializePerformance(
+                        new EventPlayer[] { player },  // the players to use for the playlist
+                        transform.position, transform.rotation, //position and rotation to start the performance
+                        OnPerformanceEndCallback //performance end callback
+                    );
+
+
+
+
+        players:
+            play events, 
+
+            asset object per event chosen based on parameters matching asset object conditions
+            
+            when multiple events played, first is in charge of deciding when the event is ending 
+            (unless asset object timed)
+
+
+            player then calls whichever component has subscribed to whenever an event is played
+            that corresponds to the event's pack type
+
+
+            to subscribe to events being played:
+
+                get a reference to the event player, then call:
+
+                    SubscribeToEventPlay ( { pack type name } , { callback when event is played and asset object chosen } )
+
+                the callback supplied should have parameters:
+                    
+                    AssetObject assetObject :   the asset object chosen for the event,
+                    
+                    System.Action endEvent  :   a callback for when the assetObject is done playing
+                                                if it's not null, then the component is in charge
+                                                of deciding when the asset object (and event) are done
+
+                the callback is now called whenever the player plays events of the pack type specified
+
+
+
+        events:
+        pack manager
+
+
+        custom parameters
+
+        maybe animation download?
+
+
+
+            
+
+                                                
+                
+
+            
+    
+    */
 
     [RequireComponent(typeof(Animator))]
     public class CustomAnimator : MonoBehaviour
     {
-        public static readonly string[] sLoop_Names = new string[] {"Loops_0", "Loops_1"};
-        public static readonly string[] sLoop_Indicies = new string[] {"LoopIndex_0", "LoopIndex_1"};
-        public static readonly string[] sLoop_Mirrors = new string[] {"p_LoopMirror_0", "p_LoopMirror_1"};
-        public static readonly string[] sLoop_Speeds = new string[] {"p_LoopSpeed_0", "p_LoopSpeed_1"};
-        public const string sMirror = "Mirror";
-        public const string sSpeed = "Speed";
-        public const string sActiveLoopSet = "ActiveLoopSet";
-        public const string sShots = "OneShots";
-
-        static readonly int p_Mirror = Animator.StringToHash( sMirror);
-        static readonly int p_Speed = Animator.StringToHash( sSpeed);
-        static readonly int p_ActiveLoopSet = Animator.StringToHash( sActiveLoopSet);
-        static readonly int[] p_LoopIndicies = new int[] {
-            Animator.StringToHash( sLoop_Indicies[0]), 
-            Animator.StringToHash( sLoop_Indicies[1]), 
-        };
-        static readonly int[] p_LoopSpeeds = new int[] {
-            Animator.StringToHash( sLoop_Speeds[0]), 
-            Animator.StringToHash( sLoop_Speeds[1]), 
-        };
-        static readonly int[] p_LoopMirrors = new int[] {
-            Animator.StringToHash( sLoop_Mirrors[0]), 
-            Animator.StringToHash( sLoop_Mirrors[1]), 
-        };
-        
-    
-        AssetObjectEventPlayer event_player;
+        //call on awake
         void InitializeEventPlayer () {
-            event_player = GetComponent<AssetObjectEventPlayer>();
-            event_player.SubscribeToEventVariation("Animations", OnPlayEvent);
+            //get the event player
+            AssetObjectEventPlayer event_player = GetComponent<AssetObjectEventPlayer>();
+
+            
+            //tell the event player to call this component's "Use Asset Object" method
+            //whenever it plays an event that uses the "Animations" pack
+            event_player.SubscribeToEventPlay("Animations", UseAssetObject);
         }
 
+        /*
+            when this component is in charge of determining the end of the event played
+            (when it's the main event on a cue, and the asset object is not timed)
+            it has to call the supplied callback to let the player know the event has ended
 
-        void OnPlayEvent(AssetObject assetObject, System.Action end_event) {
-            this.end_event = end_event;
-            bool mirror = false;
-            int mirror_mode = assetObject["Mirror"].IntValue;
-            float trans_speed = assetObject["Transition"].FloatValue;
+            in htis case, when the animation is done
+        */
+        System.Action endEvent;
+
+
+        /*
+            called when the attached event player plays an 
+            "Animations" event and chooses an appropriate asset object
+        
+            if the endEvent callback is not null, then this component 
+            is in charge of deciding when the 'event' is done.  
+        
+            in this case, this component tracks when the animator is exiting an animation
+            that has been played
+        */
+        void UseAssetObject(AssetObject assetObject, System.Action endEvent) {
+            this.endEvent = endEvent;
+
+            //get asset object parameter values
+            int animID = assetObject.id;
+            float transition = assetObject["Transition"].FloatValue;
             float speed = assetObject["Speed"].FloatValue;
             bool looped = assetObject["Looped"].BoolValue;
+            int mirror = assetObject["Mirror"].IntValue;
 
-            if (mirror_mode == 2) {
-                mirror = UnityEngine.Random.value < .5f;
-            }
-            else if (mirror_mode == 1) {
-                mirror = true;
-            }
-            Play(assetObject.id, false, mirror, looped, trans_speed, speed);
+            
+            Play(animID, false, (mirror == 2) ? Random.value < .5f : mirror == 1, looped, transition, speed);
         }
 
-
-
-        Action end_event;
-
-        void OnOneShotTransitionStart () {
-            if (end_event != null) {
-                Debug.Log("on one shot transition start");
-                end_event();
-                end_event = null;
-            }
+        // let the player know the event is done if this component is keeping track of that
+        void TriggerEndEvent () {
+            if (endEvent == null) return;
+            endEvent();
+            endEvent = null;
         }
-
-
         
-        public RuntimeAnimatorController animatorController;
+
+
+
+
+        public const string sMirror = "Mirror", sSpeed = "Speed", sActiveLoop = "ActiveLoop", sShots = "OneShots";
+        public static readonly string[] sLoopNames = new string[] {"Loops0", "Loops1"};
+        public static readonly string[] sLoopIndicies = new string[] {"Index0", "Index1"};
+        public static readonly string[] sLoopMirrors = new string[] {"Mirror0", "Mirror1"};
+        public static readonly string[] sLoopSpeeds = new string[] {"Speed0", "Speed1"};
+        static readonly int pMirror = Animator.StringToHash( sMirror );
+        static readonly int pSpeed = Animator.StringToHash( sSpeed);
+        static readonly int pActiveLoopSet = Animator.StringToHash( sActiveLoop );
+        static readonly int[] pLoopIndicies = new int[] { Animator.StringToHash( sLoopIndicies[0]), Animator.StringToHash( sLoopIndicies[1]), };
+        static readonly int[] pLoopSpeeds = new int[] { Animator.StringToHash( sLoopSpeeds[0]), Animator.StringToHash( sLoopSpeeds[1]), };
+        static readonly int[] pLoopMirrors = new int[] { Animator.StringToHash( sLoopMirrors[0]), Animator.StringToHash( sLoopMirrors[1]), };
+        
+
+        //custom animation component that controls a Unity Animator with a runtime animator controller
+        //set up by the wizard included in this package
         Animator anim;
-        int active_loopset;
-        bool playing_one_shot;
-        bool end_check, was_in_transition;
+        int activeLoops;
+        bool playingOneShot, endCheck;
 
         void Awake () {
             anim = GetComponent<Animator>();
-            //anim.avatar = transform.GetChild(0).GetComponent<Animator>().avatar;
-            anim.runtimeAnimatorController = animatorController;
             anim.applyRootMotion = true;
             InitializeEventPlayer();
         }
-
-
         void Update () {
-
-            bool next_is_one_shot;
-            if (OneShotEnded(out next_is_one_shot)) {
-                if (!next_is_one_shot) {
-                    playing_one_shot = false;
-                }
-                //OnOneShotTransitionEnd();
-            }
+            CheckOneShotEndings();
         }
 
-        bool OneShotEnded (out bool next_is_one_shot, int layer = 0) {
+        //doing it after transition end looks janky
+        void OnOneShotExitTransitionStart () {
+            TriggerEndEvent();
+        }
+        void OnOneShotTransitionEnd() {
+
+        }
+
+    
+        void Play (int id, bool interrupt, bool mirror, bool loop, float transition, float speed) {
+            if (loop) PlayLoop(id, interrupt, mirror, transition, speed);
+            else PlayOneShot(id, mirror, transition, speed);
+        }
+        void PlayLoop (int id, bool interrupt, bool mirror, float transition, float speed, int layer = 0) {
+
+            bool do_transition = (playingOneShot && interrupt) || !playingOneShot;
+            
+            if (do_transition) activeLoops = (activeLoops + 1) % 2;
+            //if we're doing it in the background of a one shot just change the current active loopset
+
+            //Debug.Log("playing loop at loopset: " + activeLoops);
+            anim.SetFloat(pLoopIndicies[activeLoops], id);
+            anim.SetFloat(pLoopSpeeds[activeLoops], speed);
+            anim.SetBool(pLoopMirrors[activeLoops], mirror);
+
+            if (do_transition) anim.CrossFadeInFixedTime(sLoopNames[activeLoops], transition, layer);
+            
+            anim.SetInteger(pActiveLoopSet, activeLoops);
+        }
+            
+
+        void PlayOneShot(int id, bool mirror, float transition, float speed, int layer = 0) {
+
+            anim.SetBool(pMirror, mirror);
+            anim.SetFloat(pSpeed, speed);
+
+            anim.CrossFadeInFixedTime(id.ToString(), transition, layer);
+
+            playingOneShot = true;
+        }
+
+        //check when a non looped animation is starting its exit transition and ending its exit transition
+        void CheckOneShotEndings (int layer = 0) {
         
             AnimatorStateInfo current_state = anim.GetCurrentAnimatorStateInfo(layer);
             AnimatorStateInfo next_state = anim.GetNextAnimatorStateInfo(layer);
 
             bool current_is_shot = current_state.IsTag(sShots);
-            next_is_one_shot = next_state.IsTag(sShots);
+            bool next_is_one_shot = next_state.IsTag(sShots);
 
             if (anim.IsInTransition(layer)) {
                 if (current_is_shot) {
                     if (next_state.fullPathHash != current_state.fullPathHash) {
-                        if (!end_check) {
-                            end_check = true;
-                            OnOneShotTransitionStart();
+                        if (!endCheck) {
+                            endCheck = true;
+                            OnOneShotExitTransitionStart();
                         }
-
                     }
                 }
-                return false;
             }
             else {
-                if (end_check) {
-                    end_check = false;
-                    return true;
+                if (endCheck) {
+                    endCheck = false;
+                    if (!next_is_one_shot) playingOneShot = false;
+                    OnOneShotTransitionEnd();
                 }
-                return false;
             }
-        }
-
-
-        public void Play (int anim_index, bool interrupt_current, bool mirror, bool loop, float transition_time, float speed) {
-            if (loop) {
-                PlayLoop(anim_index, interrupt_current, mirror, transition_time, speed);
-            }
-            else {
-                PlayAnimation(anim_index, mirror, transition_time, speed);
-            }
-        }
-        
-        //public void InterruptAnimation () {
-        //    Debug.Log("interupting animation");
-        //    anim.SetTrigger(p_AnimExit);
-        //}
-    
-        void PlayLoop (int anim_index, bool interrupt_current, bool mirror, float transition_time, float speed) {
-            int layer = 0;
-
-            bool do_transition = (playing_one_shot && interrupt_current) || !playing_one_shot;
-
-            if (do_transition) active_loopset = (active_loopset + 1) % 2;
-            
-            //if we're doing it in the background of a one shot just change the current active loopset
-
-            //Debug.Log("playing loop at loopset: " + active_loopset);
-            anim.SetFloat(p_LoopIndicies[active_loopset], anim_index);
-            anim.SetFloat(p_LoopSpeeds[active_loopset], speed);
-            anim.SetBool(p_LoopMirrors[active_loopset], mirror);
-
-            if (do_transition) {
-                //InterruptAnimation();
-                anim.CrossFadeInFixedTime(sLoop_Names[active_loopset], transition_time, layer);
-            }
-            anim.SetInteger(p_ActiveLoopSet, active_loopset);
-            
-        }
-
-        void PlayAnimation(int anim_index, bool mirror, float transition_time, float speed) {
-
-            anim.SetBool(p_Mirror, mirror);
-            anim.SetFloat(p_Speed, speed);
-
-            int layer = 0;
-            anim.CrossFadeInFixedTime(anim_index.ToString(), transition_time, layer);
-
-            playing_one_shot = true;
-            
         }
     }
 }

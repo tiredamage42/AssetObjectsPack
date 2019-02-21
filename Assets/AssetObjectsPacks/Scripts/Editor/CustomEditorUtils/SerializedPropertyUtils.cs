@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
+using System.Collections.Generic;
 namespace AssetObjectsPacks {
     public class EditorProp {
 
@@ -11,11 +11,9 @@ namespace AssetObjectsPacks {
         public bool boolValue { get { return prop.boolValue; } }
         public string stringValue { get { return prop.stringValue; } }
         public int enumValueIndex { get { return prop.enumValueIndex; } }
-
-        
         public int arraySize { get { return prop.arraySize; } }
-        bool isArray { get { return prop.isArray; } }
         
+        bool isArray { get { return prop.isArray; } }
         List<EditorProp> arrayElements = new List<EditorProp>();
         Dictionary<string, EditorProp> name2Prop = new Dictionary<string, EditorProp>();
         public EditorProp (SerializedProperty prop) {
@@ -24,9 +22,7 @@ namespace AssetObjectsPacks {
         }
 
         void RebuildArray () {
-            int c = arraySize;
-            arrayElements.Clear();
-            for (int i = 0; i < c; i++) arrayElements.Add( new EditorProp( prop.GetArrayElementAtIndex(i) ) );
+            arrayElements = new List<EditorProp>().Generate(arraySize, i => { return new EditorProp( prop.GetArrayElementAtIndex(i) ); } );
         }
 
         public bool ContainsDuplicateNames (out string duplicateName, string checkNameField) {
@@ -66,8 +62,15 @@ namespace AssetObjectsPacks {
         public EditorProp AddNew () {
             if (CheckNonArray()) return null;
             int l = prop.arraySize;
+            
+            //Debug.Log("adding...");
             prop.InsertArrayElementAtIndex(l);
+            
+            //Debug.Log("adding to elements...");
+            
             arrayElements.Add( new EditorProp( prop.GetArrayElementAtIndex(l) ) );
+            
+            //Debug.Log("done adding...");
             return arrayElements.Last();
         }
         public void DeleteAt (int index) {
@@ -78,6 +81,8 @@ namespace AssetObjectsPacks {
         public EditorProp this [int index] {
             get {
                 if (CheckNonArray()) return null;
+
+
                 if (index < 0 || index >= arraySize) {
                     Debug.LogError("Array index out of range");
                     return null;
@@ -89,7 +94,7 @@ namespace AssetObjectsPacks {
         public EditorProp this [string name] {
             get {
                 if (isArray) {
-                    Debug.LogError (prop.displayName + " is an array type");
+                    Debug.LogError (prop.displayName + " is an array type, use integer indexing");
                     return null;
                 }
                 EditorProp customProp;
@@ -102,55 +107,42 @@ namespace AssetObjectsPacks {
         }
 
         public void CopyProp (EditorProp copy) {
+
+            //Debug.Log("copying... 0");
             SerializedProperty c = copy.prop;
+            
+            //Debug.Log("copying... 1");
+            
             if (prop.propertyType != c.propertyType) {
                 Debug.LogError("Incompatible types (" + prop.propertyType + ", " + c.propertyType + ")");
                 return;
             }
-            prop.intValue = c.intValue;
-            prop.boolValue = c.boolValue;
-            prop.floatValue = c.floatValue;
-            prop.stringValue = c.stringValue;
-            prop.colorValue = c.colorValue;
-            prop.objectReferenceValue = c.objectReferenceValue;
-            prop.enumValueIndex = c.enumValueIndex;
-            prop.vector2Value = c.vector2Value;
-            prop.vector3Value = c.vector3Value;
-            prop.vector4Value = c.vector4Value;
-            prop.rectValue = c.rectValue;
-            prop.animationCurveValue = c.animationCurveValue;
-            prop.boundsValue = c.boundsValue;
-            prop.quaternionValue = c.quaternionValue;
-            prop.exposedReferenceValue = c.exposedReferenceValue;
-            prop.vector2IntValue = c.vector2IntValue;
-            prop.vector3IntValue = c.vector3IntValue;
-            prop.rectIntValue = c.rectIntValue;
-            prop.boundsIntValue = c.boundsIntValue;
-
-            /*
-            switch (p.propertyType){
-                case SerializedPropertyType.Integer	:p.intValue = c.intValue;break;
-                case SerializedPropertyType.Boolean	:p.boolValue = c.boolValue;break;
-                case SerializedPropertyType.Float	:p.floatValue = c.floatValue;break;
-                case SerializedPropertyType.String	:p.stringValue = c.stringValue;break;
-                case SerializedPropertyType.Color	:p.colorValue = c.colorValue;break;
-                case SerializedPropertyType.ObjectReference	:p.objectReferenceValue = c.objectReferenceValue;break;
-                case SerializedPropertyType.Enum	:p.enumValueIndex = c.enumValueIndex;break;
-                case SerializedPropertyType.Vector2	:p.vector2Value = c.vector2Value;break;
-                case SerializedPropertyType.Vector3	:p.vector3Value = c.vector3Value;break;
-                case SerializedPropertyType.Vector4	:p.vector4Value = c.vector4Value;break;
-                case SerializedPropertyType.Rect	:p.rectValue = c.rectValue;break;
-                case SerializedPropertyType.AnimationCurve	:p.animationCurveValue = c.animationCurveValue;break;
-                case SerializedPropertyType.Bounds	:p.boundsValue = c.boundsValue;break;
-                case SerializedPropertyType.Quaternion	:p.quaternionValue = c.quaternionValue;break;
-                case SerializedPropertyType.ExposedReference:	p.exposedReferenceValue = c.exposedReferenceValue;break;
-                case SerializedPropertyType.Vector2Int:	p.vector2IntValue = c.vector2IntValue;break;
-                case SerializedPropertyType.Vector3Int:	p.vector3IntValue = c.vector3IntValue;break;
-                case SerializedPropertyType.RectInt	:p.rectIntValue = c.rectIntValue;break;
-                case SerializedPropertyType.BoundsInt	:p.boundsIntValue = c.boundsIntValue;break;
-                default:Debug.LogError("Not implemented: " + p.propertyType);break;
+            
+            //Debug.Log("copying... 2");
+            
+            switch (prop.propertyType){
+                case SerializedPropertyType.Integer	            :   prop.intValue              =    c.intValue              ;break;
+                case SerializedPropertyType.Boolean	            :   prop.boolValue             =    c.boolValue             ;break;
+                case SerializedPropertyType.Float	            :   prop.floatValue            =    c.floatValue            ;break;
+                case SerializedPropertyType.String	            :   prop.stringValue           =    c.stringValue           ;break;
+                case SerializedPropertyType.Color	            :   prop.colorValue            =    c.colorValue            ;break;
+                case SerializedPropertyType.ObjectReference	    :   prop.objectReferenceValue  =    c.objectReferenceValue  ;break;
+                case SerializedPropertyType.Enum	            :   prop.enumValueIndex        =    c.enumValueIndex        ;break;
+                case SerializedPropertyType.Vector2	            :   prop.vector2Value          =    c.vector2Value          ;break;
+                case SerializedPropertyType.Vector3	            :   prop.vector3Value          =    c.vector3Value          ;break;
+                case SerializedPropertyType.Vector4	            :   prop.vector4Value          =    c.vector4Value          ;break;
+                case SerializedPropertyType.Rect	            :   prop.rectValue             =    c.rectValue             ;break;
+                case SerializedPropertyType.AnimationCurve	    :   prop.animationCurveValue   =    c.animationCurveValue   ;break;
+                case SerializedPropertyType.Bounds	            :   prop.boundsValue           =    c.boundsValue           ;break;
+                case SerializedPropertyType.Quaternion	        :   prop.quaternionValue       =    c.quaternionValue       ;break;
+                case SerializedPropertyType.ExposedReference    :   prop.exposedReferenceValue =    c.exposedReferenceValue ;break;
+                case SerializedPropertyType.Vector2Int          :   prop.vector2IntValue       =    c.vector2IntValue       ;break;
+                case SerializedPropertyType.Vector3Int          :   prop.vector3IntValue       =    c.vector3IntValue       ;break;
+                case SerializedPropertyType.RectInt	            :   prop.rectIntValue          =    c.rectIntValue          ;break;
+                case SerializedPropertyType.BoundsInt	        :   prop.boundsIntValue        =    c.boundsIntValue        ;break;
+                
+                default:Debug.LogError("Not implemented: " + prop.propertyType);break;
             }
-            */
         }
     }
 }

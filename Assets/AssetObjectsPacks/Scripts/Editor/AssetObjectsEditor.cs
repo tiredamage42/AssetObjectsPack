@@ -4,30 +4,39 @@ using UnityEditor;
 namespace AssetObjectsPacks {
     public static class AssetObjectsEditor 
     {
-        public static PacksManager GetPackManager () {
+
+
+        static PacksManager pm;
+        public static PacksManager packManager {
+            get {
+                if (pm == null) pm = GetPackManager();
+                return pm;
+            }
+        }
+        static PacksManager GetPackManager () {
             string[] guids = AssetDatabase.FindAssets("t:"+ typeof(PacksManager).Name);  
-            if (guids.Length == 0) {
+            int l = guids.Length;
+            if (l == 0) {
                 Debug.LogError("No PacksManager Object Found");
                 return null;
             }
-            return AssetDatabase.LoadAssetAtPath<PacksManager>(AssetDatabase.GUIDToAssetPath(guids[0]));
+            string path = AssetDatabase.GUIDToAssetPath(guids[0]);
+            if (l > 1) Debug.LogWarning("Multiple PackManagers found, using: '" + path + "'");
+            return AssetDatabase.LoadAssetAtPath<PacksManager>(path);
         }
        
-        public const string asset_object_key = "@ID-";  
+        const string sIDKey = "@ID-";  
         const string back_slash = "/", dash = "-";
-        const char back_slash_c = '/', dash_c = '-', dot_c = '.', comma_c = ',';    
+        const char back_slash_c = '/', dash_c = '-', dot_c = '.';    
 
         public static string[] GetAllAssetObjectPaths (string directory, string file_extensions, bool include_dir) {    
-            return EditorUtils.GetFilePathsInDirectory(directory, include_dir, file_extensions, asset_object_key, true);
+            return EditorUtils.GetFilePathsInDirectory(directory, include_dir, file_extensions, sIDKey, true);
         }
         public static string[] GetAllAssetObjectPathsWithoutIDs (string directory, string file_extensions) {
-            return EditorUtils.GetFilePathsInDirectory(directory, true, file_extensions, asset_object_key, false);
+            return EditorUtils.GetFilePathsInDirectory(directory, true, file_extensions, sIDKey, false);
         }
-        
-        public static string[] GetAllAssetObjectPaths (string directory, string file_extensions, bool include_dir, out string[] without_ids, out Dictionary<int, string> id2file) {
-            without_ids = GetAllAssetObjectPathsWithoutIDs(directory, file_extensions);
+        public static string[] GetAllAssetObjectPaths (string directory, string file_extensions, bool include_dir, out Dictionary<int, string> id2file) {
             string[] paths = GetAllAssetObjectPaths(directory, file_extensions, include_dir);
-            
             int l = paths.Length;
             id2file = new Dictionary<int, string>(l);
             for (int i = 0; i < l; i++) id2file.Add(GetObjectIDFromPath(paths[i]), paths[i]);
@@ -61,6 +70,8 @@ namespace AssetObjectsPacks {
             return directory + file_name;
         }
 
+
+
         static int[] GetExistingIDs (string[] all_valid_paths) {
             int l = all_valid_paths.Length;
             int[] all_ids = new int[l];
@@ -83,31 +94,45 @@ namespace AssetObjectsPacks {
             return result;
         }
 
-        //call from editor on enable if paths without id's length is not 0
-        public static void GenerateNewIDs (string[] all_valid_paths, string[] paths_without_ids) {
+        public static void GenerateNewIDs (string[] validPaths, string[] noIDs) {
 
-            int l = paths_without_ids.Length;
-            int[] new_ids = GenerateNewIDList(l, GetExistingIDs (all_valid_paths));
+            int l = noIDs.Length;
+            int[] newIDs = GenerateNewIDList(l, GetExistingIDs (validPaths));
             
             for (int i = 0; i < l; i++) {
-                string asset_path = paths_without_ids[i];
+                string path = noIDs[i];
 
-                string orig_name = asset_path;
-                if (orig_name.Contains("/")) {
-                    orig_name = EditorUtils.RemoveDirectory(asset_path);
+                if (path.Contains(sIDKey)) {
+                    Debug.LogError("asset was already assigned an id: " + path + " (to fix, just delete the '@ID-#-' section)");
+                    continue;
                 }
+
+                string origName = path;
+                if (origName.Contains("/")) origName = EditorUtils.RemoveDirectory(path);
                 
-                if (orig_name.Contains(asset_object_key)) {
-                    Debug.LogError("asset was already assigned an id: " + orig_name + " (to fix, just delete the '@ID-#-' section)");
-                    return;
-                }
-                string new_name = asset_object_key + new_ids[i] + "-" + orig_name;                
-                AssetDatabase.RenameAsset(asset_path, new_name);
+                string newName = sIDKey + newIDs[i] + "-" + origName;                
+                AssetDatabase.RenameAsset(path, newName);
             }
             Debug.Log("Assets are now ready with unique IDs");
         }
 
 
-
+        public static int[] GetAllUsedIDs (string packName) {
+            List<int> used = new List<int>();
+            AssetObjectEventPack[] allEvents = EditorUtils.GetAllAssetsOfType<AssetObjectEventPack>();
+            int l = allEvents.Length;
+            for (int i = 0; i < l; i++) {
+                AssetObjectEventPack e = allEvents[i];
+                if (packManager.FindPackByID( e.assetObjectPackID, out _ ).name == packName) {                    
+                    int y = e.assetObjects.Length;
+                    for (int z = 0; z < y; z++) {
+                        int id = e.assetObjects[z].id;
+                        if (!used.Contains(id)) used.Add(id);
+                    }
+                }
+            }
+            if (used.Count == 0) Debug.LogWarning("no IDs used for " + packName + " pack!");
+            return used.ToArray();
+        }
     }
 }

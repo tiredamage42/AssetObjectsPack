@@ -38,6 +38,11 @@ namespace AssetObjectsPacks {
             for (int i = 0; i < count; i++) h.Add(get_method(i));
             return h;   
         }
+        public static List<T> Generate<T>(this List<T> h, int count, GetMethod<T> get_method) {
+            h.Clear();
+            for (int i = 0; i < count; i++) h.Add(get_method(i));
+            return h;   
+        }
 
 
 
@@ -74,6 +79,16 @@ namespace AssetObjectsPacks {
             for (int i = 0; i < h.Length; i++) h[i] = get_method(i);
             return h;   
         }
+
+        public static void Add<T> (this T[] a, T e) {
+            int l = a.Length;
+            System.Array.Resize(ref a, l + 1);
+            a[l] = e;
+        }
+        public static void Clear<T> (this T[] a) {
+            System.Array.Resize(ref a, 0);
+        }
+            
         
         
         

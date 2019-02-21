@@ -1,14 +1,7 @@
 ﻿using UnityEngine;
-
 namespace AssetObjectsPacks {
-
-
     [System.Serializable] public class CustomParameter {
 
-        #if UNITY_EDITOR 
-        public const string nameField = "name", typeField = "paramType", hintField = "hint";
-        #endif
-        
         public enum ParamType { 
             BoolValue = 0, 
             FloatValue = 1, 
@@ -20,6 +13,7 @@ namespace AssetObjectsPacks {
         public bool BoolValue;
         public float FloatValue;
         public int IntValue;
+
         public CustomParameter (string name, float default_value, string hint) {
             paramType = ParamType.FloatValue;
             this.name = name;
@@ -61,8 +55,6 @@ namespace AssetObjectsPacks {
             this.IntValue = default_value;
         }
 
-
-        
         public bool MatchesParameter (CustomParameter other_parameter) {
             if (other_parameter.name != name) {
                 Debug.LogWarning("Name Mismatch! " + other_parameter.name + " / " + name);

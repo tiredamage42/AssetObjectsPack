@@ -1,8 +1,5 @@
-﻿
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
-
 namespace AssetObjectsPacks {
     public static class StringUtils {
         public static string PadToLength(this string s, int length, string pad = " ") {
@@ -14,8 +11,6 @@ namespace AssetObjectsPacks {
         public static bool IsEmpty(this string s) {
             return string.IsNullOrEmpty(s) || string.IsNullOrWhiteSpace(s);
         }
-
-        #if UNITY_EDITOR
         public static bool IsValidDirectory(this string s) {
             if (s.IsEmpty()) return false;
             if (!s.EndsWith("/")) return false;
@@ -59,7 +54,6 @@ namespace AssetObjectsPacks {
             }
             return null;
         }
-        #endif
     }
     public class Pool<T> where T : new() {
         List<T> pool = new List<T>();

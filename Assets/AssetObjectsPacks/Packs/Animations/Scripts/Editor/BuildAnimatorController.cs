@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor.Animations;
 using UnityEditor;
 using System.Linq;
@@ -20,7 +19,7 @@ namespace AssetObjectsPacks.Animations {
             ScriptableWizard.DisplayWizard<AnimatorControllerBuilder>("Generate Anim Controller", "Generate");
         }
         void OnWizardCreate() {
-            PacksManager packs = AssetObjectsEditor.GetPackManager();
+            PacksManager packs = AssetObjectsEditor.packManager;
             if (packs == null) return;
             
             if (!saveDirectory.EndsWith("/")) saveDirectory += "/";
@@ -38,74 +37,32 @@ namespace AssetObjectsPacks.Animations {
         public float exitTransitionDuration = .25f;
         public string animationsPackName = "Animations";
         public string saveDirectory = "Assets/";
-
-        public static List<AssetObjectEventPack> GetAllEventPacks() {
-            string[] paths = AssetDatabase.GetAllAssetPaths().Where( f => f.Contains(".asset") ).ToArray();
-            List<AssetObjectEventPack> all_event_packs = new List<AssetObjectEventPack>();
-            int l = paths.Length;
-            for (int i = 0; i < l; i++) {
-                all_event_packs.Add(EditorUtils.GetAssetAtPath<AssetObjectEventPack>(paths[i]));
-            }
-            return all_event_packs;
-        }
-
-        
-    
-        //only add used animations to controller, to avoid adding thousands of states
-        List<int> GetAllUsedIDs () {
-            List<int> used_ids = new List<int>();
-            List<AssetObjectEventPack> all_event_packs = GetAllEventPacks();
-            int l = all_event_packs.Count;
-            for (int i = 0; i < l; i++) {
-                AssetObjectEventPack ep = all_event_packs[i];
-                int packIndex;
-                if (AssetObjectsManager.instance.packs.FindPackByID( ep.assetObjectPackID, out packIndex ).name == animationsPackName) {
-                    int y = ep.assetObjects.Length;
-                    for (int z = 0; z < y; z++) {
-                        int id = ep.assetObjects[z].id;
-                        if (!used_ids.Contains(id)) {
-                            used_ids.Add(id);
-                        }
-                    }
-                }
-            }
             
-            if (used_ids.Count == 0) {
-                Debug.LogError("no scenes saved or no animations specified in scene cues");
-            }
-            return used_ids;
-        }
+        //only add used animations to controller, to avoid adding thousands of states
+        
 
-        void BuildAnimatorController (AssetObjectPack animation_type) {
-            List<int> used_ids = new List<int>();
+        void BuildAnimatorController (AssetObjectPack animationPack) {
+            int[] used_ids = null;
             if (usedOnly) {
-                used_ids = GetAllUsedIDs();
-                if (used_ids.Count == 0) {
-                    return;
-                }
+                used_ids = AssetObjectsEditor.GetAllUsedIDs(animationsPackName);
+                if (used_ids.Length == 0) return;
             } 
 
-            string[] file_paths = AssetObjectsEditor.GetAllAssetObjectPaths(animation_type.objectsDirectory, animation_type.fileExtensions, true);
+            string[] allPaths = AssetObjectsEditor.GetAllAssetObjectPaths(animationPack.objectsDirectory, animationPack.fileExtensions, true);
             
             //filter out unused file paths
-            if (usedOnly) file_paths = file_paths.Where(f => used_ids.Contains(AssetObjectsEditor.GetObjectIDFromPath(f))).ToArray();
+            if (usedOnly) allPaths = allPaths.Where(f => used_ids.Contains(AssetObjectsEditor.GetObjectIDFromPath(f))).ToArray();
             
-
-            
-
-            int c = file_paths.Length;
-            ClipIDPair[] clip_id_pairs = BuildClipIDPairs(file_paths, c);
-            if (clip_id_pairs == null) return;
-            
-            ControllerBuild(clip_id_pairs, c);   
+            int c = allPaths.Length;
+            ControllerBuild(BuildClipIDPairs(allPaths, c), c);   
 
             Debug.Log("Controller built at: " + saveDirectory + "AnimationsController.controller");         
         }
 
-        ClipIDPair[] BuildClipIDPairs (string[] file_paths, int c) {
+        ClipIDPair[] BuildClipIDPairs (string[] allPaths, int c) {
             ClipIDPair[] results = new ClipIDPair[c];
             for (int i = 0; i < c; i++) {
-                string f = file_paths[i];
+                string f = allPaths[i];
                 
                 AnimationClip clip = EditorUtils.GetAssetAtPath<AnimationClip>(f);
                 if (clip == null) {
@@ -120,14 +77,15 @@ namespace AssetObjectsPacks.Animations {
             controller.AddParameter(CustomAnimator.sMirror, AnimatorControllerParameterType.Bool);
             controller.AddParameter(CustomAnimator.sSpeed, AnimatorControllerParameterType.Float);
 
-            for (int i = 0; i < CustomAnimator.sLoop_Indicies.Length; i++) {
-                controller.AddParameter(CustomAnimator.sLoop_Indicies[i], AnimatorControllerParameterType.Float);
-                controller.AddParameter(CustomAnimator.sLoop_Mirrors[i], AnimatorControllerParameterType.Bool);
-                controller.AddParameter(CustomAnimator.sLoop_Speeds[i], AnimatorControllerParameterType.Float);
+            for (int i = 0; i < CustomAnimator.sLoopIndicies.Length; i++) {
+                controller.AddParameter(CustomAnimator.sLoopIndicies[i], AnimatorControllerParameterType.Float);
+                controller.AddParameter(CustomAnimator.sLoopMirrors[i], AnimatorControllerParameterType.Bool);
+                controller.AddParameter(CustomAnimator.sLoopSpeeds[i], AnimatorControllerParameterType.Float);
             }
-            controller.AddParameter(CustomAnimator.sActiveLoopSet, AnimatorControllerParameterType.Int);
+            controller.AddParameter(CustomAnimator.sActiveLoop, AnimatorControllerParameterType.Int);
         }
         void ControllerBuild (ClipIDPair[] clips, int c) {
+            if (clips == null) return;
             // Create the animator in the project
             AnimatorController controller = AnimatorController.CreateAnimatorControllerAtPath(saveDirectory + "AnimationsController.controller");
             
@@ -135,26 +93,20 @@ namespace AssetObjectsPacks.Animations {
             AddParameters(controller);
 
             //make blend trees for looped animations (2 to smoothly transition between loops)
-            int blend_tree_count = 2;
-            AnimatorState[] loop_blend_trees = new AnimatorState[blend_tree_count];
-            for (int i =0 ; i < blend_tree_count; i++) {
-                loop_blend_trees[i] = AddBlendTree(controller, 0, clips, CustomAnimator.sLoop_Names[i], CustomAnimator.sLoop_Mirrors[i], CustomAnimator.sLoop_Speeds[i], c, CustomAnimator.sLoop_Indicies[i]);
-            }      
-            for (int i = 0; i < c; i++) {
-                AddState(controller, 0, clips[i], loop_blend_trees);
-            }    
+            AnimatorState[] blendTrees = new AnimatorState[2];
+            for (int i =0 ; i < 2; i++) blendTrees[i] = AddBlendTree(controller, 0, clips, CustomAnimator.sLoopNames[i], CustomAnimator.sLoopMirrors[i], CustomAnimator.sLoopSpeeds[i], c, CustomAnimator.sLoopIndicies[i]);            
+            for (int i = 0; i < c; i++) AddState(controller, 0, clips[i], blendTrees);
         }
 
 
-        void AddState (AnimatorController controller, int layer_index, ClipIDPair clip_id_pair, AnimatorState[] blend_trees) {
-            int state_id = clip_id_pair.id;
-            AnimationClip clip = clip_id_pair.clip;
+        void AddState (AnimatorController controller, int layer, ClipIDPair clipIDPair, AnimatorState[] blendTrees) {
+            int id = clipIDPair.id;
+            AnimationClip clip = clipIDPair.clip;
 
-            AnimatorStateMachine sm = controller.layers[layer_index].stateMachine;
+            AnimatorStateMachine sm = controller.layers[layer].stateMachine;
             
-            // Add the state to the state machine
-            // (The Vector3 is for positioning in the editor window)
-            AnimatorState state = sm.AddState(state_id.ToString());//, new Vector3(300, 0, 0));
+            // Add the state to the state machine (The Vector3 is for positioning in the editor window)
+            AnimatorState state = sm.AddState(id.ToString());//, new Vector3(300, 0, 0));
             
             state.mirrorParameterActive = true;
             state.mirrorParameter = CustomAnimator.sMirror;
@@ -167,40 +119,39 @@ namespace AssetObjectsPacks.Animations {
 
             float exit_time = 1.0f - (exitTransitionDuration / clip.length);
 
-            int c = blend_trees.Length;
+            int c = blendTrees.Length;
             for (int i = 0; i < c; i++) {
-                AnimatorStateTransition exit_transition = state.AddTransition(blend_trees[i]);
-                exit_transition.AddCondition(UnityEditor.Animations.AnimatorConditionMode.Equals, i, CustomAnimator.sActiveLoopSet);
-                exit_transition.canTransitionToSelf = false;
-                exit_transition.hasExitTime = true;
-                exit_transition.exitTime = exit_time;
-                exit_transition.hasFixedDuration = true;
-                exit_transition.duration = exitTransitionDuration;
-        
+                AnimatorStateTransition exit = state.AddTransition(blendTrees[i]);
+                exit.AddCondition(AnimatorConditionMode.Equals, i, CustomAnimator.sActiveLoop);
+                exit.canTransitionToSelf = false;
+                exit.hasExitTime = true;
+                exit.exitTime = exit_time;
+                exit.hasFixedDuration = true;
+                exit.duration = exitTransitionDuration;
             }
         }
 
-        AnimatorState AddBlendTree (AnimatorController controller, int layer_index, ClipIDPair[] clip_id_pairs, string name, string mirrorParameter, string speedParameter, int c, string blend_param) {
-            AnimatorState blendTreeState = controller.layers[layer_index].stateMachine.AddState(name);
+        AnimatorState AddBlendTree (AnimatorController controller, int layer, ClipIDPair[] clipIDPairs, string name, string mirrorParam, string speedParam, int c, string blendParam) {
+            AnimatorState state = controller.layers[layer].stateMachine.AddState(name);
             BlendTree blendTree = new BlendTree();
             AssetDatabase.AddObjectToAsset(blendTree, controller);
             blendTree.name = name;
             blendTree.hideFlags = HideFlags.HideInHierarchy;
             blendTree.blendType = BlendTreeType.Simple1D;
-            blendTree.blendParameter = blend_param;
+            blendTree.blendParameter = blendParam;
             blendTree.useAutomaticThresholds = false;
             
-            for (int i = 0; i < c; i++) blendTree.AddChild(clip_id_pairs[i].clip, threshold: clip_id_pairs[i].id);
+            for (int i = 0; i < c; i++) blendTree.AddChild(clipIDPairs[i].clip, threshold: clipIDPairs[i].id);
 
-            blendTreeState.motion = blendTree;
+            state.motion = blendTree;
 
-            blendTreeState.mirrorParameterActive = true;
-            blendTreeState.mirrorParameter = mirrorParameter;
+            state.mirrorParameterActive = true;
+            state.mirrorParameter = mirrorParam;
 
-            blendTreeState.speedParameterActive = true;
-            blendTreeState.speedParameter = speedParameter;
+            state.speedParameterActive = true;
+            state.speedParameter = speedParam;
             
-            return blendTreeState;
+            return state;
         }
     }
 }
