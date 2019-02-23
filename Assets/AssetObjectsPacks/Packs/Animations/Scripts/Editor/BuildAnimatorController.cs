@@ -20,14 +20,23 @@ namespace AssetObjectsPacks.Animations {
         }
         void OnWizardCreate() {
             PacksManager packs = AssetObjectsEditor.packManager;
-            if (packs == null) return;
+            if (packs == null) {
+                Debug.LogError("Couldnt find pack manager");
+                return;
+            }
             
             if (!saveDirectory.EndsWith("/")) saveDirectory += "/";
+
+            bool foundPack = false;
             for (int i = 0; i < packs.packs.Length; i++) {
                 if( packs.packs[i].name == animationsPackName) {
                     BuildAnimatorController(packs.packs[i]);
+                    foundPack = true;
                     break;
                 }
+            }
+            if (!foundPack) {
+                Debug.LogError("Couldnt find pack named: " + animationsPackName);
             }
         }
 
@@ -42,16 +51,14 @@ namespace AssetObjectsPacks.Animations {
         
 
         void BuildAnimatorController (AssetObjectPack animationPack) {
-            int[] used_ids = null;
-            if (usedOnly) {
-                used_ids = AssetObjectsEditor.GetAllUsedIDs(animationsPackName);
-                if (used_ids.Length == 0) return;
-            } 
+            string[] allPaths = AssetObjectsEditor.GetAllAssetObjectPaths(animationPack.dir, animationPack.extensions, true);
 
-            string[] allPaths = AssetObjectsEditor.GetAllAssetObjectPaths(animationPack.objectsDirectory, animationPack.fileExtensions, true);
-            
             //filter out unused file paths
-            if (usedOnly) allPaths = allPaths.Where(f => used_ids.Contains(AssetObjectsEditor.GetObjectIDFromPath(f))).ToArray();
+            if (usedOnly) {
+                int[] used_ids = AssetObjectsEditor.GetAllUsedIDs(animationsPackName);
+                if (used_ids.Length == 0) return;
+                allPaths = allPaths.Where(f => used_ids.Contains(AssetObjectsEditor.GetObjectIDFromPath(f))).ToArray();
+            } 
             
             int c = allPaths.Length;
             ControllerBuild(BuildClipIDPairs(allPaths, c), c);   

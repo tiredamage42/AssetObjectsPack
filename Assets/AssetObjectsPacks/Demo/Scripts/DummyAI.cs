@@ -17,19 +17,21 @@ public class DummyAI : MonoBehaviour{
     //public int speed;
     //public int weapon;
 
-    public AssetObjectEventPlaylist idle_scene;
-
-    AssetObjectEventPlayer player;
+    //public Playlist idle_scene;
+    public PlaylistHolder walkScene;
+    EventPlayer player;
     void Awake () {
-        player = GetComponent<AssetObjectEventPlayer>();
+        player = GetComponent<EventPlayer>();
         player.playerParams = new CustomParameter[] {
-             new CustomParameter("Stance", 0, ""),
-             new CustomParameter("Agitated", false, ""),
+             new CustomParameter("Stance", 0),
+             new CustomParameter("Agitated", false),
         };
     }
     
     void Start () {
-        idle_scene.InitializePerformance(new AssetObjectEventPlayer[] { player }, transform.position, transform.rotation, null);
+        //idle_scene.InitializePerformance(new EventPlayer[] { player }, transform.position, transform.rotation, null);
+        walkScene.PlayPlaylist(new EventPlayer[] { player }, null);
+
     }
 }
 

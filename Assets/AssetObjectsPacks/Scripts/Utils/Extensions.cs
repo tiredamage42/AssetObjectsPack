@@ -14,12 +14,10 @@ namespace AssetObjectsPacks {
         static IEnumerable<T> Generate<T>(GetMethod<T> get_obj_method, int count) {
             for (int i = 0; i < count; i++) yield return get_obj_method(i);
         }
+        */
         public static HashSet<T> ToHashSet<T>(this IEnumerable<T> a) {
-            HashSet<T> r = new HashSet<T>();
-            foreach (T o in a) r.Add(o);
-            return r;
+            return new HashSet<T>().Generate( a, o => o );
         }
-         */
 
         public delegate T TFromO<T, O> (O other);
         public static HashSet<T> Generate<T, O> (this HashSet<T> h, HashSet<O> other, TFromO<T,O> t_from_o) {
@@ -88,6 +86,12 @@ namespace AssetObjectsPacks {
         public static void Clear<T> (this T[] a) {
             System.Array.Resize(ref a, 0);
         }
+
+        public static void AddRange<T> (this HashSet<T> e, HashSet<T> r) {
+            foreach (var i in r) e.Add(i);
+
+        }
+
             
         
         
@@ -121,11 +125,11 @@ namespace AssetObjectsPacks {
         }
         public static IList<T> Slice<T>(this IList<T> x, int a=0, int b=-1) {
             if (b < 0) b = x.Count + b;
-            //int l = (b < 0) ? x.Count - a : b;
             List<T> r = new List<T>();
             for (int i = a; i <= b; i++) r.Add( x[i] ); 
             return r;
         }
+        /*
         public static bool Contains(this int[] a, int e) {
             int l = a.Length;
             for (int i = 0; i < l; i++) {
@@ -133,6 +137,7 @@ namespace AssetObjectsPacks {
             }
             return false;
         }
+        */
         
 
         public static T RandomChoice<T>(this IList<T> l) {

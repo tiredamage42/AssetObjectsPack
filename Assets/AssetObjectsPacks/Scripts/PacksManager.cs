@@ -2,7 +2,7 @@
 namespace AssetObjectsPacks {
     [System.Serializable] public class AssetObjectPack {
         #if UNITY_EDITOR
-        public string objectsDirectory, fileExtensions, assetType;
+        public string dir, extensions, assetType;
         public CustomParameter[] defaultParameters;
         #endif
 
@@ -27,4 +27,3 @@ namespace AssetObjectsPacks {
         }   
     }
 }
-

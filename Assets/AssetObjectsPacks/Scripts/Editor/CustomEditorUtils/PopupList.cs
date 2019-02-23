@@ -37,7 +37,7 @@ namespace AssetObjectsPacks {
             return new Vector2(150f, m_Data.m_ListElements.Count * k_LineHeight + 2 * k_Margin);
         }
         public override void OnGUI(Rect rect){
-            Event evt = Event.current;
+            UnityEngine.Event evt = UnityEngine.Event.current;
             // We do not use the layout event
             if (evt.type == EventType.Layout) return;
             if (evt.type == EventType.KeyDown && evt.keyCode == KeyCode.Escape){
@@ -49,7 +49,7 @@ namespace AssetObjectsPacks {
             if (evt.type == EventType.Repaint) background.Draw(new Rect(rect.x, rect.y, rect.width, rect.height), false, false, false, false);
         }
         void DrawList(Rect rect){
-            Event evt = Event.current;
+            UnityEngine.Event evt = UnityEngine.Event.current;
             int i = -1;
             foreach (var element in m_Data.m_ListElements) {
                 i++;
@@ -61,8 +61,8 @@ namespace AssetObjectsPacks {
                     }
                     break;
                     case EventType.MouseDown:{
-                        if (Event.current.button == 0) {
-                            if (label_rect.Contains(Event.current.mousePosition)) {
+                        if (evt.button == 0) {
+                            if (label_rect.Contains(evt.mousePosition)) {
                                 if (m_Data.m_OnSelectCallback != null) m_Data.m_OnSelectCallback(element);
                                 evt.Use();
                                 editorWindow.Close();
@@ -71,7 +71,7 @@ namespace AssetObjectsPacks {
                     }
                     break;
                     case EventType.MouseMove:{
-                        if (label_rect.Contains(Event.current.mousePosition)){
+                        if (label_rect.Contains(evt.mousePosition)){
                             m_SelectedCompletionIndex = i;
                             evt.Use();
                         }

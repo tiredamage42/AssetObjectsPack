@@ -4,8 +4,6 @@ using UnityEditor;
 namespace AssetObjectsPacks {
     public static class AssetObjectsEditor 
     {
-
-
         static PacksManager pm;
         public static PacksManager packManager {
             get {
@@ -48,39 +46,25 @@ namespace AssetObjectsPacks {
             return int.Parse(path.Split(dash_c)[1]);
         }
         public static string RemoveIDFromPath (string path) {
-            string directory = StringUtils.empty;
-            string file_name = path;
-
-            if (path.Contains(back_slash)) {
-
-                string[] dir_and_name = EditorUtils.DirectoryNameSplit(path);
-                directory = dir_and_name[0];
-                file_name = dir_and_name[1];
-                
-            }
+            string[] dirName = EditorUtils.DirectoryNameSplit(path);
+            string directory = dirName[0];
+            string name = dirName[1];
+            
             //remove file extension
-            file_name = file_name.Split(dot_c)[0]; 
+            name = name.Split(dot_c)[0]; 
             
             //take out id -234-
-            string[] split_by_dash = file_name.Split(dash_c);
+            string[] split = name.Split(dash_c);
 
-            IList<string> sans_id = split_by_dash.Slice(2, -1);
-
-            file_name = string.Join(dash, sans_id);
-            return directory + file_name;
+            //remove id
+            IList<string> noID = split.Slice(2, -1);
+            name = string.Join(dash, noID);
+            return directory + name;
         }
 
 
 
-        static int[] GetExistingIDs (string[] all_valid_paths) {
-            int l = all_valid_paths.Length;
-            int[] all_ids = new int[l];
-            for (int i = 0; i < l; i++) {
-                all_ids[i] = GetObjectIDFromPath(all_valid_paths[i]);
-            }
-            return all_ids;
-        }
-        public static int[] GenerateNewIDList (int count, int[] used_ids) {
+        public static int[] GenerateNewIDList (int count, HashSet<int> used_ids) {
             int[] result = new int[count];
             int generated = 0;
             int trying_id = 0;
@@ -95,23 +79,15 @@ namespace AssetObjectsPacks {
         }
 
         public static void GenerateNewIDs (string[] validPaths, string[] noIDs) {
-
             int l = noIDs.Length;
-            int[] newIDs = GenerateNewIDList(l, GetExistingIDs (validPaths));
-            
+            int[] newIDs = GenerateNewIDList(l, new HashSet<int>().Generate(validPaths.Length, i => GetObjectIDFromPath(validPaths[i]) ));
             for (int i = 0; i < l; i++) {
                 string path = noIDs[i];
-
                 if (path.Contains(sIDKey)) {
-                    Debug.LogError("asset was already assigned an id: " + path + " (to fix, just delete the '@ID-#-' section)");
+                    Debug.LogWarning("asset was already assigned an id: " + path);
                     continue;
                 }
-
-                string origName = path;
-                if (origName.Contains("/")) origName = EditorUtils.RemoveDirectory(path);
-                
-                string newName = sIDKey + newIDs[i] + "-" + origName;                
-                AssetDatabase.RenameAsset(path, newName);
+                AssetDatabase.RenameAsset(path, sIDKey + newIDs[i] + "-" + EditorUtils.RemoveDirectory(path));
             }
             Debug.Log("Assets are now ready with unique IDs");
         }
@@ -119,10 +95,10 @@ namespace AssetObjectsPacks {
 
         public static int[] GetAllUsedIDs (string packName) {
             List<int> used = new List<int>();
-            AssetObjectEventPack[] allEvents = EditorUtils.GetAllAssetsOfType<AssetObjectEventPack>();
+            Event[] allEvents = EditorUtils.GetAllAssetsOfType<Event>();
             int l = allEvents.Length;
             for (int i = 0; i < l; i++) {
-                AssetObjectEventPack e = allEvents[i];
+                Event e = allEvents[i];
                 if (packManager.FindPackByID( e.assetObjectPackID, out _ ).name == packName) {                    
                     int y = e.assetObjects.Length;
                     for (int z = 0; z < y; z++) {

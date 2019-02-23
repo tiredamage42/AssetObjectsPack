@@ -25,11 +25,11 @@ namespace AssetObjectsPacks {
         }
 
         static List<int> active_performances = new List<int>();
-        static Pool<AssetObjectEventPlaylist.Performance> performance_pool = new Pool<AssetObjectEventPlaylist.Performance>();
-        public static AssetObjectEventPlaylist.Performance GetNewPerformance () {
+        static Pool<Playlist.Performance> performance_pool = new Pool<Playlist.Performance>();
+        public static Playlist.Performance GetNewPerformance () {
             int new_performance_key = performance_pool.GetNewObject();
             active_performances.Add(new_performance_key);
-            AssetObjectEventPlaylist.Performance p = performance_pool[new_performance_key];
+            Playlist.Performance p = performance_pool[new_performance_key];
             p.SetPerformanceKey(new_performance_key);
             return p;
         }

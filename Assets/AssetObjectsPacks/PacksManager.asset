@@ -13,39 +13,39 @@ MonoBehaviour:
   m_Name: PacksManager
   m_EditorClassIdentifier: 
   packs:
-  - defaultParameters:
+  - dir: Assets/AssetObjectsPacks/Packs/Animations/AssetObjects/
+    extensions: .fbx
+    assetType: UnityEngine.AnimationClip
+    defaultParameters:
     - name: Duration
-      hint: Nagative values for object duration
       paramType: 1
       BoolValue: 0
       FloatValue: -1
       IntValue: 0
+      StringValue: 
+    - name: Mirror
+      paramType: 2
+      BoolValue: 0
+      FloatValue: -1
+      IntValue: 0
+      StringValue: 
     - name: Speed
-      hint: 
       paramType: 1
       BoolValue: 0
       FloatValue: 1
       IntValue: 0
-    - name: Mirror
-      hint: 0=None, 1=Mirror, 2=Random
-      paramType: 1
-      BoolValue: 0
-      FloatValue: -1
-      IntValue: 0
+      StringValue: 
     - name: Looped
-      hint: 
-      paramType: 1
+      paramType: 0
       BoolValue: 0
       FloatValue: -1
       IntValue: 0
-    - name: Parameter Name
-      hint: Hint
+      StringValue: 
+    - name: Transition
       paramType: 1
       BoolValue: 0
-      FloatValue: -1
+      FloatValue: 0.25
       IntValue: 0
-    objectsDirectory: Assets/AssetObjectsPacks/Packs/Animations/AssetObjects/
-    fileExtensions: .fbx
-    assetType: UnityEngine.AnimationClip
+      StringValue: 
     name: Animations
-    id: 1
+    id: 0

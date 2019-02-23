@@ -13,12 +13,40 @@ MonoBehaviour:
   m_Name: New Asset Object Event Pack
   m_EditorClassIdentifier: 
   multi_edit_instance:
-    showConditions: 0
-    conditionChecks: []
-    object_reference: {fileID: 0}
-    tags: []
+    conditions: []
+    objRef: {fileID: 0}
     id: 0
-    parameters: []
+    parameters:
+    - name: Duration
+      paramType: 1
+      BoolValue: 0
+      FloatValue: -1
+      IntValue: 0
+      StringValue: 
+    - name: Mirror
+      paramType: 2
+      BoolValue: 0
+      FloatValue: -1
+      IntValue: 0
+      StringValue: 
+    - name: Speed
+      paramType: 1
+      BoolValue: 0
+      FloatValue: 1
+      IntValue: 0
+      StringValue: 
+    - name: Looped
+      paramType: 0
+      BoolValue: 0
+      FloatValue: 1
+      IntValue: 0
+      StringValue: 
+    - name: Transition
+      paramType: 1
+      BoolValue: 0
+      FloatValue: 0.25
+      IntValue: 0
+      StringValue: 
   hiddenIDs: 
   assetObjects: []
   assetObjectPackID: 0

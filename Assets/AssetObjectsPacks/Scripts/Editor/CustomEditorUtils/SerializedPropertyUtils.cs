@@ -1,125 +1,196 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
+
 namespace AssetObjectsPacks {
+    enum EditorPropType { Property, Array, SO }
     public class EditorProp {
-
+        EditorPropType editorPropType;
         public SerializedProperty prop;
-
-        public int intValue { get { return prop.intValue; } }
-        public float floatValue { get { return prop.floatValue; } }
-        public bool boolValue { get { return prop.boolValue; } }
-        public string stringValue { get { return prop.stringValue; } }
-        public int enumValueIndex { get { return prop.enumValueIndex; } }
-        public int arraySize { get { return prop.arraySize; } }
-        
-        bool isArray { get { return prop.isArray; } }
-        List<EditorProp> arrayElements = new List<EditorProp>();
+        SerializedObject obj;
+        bool _wasChanged;
         Dictionary<string, EditorProp> name2Prop = new Dictionary<string, EditorProp>();
-        public EditorProp (SerializedProperty prop) {
-            this.prop = prop;
-            if (isArray) RebuildArray(); 
-        }
 
-        void RebuildArray () {
-            arrayElements = new List<EditorProp>().Generate(arraySize, i => { return new EditorProp( prop.GetArrayElementAtIndex(i) ); } );
+        public void ResetChanged () {
+            _wasChanged = false;
+            foreach (var e in arrayElements) e.ResetChanged();
+            foreach (var n in name2Prop.Keys) name2Prop[n].ResetChanged();
         }
-
-        public bool ContainsDuplicateNames (out string duplicateName, string checkNameField) {
-            duplicateName = string.Empty;
-            if (CheckNonArray()) return false;
-            int l = arraySize;
-            for (int i = 0; i < l; i++) {
-                string oName = this[i][checkNameField].stringValue;
-                for (int x = i+1; x < l; x++) {
-                    if (oName == this[x][checkNameField].stringValue) {
-                        duplicateName = oName;
-                        return true;
-                    }
-                }
+        public bool IsChanged() {
+            if (_wasChanged) return true;
+            foreach (var e in arrayElements) {
+                if (e.IsChanged()) return true;
+            }
+            foreach (var n in name2Prop.Keys) {
+                if (name2Prop[n].IsChanged()) return true;
             }
             return false;
         }
 
-        bool CheckNonArray () {
-            if (isArray) return false;
-            Debug.LogError (prop.displayName + " isnt an array type");
+
+        public EditorProp (SerializedProperty prop) {
+            this.prop = prop;
+            editorPropType = prop.isArray && prop.propertyType != SerializedPropertyType.String ? EditorPropType.Array : EditorPropType.Property;
+            //Debug.Log(editorPropType);
+            if (editorPropType == EditorPropType.Array) RebuildArray(); 
+        }
+        public EditorProp (SerializedObject obj) {
+            this.obj = obj;
+            editorPropType = EditorPropType.SO;
+        }
+
+        bool CheckEditorPropType (EditorPropType shouldBe) {
+            if (shouldBe != editorPropType) {
+                Debug.LogError ( (editorPropType == EditorPropType.SO ? obj.targetObject.name : prop.displayName) + "(" + editorPropType.ToString() + ") isnt type: " + shouldBe.ToString());
+                return false;
+            }
             return true;
         }
-
-        public void SetEnumValue (int value) { prop.enumValueIndex = value; }
-        public void SetValue (bool value) { prop.boolValue = value; }
-        public void SetValue (float value) { prop.floatValue = value; }
-        public void SetValue (int value) { prop.intValue = value; }
-        public void SetValue (Object value) { prop.objectReferenceValue = value; }
-        public void SetValue (string value) { prop.stringValue = value; }
-
-        public void Clear () {
-            if (CheckNonArray()) return;
-            prop.ClearArray();
-            arrayElements.Clear();
-        }
-        public EditorProp AddNew () {
-            if (CheckNonArray()) return null;
-            int l = prop.arraySize;
-            
-            //Debug.Log("adding...");
-            prop.InsertArrayElementAtIndex(l);
-            
-            //Debug.Log("adding to elements...");
-            
-            arrayElements.Add( new EditorProp( prop.GetArrayElementAtIndex(l) ) );
-            
-            //Debug.Log("done adding...");
-            return arrayElements.Last();
-        }
-        public void DeleteAt (int index) {
-            if (CheckNonArray()) return;
-            prop.DeleteArrayElementAtIndex(index);
-            RebuildArray(); 
-        }
-        public EditorProp this [int index] {
-            get {
-                if (CheckNonArray()) return null;
-
-
-                if (index < 0 || index >= arraySize) {
-                    Debug.LogError("Array index out of range");
-                    return null;
-                }
-                return arrayElements[index];
-            }
+        public void SaveObject () {
+            if (!CheckEditorPropType(EditorPropType.SO)) return;
+            EditorUtility.SetDirty(obj.targetObject);
+            obj.ApplyModifiedProperties();
+            ResetChanged();
         }
 
+        //get property/relative
         public EditorProp this [string name] {
             get {
-                if (isArray) {
-                    Debug.LogError (prop.displayName + " is an array type, use integer indexing");
-                    return null;
-                }
+                //if (editorPropType == EditorPropType.Array) {
+                //    Debug.LogError (prop.displayName + " is an array type, use integer indexing");
+                //    return null;
+                //}
                 EditorProp customProp;
                 if (!name2Prop.TryGetValue(name, out customProp)) {
-                    customProp = new EditorProp ( prop.FindPropertyRelative ( name ) );
+                    customProp = new EditorProp ( editorPropType == EditorPropType.SO ? obj.FindProperty ( name ) : prop.FindPropertyRelative ( name ) );
                     name2Prop.Add(name, customProp);
                 }
                 return customProp;
             }
         }
 
-        public void CopyProp (EditorProp copy) {
+        #region ARRAY_PROP
+            List<EditorProp> arrayElements = new List<EditorProp>();
 
-            //Debug.Log("copying... 0");
+            //index into array prop
+            public EditorProp this [int index] {
+                get {
+                    if (!CheckForArray(false)) return null;
+                    if (index < 0 || index >= arraySize) {
+                        Debug.LogError("Array index out of range");
+                        return null;
+                    }
+                    return arrayElements[index];
+                }
+            }
+            bool CheckForArray(bool change) {
+                if (!CheckEditorPropType(EditorPropType.Array)) return false;
+                if (change) _wasChanged = true;
+                return true;
+            }
+            void RebuildArray () {
+                arrayElements = new List<EditorProp>().Generate(arraySize, i => new EditorProp( prop.GetArrayElementAtIndex(i) ) );
+            }
+            public bool ContainsElementsWithDuplicateNames (out string duplicateName, string checkNameField="name") {
+                duplicateName = string.Empty;
+                if (!CheckForArray(false)) return false;
+                int l = arraySize;
+                for (int i = 0; i < l; i++) {
+                    string oName = this[i][checkNameField].stringValue;
+                    for (int x = i+1; x < l; x++) {
+                        if (oName == this[x][checkNameField].stringValue) {
+                            duplicateName = oName;
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+
+            public void Clear () {
+                if (!CheckForArray(true)) return;
+                prop.ClearArray();
+                arrayElements.Clear();
+            }
+            public EditorProp AddNew () {
+                if (!CheckForArray(true)) return null;
+                int l = prop.arraySize;
+                prop.InsertArrayElementAtIndex(l);
+                arrayElements.Add( new EditorProp( prop.GetArrayElementAtIndex(l) ) );
+                return arrayElements.Last();
+            }
+            public void DeleteAt (int index) {
+                if (!CheckForArray(true)) return;
+                prop.DeleteArrayElementAtIndex(index);
+                RebuildArray(); 
+            }
+        #endregion
+
+        #region GETTERS_SETTERS
+            #region GETTERS
+                public int intValue { get { 
+                    if (!CheckEditorPropType(EditorPropType.Property)) return 0;
+                    return prop.intValue;
+                } }
+                public float floatValue { get { 
+                    if (!CheckEditorPropType(EditorPropType.Property)) return 0;
+                    return prop.floatValue; 
+                } }
+                public bool boolValue { get { 
+                    if (!CheckEditorPropType(EditorPropType.Property)) return false;
+                    return prop.boolValue; 
+                } }
+                public string stringValue { get { 
+                    if (!CheckEditorPropType(EditorPropType.Property)) return "";
+                    return prop.stringValue; 
+                } }
+                public int enumValueIndex { get { 
+                    if (!CheckEditorPropType(EditorPropType.Property)) return 0;
+                    return prop.enumValueIndex; 
+                } }
+                public int arraySize { get { 
+                    if (!CheckEditorPropType(EditorPropType.Array)) return 0;
+                    return prop.arraySize; 
+                } }
+            #endregion
+            #region SETTERS
+                public void SetEnumValue (int value) { 
+                    if (!CheckEditorPropType(EditorPropType.Property)) return;
+                    prop.enumValueIndex = value; 
+                }
+                public void SetValue (bool value) { 
+                    if (!CheckEditorPropType(EditorPropType.Property)) return;
+                    prop.boolValue = value; 
+                }
+                public void SetValue (float value) { 
+                    if (!CheckEditorPropType(EditorPropType.Property)) return;
+                    prop.floatValue = value; 
+                }
+                public void SetValue (int value) { 
+                    if (!CheckEditorPropType(EditorPropType.Property)) return;
+                    prop.intValue = value; 
+                }
+                public void SetValue (Object value) { 
+                    if (!CheckEditorPropType(EditorPropType.Property)) return;
+                    prop.objectReferenceValue = value; 
+                }
+                public void SetValue (string value) { 
+                    if (!CheckEditorPropType(EditorPropType.Property)) return;
+                    prop.stringValue = value; 
+                }
+            #endregion
+        #endregion
+
+        public void CopyProp (EditorProp copy) {
+            if (!CheckEditorPropType(EditorPropType.Property)) return;
+
             SerializedProperty c = copy.prop;
-            
-            //Debug.Log("copying... 1");
-            
             if (prop.propertyType != c.propertyType) {
                 Debug.LogError("Incompatible types (" + prop.propertyType + ", " + c.propertyType + ")");
                 return;
             }
-            
-            //Debug.Log("copying... 2");
-            
+
+            //_wasChanged = true; 
             switch (prop.propertyType){
                 case SerializedPropertyType.Integer	            :   prop.intValue              =    c.intValue              ;break;
                 case SerializedPropertyType.Boolean	            :   prop.boolValue             =    c.boolValue             ;break;
