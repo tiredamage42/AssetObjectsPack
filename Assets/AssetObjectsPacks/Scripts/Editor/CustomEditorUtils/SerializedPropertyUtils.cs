@@ -112,12 +112,40 @@ namespace AssetObjectsPacks {
                 prop.ClearArray();
                 arrayElements.Clear();
             }
-            public EditorProp AddNew () {
+
+            bool NameUnique(string name, string nameField) {
+                for (int i = 0; i < arraySize; i++) {
+                    if (this[i][nameField].stringValue == name) return false;
+                }
+                return true;
+            }
+        
+
+
+            public EditorProp AddNew (string uniqueNamePrefix = null, string nameField = "name") {
                 if (!CheckForArray(true)) return null;
+
+                //int newID = AssetObjectsEditor.GenerateNewIDList(1, new HashSet<int>().Generate( packs.arraySize, i => packs[i][idField].intValue ))[0];
+
+                string origName = uniqueNamePrefix;
+                string new_name = origName;
+                int trying = 0;
+                while (!NameUnique(new_name, nameField) && trying <= 999 ) {
+                    new_name = origName + " " + trying.ToString();
+                    trying ++;
+                }
+            
                 int l = prop.arraySize;
                 prop.InsertArrayElementAtIndex(l);
                 arrayElements.Add( new EditorProp( prop.GetArrayElementAtIndex(l) ) );
-                return arrayElements.Last();
+                EditorProp newElement = arrayElements.Last();
+
+                if (uniqueNamePrefix != null) {
+                    newElement[nameField].SetValue(new_name);
+                }
+
+
+                return newElement;
             }
             public void DeleteAt (int index) {
                 if (!CheckForArray(true)) return;
@@ -128,6 +156,8 @@ namespace AssetObjectsPacks {
 
         #region GETTERS_SETTERS
             #region GETTERS
+
+
                 public int intValue { get { 
                     if (!CheckEditorPropType(EditorPropType.Property)) return 0;
                     return prop.intValue;
@@ -151,6 +181,11 @@ namespace AssetObjectsPacks {
                 public int arraySize { get { 
                     if (!CheckEditorPropType(EditorPropType.Array)) return 0;
                     return prop.arraySize; 
+                } }
+                public Object objRefValue { get { 
+                    if (!CheckEditorPropType(EditorPropType.Property)) return null;
+                    return prop.objectReferenceValue;
+                    
                 } }
             #endregion
             #region SETTERS

@@ -32,6 +32,8 @@ namespace AssetObjectsPacks {
             }
             return baseStyles[i];
         }
+        public static GUIStyle box { get { return ReturnOrBuild(8, GUI.skin.box); } }
+        
         public static GUIStyle toolbarButton { get { return ReturnOrBuild(0, EditorStyles.toolbarButton); } }
         public static GUIStyle label { get { return ReturnOrBuild(1, EditorStyles.label); } }
         public static GUIStyle helpBox { get { return ReturnOrBuild(2, EditorStyles.helpBox); } }
@@ -128,19 +130,38 @@ namespace AssetObjectsPacks {
             EditorGUI.indentLevel--;
             }
         }
-        public static bool DrawDelayedTextProp (EditorProp prop, GUIContent content, GUILayoutOption option) {
+        public static bool DrawTextProp (EditorProp prop, GUIContent content, GUILayoutOption option, bool delayed) {
             EditorGUILayout.BeginHorizontal();
             Label(content, option);
-            bool changed = DrawDelayedTextProp(prop);
+            bool changed = DrawTextProp(prop, delayed);
             EditorGUILayout.EndHorizontal();
             return changed;
         }
-        public static bool DrawDelayedTextProp (EditorProp prop) {
-            return DrawDelayedTextProp(prop, GUILayout.ExpandWidth(true));
+        public static bool DrawTextProp (EditorProp prop, GUIContent content, bool fitContent, bool delayed) {
+            EditorGUILayout.BeginHorizontal();
+            Label(content, fitContent);
+            bool changed = DrawTextProp(prop, delayed);
+            EditorGUILayout.EndHorizontal();
+            return changed;
+        }
+        
+        public static bool DrawTextProp (EditorProp prop, bool delayed) {
+            return DrawTextProp(prop, GUILayout.ExpandWidth(true), delayed);
         }   
-        public static bool DrawDelayedTextProp (EditorProp prop, GUILayoutOption option) {
+        public static bool DrawTextProp (EditorProp prop, GUIContent content, bool delayed) {
+            return DrawTextProp(prop, content, GUILayout.ExpandWidth(true), delayed);
+        }   
+        
+        public static bool DrawTextProp (EditorProp prop, GUILayoutOption option, bool delayed) {
             string old_val = prop.stringValue;
-            string new_val = EditorGUILayout.DelayedTextField(blank_content, old_val, option);
+            string new_val;
+            if (delayed) {
+                new_val = EditorGUILayout.DelayedTextField(blank_content, old_val, option);
+            }
+            else {
+                new_val = EditorGUILayout.TextField(blank_content, old_val, option);
+            }
+
             bool changed = new_val != old_val;
             if (changed) prop.SetValue( new_val );
             return changed;
@@ -208,7 +229,7 @@ namespace AssetObjectsPacks {
         public static void Label (GUIContent c, bool fit_content, Color32 text_color) {
             Label(c, text_color, fit_content ? GUILayout.Width(GUIStyles.label.CalcSize(c).x) : GUILayout.ExpandWidth(true));
         }
-        public static void Label (GUIContent c, Color32 text_color, GUILayoutOption option) {
+        public static void Label (GUIContent c, Color32 text_color, params GUILayoutOption[] option) {
             DoWithinColor (GUIStyles.label, text_color, () => EditorGUILayout.LabelField(c, GUIStyles.label, option) );
         }
         public static void Space(int count = 1) {
@@ -236,8 +257,8 @@ namespace AssetObjectsPacks {
             fn();
             GUI.backgroundColor = orig_bg;
         }
-        public static void StartBox (int space, Color32 color, GUILayoutOption option) {
-            DoWithinColor(color, () => EditorGUILayout.BeginVertical(GUI.skin.box, option) );
+        public static void StartBox (int space, Color32 color, params GUILayoutOption[] options) {
+            DoWithinColor(color, () => EditorGUILayout.BeginVertical(GUI.skin.box, options) );
             Space(space);
         }
         public static void StartBox (int space, Color32 color) {
@@ -247,7 +268,7 @@ namespace AssetObjectsPacks {
         public static void StartBox (int space) {
             StartBox(space, Colors.medGray);
         }
-        public static void StartBox (int space, GUILayoutOption option) {
+        public static void StartBox (int space, params GUILayoutOption[] option) {
             StartBox(space, Colors.medGray, option);
         }
         public static void BeginIndent (int indent_space = 1) {
@@ -294,6 +315,17 @@ namespace AssetObjectsPacks {
             s.richText = origRT;
             return r;
         }
+        public static bool Button (GUIContent c, GUIStyle s, Color32 color, Color32 text_color, Rect rt) {
+            bool r = false;
+            bool origRT = s.richText;
+            s.richText = true;
+            DoWithinColor(color, s, text_color, () => r = GUI.Button(rt, c, s));//, options) );
+            s.richText = origRT;
+            return r;
+        }
+        /*
+        */
+        
         public static bool Button (GUIContent c, GUIStyle s, Color32 color, Color32 text_color, GUILayoutOption option) {
             return Button(c, s, color, text_color, new GUILayoutOption[] { option } );
         }

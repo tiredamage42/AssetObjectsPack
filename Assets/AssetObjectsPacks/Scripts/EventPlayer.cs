@@ -27,8 +27,8 @@ namespace AssetObjectsPacks {
         public List<Playlist.Performance> current_playlists = new List<Playlist.Performance>();
         Dictionary<string, Action<AssetObject, Action>> pack2playevent = new Dictionary<string, Action<AssetObject, Action>>();
 
-        public void SubscribeToEventPlay(string pack, Action<AssetObject, Action> on_play_event) {
-            pack2playevent[pack] = on_play_event;
+        public void SubscribeToEventPlay(string packName, Action<AssetObject, Action> on_play_event) {
+            pack2playevent[packName] = on_play_event;
         }
 
         public Action on_event_end;
@@ -49,25 +49,31 @@ namespace AssetObjectsPacks {
                 on_event_end();
                 on_event_end = null;
             }
-            isOverriden = false;
+            endEventOverriden = false;
             playing_event = false;
+            overrideEvents.Clear();
+
         }
         void EndEventDummy () { 
+
             
+            overrideEvents.Clear();
         }
 
-        bool isOverriden;
+        bool endEventOverriden;
 
 
         public Action OverrideEndEvent () {
-            isOverriden = true;
+            endEventOverriden = true;
             return EndEvent;
         }
 
 
+        Dictionary<string, Event> overrideEvents = new Dictionary<string, Event>();
+        public void OverrideEventToPlay(string packName, Event overrideEvent) {
 
-
-
+            overrideEvents.Add(packName, overrideEvent);
+        }
 
         public void PlayEvents (Event[] events, Action on_event_end) {
 
@@ -89,10 +95,18 @@ namespace AssetObjectsPacks {
                 Event ep = events[i];
 
                 int packIndex;
+                string packName = AssetObjectsManager.instance.packs.FindPackByID( ep.assetObjectPackID, out packIndex).name;
                 
-                string k = AssetObjectsManager.instance.packs.FindPackByID( ep.assetObjectPackID, out packIndex).name;
+                Event overrideEvent;
+                if (overrideEvents.TryGetValue(packName, out overrideEvent)) {
+                    Debug.Log("overriding: " + ep.name + " with: " + overrideEvent.name);
+                    ep = overrideEvent;
+                }
+
+
                 
-                AssetObject o = ep.assetObjects.Where( ao => ao.PassesConditionCheck( playerParams )  ).ToArray().RandomChoice();
+                //AssetObject o = ep.assetObjects.Where( ao => ao.PassesConditionCheck( playerParams )  ).ToArray().RandomChoice();
+                AssetObject o = ep.GetFilteredStatesList(playerParams).RandomChoice();
 
                 if (i == 0) current_duration = o["Duration"].FloatValue;
                 
@@ -100,9 +114,9 @@ namespace AssetObjectsPacks {
                 //and when the duration is < 0
                 //and not overriden
                 Action end_event = EndEventDummy;
-                if (!isOverriden && current_duration < 0 && i == 0) end_event = EndEvent;
+                if (!endEventOverriden && current_duration < 0 && i == 0) end_event = EndEvent;
                 
-                pack2playevent[k](o, end_event);
+                pack2playevent[packName](o, end_event);
             }
         }
     }

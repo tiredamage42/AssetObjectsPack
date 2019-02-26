@@ -1,23 +1,17 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
-
 namespace AssetObjectsPacks {
-    public enum PaginationAttempt {
-        None = 0, Fwd = 1, Back = 2,
-    }
-
-    public class Pagination 
-    {
-
+    public enum PaginationAttempt { None = 0, Fwd = 1, Back = 2, }
+    public class Pagination {
         public void ResetPage() {
             page = 0;
         }
 
-        int elementsPerPage = 50;
+        int elementsPerPage = 30;
         int page, max_pages;
 
-        public IEnumerable<T> Paginate<T> (IList<T> unpaginatedElements) {
+        public IList<T> Paginate<T> (IList<T> unpaginatedElements) {
             int l = unpaginatedElements.Count;
 
             max_pages = (l / elementsPerPage) + Mathf.Min(1, l % elementsPerPage);

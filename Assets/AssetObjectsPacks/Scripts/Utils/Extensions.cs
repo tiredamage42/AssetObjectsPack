@@ -30,17 +30,28 @@ namespace AssetObjectsPacks {
             foreach (O o in other) h.Add( t_from_o(o) );
             return h;
         }
+
+
         
         public static HashSet<T> Generate<T>(this HashSet<T> h, int count, GetMethod<T> get_method) {
             h.Clear();
             for (int i = 0; i < count; i++) h.Add(get_method(i));
             return h;   
         }
+
+        public static List<T> Generate<T, O> (this List<T> h, IEnumerable<O> other, TFromO<T,O> t_from_o) {
+            h.Clear();
+            foreach (O o in other) h.Add( t_from_o(o) );
+            return h;
+        }
+        
         public static List<T> Generate<T>(this List<T> h, int count, GetMethod<T> get_method) {
             h.Clear();
             for (int i = 0; i < count; i++) h.Add(get_method(i));
             return h;   
         }
+        
+
 
 
 

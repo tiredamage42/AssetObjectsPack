@@ -7,24 +7,39 @@ using AssetObjectsPacks;
 public class FaceMovementDirection : MonoBehaviour
 {
 
-    public float turnSpeed = 50;
+    public float turnSpeed = 2.5f;
     public float destinationThreshold = .1f;
 
 
     Transform destination;
     bool moving;
-    EventPlayer player;    
-    void Awake () {
-        player = GetComponent<EventPlayer>();
-    }
+    
 
     System.Action endEvent;
+    EventPlayer _player;
+    EventPlayer player {
+        get {
+            if (_player == null) _player = GetComponent<EventPlayer>();
+            return _player;
+        }
+    }   
     void InitializeMovementDirection_Event(Transform destination) {
-        Debug.Log("overriding player");
+        //Debug.Log("overriding player");
         endEvent = player.OverrideEndEvent();
-        Debug.Log("initializing");
+        //Debug.Log("initializing");
         InitializeMovementDirection(destination);
     }
+    void EndMovementEvent () {
+        if (endEvent != null) {
+            endEvent();
+            endEvent = null;
+        }
+    }
+
+
+
+
+
     void InitializeMovementDirection(Transform destination) {
         this.destination = destination;
         moving = true;
@@ -41,17 +56,14 @@ public class FaceMovementDirection : MonoBehaviour
     void Update () {
         if (!moving) return;
 
-        Debug.DrawLine(destination.position, transform.position, Color.green);
+        //Debug.DrawLine(destination.position, transform.position, Color.green);
 
         if (Vector3.Distance(transform.position, destination.position) <= destinationThreshold) {
             Debug.Log("arrived");
             destination = null;
             moving = false;
 
-            if (endEvent != null) {
-                endEvent();
-                endEvent = null;
-            }
+            EndMovementEvent();
         }
     }
 }

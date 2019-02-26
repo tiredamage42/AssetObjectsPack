@@ -154,13 +154,13 @@ namespace AssetObjectsPacks {
 
                 GUIUtils.StartBox(1);
                 //name
-                GUIUtils.DrawDelayedTextProp(pack[nameField], new GUIContent("Pack Name"), packsFieldsWidth);
+                GUIUtils.DrawTextProp(pack[nameField], new GUIContent("Pack Name"), packsFieldsWidth, false);
                 //asset type
-                GUIUtils.DrawDelayedTextProp(pack[assetTypeField], new GUIContent("Asset Type", "The asset type or component to the pack targets"), packsFieldsWidth);
+                GUIUtils.DrawTextProp(pack[assetTypeField], new GUIContent("Asset Type", "The asset type or component to the pack targets"), packsFieldsWidth, false);
                 //directory
                 GUIUtils.DrawDirectoryField(pack[dirField], new GUIContent("Objects Directory", "The directory where the assets are held"), packsFieldsWidth, true);
                 //file extensions
-                GUIUtils.DrawDelayedTextProp(pack[extensionsField], new GUIContent("File Extensions", "The file extensions to look for in the directory, seperated by commas.\nExample: '.fbx, .wav, .mp3'"), packsFieldsWidth);
+                GUIUtils.DrawTextProp(pack[extensionsField], new GUIContent("File Extensions", "The file extensions to look for in the directory, seperated by commas.\nExample: '.fbx, .wav, .mp3'"), packsFieldsWidth, false);
                 GUIUtils.EndBox(1);
                 
                 //default params

@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1284b611740a6448d90c4ebacf05b26a, type: 3}
-  m_Name: New Asset Object Event Pack
+  m_Name: 180
   m_EditorClassIdentifier: 
   multi_edit_instance:
     objRef: {fileID: 0}

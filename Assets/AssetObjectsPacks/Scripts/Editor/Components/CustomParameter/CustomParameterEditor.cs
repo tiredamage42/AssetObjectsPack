@@ -27,12 +27,13 @@ namespace AssetObjectsPacks {
             GetParamProperty(orig).CopyProp(GetParamProperty(to_copy));
         }
         public static void ClearAndRebuildParameters(EditorProp parameters, EditorProp defaultParams) {
+            Debug.Log("clearing and rebuilding");
             parameters.Clear();
             int l = defaultParams.arraySize;    
             for (int i = 0; i < l; i++) CopyParameter(parameters.AddNew(), defaultParams[i]);
         }
         public static void UpdateParametersToReflectDefaults (EditorProp parameters, EditorProp defaultParams) {
-            
+            Debug.Log("Updating params");
             int c_p = parameters.arraySize;
             int c_d = defaultParams.arraySize;
 
@@ -111,7 +112,7 @@ namespace AssetObjectsPacks {
                 for (int i = 0; i < l; i++) {
                     GUIUtils.DrawProp( GetParamProperty( parameters[i] ), blank, paramWidths[i]);
                     if (doMulti){
-                        if (GUIUtils.SmallButton(new GUIContent("S","Set Values"))) multiParamSet = i;
+                        if (GUIUtils.SmallButton(new GUIContent("S", "Set Values"))) multiParamSet = i;
                     }
                     else {
                         GUIUtils.SmallButtonClear();   
@@ -155,7 +156,7 @@ namespace AssetObjectsPacks {
                 delete = GUIUtils.SmallButton(new GUIContent("D", "Delete Parameter"), Colors.red, Colors.white);
                
                 GUIUtils.NextControlOverridesKeyboard();
-                GUIUtils.DrawDelayedTextProp(parameter[nameField], GUILayout.MinWidth(32));
+                GUIUtils.DrawTextProp(parameter[nameField], GUILayout.MinWidth(32), true);
                 GUIUtils.CheckLoseFocusLastRect();
 
                 GUILayoutOption pFieldWidth = GUILayout.Width(75);

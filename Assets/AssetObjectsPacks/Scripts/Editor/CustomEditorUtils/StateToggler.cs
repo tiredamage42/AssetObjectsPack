@@ -32,9 +32,14 @@ namespace AssetObjectsPacks {
             bool attempt = GUIUtils.Button(c, fitContent, s) || hotKey;
             toggleSuccess = false;
             if (attempt) {
+                Debug.Log("Attemtping state toggle");
                 HashSet<int> idsToToggle = getIDsOnToggle();
                 toggleSuccess = idsToToggle.Count != 0;
-                if (toggleSuccess) ToggleState(idsToToggle);
+                if (toggleSuccess) {
+
+                    ToggleState(idsToToggle);
+                    Debug.Log("toggle success");
+                }
             }
         }
     }

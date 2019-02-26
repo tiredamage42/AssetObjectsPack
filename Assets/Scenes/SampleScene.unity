@@ -502,8 +502,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ba79615b28abd4c54a60a5164dfca1be, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  turnSpeed: 50
+  turnSpeed: 2.5
   destinationThreshold: 0.1
+--- !u!114 &1138660217
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1138660213}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be95eb3a41f8b40d2bdd46a42795c490, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  d45r: {fileID: 11400000, guid: ad1620ac5095f458c99d9d33a8d63ed7, type: 2}
+  d45l: {fileID: 0}
+  d90r: {fileID: 11400000, guid: dab9c707f5a964046a8ffe0e1bb148d0, type: 2}
+  d90l: {fileID: 11400000, guid: 585cff884b2594a32bff792ca5f8eb05, type: 2}
+  d135r: {fileID: 11400000, guid: c06b629a656474a61aa17657f073e2f4, type: 2}
+  d135l: {fileID: 11400000, guid: e03a1aa781d6644cb89d6e0c280939d1, type: 2}
+  d180: {fileID: 11400000, guid: c0766e4e6f7ce424f9472f0e62df795c, type: 2}
+  animationPackName: Animations
+  isTurning: 0
+  turnTarget: {x: 0, y: 0, z: 0}
 --- !u!114 &1138660218
 MonoBehaviour:
   m_ObjectHideFlags: 0

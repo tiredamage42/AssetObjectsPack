@@ -92,6 +92,23 @@ namespace AssetObjectsPacks {
             Debug.Log("Assets are now ready with unique IDs");
         }
 
+        static void GetAOIDs(EventState state, List<int> ids) {
+            for (int i = 0; i < state.assetObjects.Length; i++) {
+
+                int id = state.assetObjects[i].id;
+                if (!ids.Contains(id)) ids.Add(id);
+            }
+
+            for (int i = 0; i < state.subStates.Length; i++) {
+                GetAOIDs(state, ids);
+            }
+                    
+
+
+
+
+        }
+
 
         public static int[] GetAllUsedIDs (string packName) {
             List<int> used = new List<int>();
@@ -99,12 +116,18 @@ namespace AssetObjectsPacks {
             int l = allEvents.Length;
             for (int i = 0; i < l; i++) {
                 Event e = allEvents[i];
-                if (packManager.FindPackByID( e.assetObjectPackID, out _ ).name == packName) {                    
+                if (packManager.FindPackByID( e.assetObjectPackID, out _ ).name == packName) {    
+
+                    GetAOIDs(e.baseState, used);
+
+
+/*
                     int y = e.assetObjects.Length;
                     for (int z = 0; z < y; z++) {
                         int id = e.assetObjects[z].id;
                         if (!used.Contains(id)) used.Add(id);
                     }
+*/
                 }
             }
             if (used.Count == 0) Debug.LogWarning("no IDs used for " + packName + " pack!");

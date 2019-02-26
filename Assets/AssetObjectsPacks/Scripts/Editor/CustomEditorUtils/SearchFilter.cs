@@ -1,8 +1,6 @@
 ﻿using UnityEngine;
 using UnityEditor;
-
 namespace AssetObjectsPacks {
-
     public class SearchFilter 
     {
         string searchFilter;

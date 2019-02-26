@@ -59,6 +59,28 @@ namespace AssetObjectsPacks {
             this.StringValue = value;
         }
 
+        public bool MatchesParameter(string[] paramStringSplit) {
+            if (paramStringSplit[1] != name) {
+                Debug.LogWarning("Name Mismatch! " + paramStringSplit[1] + " / " + name);
+                return false;
+            }
+            
+            
+            switch ( paramStringSplit[0].ToLower() ) {
+                case "b":
+                return bool.Parse(paramStringSplit[2]) == BoolValue;
+                case "i":
+                return int.Parse(paramStringSplit[2]) == IntValue;
+                case "f":
+                return float.Parse(paramStringSplit[2]) == FloatValue;
+                case "s":
+                return paramStringSplit[2] == StringValue;
+            }
+            return true;
+                
+                
+        }
+
         public bool MatchesParameter (CustomParameter other_parameter) {
             if (other_parameter.name != name) {
                 Debug.LogWarning("Name Mismatch! " + other_parameter.name + " / " + name);
