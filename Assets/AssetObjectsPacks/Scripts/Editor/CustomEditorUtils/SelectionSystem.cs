@@ -6,7 +6,7 @@ namespace AssetObjectsPacks {
         public bool singleSelection { get { return hi == lo && lo != -1; } }
         public int selectionCount { get { return hasSelection ? (hi - lo) + 1 : 0; } }
 
-        int lo = -1, hi = -1;
+        public int lo = -1, hi = -1;
 
         public bool SingleSelection(out int index) { 
             index = lo;
@@ -32,6 +32,10 @@ namespace AssetObjectsPacks {
             else hi = lo = (singleSelection && i == lo) ? -1 : i;
         }
         public bool HandlDirectionalSelection (bool up, bool down, bool multiple, int lastIndex) {
+
+            if (lastIndex < 0) {
+                return false;
+            }
             bool changed = false;
             if ((down || up) && selectionCount == 0) {
                 hi = lo = down ? 0 : lastIndex;

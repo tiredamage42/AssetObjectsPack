@@ -4,22 +4,23 @@ using System;
 namespace AssetObjectsPacks {
     public static class CustomParameterEditor {
 
-        const string typeField = "paramType", nameField = "name";
+        const string typeField = "pType", nameField = "name";
 
         public static void CopyParameterList (EditorProp orig, EditorProp toCopy) {
             orig.Clear();
             for (int p = 0; p < toCopy.arraySize; p++) CopyParameter(orig.AddNew(), toCopy[p]);
         }
         public static void AddParameterToList (EditorProp parameters) {
-            parameters.AddNew()[nameField].SetValue( "Parameter Name" );
+            EditorProp newParam = parameters.AddNew();
+            newParam[nameField].SetValue( "Parameter Name" );
         }
         public static void DefaultDurationParameter (EditorProp parameter) {
             parameter[nameField].SetValue( "Duration" );
-            parameter[typeField].SetEnumValue( (int)CustomParameter.ParamType.FloatValue );
+            parameter[typeField].SetValue( (int)CustomParameter.ParamType.FloatValue );
             parameter[CustomParameter.ParamType.FloatValue.ToString()].SetValue( -1.0f );
         }
         static EditorProp GetParamProperty(EditorProp parameter) {
-            return parameter[((CustomParameter.ParamType)parameter[typeField].enumValueIndex).ToString()];
+            return parameter[((CustomParameter.ParamType)parameter[typeField].intValue).ToString()];
         }
         public static void CopyParameter(EditorProp orig, EditorProp to_copy) {
             orig[nameField].CopyProp(to_copy[nameField]);
@@ -27,18 +28,20 @@ namespace AssetObjectsPacks {
             GetParamProperty(orig).CopyProp(GetParamProperty(to_copy));
         }
         public static void ClearAndRebuildParameters(EditorProp parameters, EditorProp defaultParams) {
-            Debug.Log("clearing and rebuilding");
             parameters.Clear();
             int l = defaultParams.arraySize;    
-            for (int i = 0; i < l; i++) CopyParameter(parameters.AddNew(), defaultParams[i]);
+            for (int i = 0; i < l; i++) {
+                EditorProp newParam = parameters.AddNew();
+                CopyParameter(newParam, defaultParams[i]);
+            }
         }
         public static void UpdateParametersToReflectDefaults (EditorProp parameters, EditorProp defaultParams) {
-            Debug.Log("Updating params");
+            //Debug.Log("Updating params");
             int c_p = parameters.arraySize;
             int c_d = defaultParams.arraySize;
 
             Func<EditorProp, string> GetParamName = (EditorProp parameter) => parameter[nameField].stringValue;
-            Func<EditorProp, int> GetParamType = (EditorProp parameter) => parameter[typeField].enumValueIndex;
+            Func<EditorProp, int> GetParamType = (EditorProp parameter) => parameter[typeField].intValue;
 
             //check for parameters to delete
             for (int i = c_p - 1; i >= 0; i--) {                    

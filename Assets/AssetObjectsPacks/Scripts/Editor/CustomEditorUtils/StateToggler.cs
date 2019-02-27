@@ -28,8 +28,8 @@ namespace AssetObjectsPacks {
         }
 
         //GUI
-        public void ToggleStateButton (bool hotKey, GUIContent c, bool fitContent, GUIStyle s, out bool toggleSuccess, System.Func<HashSet<int>> getIDsOnToggle) {
-            bool attempt = GUIUtils.Button(c, fitContent, s) || hotKey;
+        public void ToggleStateButton (bool hotKey, GUIContent c, GUIStyle s, GUILayoutOption options, out bool toggleSuccess, System.Func<HashSet<int>> getIDsOnToggle) {
+            bool attempt = GUIUtils.Button(c, s, Colors.liteGray, Colors.black, options) || hotKey;
             toggleSuccess = false;
             if (attempt) {
                 Debug.Log("Attemtping state toggle");

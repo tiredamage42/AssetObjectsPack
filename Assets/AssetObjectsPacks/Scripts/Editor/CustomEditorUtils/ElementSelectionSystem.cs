@@ -7,60 +7,53 @@ namespace AssetObjectsPacks {
 
     public class ElementSelectionSystem 
     {
-        static void HoverSelectGUI (GUIContent gui, bool selected, bool hidden, bool directory, Rect rt) {
-            //selected = false;
 
-            GUI.enabled = false;
+        
+        static bool WindowElementGUI (GUIContent gui, bool selected, bool hidden, bool directory, bool enabled, bool hover, Rect rt) {
             GUIStyle s = GUIStyles.toolbarButton;
+
             TextAnchor a = s.alignment;
             Texture2D t = s.normal.background;
+            Texture2D th = s.active.background;
+                
             s.fontStyle = hidden ? FontStyle.Italic : FontStyle.Normal;
-            s.normal.background = (!selected && !directory) ? null : t;
+
+            //if (!hover) {
+                s.normal.background = (!selected && !directory) ? null : t;
+                s.active.background = (!selected && !directory) ? null : th;
+            //}
             s.alignment = TextAnchor.MiddleLeft;
-            Color32 txtColor = hidden ? Colors.yellow : (selected || directory ? Colors.black : Colors.white);
-            //rt = GUILayoutUtility.GetRect(gui, s, new GUILayoutOption[] {GUILayout.ExpandWidth(true)});
-            GUIUtils.Button(gui, s, Colors.Toggle(selected), txtColor, rt);
-            s.normal.background = t;
-            s.alignment = a;
-            s.fontStyle = FontStyle.Normal;
+                    
+            Color32 txtColor = hidden ? Colors.yellow : (selected || directory || hover ? Colors.black : Colors.liteGray);
+
+            GUI.enabled = enabled;
+            bool pressed = GUIUtils.Button(gui, s, Colors.Toggle(selected), txtColor, rt);
             GUI.enabled = true;
-        }
-        /*
-        public static bool SelectionSystemElementGUI (bool beingDragged, GUIContent gui, bool selected, bool hidden, bool directory, out Rect rt) {
-            GUIStyle s = GUIStyles.toolbarButton;
-            TextAnchor a = s.alignment;
-            Texture2D t = s.normal.background;
-            s.fontStyle = hidden ? FontStyle.Italic : FontStyle.Normal;
-            s.normal.background = (!selected && !directory) ? null : t;
-            s.alignment = TextAnchor.MiddleLeft;
-            Color32 txtColor = hidden ? Colors.yellow : (selected || directory ? Colors.black : Colors.liteGray);
 
-
-            rt = GUILayoutUtility.GetRect(gui, s, new GUILayoutOption[] {GUILayout.ExpandWidth(true)});
-            bool pressed = false;
-            if (!beingDragged) {
-
-                pressed = GUIUtils.Button(gui, s, Colors.Toggle(selected), txtColor, rt);
-            }
-            s.normal.background = t;
+            //if (!hover) {
+                s.normal.background = t;
+                s.active.background = th;
+            //}
             s.alignment = a;
             s.fontStyle = FontStyle.Normal;
+
             return pressed;
+
         }
-        */
+        
         public struct Element {
             public int id, poolIndex;
             public string path;
-            public Element (int id, string path, int poolIndex) 
-            => (this.id, this.path, this.poolIndex) = (id, path, poolIndex);
+            public Element (int id, string path, int poolIndex) => (this.id, this.path, this.poolIndex) = (id, path, poolIndex);
         }
         public class Inputs {
             public string folderFwdDir = null;
             public PaginationAttempt paginationAttempt;
             public bool paginationSuccess, hiddenToggleSuccess, selectionChanged;
-            //public bool folderBack, searchChanged, folderedToggled, changedTabView;
-            public bool folderBack, searchChanged, changedTabView, folderBackFirst;
-        
+            public bool folderBack, searchChanged, changedTabView, createdDirectory, droppedOnReceiver;
+            public IEnumerable<int> droppedIndicies;
+            public Element dropReceiver;
+
         }
 
         public int viewTab;
@@ -72,10 +65,7 @@ namespace AssetObjectsPacks {
                 this.name = name;
                 this.canHide = canHide;
             }
-
         }
-
-
 
         public bool justFilesSelected { get { return selectionSystem.hasSelection && !selectionHasDirs; } }
         public bool hasSelection { get { return selectionSystem.hasSelection; } }
@@ -84,9 +74,7 @@ namespace AssetObjectsPacks {
             get {
                 int index;
                 bool singleSelection = selectionSystem.SingleSelection(out index);
-                if (!hasSelection || !singleSelection) {
-                    return new Element(-1,"",-1);
-                }
+                if (!hasSelection || !singleSelection) return new Element(-1,"",-1);
                 return mainElements[index];
             }
         }
@@ -98,17 +86,13 @@ namespace AssetObjectsPacks {
 
 
         
-        public string currentFolderPath = "", prevFolderPath;
+        public string curPath = "", parentPath = "";
 
         void ResetCurrentPath () {
-            currentFolderPath = prevFolderPath = "";
-            //currentFolderOffset = 0;
-            onMoveFolder(viewTab, null, currentFolderPath, true);//, false);
+            curPath = parentPath = "";
         }
-        //int currentFolderOffset;
         
         Element[] mainElements, prevWindowElements;
-        //bool folderedView;
         
         public delegate Element GetElementAtPoolIndex (int index, int variation, string dirPath);
         public delegate int GetPoolCount (int variation, string dirPath);
@@ -117,7 +101,7 @@ namespace AssetObjectsPacks {
         GetPoolCount getPoolCount;
         GetIgnorePoolIDs getIgnorePoolIDs;
         System.Action onSelectionChange;
-        System.Action<HashSet<int>, string, Element, int> onDirDragDrop;
+        System.Action<IEnumerable<int>, string, string, int> onDirDragDrop;
         
         bool SingleDirectorySelected(out int index) {
             return selectionSystem.SingleSelection(out index) && mainElements[index].id == -1;
@@ -126,665 +110,255 @@ namespace AssetObjectsPacks {
             inputs.paginationAttempt = pagination.DrawPages(kbListener, out inputs.paginationSuccess);
         }
 
-        //bool isHoldingDownSelection;
+        string DirDisplayName ( string path, int mainFocusOffset, out bool isFile) {
 
-
-        List<int> draggedIndicies = new List<int>();
-        bool wasDragged;
-        Vector2 mouseDragOffset;
-
-        string DirDisplayName ( string path, int mainFocusOffset, out bool isFile, bool debug = false) {
-            int currentFolderOffset = 0;
-                if (debug) {
-
-                    Debug.Log("getting folder display name for: " + path);
-                    Debug.Log("current folder display: " + currentFolderPath);
-                }
-            if (currentFolderPath.Contains("/")) {
-                currentFolderOffset = currentFolderPath.Split('/').Length-1;
+            int mainFolderOffset = 0;    
+            if (curPath.Contains("/")) {
+                mainFolderOffset = curPath.Split('/').Length;
+            }
+            else if (!curPath.IsEmpty()) {
+                mainFolderOffset = 1;
             }
 
-                if (debug) {
-
-                Debug.Log("current offset: " + currentFolderOffset);
-                }
-            //else {
-
-
-            //}
+            int i = mainFolderOffset + mainFocusOffset;
             string[] sp = path.Split('/');
-            isFile = currentFolderOffset + mainFocusOffset == sp.Length - 1;
-            return sp[currentFolderOffset + mainFocusOffset];
-                    
+            isFile = i == sp.Length - 1;
+            string res = sp[i];
+            return res;
         }
 
+        GUIContent GetValues(int atIndex, out bool isDir, out bool isSelected, out bool isHidden) {
+            int id = mainElements[atIndex].id;
+            string path = mainElements[atIndex].path;
+            isDir = id == -1;
+            isSelected = selectionSystem.IsSelected(atIndex);
+            isHidden = showingHidden && !isDir;
+            return new GUIContent(  isDir ? DirDisplayName(path, 0, out _) : (path.Contains("/") ? path.Split('/').Last() : path)  );                
+        }
 
-        public void DrawElements (int viewVariation, Inputs inputs, KeyboardListener kbListener){
-            UnityEngine.Event e = UnityEngine.Event.current;
-            Vector2 mousePos = e.mousePosition;
+        void DrawTopToolbar (int viewTab, Inputs inputs, KeyboardListener kbListener) {
+            EditorGUILayout.BeginHorizontal();
+            
+            //cur path
+            GUI.enabled = false;
+            EditorGUILayout.TextField(curPath);            
+            GUI.enabled = true;
+            //search
+            inputs.searchChanged = searchFilter.SearchBarGUI();
 
-            bool mouseClicked = e.type == EventType.MouseDown && e.button == 0 ;
+            //buttons
+            GUIStyle s = GUIStyles.toolbarButton;
 
-            bool mouseUp = e.type == EventType.MouseUp;
-
-            if (!wasDragged) {
-                wasDragged = e.type == EventType.MouseDrag && draggedIndicies.Count != 0;
+            //add directory
+            if (!showingHidden) {            
+                if (GUIUtils.Button(new GUIContent(EditorGUIUtility.IconContent("Folder Icon").image, "Add Folder"), s, iconWidth)){
+                    onDirectoryCreate(viewTab, curPath);
+                    inputs.createdDirectory = true;
+                }
             }
-                
 
+            //toggle hidden
+            if (viewTabOptions[viewTab].canHide) {
+                ToggleHiddenButtonGUI(kbListener, inputs, s);    
+            }
+            //extra
+            extraToolbarButtons(viewTab, s);
+            
+            EditorGUILayout.EndHorizontal();
+        }
+
+        void DrawAlternateWindowElement (int i, ref int clickedI, ref int clickedCol) {
+            string path = prevWindowElements[i].path;
+            DrawBaseWindowElement(
+                0, 
+                new GUIContent(i == 0 ? (" << " + (path.IsEmpty() ? "Base" : path)) : DirDisplayName(path, -1, out _)), 
+                i != 0 && curPath == path, i == 0, false, true, false, i, 
+                ref clickedI, ref clickedCol
+            );            
+        }
+
+        Rect DrawBaseWindowElement (int windowOffset, GUIContent gui, bool isSelected, bool drawDir, bool isHidden, bool isReceiver, bool isDraggable, int i, ref int clickedElementIndex, ref int clickedElementWindowIndex) {
+            Rect rt = GUILayoutUtility.GetRect(gui, GUIStyles.toolbarButton);
+            bool beingDragged, isDragHovered, dropReceived;
+            dragDrop.CheckElementRectForDragsOrDrops (i, windowOffset, rt, isReceiver, isDraggable, out beingDragged, out isDragHovered, out dropReceived);            
+            if (WindowElementGUI (gui, isSelected || (isReceiver && isDragHovered), isHidden, drawDir, !beingDragged && !dropReceived, false, rt)) {
+                clickedElementIndex = i;
+                clickedElementWindowIndex = windowOffset;
+            }
+            return rt;
+        }
+        Rect DrawMainWindowElement (int i, ref int clickedElementIndex, ref int clickedElementWindowIndex) {
+            bool isDir, isHidden, isSelected;
+            return DrawBaseWindowElement(1, GetValues(i, out isDir, out isSelected, out isHidden), isSelected, isDir, isHidden, isDir, true, i, ref clickedElementIndex, ref clickedElementWindowIndex);
+        }
+        void DrawDragHoverElement (int i, Rect r) {
+            bool isDir, isHidden, isSelected;
+            WindowElementGUI (GetValues(i, out isDir, out isSelected, out isHidden), isSelected, isHidden, isDir, !isDir && !isSelected, true, r);  
+        }
+            
+
+        public void DrawElements (int viewTab, Inputs inputs, KeyboardListener keyboardListener){
+            
+            dragDrop.InputListen ();
+            
             int clickedElementWindowIndex = -1, clickedElementIndex = -1;
-            int dropReceiverWindowIndex = -1, dropReceiverElementIndex = -1;
-
+            
             inputs.selectionChanged = false;
 
-            //if (elements.Length == 0) {
-            //    EditorGUILayout.HelpBox("No Elements!", MessageType.Info);
-            //    return;
-            //}
-
-            /*
-
-            GUI.enabled = draggedIndicies.Count != 0 && wasDragged;
-            //Rect rt = GUILayoutUtility.GetRect(new GUIContent ("Drag Drop Here"), GUIStyles.box, GUILayout.ExpandWidth(true)
-                
-            //);
-
-            //rt
-
             EditorGUILayout.BeginHorizontal();
-
-            EditorGUILayout.BeginVertical();
-            GUIUtils.Space(1);
-
-            GUIUtils.Label(new GUIContent("Move To"), true);
-
-            EditorGUILayout.EndVertical();
-
-
-            GUIUtils.StartBox(0, Colors.green, new GUILayoutOption[] { GUILayout.Height(16) });//, GUILayout.Height(128) });
-            
-            TextAnchor a = GUIStyles.label.alignment;
-            int fontSize = GUIStyles.label.fontSize;
-            GUIStyles.label.alignment = TextAnchor.UpperCenter;
-            GUIStyles.label.fontSize = 8;
-
-            GUIUtils.Label(new GUIContent("<b>Last Directory</b>"), Colors.black, new GUILayoutOption[] { GUILayout.MinWidth(32), GUILayout.Height(12) });
-            
-            GUIUtils.EndBox(0);
-            Rect upRect = GUILayoutUtility.GetLastRect();
-
-            if (upRect.Contains(mousePos)) {
-                Debug.LogWarning("In Rect");
-            }
-            */
-
-/*
-            GUILayout.FlexibleSpace();
-
-            EditorGUILayout.BeginVertical();
-            GUIUtils.Space(1);
-
-            GUIUtils.Label(new GUIContent("Move To"), true);
-
-            EditorGUILayout.EndVertical();
-
-
-GUILayout.FlexibleSpace();
- */
-
-
-
-
-
-            /*
-
-            GUIUtils.StartBox(0, Colors.yellow, new GUILayoutOption[] { GUILayout.Height(8) });//, GUILayout.Height(128) });
-            GUIUtils.Label(new GUIContent("<b>Base Directory</b>"), Colors.black, new GUILayoutOption[] { GUILayout.MinWidth(32), GUILayout.Height(12) });
-            GUIUtils.EndBox(0);
-            
-            Rect baseRect = GUILayoutUtility.GetLastRect();
-
-            if (baseRect.Contains(mousePos)) {
-                Debug.LogWarning("In base Rect");
-            }
-
-            EditorGUILayout.EndHorizontal();
-
-            GUI.enabled = true;
-
-            GUIStyles.label.alignment = a;
-            GUIStyles.label.fontSize = fontSize;
-
-            */
-            
-
-
-            
-            
-
-        
-
-
-
-            //EditorGUI.DrawRect(GUILayoutUtility.GetRect(
-
-            //), Colors.green);
-
-
 
             //prev directory elements
-
-
-
-
-            EditorGUILayout.BeginHorizontal();
-            
-            GUIUtils.StartBox(0, GUILayout.MaxWidth(64));
-            //List<int> selectedIndicies = new List<int>();
-            //List<Rect> selectedRects = new List<Rect>();
-
-
             int l = prevWindowElements.Length;
-            int clickedRectIndex = -1;
-            List<Rect> allElementRects = new List<Rect>();
-            for (int i = 0; i < l; i++) {
-                int id = prevWindowElements[i].id;
+            if (l != 0) {
+            
+                EditorGUILayout.BeginVertical(GUILayout.MaxWidth(64));
 
-                string path = prevWindowElements[i].path;
-                bool isDir = id == -1;
-                bool isBackDir = id == -2;
+                GUIUtils.StartBox(0);
 
 
+                //EditorGUILayout.BeginVertical(GUILayout.MinHeight(3));
+                //EditorGUILayout.BeginHorizontal();//GUILayout.MinHeight(3));
+                //EditorGUILayout.EndHorizontal();
+                //EditorGUILayout.EndVertical();
 
-
-                //string displayName = isDir ? path : (folderedView && path.Contains("/") ? path.Split('/').Last() : path);
-                
-                
-                string displayName = path;// isDir || isBackDir ? path : (path.Contains("/") ? path.Split('/').Last() : path);
-                        
-                if (isBackDir){ 
-                    if(displayName.IsEmpty()) {
-                    displayName = "Base";
-                    }
-                }
-                else {
-                    //if (currentFolderOffset > 1) {
-
-                        //Debug.Log(displayName);
-                        //Debug.Log(sp.Length);
-                    //}
-                        //string[] sp = displayName.Split('/');
-                        displayName = DirDisplayName(displayName, -1, out _, false);// sp[currentFolderOffset - 1];
-
+                for (int i = 0; i < l; i++) {
+                    bool isBackDir = i == 0;
+                    DrawAlternateWindowElement (i, ref clickedElementIndex, ref clickedElementWindowIndex);
+                    if (i == 0) GUIUtils.Space();
                 }
 
-                
+                GUIUtils.EndBox(0);
 
-                
-
-                //Debug.Log(path + " || " + currentFolderPath);
-                bool isSelected = !isBackDir && currentFolderPath.StartsWith(path);
-
-                
-                
-                
-
-                //bool isHidden = !isDir && hiddenIDsToggler.IsState(prevWindowElements[i].id);
-                GUIContent gui = new GUIContent( (isBackDir ? " << " : "") + displayName  );
-                
-                //bool beingDragged = wasDragged && draggedIndicies.Contains(i);
-                
-                
-                    //Debug.Log("DOWN");
-                    //e.Use();
-                
-                Rect rt;
-                //if (SelectionSystemElementGUI(beingDragged, gui, isSelected, isHidden, isDir, out rt)) clickedElementIndex = i;  
-                
-                GUIStyle s = GUIStyles.toolbarButton;
-            TextAnchor a = s.alignment;
-            Texture2D t = s.normal.background;
-            Texture2D th = s.active.background;
-            
-            s.fontStyle = FontStyle.Normal;
-            //s.normal.background = (!isSelected && !isDir && !isBackDir) ? null : t;
-            //s.active.background = (!isSelected && !isDir && !isBackDir) ? null : th;
-            s.normal.background = (!isSelected && !isBackDir) ? null : t;
-            s.active.background = (!isSelected && !isBackDir) ? null : th;
-            
-            s.alignment = TextAnchor.MiddleLeft;
-            //Color32 txtColor = (isSelected || isDir ? Colors.black : Colors.liteGray);
-            Color32 txtColor = (isSelected || isBackDir ? Colors.black : Colors.liteGray);
-            
-            Color32 buttonColor = isBackDir ? Colors.liteGray : Colors.Toggle(isSelected);
-
-            rt = GUILayoutUtility.GetRect(gui, s, new GUILayoutOption[] {GUILayout.ExpandWidth(true)});
-                allElementRects.Add(rt);
-
-//if (isDir) {
-
-                if (wasDragged){//} && !beingDragged) {
-                    if (rt.Contains(mousePos)) {
-
-                        s.normal.background = t;
-                        s.active.background = th;
-                        txtColor = Colors.black;
-
-                        buttonColor = Colors.selected;
-                        
-
-                    }
-                }
-//}
-
-
-
-
-            
-                
-
-                bool skipButton = false;
-                if (mouseUp && rt.Contains(mousePos) && wasDragged) {
-
-                    //if (isDir || isBackDir){
-
-                    Debug.Log("mouse up");
-                    dropReceiverElementIndex = i;
-                    dropReceiverWindowIndex = 0;
-
-                    //}
-
-
-
-
-
-                    //e.Use();
-                    skipButton = true;
-                }
-                
-                
-            
-            
-            
-            
-            
-            
-            
-            bool pressed = false;
-
-                        GUI.enabled = !skipButton;
-
-            //if (!beingDragged && !skipButton) {
-                pressed = GUIUtils.Button(gui, s, buttonColor, txtColor, rt);
-                if (pressed) {
-
-                    Debug.Log("pressed");
-                }
-            //}
-                        GUI.enabled = true;
-
-
-            s.normal.background = t;
-            s.active.background = th;
-            s.alignment = a;
-            s.fontStyle = FontStyle.Normal;
-
-            if (pressed) {
-                clickedElementIndex = i;
-                clickedElementWindowIndex = 0;
+                EditorGUILayout.EndVertical();
             }
-
-
-
-
-                
-                
-                
-            }
-            GUIUtils.EndBox(0);
-
 
 
             //main elements
-
-
-
-
-
-
+            EditorGUILayout.BeginVertical(GUILayout.MaxWidth(1000));
 
             GUIUtils.StartBox(0);
-            //List<int> selectedIndicies = new List<int>();
-            //List<Rect> selectedRects = new List<Rect>();
 
+            DrawTopToolbar (viewTab, inputs, keyboardListener);
 
+            GUIUtils.Space();
+            
             l = mainElements.Length;
-            //int clickedRectIndex = -1;
-            allElementRects.Clear();
-            //List<Rect> allElementRects = new List<Rect>();
-            for (int i = 0; i < l; i++) {
-
-                string path = mainElements[i].path;
-                bool isDir = mainElements[i].id == -1;
-                //string displayName = isDir ? path : (folderedView && path.Contains("/") ? path.Split('/').Last() : path);
-                string displayName = isDir ? DirDisplayName(path, 0, out _) : (path.Contains("/") ? path.Split('/').Last() : path);
-                
-                bool isSelected = selectionSystem.IsSelected(i);
-                bool isHidden = !isDir && hiddenIDsToggler.IsState(mainElements[i].id);
-                GUIContent gui = new GUIContent(  displayName  );
-                
-                bool beingDragged = wasDragged && draggedIndicies.Contains(i);
-                
-                
-                    //Debug.Log("DOWN");
-                    //e.Use();
-                
-                Rect rt;
-                //if (SelectionSystemElementGUI(beingDragged, gui, isSelected, isHidden, isDir, out rt)) clickedElementIndex = i;  
-                
-                GUIStyle s = GUIStyles.toolbarButton;
-            TextAnchor a = s.alignment;
-            Texture2D t = s.normal.background;
-            Texture2D th = s.active.background;
+            Rect[] mainRects = new Rect[l];
             
-            s.fontStyle = isHidden ? FontStyle.Italic : FontStyle.Normal;
-            s.normal.background = (!isSelected && !isDir) ? null : t;
-            s.active.background = (!isSelected && !isDir) ? null : th;
-            
-            s.alignment = TextAnchor.MiddleLeft;
-            Color32 txtColor = isHidden ? Colors.yellow : (isSelected || isDir ? Colors.black : Colors.liteGray);
-            Color32 buttonColor = Colors.Toggle(isSelected);
-
-            rt = GUILayoutUtility.GetRect(gui, s, new GUILayoutOption[] {GUILayout.ExpandWidth(true)});
-                allElementRects.Add(rt);
-
-if (isDir) {
-
-                if (wasDragged && !beingDragged) {
-                    if (rt.Contains(mousePos)) {
-
-                        s.normal.background = t;
-                        s.active.background = th;
-                        txtColor = Colors.black;
-
-                        buttonColor = Colors.selected;
-                        
-
-                    }
-                }
-}
-
-
-
-
-            
-                
-
-                bool skipButton = false;
-                if (mouseUp && rt.Contains(mousePos) && wasDragged && !beingDragged) {
-
-                    if (isDir){
-
-                    Debug.Log("mouse up");
-                    dropReceiverElementIndex = i;
-                    dropReceiverWindowIndex = 1;
-                    
-                    //mouseUpIndex = i;
-                    }
-
-
-
-
-
-                    //e.Use();
-                    skipButton = true;
-                }
-                
-                if (mouseClicked && rt.Contains(mousePos))
-                {
-                    //isHoldingDownSelection = true;
-                    //Debug.Log("DOWN: " + displayName);
-
-                    
-
-                    clickedRectIndex = i;
-
-
-                
-                }
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            bool pressed = false;
-
-                        GUI.enabled = !beingDragged && !skipButton;
-
-            //if (!beingDragged && !skipButton) {
-                pressed = GUIUtils.Button(gui, s, buttonColor, txtColor, rt);
-                //if (pressed) {
-
-                    //Debug.Log("pressed");
-                //}
-            //}
-                        GUI.enabled = true;
-
-
-            s.normal.background = t;
-            s.active.background = th;
-            s.alignment = a;
-            s.fontStyle = FontStyle.Normal;
-
-            if (pressed) {
-                clickedElementIndex = i;
-                clickedElementWindowIndex = 1;
+            if (l == 0) {
+                EditorGUILayout.HelpBox("No Elements!", MessageType.Info);   
+            }
+            else {
+                for (int i = 0; i < l; i++) mainRects[i] = DrawMainWindowElement (i, ref clickedElementIndex, ref clickedElementWindowIndex);
             }
 
-
-
-
-                
-                
-                
-            }
-
-            if (mouseUp) {
-
-                if (dropReceiverElementIndex != -1) {
-
-                    Element el = dropReceiverWindowIndex == 0 ? prevWindowElements[dropReceiverElementIndex] : mainElements[dropReceiverElementIndex];
-                    if (dropReceiverWindowIndex == 0) {
-
-                        Debug.Log("On Drop Previous: "+ el.path);
-
-                        OnDropDir(new HashSet<int>().Generate( draggedIndicies, di => di ), el);
-
-
-                    }
-                    else {
-
-                        bool onDir = el.id == -1;
-                        if (onDir) {
-
-
-
-                            OnDropDir(new HashSet<int>().Generate( draggedIndicies, di => di ), el);
-
-
-                        }
-                    }
-
-
-                }
-                draggedIndicies.Clear();
-                //isHoldingDownSelection = false;
-                wasDragged = false;
-            }
+            EditorGUILayout.EndVertical();
             
-
-            if (clickedRectIndex != -1) {
-                    if (draggedIndicies.Count == 0) {
-                bool selected = selectionSystem.IsSelected(clickedRectIndex);
-
-                if (selected) {
-                    draggedIndicies = selectionSystem.GetSelectionEnumerator().ToList();
-                }
-                else {
-                    draggedIndicies.Clear();
-                    draggedIndicies.Add(clickedRectIndex);
-                }
-                wasDragged = false;
-
-                
-                mouseDragOffset = new Vector2(allElementRects[draggedIndicies[0]].x - mousePos.x,allElementRects[draggedIndicies[0]].y - mousePos.y);
-
-
-
-
-                    }
-
-            }
- 
-
-
-
-
-            if (draggedIndicies.Count != 0 && wasDragged) {
-                EditorWindow.mouseOverWindow.Repaint();
-                //Repaint();
-
-                EditorGUIUtility.AddCursorRect(new Rect(mousePos.x-5, mousePos.y-5, 10, 10), MouseCursor.ArrowPlus);
-
-                for (int i = 0; i < draggedIndicies.Count; i++) {
-                    Element el = mainElements[draggedIndicies[i]];
-                    Rect rt = allElementRects[draggedIndicies[i]];
-
-                    float offset = rt.y - allElementRects[draggedIndicies[0]].y;
-
-
-                    Rect newRt = new Rect(mousePos.x + mouseDragOffset.x, mousePos.y + mouseDragOffset.y + offset, rt.width, rt.height);
-
-                    string path = el.path;
-                    bool isDir = el.id == -1;
-                    //string displayName = isDir ? path : (folderedView && path.Contains("/") ? path.Split('/').Last() : path);
-                    string displayName = isDir ? DirDisplayName(path, 0, out _) : (path.Contains("/") ? path.Split('/').Last() : path);
-                    
-                    HoverSelectGUI (new GUIContent (displayName), selectionSystem.IsSelected(draggedIndicies[i]), !isDir && hiddenIDsToggler.IsState(el.id),isDir, newRt);
-
-
-
-
-
-
-                }
-
-                
-
-            }
-
-                
-            
-
-            inputs.selectionChanged = selectionSystem.HandlDirectionalSelection(kbListener[KeyCode.UpArrow], kbListener[KeyCode.DownArrow], kbListener.shift, mainElements.Length - 1);
-
-            int lo = -1;
-            if (clickedElementIndex == -1 && kbListener[KeyCode.Return] && SingleDirectorySelected(out lo)) {
-                clickedElementIndex = lo;
-                clickedElementWindowIndex = 1;
-            }
-
-                
-            if (clickedElementIndex != -1) {
-                if (clickedElementWindowIndex == 1) {
-
-                    if (mainElements[clickedElementIndex].id != -1){
-                        selectionSystem.OnObjectSelection(clickedElementIndex, kbListener.shift);
-                        inputs.selectionChanged = true;
-                    }
-                    else {
-                        inputs.folderFwdDir = mainElements[clickedElementIndex].path;
-                    }
-                }
-                else if (clickedElementWindowIndex == 0) {
-                    if (prevWindowElements[clickedElementIndex].id == -2){
-                        Debug.Log("Go To: prev Directory");
-                        
-                        inputs.folderBack = true;
-                    }
-                    else if (prevWindowElements[clickedElementIndex].id != -1){
-                        
-                        Debug.Log("Go To: Already there");
-                        //selectionSystem.OnObjectSelection(clickedElementIndex, kbListener.shift);
-                        //inputs.selectionChanged = true;
-                    }
-                    else {
-                        bool isCurrent = prevWindowElements[clickedElementIndex].path == currentFolderPath;//.Contains(prevWindowElements[clickedElementIndex].path);
-
-                        if (isCurrent) {
-                            Debug.Log("Go To: Already There");
-                        }
-                        else {
-
-                            //string[] sp = prevWindowElements[clickedElementIndex].path.Split('/');
-                            //string folder = sp[currentFolderOffset - 1];
-
-                            inputs.folderFwdDir = prevWindowElements[clickedElementIndex].path;
-                            //inputs.folderBackFirst = true;
-                            Debug.Log("Go To: " + prevWindowElements[clickedElementIndex].path);// prevWindowElements[clickedElementIndex].path);
-
-                        }
-
-                        //inputs.folderFwdDir = elements[clickedElementIndex].path;
-                    }
-
-                }
-                
-            }
-
-            GUIUtils.EndBox(1);
-
-
             EditorGUILayout.EndHorizontal();
+            GUIUtils.EndBox(0);
+            
+            //end loop
+
+            dragDrop.CheckNewDragStart (mainRects, selectionSystem);
+
+            int receiverIndex, receiverCollection, droppedCollection;
+            inputs.droppedOnReceiver = dragDrop.CheckDrop (out receiverIndex, out receiverCollection, out droppedCollection, out inputs.droppedIndicies);
+            if (inputs.droppedOnReceiver) {
+                //Debug.Log("drop on receiver");
+                inputs.dropReceiver = receiverCollection == 0 ? prevWindowElements[receiverIndex] : mainElements[receiverIndex];
+            }
+    
+            dragDrop.DrawDragGUIs (mainRects, DrawDragHoverElement);
+
+            inputs.selectionChanged = selectionSystem.HandlDirectionalSelection(keyboardListener[KeyCode.UpArrow], keyboardListener[KeyCode.DownArrow], keyboardListener.shift, mainElements.Length - 1);
+
+            //enter movies fwd directory when one selected
+            CheckForEnterPressOnSingleDirectory (keyboardListener, ref clickedElementIndex, ref clickedElementWindowIndex);
+            CheckClickedElement(clickedElementIndex, clickedElementWindowIndex, inputs, keyboardListener);
+
             
         }
 
-        void OnDropDir(HashSet<int> dragged, Element dirElement) {
+        void CheckClickedElement(int clickedIndex, int collection, Inputs inputs, KeyboardListener keyboardListener) {
+            if (clickedIndex == -1) return;
 
-                    //void OnDirDragDrop(HashSet<int> dragIndicies, string curPath, ElementSelectionSystem.Element dirElement, int viewTab) {
-
-
-            onDirDragDrop(dragged, currentFolderPath, dirElement, viewTab);
+            //main window
+            if (collection == 1) {
+                //element select
+                if (mainElements[clickedIndex].id != -1){
+                    selectionSystem.OnObjectSelection(clickedIndex, keyboardListener.shift);
+                    inputs.selectionChanged = true;
+                }
+                //folder select
+                else {
+                    inputs.folderFwdDir = mainElements[clickedIndex].path;
+                }
+            }
+            //prev directory window
+            else if (collection == 0) {
+                //back directory
+                if (prevWindowElements[clickedIndex].id == -2){
+                    Debug.Log("Go To: prev Directory");    
+                    inputs.folderBack = true;
+                }
+                //directory select
+                else {
+                    //not already there
+                    string path = prevWindowElements[clickedIndex].path;
+                    bool isCurrent = path == curPath;
+                    if (!isCurrent) {
+                        inputs.folderFwdDir = path;
+                        Debug.Log("Go To: " + path);
+                    }
+                }
+            }
             
+        }
 
+        void CheckForEnterPressOnSingleDirectory (KeyboardListener keyboardListener, ref int clickedElementIndex, ref int clickedElementWindowIndex) {
+            //enter movies fwd directory when one selected
+            int lo = -1;
+            if (clickedElementIndex == -1 && keyboardListener[KeyCode.Return] && SingleDirectorySelected(out lo)) {
+                clickedElementIndex = lo;
+                clickedElementWindowIndex = 1;
+            }
+        }
+
+
+        DragAndDrop dragDrop = new DragAndDrop();
+
+        void OnDropDir(IEnumerable<int> dragged, Element dirElement) {
+            onDirDragDrop(dragged, curPath, dirElement.path, viewTab);
         }
 
         public void HandleInputs (Inputs inputs, bool forceRebuild) {
 
+            
 
-            //bool clearAndRebuild = forceRebuild || inputs.changedTabView || inputs.folderedToggled || inputs.searchChanged|| inputs.paginationSuccess;
-            //bool resetPage = inputs.folderedToggled || inputs.changedTabView;
-            bool clearAndRebuild = forceRebuild || inputs.changedTabView || inputs.searchChanged|| inputs.paginationSuccess;
+            bool clearAndRebuild = forceRebuild || inputs.createdDirectory || inputs.changedTabView || inputs.searchChanged|| inputs.paginationSuccess;// || inputs.movedFiles;
             bool resetPage = inputs.changedTabView;
                 
-            clearAndRebuild = clearAndRebuild || ((inputs.hiddenToggleSuccess));// && selectionSystem.hasSelection));// || inputs.resetHidden);
+            clearAndRebuild = clearAndRebuild || ((inputs.hiddenToggleSuccess));
                         
-            //if (folderedView) {
+            if (inputs.paginationAttempt == PaginationAttempt.Back && !inputs.paginationSuccess) {
+                inputs.folderBack = true;
+            }
+            
+            bool movedFolder = (inputs.folderBack && MoveFolder()) || (inputs.folderFwdDir != null && MoveFolder(inputs.folderFwdDir));
+            clearAndRebuild = clearAndRebuild || movedFolder;
+            resetPage = resetPage || movedFolder;
+            
 
-                if (inputs.paginationAttempt == PaginationAttempt.Back && !inputs.paginationSuccess) inputs.folderBack = true;
-                
-                bool movedFolder = (inputs.folderBack && MoveFolder()) || (inputs.folderFwdDir != null && MoveFolder(inputs.folderFwdDir));
-                
-                clearAndRebuild = clearAndRebuild || movedFolder;
-                resetPage = resetPage || movedFolder;
-            //}
 
-            if (inputs.changedTabView) {// || inputs.folderedToggled) {
+
+
+            if (inputs.droppedOnReceiver) {
+                OnDropDir(inputs.droppedIndicies, inputs.dropReceiver);
+                //inputs.movedFiles = true;
+                clearAndRebuild = true;
+            }
+            
+            if (inputs.changedTabView) {
                 ResetCurrentPath();
             }
             if (clearAndRebuild) {                
@@ -794,63 +368,29 @@ if (isDir) {
             if (inputs.selectionChanged) onSelectionChange();
         }
 
-        public void ForceBackFolder () {
+        //public bool isDragging {
+        //    get {
+        //        return dragDrop.dragging;
+        //    }
+        //}
 
+        public void ForceBackFolder () {
             MoveFolder();
             ClearSelectionsAndRebuild(true);
             onSelectionChange();
         }
 
-        System.Action<int, string, string, bool> onMoveFolder;
-
-
-        string CalcLastFolder(string curFolder) {
-            if (curFolder.IsEmpty()) return curFolder;
-            return curFolder.Substring(0, curFolder.Substring(0, curFolder.Length-1).LastIndexOf("/") + 1);
-
-
+        string CalcLastFolder(string dir) {
+            if (dir.IsEmpty() || !dir.Contains("/")) return string.Empty;
+            return dir.Substring(0, dir.LastIndexOf("/"));
         }
-
-        //bool MoveFolder(string addPath = null, bool folderBackFirst = false) {
-        bool MoveFolder(string toPath = null){//, bool folderBackFirst = false) {
-            
-            bool back = toPath == null;// addPath == null;
-            if (back) {
-                if (currentFolderPath.IsEmpty()) return false;
-                //if (currentFolderOffset <= 0) return false;
-
-                currentFolderPath = CalcLastFolder(currentFolderPath);
-                prevFolderPath = CalcLastFolder(currentFolderPath);
-
-
-
+        bool MoveFolder(string toPath = null){
+            if (toPath == null) {
+                if (curPath.IsEmpty()) return false;
+                curPath = CalcLastFolder(curPath);
             }
-            else {
-                //if (folderBackFirst) {
-
-                    //currentFolderPath = CalcLastFolder(currentFolderPath);
-                    //prevFolderPath = CalcLastFolder(currentFolderPath);
-                    //currentFolderOffset--;
-
-
-                //}
-
-                currentFolderPath = toPath + "/";
-                prevFolderPath = CalcLastFolder(currentFolderPath);
-
-                Debug.Log("prevFolderPath: " + prevFolderPath);
-                Debug.Log("currentFolderPath: " + currentFolderPath);
-
-                
-
-                //prevFolderPath = currentFolderPath;
-                //currentFolderPath += addPath + "/";
-            
-            }
-            //currentFolderOffset+= back ? -1 : 1;
-
-            onMoveFolder (viewTab, toPath, WithoutLastSlash(currentFolderPath), false );//, folderBackFirst );
-
+            else curPath = toPath;
+            parentPath = CalcLastFolder(curPath);
             return true;
         }
         
@@ -867,114 +407,91 @@ if (isDir) {
         HashSet<int> IDsInDirectory(string dir, int poolCount, HashSet<int> ignorePoolIDs) { 
             return new HashSet<int>().Generate(
                 new List<Element>()
-                    .Generate(poolCount, i => getElementAtPoolIndex(i, viewTab, WithoutLastSlash(currentFolderPath)))
+                    .Generate(poolCount, i => getElementAtPoolIndex(i, viewTab, curPath))
                     .Where(e => !ignorePoolIDs.Contains(e.id) && showingHidden == hiddenIDsToggler.IsState(e.id) && e.path.StartsWith(dir)),
                 e => e.id
             );
         }
-        
-
-
-
         IEnumerable<int> GetPoolIndiciesInSelectionBase() {                
             return new HashSet<int>().Generate( selectionSystem.GetSelectionEnumerator(), i => (mainElements[i].id == -1 ? -1 : mainElements[i].poolIndex) );
         }
-        
         IEnumerable<int> GetPoolIndiciesInElementsBase () {
             return new HashSet<int>().Generate( mainElements, e => e.id == -1 ? -1 : e.poolIndex );
         }
-
         HashSet<int> FilterOutDirectories (IEnumerable<int> e) {
             return e.Where( i => i != -1 ).ToHashSet();
         }
         public HashSet<int> GetPoolIndiciesInSelection() {
-            return FilterOutDirectories(GetPoolIndiciesInSelectionBase());
+            return new HashSet<int>().Generate( selectionSystem.GetSelectionEnumerator(), i => mainElements[i].poolIndex );
         }
         public HashSet<int> GetPoolIndiciesInSelectionOrAllShown () {
             return FilterOutDirectories( selectionSystem.hasSelection ? GetPoolIndiciesInSelectionBase() : GetPoolIndiciesInElementsBase() );
         }
 
+        public HashSet<int> GetIDsInElements(IEnumerable<int> selectionIndicies, bool includeDirs, out bool hasDirs) {
+            hasDirs = false;
+            int poolCount = getPoolCount(viewTab, curPath);
+            HashSet<int> ignorePoolIDs = getIgnorePoolIDs(viewTab);
+            HashSet<int> ids = new HashSet<int>();
+            foreach (var i in selectionIndicies) {
+                int id = mainElements[i].id;
+                if (id == -1) {
+                    if (includeDirs) {
+                        ids.AddRange( IDsInDirectory(curPath + "/" + DirDisplayName( mainElements[i].path, 0, out _ ), poolCount, ignorePoolIDs) );
+                        hasDirs = true;
+                    }
+                }
+                else ids.Add(id);
+            }
+            return ids;
+        }
         public HashSet<int> GetIDsInSelection(bool includeDirs, out bool hasDirs) {
             hasDirs = false;
             if (!selectionSystem.hasSelection) return null;
-            int poolCount = getPoolCount(viewTab, WithoutLastSlash(currentFolderPath));
-            HashSet<int> ignorePoolIDs = getIgnorePoolIDs(viewTab);
-            HashSet<int> ids = new HashSet<int>();
-
-            foreach (var i in selectionSystem.GetSelectionEnumerator()) {
-                int id = mainElements[i].id;
-                string path = mainElements[i].path;
-                if (id == -1) {
-                    if (includeDirs) {
-                        string dir = currentFolderPath + path;
-                        
-                        ids.AddRange( IDsInDirectory(dir, poolCount, ignorePoolIDs) );
-
-                        hasDirs = true;
-                    }
-                }
-                else {
-                    ids.Add(id);
-                }
-            }
-            return ids;
+            return GetIDsInElements(selectionSystem.GetSelectionEnumerator(), includeDirs, out hasDirs);
         }
         public HashSet<int> GetIDsInElements(bool includeDirs, out bool hasDirs) {
             hasDirs = false;
-            int poolCount = getPoolCount(viewTab, WithoutLastSlash(currentFolderPath));
-            HashSet<int> ignorePoolIDs = getIgnorePoolIDs(viewTab);
-            HashSet<int> ids = new HashSet<int>();
-
-            foreach (var e in mainElements) {// selectionSystem.GetSelectionEnumerator()) {
-                int id = e.id;// elements[i].id;
-                string path = e.path;//elements[i].path;
-                if (id == -1) {
-                    if (includeDirs) {
-                        string dir = currentFolderPath + path;//elements[i].path;
-                        ids.AddRange( IDsInDirectory(dir, poolCount, ignorePoolIDs) );
-                        hasDirs = true;
-                    }
-                }
-                else {
-                    ids.Add(id);
-                }
-            }
-            return ids;
+            return GetIDsInElements(new HashSet<int>().Generate( mainElements.Length, i => i ), includeDirs, out hasDirs);
         }
 
-
         ViewTabOption[] viewTabOptions;
+        System.Action<int, string> onDirectoryCreate;
+        System.Action<int, GUIStyle> extraToolbarButtons;
         
         public void Initialize (
             ViewTabOption[] viewTabOptions, 
             EditorProp hiddenIDsProp, 
-            GetElementAtPoolIndex getElementAtPoolIndex, GetPoolCount getPoolCount, GetIgnorePoolIDs getIgnorePoolIDs, 
+            GetElementAtPoolIndex getElementAtPoolIndex, 
+            GetPoolCount getPoolCount, GetIgnorePoolIDs getIgnorePoolIDs, 
 
         System.Action onSelectionChange,
-        System.Action<int, string, string, bool> onMoveFolder,
-        System.Action<HashSet<int>, string, Element, int> onDirDragDrop
+        System.Action<IEnumerable<int>, string, string, int> onDirDragDrop,
+        System.Action<int, string> onDirectoryCreate,
+        System.Action<int, GUIStyle> extraToolbarButtons
+                
+                
         ) {
-            this.onMoveFolder = onMoveFolder;
+            this.extraToolbarButtons = extraToolbarButtons;
+            this.onDirectoryCreate = onDirectoryCreate;
             this.onDirDragDrop = onDirDragDrop;
+            this.getElementAtPoolIndex = getElementAtPoolIndex;
+            this.getPoolCount = getPoolCount;
+            this.getIgnorePoolIDs = getIgnorePoolIDs;
+            this.onSelectionChange = onSelectionChange;
+
             List<ViewTabOption> viewOpts = new List<ViewTabOption>();
-            if (viewTabOptions.Length != 0) {
-                for (int i = 0; i < viewTabOptions.Length; i++) {
-                    viewOpts.Add(viewTabOptions[i]);
-                }
+            int l = viewTabOptions.Length;
+            if (l != 0) {
+                for (int i = 0; i < l; i++) viewOpts.Add(viewTabOptions[i]);
             }
             else {
                 viewOpts.Add(new ViewTabOption( new GUIContent("Select"), true ));
             }
             viewOpts.Add(new ViewTabOption( new GUIContent("Hidden"), true ));
-
             this.viewTabOptions = viewOpts.ToArray();
 
             hiddenIDsToggler.Initialize(hiddenIDsProp);
-            
-            this.getElementAtPoolIndex = getElementAtPoolIndex;
-            this.getPoolCount = getPoolCount;
-            this.getIgnorePoolIDs = getIgnorePoolIDs;
-            this.onSelectionChange = onSelectionChange;
 
             ResetCurrentPath();
             ClearSelectionsAndRebuild(true);
@@ -983,19 +500,18 @@ if (isDir) {
 
         public bool showingHidden { get { return viewTab == viewTabOptions.Length - 1; } }
 
-
+/*
         string WithoutLastSlash(string path) {
             if (path.IsEmpty() || !path.EndsWith("/")) {
                 return path;
             }
             return path.Substring(0, path.Length - 1);
         }
+*/
 
         void RebuildDisplayedElements() {
-            Debug.Log("rebuilding");
-
-
-            int poolCount = getPoolCount(viewTab, WithoutLastSlash(currentFolderPath));
+            
+            int poolCount = getPoolCount(viewTab, curPath);
             HashSet<int> ignorePoolIDs = getIgnorePoolIDs(viewTab);
 
             HashSet<string> used = new HashSet<string>();         
@@ -1003,124 +519,61 @@ if (isDir) {
             int lastDir = 0;
             
             IEnumerable<Element> filtered = new List<Element>()
-                .Generate(poolCount, i => getElementAtPoolIndex(i, viewTab, WithoutLastSlash(currentFolderPath)))
-                .Where(e => !ignorePoolIDs.Contains(e.id) && showingHidden == hiddenIDsToggler.IsState(e.id) && searchFilter.PassesSearchFilter(e.path))
-                //.ToList()
+                .Generate(poolCount, i => getElementAtPoolIndex(i, viewTab, curPath))
+                .Where(e => (ignorePoolIDs == null || !ignorePoolIDs.Contains(e.id)) && showingHidden == hiddenIDsToggler.IsState(e.id) && searchFilter.PassesSearchFilter(e.path))
             ;
 
-            List<Element> unpaginated;
-            //if (!folderedView) {
-            //    unpaginated = filtered.ToList();
-            //}
-            //else {
+            List<Element> unpaginated = new List<Element>();
 
+            foreach (var e in filtered) {
+                if (!curPath.IsEmpty() && !e.path.StartsWith(curPath)) continue;
 
-                unpaginated = new List<Element>();
+                string name = e.path;
+                bool isFile = true;
 
-                bool debug = true;;
-                foreach (var e in filtered) {
-                    if (!currentFolderPath.IsEmpty() && !e.path.StartsWith(currentFolderPath)) continue;
-
-                    string name = e.path;
-                    bool isFile = true;
-
-                    if (name.Contains("/")) {
-
-                        name = DirDisplayName ( name, 0, out isFile, debug );
-
-                        debug = false;
-
-                        //string[] sp = name.Split('/');
-                        //name = sp[currentFolderOffset];
-                        //isFile = currentFolderOffset == sp.Length - 1;
-                    }
-                    
-                    //foldered directory
-                    if (!isFile) {
-                        if (used.Contains(name)) continue;
-                        used.Add(name);
-                        unpaginated.Insert(lastDir, new Element(-1, currentFolderPath + name, -1));// name, -1));
-                        lastDir++;       
-                        continue;
-                    }   
-                    unpaginated.Add(e);
-                }
-            //}
-
+                if (name.Contains("/")) name = DirDisplayName ( name, 0, out isFile );
+                
+                //foldered directory
+                if (!isFile) {
+                    if (used.Contains(name)) continue;
+                    used.Add(name);
+                    unpaginated.Insert(lastDir, new Element(-1, curPath + (curPath.IsEmpty() ? "" : "/") + name, e.poolIndex));
+                    lastDir++;       
+                    continue;
+                }   
+                unpaginated.Add(e);
+            }
             mainElements = pagination.Paginate(unpaginated).ToArray();
-
-
-            //int poolCount = getPoolCount(viewTab);
-            //HashSet<int> ignorePoolIDs = getIgnorePoolIDs(viewTab);
-
-            //HashSet<string> used = new HashSet<string>();      
-
-            used.Clear();   
-               
-            lastDir = 0;
             
-            List<Element> prevElement;
-                prevElement = new List<Element>();
+            used.Clear();   
+            
+            List<Element> prevElement = new List<Element>();
 
+            if (!curPath.IsEmpty()) {
 
+                poolCount = getPoolCount(viewTab, parentPath);
 
-                //if (currentFolderOffset > 0) {
-                if (!currentFolderPath.IsEmpty()) {
-
-                    Debug.Log("rebuilding previous");
-
-            poolCount = getPoolCount(viewTab, WithoutLastSlash(prevFolderPath));
-
-
-            IEnumerable<Element> prevfiltered = new List<Element>()
-                .Generate(poolCount, i => getElementAtPoolIndex(i, viewTab, WithoutLastSlash(prevFolderPath)))
-                .Where(e => !ignorePoolIDs.Contains(e.id) && showingHidden == hiddenIDsToggler.IsState(e.id) && searchFilter.PassesSearchFilter(e.path))
-                //.ToList()
-            ;
-
-            //if (!folderedView) {
-            //    unpaginated = filtered.ToList();
-            //}
-            //else {
-
-                debug = true;
-
+                IEnumerable<Element> prevfiltered = new List<Element>()
+                    .Generate(poolCount, i => getElementAtPoolIndex(i, viewTab, parentPath))
+                    .Where(e => (ignorePoolIDs == null || !ignorePoolIDs.Contains(e.id)) && showingHidden == hiddenIDsToggler.IsState(e.id) && searchFilter.PassesSearchFilter(e.path))
+                ;
 
                 foreach (var e in prevfiltered) {
-                    if (!prevFolderPath.IsEmpty() && !e.path.StartsWith(prevFolderPath)) continue;
+                    if (!parentPath.IsEmpty() && !e.path.StartsWith(parentPath)) continue;
 
                     string name = e.path;
                     bool isFile = true;
-
-                    if (name.Contains("/")) {
-                        int offset = -1;
-                        name = DirDisplayName(name, offset, out isFile, debug);
-
-                        debug = false;
-                        //string[] sp = name.Split('/');
-                        //name = sp[currentFolderOffset - 1];
-                        //isFile = currentFolderOffset - 1 == name.Split('/').Length - 1;
-                    }
+                    if (name.Contains("/")) name = DirDisplayName(name, -1, out isFile);
                     
-                    //foldered directory
                     if (!isFile) {
                         if (used.Contains(name)) continue;
-                        used.Add(name);
-                        //Debug.Log("path: " + e.path);
-            
-                        prevElement.Add(new Element(-1, prevFolderPath + name, -1));
-                        lastDir++;       
-                        continue;
+                        used.Add(name);            
+                        prevElement.Add(new Element(-1, parentPath + (parentPath.IsEmpty() ? "" : "/")+ name, -1));
                     }   
-                    //prevElement.Add(e);
                 }
-            //}
-            //Debug.Log("path: " + WithoutLastSlash(prevFolderPath));
-                prevElement.Insert(0, new Element(-2, WithoutLastSlash(prevFolderPath), -1));
-                }
+                prevElement.Insert(0, new Element(-2, parentPath, -1));
+            }
             prevWindowElements = prevElement.ToArray();
-
-            //elements = pagination.Paginate(unpaginated).ToArray();
         }
 
         void ClearSelectionsAndRebuild(bool resetPage) {
@@ -1130,86 +583,25 @@ if (isDir) {
         }
 
         public void DrawToolbar (KeyboardListener kbListener, Inputs inputs) {
-            
             GUIUtils.StartBox(0);
             inputs.changedTabView = GUIUtils.Tabs(new GUIContent[viewTabOptions.Length].Generate(viewTabOptions, e => e.name), ref viewTab);
-            GUIUtils.Space();
-            
-            EditorGUILayout.BeginHorizontal();
-
-            if (viewTabOptions[viewTab].canHide) {
-                ToggleHiddenButtonGUI(kbListener, inputs, GUIStyles.miniButtonLeft);    
-            }
-            //FolderedViewButtonGUI(inputs, viewTabOptions[viewTab].canHide ? GUIStyles.miniButtonRight : GUIStyles.miniButton);
-            
-
-            
-            inputs.searchChanged = searchFilter.SearchBarGUI();
-            
-            EditorGUILayout.EndHorizontal();
-            
-            GUIUtils.Space();
-            
-            DirectoryBackButtonGUI(inputs, GUIStyles.miniButtonLeft);
-            
-            GUIUtils.EndBox(1);
+            GUIUtils.EndBox(0);
         }
 
-        void DirectoryBackButtonGUI (Inputs input, GUIStyle s) {   
-            EditorGUILayout.BeginHorizontal();
-            GUIContent c = new GUIContent("   <<   ", "Back");
-            GUI.enabled = !currentFolderPath.IsEmpty();// currentFolderOffset > 0;
-            //GUI.enabled = folderedView && curFolderOffset > 0;
-            
-            input.folderBack = GUIUtils.Button(c, GUIStyles.miniButtonLeft, Colors.liteGray, Colors.black, new GUILayoutOption[] { GUILayout.Height(16), c.CalcWidth(GUIStyles.miniButtonRight)  });
-            GUI.enabled = false;
-            EditorGUILayout.TextField(currentFolderPath);            
-            GUI.enabled = true;
-            EditorGUILayout.EndHorizontal();
-        }
-        //void FolderedViewButtonGUI (Inputs input, GUIStyle s) {
-        //    folderedView = GUIUtils.ToggleButton(new GUIContent("Folders", "Enable/Disable Foldered View"), true, folderedView, s, out input.folderedToggled);
-        //}   
+        GUILayoutOption iconWidth = GUILayout.Width(20);
 
-        
         void ToggleHiddenButtonGUI (KeyboardListener kbListener, Inputs input, GUIStyle s) {
-            
-            //GUI.enabled = selectionSystem.hasSelection;
             hiddenIDsToggler.ToggleStateButton(
                 kbListener[KeyCode.H], 
-                new GUIContent("Hide/Unhide", "Toggle the hidden status of the selection (if any, else all shown elements)"), true, s, 
-                out input.hiddenToggleSuccess,
-                GetHiddenToggleSelection
+                EditorGUIUtility.IconContent("animationvisibilitytoggleon", "Toggle the hidden status of the selection (if any, else all shown elements)"),
+                s, iconWidth, out input.hiddenToggleSuccess, GetHiddenToggleSelection
             );
-
-
-                //if (setProp != -1) AssetObjectEditor.CopyParameters(GetAOPropsSelectOrAll(), multiEditAO, setProp);
-        
-
-      
-
-
-
-
-
-
-            //GUI.enabled = true;
         }
+
         HashSet<int> GetHiddenToggleSelection () {
-
-            HashSet<int> selection = new HashSet<int>();
-            //if (!selectionSystem.hasSelection) {
-
-            //    return selection;
-            //}
-            
-            
-            
-            
             bool containsDirs;
-            selection = !selectionSystem.hasSelection ? GetIDsInElements(true, out containsDirs) : GetIDsInSelection(true, out containsDirs);
-            if (containsDirs && !EditorUtility.DisplayDialog("Hide/Unhide Directory", "Selection contains directories, hidden status of all sub elements will be toggled", "Ok", "Cancel"))  
-                selection.Clear();
+            HashSet<int> selection = !selectionSystem.hasSelection ? GetIDsInElements(true, out containsDirs) : GetIDsInSelection(true, out containsDirs);
+            if (containsDirs && !EditorUtility.DisplayDialog("Hide/Unhide Directory", "Selection contains directories, hidden status of all sub elements will be toggled", "Ok", "Cancel")) selection.Clear();
             return selection;
         }
     }

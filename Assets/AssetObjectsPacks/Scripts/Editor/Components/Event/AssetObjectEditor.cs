@@ -29,21 +29,23 @@ namespace AssetObjectsPacks {
         }
 
         public static void CopyAssetObject(EditorProp ao, EditorProp toCopy) {
-            Debug.Log("Copying id");
+            //Debug.Log("Copying id");
             
             ao[idField].CopyProp ( toCopy[idField] );
-            Debug.Log("Copying obj ref");
+            //Debug.Log("Copying obj ref");
             ao[objRefField].CopyProp ( toCopy[objRefField] );
 
             
-            Debug.Log("Copying params");
+            //Debug.Log("Copying params");
             CustomParameterEditor.ClearAndRebuildParameters(ao[paramsField], toCopy[paramsField]);
             
 
         }
         public static void InitializeNewAssetObject (EditorProp ao, int obj_id, UnityEngine.Object obj_ref, bool make_default, int packIndex) {
             ao[idField].SetValue ( obj_id );
+            //Debug.Log("set id");
             ao[objRefField].SetValue ( obj_ref );
+            //Debug.Log("set obj ref");
             //only need to default first one added, the rest will copy the last one 'inserted' into the
             //serialized property array
             if (!make_default) return;

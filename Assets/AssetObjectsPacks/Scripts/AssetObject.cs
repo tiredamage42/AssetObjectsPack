@@ -7,7 +7,6 @@ namespace AssetObjectsPacks {
     /*
     */
 
-
     [System.Serializable] public class AssetObject {
         /*
 

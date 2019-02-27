@@ -35,9 +35,9 @@ namespace AssetObjectsPacks {
             GUIUtils.StartBox(0);
             EditorGUILayout.BeginHorizontal();
 
-            GUI.enabled = page > 0;
+            //GUI.enabled = page > 0;
             if (GUIUtils.Button(new GUIContent(" << "), true, GUIStyles.toolbarButton) || kbListener[KeyCode.LeftArrow]) r = PaginationAttempt.Back;
-            GUI.enabled = true;
+            //GUI.enabled = true;
 
             GUIStyle s = GUIStyles.label;
             TextAnchor ol = s.alignment;
@@ -45,14 +45,17 @@ namespace AssetObjectsPacks {
             GUIUtils.Label(new GUIContent("Page: " + (page + 1) + " / " + max_pages), false);
             s.alignment = ol;
 
-            GUI.enabled = page < max_pages;
+            //GUI.enabled = page < max_pages;
             if (GUIUtils.Button(new GUIContent(" >> "), true, GUIStyles.toolbarButton) || kbListener[KeyCode.RightArrow]) r = PaginationAttempt.Fwd;
-            GUI.enabled = true;
+            //GUI.enabled = true;
             
             EditorGUILayout.EndHorizontal();
             GUIUtils.EndBox(0);     
 
             wasSuccess = r != PaginationAttempt.None && SwitchPage(r == PaginationAttempt.Fwd ? 1 : -1);
+            //if (r != PaginationAttempt.None) {
+            //    Debug.Log(r);
+            //}
             return r;      
         }
 

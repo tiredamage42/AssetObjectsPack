@@ -123,16 +123,21 @@ namespace AssetObjectsPacks {
 
 
             public EditorProp AddNew (string uniqueNamePrefix = null, string nameField = "name") {
+
+                //Debug.Log("checking");
                 if (!CheckForArray(true)) return null;
 
+                
                 //int newID = AssetObjectsEditor.GenerateNewIDList(1, new HashSet<int>().Generate( packs.arraySize, i => packs[i][idField].intValue ))[0];
-
                 string origName = uniqueNamePrefix;
                 string new_name = origName;
-                int trying = 0;
-                while (!NameUnique(new_name, nameField) && trying <= 999 ) {
-                    new_name = origName + " " + trying.ToString();
-                    trying ++;
+                if (uniqueNamePrefix != null) {
+
+                    int trying = 0;
+                    while (!NameUnique(new_name, nameField) && trying <= 999 ) {
+                        new_name = origName + " " + trying.ToString();
+                        trying ++;
+                    }
                 }
             
                 int l = prop.arraySize;
@@ -221,7 +226,7 @@ namespace AssetObjectsPacks {
 
             SerializedProperty c = copy.prop;
             if (prop.propertyType != c.propertyType) {
-                Debug.LogError("Incompatible types (" + prop.propertyType + ", " + c.propertyType + ")");
+                Debug.LogError("Incompatible types (" + prop.displayName + "," + c.displayName + ") (" + prop.propertyType + ", " + c.propertyType + ")");
                 return;
             }
 

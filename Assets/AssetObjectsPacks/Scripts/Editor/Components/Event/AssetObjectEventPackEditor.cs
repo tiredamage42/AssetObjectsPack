@@ -6,51 +6,70 @@ namespace AssetObjectsPacks {
     [CustomEditor(typeof(Event))]
     public class EventEditor : Editor {
         PopupList.InputData packsPopup;    
-        //EditorProp multiEditAO, AOList, hiddenIDsProp;
         EditorProp multiEditAO, hiddenIDsProp;
 
-        //const string conditionsBlockField = "conditionsBlock";
-
+        
 
         static void AddAOsAndSubAOsToBaseList(EditorProp baseEventState, EditorProp eventState) {
-            for (int i = 0; i < eventState[EventState.assetObjectsField].arraySize; i++) {
-                AssetObjectEditor.CopyAssetObject(baseEventState[EventState.assetObjectsField].AddNew(), eventState[EventState.assetObjectsField][i]);
-            }
-            for (int i = 0; i < eventState[EventState.subStatesField].arraySize; i++) {
-                AddAOsAndSubAOsToBaseList(baseEventState, eventState[EventState.subStatesField][i]);
-            }
-
+            EditorProp aos = eventState[EventState.assetObjectsField];
+            EditorProp baseAOs = baseEventState[EventState.assetObjectsField];
+            int c = aos.arraySize;
+            for (int i = 0; i < c; i++) AssetObjectEditor.CopyAssetObject(baseAOs.AddNew(), aos[i]);
+            
+            EditorProp subStates = eventState[EventState.subStatesField];
+            c = subStates.arraySize;
+            for (int i = 0; i < c; i++) AddAOsAndSubAOsToBaseList(baseEventState, subStates[i]);
         }
 
+        static bool DeleteState (EditorProp baseEventState, EditorProp parentState, EditorProp eventState, ref int preDeleteSelection) {
+            if (preDeleteSelection == -1) {
 
-        
-        static bool DeleteState (EditorProp baseEventState, EditorProp parentState, EditorProp eventState) {
-            int selection = EditorUtility.DisplayDialogComplex(
-                "Delete State", 
-                "Delete state and asset objects? If keeping asset objects they will be moved to base state", 
-                "Delete And Keep", "Cancel", "Delete All"
-            );
-            switch(selection) {
+                preDeleteSelection = EditorUtility.DisplayDialogComplex(
+                    "Delete State", 
+                    "Delete state(s) and asset objects? If keeping asset objects they will be moved to base state", 
+                    "Delete All", "Cancel", "Delete And Keep"
+                );
+            }
+            switch(preDeleteSelection) {
                 case 1: return false;
-                case 0: 
-                    Debug.LogError("Deleted Keep");
+                case 2: 
+                    Debug.Log("Deleted Keep");
                     AddAOsAndSubAOsToBaseList(baseEventState, eventState);
                     break;
-                case 2:
-                    Debug.LogError("Deleted All");
+                case 0:
+                    Debug.Log("Deleted All");
                     break;
             }
             int atIndex = -1;
-            for (int i = 0; i < parentState[EventState.subStatesField].arraySize; i++) {
-                string name = parentState[EventState.subStatesField][i][EventState.nameField].stringValue;
-                if (name == eventState[EventState.nameField].stringValue) {
+            EditorProp parentSubstates = parentState[EventState.subStatesField];
+            string eventStateName = eventState[EventState.nameField].stringValue;
+
+            int c = parentSubstates.arraySize;
+
+            for (int i = 0; i < c; i++) {
+                if (parentSubstates[i][EventState.nameField].stringValue == eventStateName) {
                     atIndex = i;
                     break;
                 }
             }
-            parentState[EventState.subStatesField].DeleteAt(atIndex);
-            //selectionSystem.ForceBackFolder();
+            parentSubstates.DeleteAt(atIndex);
             return true;
+        }
+
+        void OnDirectoryCreate (int viewTab, string parentDir) {
+
+            if (viewTab == 0) {
+
+                EditorProp parentState = GetEventStateByPath(parentDir);
+                MakeNewEventStateDefault(parentState[EventState.subStatesField].AddNew("New Event State"));
+            }
+            else {
+
+            }
+
+
+
+
         }
 
         static void DrawEventState(EditorProp baseEventState, EditorProp parentState, EditorProp eventState, out bool addedState, out bool deletedState, out bool changedAOState) {
@@ -66,10 +85,10 @@ namespace AssetObjectsPacks {
 
 
 
-            if (GUIUtils.Button(new GUIContent("Add Substate"), true, GUIStyles.miniButton)) {
-                MakeNewEventStateDefault(eventState[EventState.subStatesField].AddNew("New Event State"));
-                addedState = true;
-            }
+            //if (GUIUtils.Button(new GUIContent("Add Substate"), true, GUIStyles.miniButton)) {
+            //    MakeNewEventStateDefault(eventState[EventState.subStatesField].AddNew("New Event State"));
+            //    addedState = true;
+            //}
 
             deletedState = false;
 
@@ -102,13 +121,11 @@ namespace AssetObjectsPacks {
             //GUIUtils.DrawTextProp(eventState[EventState.nameField], new GUIContent("Name"), false, false);
             GUI.enabled = true;
             if (deletedState) {
-                deletedState = DeleteState(baseEventState, parentState, eventState);
+
+                int deleteOption = -1;
+                deletedState = DeleteState(baseEventState, parentState, eventState, ref deleteOption);
                 
             }
-
-           
-
-
         }
 
         static void MakeNewEventStateDefault (EditorProp newEventState) {
@@ -131,7 +148,7 @@ namespace AssetObjectsPacks {
         EditorProp so;
 
         public override bool HasPreviewGUI() { 
-            return preview != null; 
+            return true;// preview != null;// && !selectionSystem.isDragging; 
         }
         public override void OnInteractivePreviewGUI(Rect r, GUIStyle background) { 
             if (preview != null) preview.OnInteractivePreviewGUI(r, background); 
@@ -147,7 +164,6 @@ namespace AssetObjectsPacks {
 
             baseEventState = so[Event.baseStateField];
 
-            //AOList = so[Event.asset_objs_field];
             hiddenIDsProp = so[Event.hiddenIDsField];
             multiEditAO = so[Event.multi_edit_instance_field];
 
@@ -160,7 +176,10 @@ namespace AssetObjectsPacks {
             Reinitialize( index );
         }
         public override void OnInspectorGUI() {
-            //base.OnInspectorGUI();
+           // base.OnInspectorGUI();
+
+           //Debug.Log("before inspector");
+            
 
             GUIUtils.StartCustomEditor();
             PacksManager pm = AssetObjectsEditor.packManager;
@@ -182,38 +201,28 @@ namespace AssetObjectsPacks {
                 EditorGUILayout.EndHorizontal();
 
                 GUIUtils.EndBox(0);
+                //Debug.Log("before draw");
+
                 
                 Draw();
+                //Debug.Log("after draw");
+
             }
+
+
             GUIUtils.EndCustomEditor(so);
+            //Debug.Log("after inspector");
+
+            //if (!HasPreviewGUI()) {
+
+                //Debug.Log(HasPreviewGUI());
+            //}
         }
 
-
-        /*
-        EditorProp curParentEventState {
-            get {
-                if (eventStatesSelected.Count <= 1) {
-                    return baseEventState;
-                }
-                return eventStatesSelected[eventStatesSelected.Count - 2];
-            }
-        }
-        */
         EditorProp baseEventState;
-/*
-        EditorProp curEventState {
-            get {
-                if (eventStatesSelected.Count == 0) {
-                    return baseEventState;
-                }
-                return eventStatesSelected.Last();
-            }
-        }
-        List<EditorProp> eventStatesSelected = new List<EditorProp>();
-
- */
 
         static EditorProp GetEventStateByName ( EditorProp subStates, string name ) {
+            //Debug.Log("Looking for: " + name);
             for (int i = 0; i < subStates.arraySize; i++) {
 
                 string subStateName = subStates[i][EventState.nameField].stringValue;
@@ -227,33 +236,7 @@ namespace AssetObjectsPacks {
         }
         
 
-        //void OnMoveFolder (int viewTab, string addName, string newPath, bool isReset, bool backFirst ) {
-        void OnMoveFolder (int viewTab, string toPath, string newPath, bool isReset ) {
-
-            bool movingBack = toPath == null;//addName == null;
-            if (viewTab == 0) {
-
-                if (isReset) {
-                    //eventStatesSelected.Clear();
-                    return;
-                }
-
-                if (movingBack) {
-                    //eventStatesSelected.Remove(eventStatesSelected.Last());
-                }
-                else {
-                    //if (backFirst){
-
-                    //    eventStatesSelected.Remove(eventStatesSelected.Last());
-                    //}
-
-                    //eventStatesSelected = GetEventStatesByPath()
-
-                    //eventStatesSelected.Add( GetEventStateByPath(newPath) );// GetEventStateByName(curEventState[EventState.subStatesField], addName) );
-                }
-            }
-        }
-
+        
 
 
         ElementSelectionSystem.Element GetPoolElementAtIndex(int i, int viewTab, string atPath) {
@@ -265,69 +248,44 @@ namespace AssetObjectsPacks {
                 path = atPath;
 
 
-                Debug.Log("Getting pool element at path: " + path);
+                //Debug.Log("Getting pool element at path: " + path);
 
-                //for (int x = 0; x < eventStatesSelected.Count; x++) {
-                //    path += eventStatesSelected[i][EventState.nameField].stringValue;
-                    //if (x != eventStatesSelected.Count -1) {
-                //        path += "/";
-                    //}
-                //}
-
-
-                //Debug.Log("starting with path: " + path);
-
-
-                EditorProp state = GetEventStateByPath(path); //curEventState;
-
-
+                EditorProp state = GetEventStateByPath(path); 
+                
                 int subStateCount = state[EventState.subStatesField].arraySize;
                 if (i < subStateCount) {
                     id = -1;
 
-                    path += state[EventState.subStatesField][i][EventState.nameField].stringValue;
+                    path += (path.IsEmpty() ? "" : "/") + state[EventState.subStatesField][i][EventState.nameField].stringValue;
 
-                    path += "/trickfolderedview";
-
-                    Debug.Log("making folder: " + path);
-
+                    path += "/";//trickfolderedview";
 
 
                 }
                 else {
 
-
                     id = AssetObjectEditor.GetID(
                         state[EventState.assetObjectsField][i - subStateCount]
                     );
-                    path = path + id2path[id].Replace("/", "*");
+                    path = path + (path.IsEmpty() ? "" : "/") + AssetObjectsEditor.RemoveIDFromPath(id2path[id]).Replace("/", " | ");
 
-                    Debug.Log("making file " + path);
+                    //Debug.Log("making file " + path);
                 }
-
-
-
-                //id = AssetObjectEditor.GetID(
-                //    AOList[i]
-                //);
-
 
             }
             else {
                 path = allPaths[i];
                 
                 id = AssetObjectsEditor.GetObjectIDFromPath(path); 
+                path = AssetObjectsEditor.RemoveIDFromPath(path);
             }
-            return new ElementSelectionSystem.Element(id, AssetObjectsEditor.RemoveIDFromPath(path), i);
+            return new ElementSelectionSystem.Element(id, path, i);
         }
 
         void ReinitializeEventStates(EditorProp baseEventState) {
-
-            Debug.Log("initializing event states aos");
             for (int i = 0; i < baseEventState[EventState.assetObjectsField].arraySize; i++) {
                 AssetObjectEditor.MakeAssetObjectDefault(baseEventState[EventState.assetObjectsField][i], packIndex, false);
             }
-            Debug.Log("initializing event states subStates");
             for (int i = 0; i < baseEventState[EventState.subStatesField].arraySize; i++) {
                 ReinitializeEventStates(baseEventState[EventState.subStatesField][i]);
             }
@@ -348,19 +306,11 @@ namespace AssetObjectsPacks {
                 
             if (errorStrings.Length == 0) {
 
-
-
                 PackEditor.GetValues(packIndex, out _, out objectsDirectory, out fileExtensions, out assetType);
-                
-
 
                 InitializeAllFilePaths();
 
-
-
                 ReinitializeEventStates(baseEventState);
-
-                //for (int i = 0; i < AOList.arraySize; i++) AssetObjectEditor.MakeAssetObjectDefault(AOList[i], packIndex, false);
                 
                 AssetObjectEditor.MakeAssetObjectDefault(multiEditAO, packIndex, true);
                 paramlabels = PackEditor.GUI.GetDefaultParamNameGUIs(packIndex);
@@ -371,14 +321,7 @@ namespace AssetObjectsPacks {
                     new ElementSelectionSystem.ViewTabOption( new GUIContent("Project"), true )
                 };
                  
-                selectionSystem.Initialize(
-                    viewTabOptions, hiddenIDsProp, 
-                    GetPoolElementAtIndex, GetPoolCount, GetIgnoreIDs, 
-                    RebuildPreviewEditor, 
-                    OnMoveFolder,
-                    OnDirDragDrop
-                );
-                
+                selectionSystem.Initialize(viewTabOptions, hiddenIDsProp, GetPoolElementAtIndex, GetPoolCount, GetIgnoreIDs, RebuildPreviewEditor, OnDirDragDrop, OnDirectoryCreate, ExtraToolbarButtons);
                 initializeAfterPackChange = true;
             }
 
@@ -388,21 +331,27 @@ namespace AssetObjectsPacks {
             for (int i = 0; i < l; i++) packsPopup.NewOrMatchingElement(pm.packs[i].name, index == i);        
         }
 
-        void OnDirDragDrop(HashSet<int> dragIndicies, string curPath, ElementSelectionSystem.Element dirElement, int viewTab) {
+        void ExtraToolbarButtons (int viewTab, GUIStyle s) {
+
+            if (!selectionSystem.showingHidden) {
+            
+                GUI.enabled = selectionSystem.justFilesSelected;
+                
+                if (ImportSettingsButton(s)) OpenImportSettings();
+                removeOrAdd = AddRemoveButton(viewTab, s);
+                
+                GUI.enabled = true;
+            }
+        }
+
+        void OnDirDragDrop(IEnumerable<int> dragIndicies, string origDir, string targetDir, int viewTab) {
             if (viewTab == 0) {
-                MoveAOsToEventState(dragIndicies, curPath, dirElement.path);// EditorProp targetState)
+                //Debug.Log("list view drag to dir " + targetDir);
+                MoveAOsToEventState(dragIndicies, origDir, targetDir);
             }
             else if (viewTab == 1) {
-                Debug.Log("project view drag to dir " + dirElement.path);
+                Debug.Log("project view drag to dir " + targetDir);
             }
-            
-
-            
-            //foreach (var de in draggedElements) {
-            //    Debug.Log(de.id + " : " + de.path);
-            //}
-            //Debug.Log("Dir:");
-            //Debug.Log(dirElement.id + " : " + dirElement.path);
         
         }
 
@@ -419,77 +368,45 @@ namespace AssetObjectsPacks {
                     so[Event.pack_id_field].SetValue( pm.packs[i].id );
                     //reset hidden ids
                     hiddenIDsProp.Clear();
+
                     //reset asset objects
-
-
                     baseEventState[EventState.assetObjectsField].Clear();
                     baseEventState[EventState.subStatesField].Clear();
                     
-                    //AOList.Clear();
-
-
-
                     Reinitialize(i);             
                     break;
                 }
             }
         }
 
-        void GetAllEventIDs (EditorProp eventState, ref HashSet<int> ret) {
-            for (int i = 0; i < eventState[EventState.assetObjectsField].arraySize; i++) {
-                ret.Add( AssetObjectEditor.GetID(eventState[EventState.assetObjectsField][i]));
 
-            }
-for (int i = 0; i < eventState[EventState.subStatesField].arraySize; i++) {
+        //for building IDs in set ignore for project view build
+        void GetAllEventIDs (EditorProp eventState, HashSet<int> ret) {
+            EditorProp aos = eventState[EventState.assetObjectsField];
+            int c = aos.arraySize;
+            for (int i = 0; i < c; i++) ret.Add( AssetObjectEditor.GetID(aos[i]));
 
-    GetAllEventIDs(eventState[EventState.subStatesField][i], ref ret);
-
-            }
-
-
-
+            EditorProp subStates = eventState[EventState.subStatesField];
+            c = subStates.arraySize;
+            for (int i = 0; i < c; i++) GetAllEventIDs(subStates[i], ret);
         }
         
         HashSet<int> GetIgnoreIDs (int viewTab) {
-            HashSet<int> ret = new HashSet<int>();
             if (viewTab == 1) {
-
-                GetAllEventIDs(baseEventState, ref ret);
-
+                HashSet<int> ret = new HashSet<int>();
+                GetAllEventIDs(baseEventState, ret);
+                return ret;
             }
-            return ret;
-            /*
-            return viewTab != 1 ? new HashSet<int>() : new HashSet<int>().Generate(
-                
-
-
-
-                AOList.arraySize, 
-                
-                i => AssetObjectEditor.GetID(
-                    AOList[i]
-                ) 
-            ); 
-            */
+            return null;
         }
 
-        int GetPoolCount (int viewTab, string dirPath) {
 
+        int GetPoolCount (int viewTab, string directory) {
             if (viewTab == 0) {
-
-                
-                EditorProp eventState = GetEventStateByPath(dirPath);
-                int currentEventSubstateCount = eventState[EventState.subStatesField].arraySize;
-
-                int c = eventState[EventState.assetObjectsField].arraySize + currentEventSubstateCount;
-                Debug.Log("Getting pool count (" + c + ") at path: " + dirPath);
-                return c;
-
+                EditorProp eventState = GetEventStateByPath(directory);
+                return eventState[EventState.assetObjectsField].arraySize + eventState[EventState.subStatesField].arraySize;
             }
-        //    return viewTab == 0 ? AOList.arraySize : allPaths.Length;
-        //    return viewTab == 0 ? currentEventTotalSize : allPaths.Length;
-        return allPaths.Length;
-        
+            return allPaths.Length;
         }
 
         UnityEngine.Object GetObjectRefForID(int id) {
@@ -508,183 +425,80 @@ for (int i = 0; i < eventState[EventState.subStatesField].arraySize; i++) {
             allPaths = AssetObjectsEditor.GetAllAssetObjectPaths (objectsDirectory, fileExtensions, false, out id2path);
         }
 
-        void CustomToolbar (int viewTab, out bool addedState, out bool deletedState, out bool changedAOState){
+        void CustomToolbar (EditorProp curParentEventState, EditorProp curEventState, int viewTab, out bool addedState, out bool deletedState, out bool changedAOState){
             addedState = deletedState = changedAOState = false;
-            if (!selectionSystem.showingHidden) {
-            GUIUtils.StartBox(0);
-            
-            EditorGUILayout.BeginHorizontal();
-            GUI.enabled = selectionSystem.justFilesSelected;
-
-            if (ImportSettingsButton(GUIStyles.miniButtonLeft)) OpenImportSettings();
-
-            removeOrAdd = AddRemoveButton(GUIStyles.miniButtonRight);
-            
-            GUI.enabled = true;
-            
-            EditorGUILayout.EndHorizontal();
-
-
-
-            if (viewTab == 0) DrawMultiEditGUI(out addedState, out deletedState, out changedAOState);
-
-            GUIUtils.EndBox(1);
+            if (viewTab == 0) {
+                GUIUtils.StartBox(0);
+                DrawMultiEditGUI(curParentEventState, curEventState, out addedState, out deletedState, out changedAOState);
+                GUIUtils.EndBox(0);
             }
         }
-        static bool ImportSettingsButton (GUIStyle s) {
-            return GUIUtils.Button(new GUIContent("Import Settings", "Open import settings on selection (if any)"), true, s);
+
+
+        GUILayoutOption iconWidth = GUILayout.Width(20);
+        bool ImportSettingsButton (GUIStyle s) {
+            GUIContent c = EditorGUIUtility.IconContent("_Popup", "Open import settings on selection (if any)");
+            return GUIUtils.Button(c, s, iconWidth);
         }
-        static bool AddRemoveButton (GUIStyle s) {
-            return GUIUtils.Button(new GUIContent("Add/Remove", "Add Selected (When in project view)\nRemove Selected (When in event view)"), true, s);
+        bool AddRemoveButton (int viewTab, GUIStyle s) {
+            GUIContent c = null;
+            if (viewTab == 0) c = EditorGUIUtility.IconContent("Toolbar Minus", "Remove Selected From Event");    
+            else if (viewTab == 1) c = EditorGUIUtility.IconContent("Toolbar Plus", "Add Selected To Event");
+            return GUIUtils.Button(c, s, iconWidth);
         }
 
 
-
-        GUIContent GetEditToolbarTitle (bool hasSelection, bool singleSelection, ElementSelectionSystem.Element selectedElement) {
+        GUIContent GetEditToolbarTitle (bool hasSelection, bool singleSelection, string selectedPath){
             string title = "Multi-Edit <b>All</b> Objects";
             if (hasSelection) {
-                if (singleSelection) {
-                    title = "Editing: <b>" + selectedElement.path + "</b>";
-                }
-                else {
-                    title = "Multi-Edit <b>Selected</b> Objects";
-                }
+                if (singleSelection) title = "Editing: <b>" + selectedPath + "</b>";
+                else title = "Multi-Edit <b>Selected</b> Objects";
             }
             return new GUIContent(title);
         }
-        EditorProp GetAOPropForEditToolbar (bool hasSelection, bool singleSelection, ElementSelectionSystem.Element selectedElement) {
-            EditorProp p = multiEditAO;
-            if (hasSelection) {
-                if (singleSelection) {
-                    if (selectedElement.id != -1) {
-                        EditorProp curEventState;
-            GetCurrentAndParentStates(out _, out curEventState);
-            int currentEventSubstateCount = curEventState[EventState.subStatesField].arraySize;
-            //int currentEventTotalSize = curEventState[EventState.assetObjectsField].arraySize + currentEventSubstateCount;
-            
-
-                        p = curEventState[EventState.assetObjectsField][selectedElement.poolIndex - currentEventSubstateCount];
-                        // AOList[selectedElement.poolIndex];
-                    }
-                }
-            }
-            return p;
+        EditorProp GetAOPropForEditToolbar (EditorProp eventState, bool singleSelection, int selectedID, int selectedPoolID) {
+            return (!singleSelection || selectedID == -1) ? multiEditAO : eventState[EventState.assetObjectsField][selectedPoolID - eventState[EventState.subStatesField].arraySize];
         }
-
-
-        string curFolderPath {
-            get {
-                return selectionSystem.currentFolderPath;
-            }
-        }
-
-
         void GetCurrentAndParentStates (out EditorProp parentState, out EditorProp curState) {
-            string path = curFolderPath;
             parentState = null;
-
-            if (path == "") {
-                //Debug.Log("base event");
-                curState = baseEventState;
-                //return baseEventState;
-                return;
-            }
-
-            //Debug.Log("getting event state at path: " + path);
-            string[] split = path.Split('/');
-
-
-            parentState = null;
-            curState = baseEventState;
-
-            for (int i = 0; i < split.Length; i++) {
-                //Debug.Log("checking (l)" + split[i]);
-                parentState = curState;
-                curState = GetEventStateByName(parentState[EventState.subStatesField], split[i]);
-            }
-            //return curState;
-
-
+            curState = GetEventStateByPath(selectionSystem.curPath);
+            if (curState != baseEventState) parentState = GetEventStateByPath(selectionSystem.parentPath);
         }
-
-
-        
         EditorProp GetEventStateByPath(string path) {
-
-            if (path == "") {
-                Debug.Log("base event");
-                return baseEventState;
-            }
-            Debug.Log("getting event state at path: " + path);
-            string[] split = path.Split('/');
-
+            if (path.IsEmpty()) return baseEventState;
             EditorProp lastState = baseEventState;
-            for (int i = 0; i < split.Length; i++) {
-                Debug.Log("checking (l)" + split[i]);
-                lastState = GetEventStateByName(lastState[EventState.subStatesField], split[i]);
-            }
+            string[] split = path.Split('/');
+            for (int i = 0; i < split.Length; i++) lastState = GetEventStateByName(lastState[EventState.subStatesField], split[i]);
             return lastState;
-
-
-
         }
 
 
 
 
         
-        void DrawMultiEditGUI (out bool addedState, out bool deletedState, out bool changedAOState){
+        void DrawMultiEditGUI (EditorProp curParentEventState, EditorProp curEventState, out bool addedState, out bool deletedState, out bool changedAOState){
 
-            EditorProp curParentEventState, curEventState;
-            GetCurrentAndParentStates(out curParentEventState, out curEventState);
-            DrawEventState(
-                baseEventState,
-                curParentEventState, curEventState, out addedState, out deletedState, out changedAOState);
-if (deletedState) {
-                    selectionSystem.ForceBackFolder();
-
-                }
+            DrawEventState(baseEventState, curParentEventState, curEventState, out addedState, out deletedState, out changedAOState);
+                        
+            if (deletedState) {
+                selectionSystem.ForceBackFolder();
+            }
 
             bool hasSelection = selectionSystem.hasSelection;
             bool singleSelection = selectionSystem.singleSelection;
             ElementSelectionSystem.Element selectedElement = selectionSystem.selectedElement;
 
             GUIUtils.Space(1);
-
-
             int setProp = -1;
             GUI.enabled = !(hasSelection && singleSelection && selectedElement.id == -1);
 
+            GUIUtils.Label(GetEditToolbarTitle (hasSelection, singleSelection, selectedElement.path), false);
+
+            bool setCondition;            
+            AssetObjectEditor.GUI.DrawAssetObjectMultiEditView(hasSelection && singleSelection, GetAOPropForEditToolbar (curEventState, singleSelection, selectedElement.id, selectedElement.poolIndex), paramWidths, out setCondition, out setProp, paramlabels);
+            GUI.enabled = true;
             
-            
-                GUIUtils.Label(GetEditToolbarTitle (hasSelection, singleSelection, selectedElement), false);
-                
-                //bool multiConditionAdd, multiConditionReplace;            
-                bool setCondition;            
-                
-                AssetObjectEditor.GUI.DrawAssetObjectMultiEditView(
-
-                    hasSelection && singleSelection,
-
-                    GetAOPropForEditToolbar (hasSelection, singleSelection, selectedElement), 
-                    
-                    
-                    paramWidths, 
-
-                    out setCondition,
-                    //out multiConditionAdd, 
-                    //out multiConditionReplace, 
-                    out setProp, 
-                    paramlabels
-                );
-
-                GUI.enabled = true;
-            
-
-            //if (multiConditionAdd || multiConditionReplace) AssetObjectEditor.CopyConditions(GetAOPropsSelectOrAll(), false);//, multiConditionAdd);
-            //if (setCondition) AssetObjectEditor.CopyConditions(GetAOPropsSelectOrAll(), multiEditAO, false);//, multiConditionAdd);
-
-            if (setProp != -1) AssetObjectEditor.CopyParameters(GetAOPropsSelectOrAll(), multiEditAO, setProp);
+            if (setProp != -1) AssetObjectEditor.CopyParameters(GetAOPropsSelectOrAll( curEventState ), multiEditAO, setProp);
         }
 
         
@@ -703,10 +517,12 @@ if (deletedState) {
                         
             selectionSystem.DrawToolbar(kbListener, inputs);
 
-
             bool addedState, deletedState, changedAOState;
+
+            EditorProp curParentEventState = null, curEventState = null;
+            if (viewTab == 0) GetCurrentAndParentStates(out curParentEventState, out curEventState);
             
-            CustomToolbar(viewTab, out addedState, out deletedState, out changedAOState);
+            CustomToolbar(curParentEventState, curEventState, viewTab, out addedState, out deletedState, out changedAOState);
         
             selectionSystem.DrawElements(viewTab, inputs, kbListener);
             selectionSystem.DrawPages (inputs, kbListener);
@@ -715,9 +531,11 @@ if (deletedState) {
             bool listChanged = false;
             bool remove = (viewTab == 0) && (kbListener[KeyCode.Delete] || kbListener[KeyCode.Backspace]);
             bool add = (viewTab == 1) && kbListener[KeyCode.Return];
+
+            
                 
             if (removeOrAdd || add || remove) {
-                if ((removeOrAdd && viewTab == 0) || remove) listChanged = DeleteSelectionFromList();
+                if ((removeOrAdd && viewTab == 0) || remove) listChanged = DeleteSelectionFromList(curEventState);
                 if ((removeOrAdd && viewTab == 1) || add) listChanged = AddSelectionToSet();
             }
             
@@ -729,155 +547,111 @@ if (deletedState) {
             selectionSystem.HandleInputs(inputs, 
                 generateNewIDs || listChanged || addedState || deletedState || changedAOState
             );
-
-            removeOrAdd = false;
             
+            removeOrAdd = false;
+
         }   
 
-        IEnumerable<EditorProp> GetAOPropsSelectOrAll () {
-
-            EditorProp curEventState;
-            GetCurrentAndParentStates(out _, out curEventState);
+        IEnumerable<EditorProp> GetAOPropsSelectOrAll (EditorProp curEventState) {
             int currentEventSubstateCount = curEventState[EventState.subStatesField].arraySize;
-            //int currentEventTotalSize = curEventState[EventState.assetObjectsField].arraySize + currentEventSubstateCount;
-            
-            return new HashSet<EditorProp>().Generate(
-                selectionSystem.GetPoolIndiciesInSelectionOrAllShown(), 
-                
-                
-                i => curEventState[EventState.assetObjectsField] [i - currentEventSubstateCount] 
-                //i => AOList[i] 
-
-
-            );
+            return new HashSet<EditorProp>().Generate(selectionSystem.GetPoolIndiciesInSelectionOrAllShown(), i => curEventState[EventState.assetObjectsField] [i - currentEventSubstateCount]);
         }
 
-        
         bool AddSelectionToSet () {
-            Debug.Log("adding selection to list");    
-            
             bool reset_i = true;            
             HashSet<int> idsInSelection = selectionSystem.GetIDsInSelection(false, out _);
             if (idsInSelection.Count == 0) return false;
+            
+            EditorProp aoArray = baseEventState[EventState.assetObjectsField];
             foreach (var id in idsInSelection) {
-                AssetObjectEditor.InitializeNewAssetObject(
-                    //AOList.AddNew(), 
-                    baseEventState[EventState.assetObjectsField].AddNew(),
-                    id, GetObjectRefForID(id), reset_i, packIndex
-                );    
+                EditorProp newAO = aoArray.AddNew();
+                Object objRef = GetObjectRefForID(id);
+                AssetObjectEditor.InitializeNewAssetObject(newAO, id, objRef, reset_i, packIndex);    
                 reset_i = false;
             }
             return true;
         }
 
-
-
-
-
-/*
-
-        int currentEventTotalSize {
-            get {
-                return curEventState[EventState.assetObjectsField].arraySize + currentEventSubstateCount;
-            }
-        }
-        int currentEventSubstateCount {
-            get {
-                return curEventState[EventState.subStatesField].arraySize;
-                
-            }
-        }
-
-*/
-
-
         
-        bool MoveAOsToEventState(HashSet<int> poolIndicies, string curPath, string targetPath)// EditorProp targetState)
+        void MoveAOsToEventState(IEnumerable<int> poolIndicies, string origDirectory, string targetDir)
         {
-            Debug.Log("moving selection to new state");    
-
-            EditorProp curState = GetEventStateByPath(curPath);
-            EditorProp targetState = GetEventStateByPath(targetPath);
-
-
-                
-
-            int currentEventSubstateCount = curState[EventState.subStatesField].arraySize;
-            int currentEventTotalSize = curState[EventState.assetObjectsField].arraySize + currentEventSubstateCount;
             
-            
-            
-        
-            //HashSet<int> moveIndicies = selectionSystem.GetPoolIndiciesInSelection();
-            if (poolIndicies.Count == 0) return false;
+            if (poolIndicies.Count() == 0) return;
+            Debug.Log("moving selection from " + origDirectory + " to " + targetDir);
 
+            EditorProp origParentState = GetEventStateByPath(origDirectory);
+            EditorProp targetState = GetEventStateByPath(targetDir);
+            
+            EditorProp parentAOs = origParentState[EventState.assetObjectsField];
+            EditorProp targetAOs = targetState[EventState.assetObjectsField];
 
-            for (int i = currentEventTotalSize - 1; i >= 0; i--) {
+            int parentSubstateCount = origParentState[EventState.subStatesField].arraySize;
+            int parentTotalSize = parentAOs.arraySize + parentSubstateCount;
+
+            for (int i = parentTotalSize - 1; i >= 0; i--) {
 
                 if (poolIndicies.Contains(i)) {
 
-                    if (i >= currentEventSubstateCount) {
-                        int aoIndex = i-currentEventSubstateCount;
+                    if (i >= parentSubstateCount) {
+                        int aoIndex = i-parentSubstateCount;
 
-                        EditorProp ao = curState[EventState.assetObjectsField][aoIndex];
-                        EditorProp newAO = targetState[EventState.assetObjectsField].AddNew();
+                        //Debug.Log(" moving " + aoIndex);
+                        EditorProp ao = parentAOs[aoIndex];
 
-                        Debug.Log("copying ao: " + AssetObjectEditor.GetName(ao));
-
-
-                        AssetObjectEditor.CopyAssetObject(
-                            targetState[EventState.assetObjectsField].AddNew(), ao
-                        );
-
-
-
-
-                        curState[EventState.assetObjectsField].DeleteAt(aoIndex);
-                    
-                    
+                        //Debug.Log("copying to new state");
+                        EditorProp newAO = targetAOs.AddNew();
+                        AssetObjectEditor.CopyAssetObject(newAO, ao);
+                        
+                        //Debug.Log("deleting original");
+                        parentAOs.DeleteAt(aoIndex);
+        
                     }
-                    //else {
-                    //    curState[EventState.subStatesField].DeleteAt(i);
-                    //}
-
-                    //AOList.DeleteAt(i);
+                    else {
+                        int stateIndex = i;
+                        Debug.Log("moving an event state to sustate");
+                        //curState[EventState.subStatesField].DeleteAt(i);
+                    }
                 }
             }
-            return true;
-            
         }
-        bool DeleteSelectionFromList () {        
+
+
+        bool DeleteSelectionFromList (EditorProp eventState) {        
             Debug.Log("deleting selection from list");    
             HashSet<int> deleteIndicies = selectionSystem.GetPoolIndiciesInSelection();
+            Debug.Log( deleteIndicies.Count);
+            
             if (deleteIndicies.Count == 0) return false;
 
+            int currentEventSubstateCount = eventState[EventState.subStatesField].arraySize;
+            int currentEventTotalSize = eventState[EventState.assetObjectsField].arraySize + currentEventSubstateCount;
 
-            EditorProp curEventState;
-            GetCurrentAndParentStates(out _, out curEventState);
-            int currentEventSubstateCount = curEventState[EventState.subStatesField].arraySize;
-            int currentEventTotalSize = curEventState[EventState.assetObjectsField].arraySize + currentEventSubstateCount;
-            
+            Debug.Log(currentEventSubstateCount + " / " + deleteIndicies.Count);
 
-
-
+            int deleteOption = -1;
             for (int i = currentEventTotalSize - 1; i >= 0; i--) {
                 if (deleteIndicies.Contains(i)) {
 
                     if (i >= currentEventSubstateCount) {
-                        curEventState[EventState.assetObjectsField].DeleteAt(i - currentEventSubstateCount);
+                                                Debug.Log("Deleting ao");
+
+                        eventState[EventState.assetObjectsField].DeleteAt(i - currentEventSubstateCount);
                     }
                     else {
-                        curEventState[EventState.subStatesField].DeleteAt(i);
+
+                        Debug.Log("Deleting events state");
+
+
+
+                        bool deletedState = DeleteState(baseEventState, eventState, eventState[EventState.subStatesField][i], ref deleteOption);
+
+                        //eventState[EventState.subStatesField].DeleteAt(i);
+
                     }
 
-                    //AOList.DeleteAt(i);
                 }
             }
             
-
-            //for (int i = AOList.arraySize - 1; i >= 0; i--) {
-            //    if (deleteIndicies.Contains(i)) AOList.DeleteAt(i);
-            //}
             return true;
         }
      
@@ -885,16 +659,12 @@ if (deletedState) {
 
             HashSet<int> idsInSelection = selectionSystem.GetIDsInSelection(false, out _);
 
-            
             Object[] rootAssets = new Object[idsInSelection.Count].Generate(idsInSelection, id => AssetDatabase.LoadAssetAtPath(objectsDirectory + id2path[id], typeof(Object)));
 
             Animations.EditImportSettings.CreateWizard(rootAssets);
         }
         
         bool removeOrAdd;
-        
-
-
 
         void RebuildPreviewEditor () {
             if (preview != null) Editor.DestroyImmediate(preview);

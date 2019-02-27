@@ -290,6 +290,8 @@ namespace AssetObjectsPacks {
         }
         public static bool EndCustomEditor (EditorProp editor) {
             EditorGUILayout.EndVertical();
+
+            
             if (EditorGUI.EndChangeCheck() || editor.IsChanged()) {     
                 editor.SaveObject();
                 return true;
@@ -307,7 +309,7 @@ namespace AssetObjectsPacks {
         }
 
 
-        public static bool Button (GUIContent c, GUIStyle s, Color32 color, Color32 text_color, GUILayoutOption[] options) {
+        public static bool Button (GUIContent c, GUIStyle s, Color32 color, Color32 text_color, params GUILayoutOption[] options) {
             bool r = false;
             bool origRT = s.richText;
             s.richText = true;
@@ -323,12 +325,17 @@ namespace AssetObjectsPacks {
             s.richText = origRT;
             return r;
         }
+
+        public static bool Button(GUIContent c, GUIStyle s, params GUILayoutOption[] options) {
+            return Button(c, s, Colors.liteGray, Colors.black, options);
+        }
+
         /*
-        */
         
         public static bool Button (GUIContent c, GUIStyle s, Color32 color, Color32 text_color, GUILayoutOption option) {
             return Button(c, s, color, text_color, new GUILayoutOption[] { option } );
         }
+        */
         public static bool ToggleButton (GUIContent c, bool fit_content, bool value, GUIStyle s, out bool changed) {
             changed = Button(c, fit_content, s, Colors.Toggle(value), Colors.black);
             return changed ? !value : value;

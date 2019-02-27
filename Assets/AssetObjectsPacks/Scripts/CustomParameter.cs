@@ -5,7 +5,16 @@ namespace AssetObjectsPacks {
         public enum ParamType { BoolValue = 0, FloatValue = 1, IntValue = 2, StringValue = 3, };
         
         public string name;
-        public ParamType paramType;
+        public ParamType paramType {
+            get {
+                return (ParamType) pType;
+            }
+            private set {
+                pType = (int)value;
+            }
+        }// = ParamType.BoolValue;
+
+        public int pType;
         
         public bool BoolValue;
         public float FloatValue;
