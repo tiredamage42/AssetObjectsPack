@@ -80,7 +80,7 @@ namespace AssetObjectsPacks {
 
         public static void GenerateNewIDs (string[] validPaths, string[] noIDs) {
             int l = noIDs.Length;
-            int[] newIDs = GenerateNewIDList(l, new HashSet<int>().Generate(validPaths.Length, i => GetObjectIDFromPath(validPaths[i]) ));
+            int[] newIDs = GenerateNewIDList(l, validPaths.Length.Generate(i => GetObjectIDFromPath(validPaths[i])).ToHashSet() );
             for (int i = 0; i < l; i++) {
                 string path = noIDs[i];
                 if (path.Contains(sIDKey)) {
@@ -94,44 +94,28 @@ namespace AssetObjectsPacks {
 
         static void GetAOIDs(EventState state, List<int> ids) {
             for (int i = 0; i < state.assetObjects.Length; i++) {
-
                 int id = state.assetObjects[i].id;
                 if (!ids.Contains(id)) ids.Add(id);
             }
-
             for (int i = 0; i < state.subStates.Length; i++) {
-                GetAOIDs(state, ids);
+                GetAOIDs(state.subStates[i], ids);
             }
-                    
-
-
-
-
         }
 
 
-        public static int[] GetAllUsedIDs (string packName) {
+        public static IEnumerable<int> GetAllUsedIDs (string packName) {
             List<int> used = new List<int>();
-            Event[] allEvents = EditorUtils.GetAllAssetsOfType<Event>();
-            int l = allEvents.Length;
-            for (int i = 0; i < l; i++) {
-                Event e = allEvents[i];
-                if (packManager.FindPackByID( e.assetObjectPackID, out _ ).name == packName) {    
-
+            IEnumerable<Event> allEvents = EditorUtils.GetAllAssetsOfType<Event>();
+            
+            foreach (var e in allEvents) {
+                if (packManager.FindPackByID( e.assetObjectPackID, out _ ).name == packName) {
                     GetAOIDs(e.baseState, used);
-
-
-/*
-                    int y = e.assetObjects.Length;
-                    for (int z = 0; z < y; z++) {
-                        int id = e.assetObjects[z].id;
-                        if (!used.Contains(id)) used.Add(id);
-                    }
-*/
                 }
             }
-            if (used.Count == 0) Debug.LogWarning("no IDs used for " + packName + " pack!");
-            return used.ToArray();
+            if (used.Count == 0) {
+                Debug.LogWarning("no IDs used for " + packName + " pack!");
+            }
+            return used;
         }
     }
 }

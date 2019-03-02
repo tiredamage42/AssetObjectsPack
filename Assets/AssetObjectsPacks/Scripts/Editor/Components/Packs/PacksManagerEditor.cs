@@ -25,7 +25,7 @@ namespace AssetObjectsPacks {
             Reinitialize();
         }
         void Reinitialize () {
-            PackEditor.GetErrorsAndWarnings(packs, (packs.arraySize > 0) ? packs[curPackI] : null, out errors, out warnings, out noIDsCount);
+            PackEditor.GetErrorsAndWarnings(packs, (packs.arraySize > 0 && curPackI > -1) ? packs[curPackI] : null, out errors, out warnings, out noIDsCount);
         }
         public override void OnInspectorGUI () {
             //base.OnInspectorGUI();

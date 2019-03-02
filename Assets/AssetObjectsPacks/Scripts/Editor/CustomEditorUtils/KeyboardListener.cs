@@ -17,6 +17,9 @@ namespace AssetObjectsPacks {
             }
         }
         public bool shift { get { return UnityEngine.Event.current.shift; } }
+        public bool command { get { return UnityEngine.Event.current.command; } }
+        public bool ctrl { get { return UnityEngine.Event.current.control; } }
+        
         Dictionary<KeyCode, bool> listenCodes = new Dictionary<KeyCode, bool>();
     }
 }

@@ -1,0 +1,4509 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1284b611740a6448d90c4ebacf05b26a, type: 3}
+  m_Name: Moves
+  m_EditorClassIdentifier: 
+  multi_edit_instance:
+    isCopy: 0
+    objRef: {fileID: 0}
+    id: 0
+    parameters:
+    - name: Duration
+      pType: 1
+      BoolValue: 0
+      FloatValue: -1
+      IntValue: 0
+      StringValue: 
+    - name: Speed
+      pType: 1
+      BoolValue: 0
+      FloatValue: 1
+      IntValue: 0
+      StringValue: 
+    - name: Mirror
+      pType: 2
+      BoolValue: 0
+      FloatValue: 1
+      IntValue: 0
+      StringValue: 
+    - name: Looped
+      pType: 0
+      BoolValue: 1
+      FloatValue: 1
+      IntValue: 0
+      StringValue: 
+    - name: Transition
+      pType: 1
+      BoolValue: 0
+      FloatValue: 0.25
+      IntValue: 0
+      StringValue: 
+  hiddenIDs: 
+  baseState:
+    isNew: 0
+    name: Base State
+    conditionBlock: 
+    assetObjects: []
+    subStates:
+    - isNew: 0
+      name: Crouch
+      conditionBlock: Stance:1
+      assetObjects: []
+      subStates:
+      - isNew: 0
+        name: Walk
+        conditionBlock: Speed:1
+        assetObjects: []
+        subStates:
+        - isNew: 0
+          name: Fwd
+          conditionBlock: Direction:0
+          assetObjects:
+          - isCopy: 0
+            objRef: {fileID: 7400002, guid: 71190ea7cb3064f7eaa9ea30fbf202f6, type: 3}
+            id: 4919
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 7400002, guid: fa7a315d007f345c2b32de7dea78adc8, type: 3}
+            id: 5122
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 7400002, guid: 73b2a42a7b089433b959f3966971c5d7, type: 3}
+            id: 5121
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 7400002, guid: 9ce7a9279098b4d15a8822943331e979, type: 3}
+            id: 5119
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 7400002, guid: 246271191220b4b5798889388069554f, type: 3}
+            id: 5118
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 7400002, guid: 1e8217e21cd30410e8368137208e10b8, type: 3}
+            id: 4367
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 7400002, guid: 6743a993b93b7458d9a1f7c8d9df7dd1, type: 3}
+            id: 4366
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 7400002, guid: f74f6662e1f42400aafa0ab270a77a17, type: 3}
+            id: 4370
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 7400002, guid: f7a46227c82f34a2d87f2b8c77b366d0, type: 3}
+            id: 4369
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 7400002, guid: 6cbfd5edeece9446386cfd7daa171a3f, type: 3}
+            id: 213
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 7400002, guid: 4c224a171836c48d39a870b2c7aa1c0b, type: 3}
+            id: 212
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 7400002, guid: b122b223243b6446eb8785a23c2e623a, type: 3}
+            id: 211
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 7400002, guid: aa6aa240e1dfe477d9c66e1661b0e1ba, type: 3}
+            id: 210
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 7400002, guid: c338df2f7a7c141bf85f94a692789d09, type: 3}
+            id: 209
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 7400002, guid: 7c6523ccc1e744420aa72f8ba5ce0f5b, type: 3}
+            id: 208
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          subStates: []
+        - isNew: 0
+          name: Left
+          conditionBlock: Direction:1
+          assetObjects:
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 715
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 2935
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 2934
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 2933
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 860
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 859
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 858
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          subStates: []
+        - isNew: 0
+          name: Right
+          conditionBlock: Direction:2
+          assetObjects:
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 5134
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 5133
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 5132
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 2139
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 714
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 851
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 850
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 849
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          subStates: []
+      - isNew: 0
+        name: Run
+        conditionBlock: Speed:2
+        assetObjects: []
+        subStates:
+        - isNew: 0
+          name: Fwd
+          conditionBlock: Direction:0
+          assetObjects:
+          - isCopy: 0
+            objRef: {fileID: 7400002, guid: a9178ab21df184dd288d153e0658e4e4, type: 3}
+            id: 713
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 7400002, guid: c3593e71a547e4486a01916542063093, type: 3}
+            id: 4373
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 7400002, guid: 63786ac351fb840b585dac6fa1ce1e3c, type: 3}
+            id: 4372
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 7400002, guid: 8e2018621a2844e55a5b9e92b0bc2bad, type: 3}
+            id: 5123
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 7400002, guid: c25d750cb4f694d65b1bd2160a2d2bd1, type: 3}
+            id: 5120
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 7400002, guid: 94088a88a4a2c42038c4046fa8883f5c, type: 3}
+            id: 4597
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          subStates: []
+        - isNew: 0
+          name: Left
+          conditionBlock: Direction:1
+          assetObjects:
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 2950
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 2949
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 2948
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          subStates: []
+        - isNew: 0
+          name: Right
+          conditionBlock: Direction:2
+          assetObjects:
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 174
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 173
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 172
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 7480
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 7479
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 7478
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          subStates: []
+    - isNew: 0
+      name: Stand
+      conditionBlock: Stance:0
+      assetObjects: []
+      subStates:
+      - isNew: 0
+        name: Walk
+        conditionBlock: Speed:1
+        assetObjects: []
+        subStates:
+        - isNew: 0
+          name: Forward
+          conditionBlock: Direction:0
+          assetObjects: []
+          subStates:
+          - isNew: 0
+            name: Passive
+            conditionBlock: Agitated:false
+            assetObjects:
+            - isCopy: 0
+              objRef: {fileID: 7400002, guid: a04e96f121e7741119e6b2d530b794d8, type: 3}
+              id: 7718
+              parameters:
+              - name: Duration
+                pType: 1
+                BoolValue: 0
+                FloatValue: -1
+                IntValue: 0
+                StringValue: 
+              - name: Speed
+                pType: 1
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Mirror
+                pType: 2
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Looped
+                pType: 0
+                BoolValue: 1
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Transition
+                pType: 1
+                BoolValue: 1
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+            - isCopy: 0
+              objRef: {fileID: 7400002, guid: 3c81236698dbc4ff7b5f5f51b97538a2, type: 3}
+              id: 7684
+              parameters:
+              - name: Duration
+                pType: 1
+                BoolValue: 0
+                FloatValue: -1
+                IntValue: 0
+                StringValue: 
+              - name: Speed
+                pType: 1
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Mirror
+                pType: 2
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Looped
+                pType: 0
+                BoolValue: 1
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Transition
+                pType: 1
+                BoolValue: 1
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+            - isCopy: 0
+              objRef: {fileID: 7400002, guid: 1e12acf6aa7564ab183c7435d5dead48, type: 3}
+              id: 6378
+              parameters:
+              - name: Duration
+                pType: 1
+                BoolValue: 0
+                FloatValue: -1
+                IntValue: 0
+                StringValue: 
+              - name: Speed
+                pType: 1
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Mirror
+                pType: 2
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Looped
+                pType: 0
+                BoolValue: 1
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Transition
+                pType: 1
+                BoolValue: 1
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+            subStates: []
+          - isNew: 0
+            name: Agitated
+            conditionBlock: Agitated:true
+            assetObjects:
+            - isCopy: 0
+              objRef: {fileID: 7400002, guid: 940f72a50d9ed40d3b5fcd2bb5d4ebfd, type: 3}
+              id: 5126
+              parameters:
+              - name: Duration
+                pType: 1
+                BoolValue: 0
+                FloatValue: -1
+                IntValue: 0
+                StringValue: 
+              - name: Speed
+                pType: 1
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Mirror
+                pType: 2
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Looped
+                pType: 0
+                BoolValue: 1
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Transition
+                pType: 1
+                BoolValue: 1
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+            - isCopy: 0
+              objRef: {fileID: 7400002, guid: 7a869bafa3ada46d79237fcf6507db83, type: 3}
+              id: 5125
+              parameters:
+              - name: Duration
+                pType: 1
+                BoolValue: 0
+                FloatValue: -1
+                IntValue: 0
+                StringValue: 
+              - name: Speed
+                pType: 1
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Mirror
+                pType: 2
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Looped
+                pType: 0
+                BoolValue: 1
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Transition
+                pType: 1
+                BoolValue: 1
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+            - isCopy: 0
+              objRef: {fileID: 7400002, guid: a854814fb460944b09aa218ccbebf43b, type: 3}
+              id: 5124
+              parameters:
+              - name: Duration
+                pType: 1
+                BoolValue: 0
+                FloatValue: -1
+                IntValue: 0
+                StringValue: 
+              - name: Speed
+                pType: 1
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Mirror
+                pType: 2
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Looped
+                pType: 0
+                BoolValue: 1
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Transition
+                pType: 1
+                BoolValue: 1
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+            - isCopy: 0
+              objRef: {fileID: 7400002, guid: e0d0da89edc3f443d8a5a90be2e799f6, type: 3}
+              id: 4371
+              parameters:
+              - name: Duration
+                pType: 1
+                BoolValue: 0
+                FloatValue: -1
+                IntValue: 0
+                StringValue: 
+              - name: Speed
+                pType: 1
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Mirror
+                pType: 2
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Looped
+                pType: 0
+                BoolValue: 1
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Transition
+                pType: 1
+                BoolValue: 1
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+            - isCopy: 0
+              objRef: {fileID: 7400002, guid: d75d3b755e60747b4a2f7c600ff47034, type: 3}
+              id: 4368
+              parameters:
+              - name: Duration
+                pType: 1
+                BoolValue: 0
+                FloatValue: -1
+                IntValue: 0
+                StringValue: 
+              - name: Speed
+                pType: 1
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Mirror
+                pType: 2
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Looped
+                pType: 0
+                BoolValue: 1
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Transition
+                pType: 1
+                BoolValue: 1
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+            - isCopy: 0
+              objRef: {fileID: 7400002, guid: 389c890903b4a4916a6b4682ccedca2a, type: 3}
+              id: 4365
+              parameters:
+              - name: Duration
+                pType: 1
+                BoolValue: 0
+                FloatValue: -1
+                IntValue: 0
+                StringValue: 
+              - name: Speed
+                pType: 1
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Mirror
+                pType: 2
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Looped
+                pType: 0
+                BoolValue: 1
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Transition
+                pType: 1
+                BoolValue: 1
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+            - isCopy: 0
+              objRef: {fileID: 7400002, guid: aa9992f75cffe4f8492ba80135e3cf10, type: 3}
+              id: 216
+              parameters:
+              - name: Duration
+                pType: 1
+                BoolValue: 0
+                FloatValue: -1
+                IntValue: 0
+                StringValue: 
+              - name: Speed
+                pType: 1
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Mirror
+                pType: 2
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Looped
+                pType: 0
+                BoolValue: 1
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Transition
+                pType: 1
+                BoolValue: 1
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+            - isCopy: 0
+              objRef: {fileID: 7400002, guid: c02d64791b38343f0ad2e55e32e80498, type: 3}
+              id: 215
+              parameters:
+              - name: Duration
+                pType: 1
+                BoolValue: 0
+                FloatValue: -1
+                IntValue: 0
+                StringValue: 
+              - name: Speed
+                pType: 1
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Mirror
+                pType: 2
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Looped
+                pType: 0
+                BoolValue: 1
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Transition
+                pType: 1
+                BoolValue: 1
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+            - isCopy: 0
+              objRef: {fileID: 7400002, guid: a794b129f172048a5b4e83961791d372, type: 3}
+              id: 214
+              parameters:
+              - name: Duration
+                pType: 1
+                BoolValue: 0
+                FloatValue: -1
+                IntValue: 0
+                StringValue: 
+              - name: Speed
+                pType: 1
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Mirror
+                pType: 2
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Looped
+                pType: 0
+                BoolValue: 1
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Transition
+                pType: 1
+                BoolValue: 1
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+            - isCopy: 0
+              objRef: {fileID: 7400002, guid: 4f1ee9d975ada47d1b7135393889f54e, type: 3}
+              id: 705
+              parameters:
+              - name: Duration
+                pType: 1
+                BoolValue: 0
+                FloatValue: -1
+                IntValue: 0
+                StringValue: 
+              - name: Speed
+                pType: 1
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Mirror
+                pType: 2
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Looped
+                pType: 0
+                BoolValue: 1
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Transition
+                pType: 1
+                BoolValue: 1
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+            subStates: []
+        - isNew: 0
+          name: Left
+          conditionBlock: Direction:1
+          assetObjects:
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 709
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 2941
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 2940
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 2939
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 2938
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 2937
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 2936
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 861
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 862
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 863
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 864
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 865
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 866
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          subStates: []
+        - isNew: 0
+          name: Right
+          conditionBlock: Direction:2
+          assetObjects:
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 5140
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 5139
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 5138
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 5137
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 5136
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 5135
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 708
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 857
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 856
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 855
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 854
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 853
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 852
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          subStates: []
+      - isNew: 0
+        name: Run
+        conditionBlock: Speed:2
+        assetObjects: []
+        subStates:
+        - isNew: 0
+          name: Fwd
+          conditionBlock: Direction:0
+          assetObjects:
+          - isCopy: 0
+            objRef: {fileID: 7400002, guid: 6dd90c4998ea84a639c43d5ad303d47f, type: 3}
+            id: 1591
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 7400002, guid: 9929e8dac2533412b9e89b4182d68d7a, type: 3}
+            id: 171
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 7400002, guid: 32a196fb175794080b2f48b15a7efc97, type: 3}
+            id: 170
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 7400002, guid: b9ed259c66d4a4470a7ee5853b802aeb, type: 3}
+            id: 169
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 7400002, guid: 198389420f86b42da92b0eba2572f3ab, type: 3}
+            id: 168
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 7400002, guid: 68604c45bda934ae485341e83229f836, type: 3}
+            id: 167
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 7400002, guid: 7dd52f86f2fc847f1beda9ac36415857, type: 3}
+            id: 166
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 7400002, guid: f2b56af542eeb40d18cdddeafe3c6e7c, type: 3}
+            id: 165
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 7400002, guid: 49efda749a6924cc9b30e0ff71c7db76, type: 3}
+            id: 164
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 7400002, guid: 9beeb51aebc86426a88a1c365b094ab9, type: 3}
+            id: 163
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 7400002, guid: e69ae5bff8feb4bad98fe531bd01001a, type: 3}
+            id: 7683
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 7400002, guid: af8cc54970e3e4d45886403ed8563b8b, type: 3}
+            id: 696
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 7400002, guid: 9ce826367d7a14743ae712ec4b6c37dc, type: 3}
+            id: 297
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          subStates: []
+        - isNew: 0
+          name: Left
+          conditionBlock: Direction:1
+          assetObjects:
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 701
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 302
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 2956
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 2955
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 2954
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 2953
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 2952
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 2951
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 225
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 224
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 223
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 222
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 221
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 220
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 219
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 218
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 217
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          subStates: []
+        - isNew: 0
+          name: Right
+          conditionBlock: Direction:2
+          assetObjects:
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 700
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 303
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 180
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 179
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 178
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 7481
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 7482
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 7483
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 175
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 176
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 177
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 1
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 7486
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 7485
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            objRef: {fileID: 0}
+            id: 7484
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 1
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+          subStates: []
+  assetObjectPackID: 0

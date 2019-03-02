@@ -1,21 +1,13 @@
 ﻿using UnityEngine;
 namespace AssetObjectsPacks {
     [System.Serializable] public class CustomParameter {
-
         public enum ParamType { BoolValue = 0, FloatValue = 1, IntValue = 2, StringValue = 3, };
-        
         public string name;
         public ParamType paramType {
-            get {
-                return (ParamType) pType;
-            }
-            private set {
-                pType = (int)value;
-            }
-        }// = ParamType.BoolValue;
-
+            get { return (ParamType) pType; }
+            private set { pType = (int)value; }
+        }
         public int pType;
-        
         public bool BoolValue;
         public float FloatValue;
         public int IntValue;
@@ -41,7 +33,6 @@ namespace AssetObjectsPacks {
             this.name = name;
             this.StringValue = value;
         }
-
 
         bool CheckCompatibleSet (ParamType trying) {
             if (paramType != trying) {
@@ -69,27 +60,35 @@ namespace AssetObjectsPacks {
         }
 
         public bool MatchesParameter(string[] paramStringSplit) {
-            if (paramStringSplit[1] != name) {
-                Debug.LogWarning("Name Mismatch! " + paramStringSplit[1] + " / " + name);
+            string pName = paramStringSplit[0];
+            string pVals = paramStringSplit[1];
+
+            if (pName != name) {
+                Debug.LogWarning("Name Mismatch! " + pName + " / " + name);
                 return false;
             }
-            
-            
-            switch ( paramStringSplit[0].ToLower() ) {
-                case "b":
-                return bool.Parse(paramStringSplit[2]) == BoolValue;
-                case "i":
-                return int.Parse(paramStringSplit[2]) == IntValue;
-                case "f":
-                return float.Parse(paramStringSplit[2]) == FloatValue;
-                case "s":
-                return paramStringSplit[2] == StringValue;
-            }
-            return true;
+            switch ( paramType ) {
+                case ParamType.IntValue:
                 
-                
-        }
+                    if (pVals.StartsWith("<")) return IntValue < int.Parse(pVals.Substring(1));
+                    else if (pVals.StartsWith(">")) return IntValue > int.Parse(pVals.Substring(1));
+                    return IntValue == int.Parse(pVals);
 
+                case ParamType.FloatValue:
+
+                    if (pVals.StartsWith("<")) return FloatValue < float.Parse(pVals.Substring(1));
+                    else if (pVals.StartsWith(">")) return FloatValue > float.Parse(pVals.Substring(1));                    
+                    return FloatValue == float.Parse(pVals);
+
+                case ParamType.BoolValue:
+                    return bool.Parse(pVals) == BoolValue;
+
+                case ParamType.StringValue:
+                    return pVals == StringValue;
+            }
+            return true; 
+        }
+/*
         public bool MatchesParameter (CustomParameter other_parameter) {
             if (other_parameter.name != name) {
                 Debug.LogWarning("Name Mismatch! " + other_parameter.name + " / " + name);
@@ -104,5 +103,6 @@ namespace AssetObjectsPacks {
             }
             return true;
         }
+ */
     }
 }

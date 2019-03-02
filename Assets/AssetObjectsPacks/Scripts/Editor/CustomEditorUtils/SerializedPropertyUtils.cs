@@ -9,6 +9,10 @@ namespace AssetObjectsPacks {
         public SerializedProperty prop;
         SerializedObject obj;
         bool _wasChanged;
+
+        public void SetChanged () {
+            _wasChanged = true;
+        }
         Dictionary<string, EditorProp> name2Prop = new Dictionary<string, EditorProp>();
 
         public void ResetChanged () {
@@ -31,7 +35,6 @@ namespace AssetObjectsPacks {
         public EditorProp (SerializedProperty prop) {
             this.prop = prop;
             editorPropType = prop.isArray && prop.propertyType != SerializedPropertyType.String ? EditorPropType.Array : EditorPropType.Property;
-            //Debug.Log(editorPropType);
             if (editorPropType == EditorPropType.Array) RebuildArray(); 
         }
         public EditorProp (SerializedObject obj) {
@@ -48,18 +51,14 @@ namespace AssetObjectsPacks {
         }
         public void SaveObject () {
             if (!CheckEditorPropType(EditorPropType.SO)) return;
-            EditorUtility.SetDirty(obj.targetObject);
             obj.ApplyModifiedProperties();
+            EditorUtility.SetDirty(obj.targetObject);
             ResetChanged();
         }
 
         //get property/relative
         public EditorProp this [string name] {
             get {
-                //if (editorPropType == EditorPropType.Array) {
-                //    Debug.LogError (prop.displayName + " is an array type, use integer indexing");
-                //    return null;
-                //}
                 EditorProp customProp;
                 if (!name2Prop.TryGetValue(name, out customProp)) {
                     customProp = new EditorProp ( editorPropType == EditorPropType.SO ? obj.FindProperty ( name ) : prop.FindPropertyRelative ( name ) );
@@ -89,7 +88,7 @@ namespace AssetObjectsPacks {
                 return true;
             }
             void RebuildArray () {
-                arrayElements = new List<EditorProp>().Generate(arraySize, i => new EditorProp( prop.GetArrayElementAtIndex(i) ) );
+                arrayElements = arraySize.Generate(i => new EditorProp( prop.GetArrayElementAtIndex(i) ) ).ToList();
             }
             public bool ContainsElementsWithDuplicateNames (out string duplicateName, string checkNameField="name") {
                 duplicateName = string.Empty;
@@ -119,37 +118,58 @@ namespace AssetObjectsPacks {
                 }
                 return true;
             }
+
+
+            string UniqueName (string prefix, string nameField) {
+                if (prefix == null) return null;
+                
+                string origName = prefix;
+                string new_name = origName;
+                int trying = 0;
+                while (!NameUnique(new_name, nameField) && trying <= 999 ) {
+                    new_name = origName + " " + trying.ToString();
+                    trying ++;
+                }
+                return new_name;
+            }
+            public EditorProp InsertAtIndex (int i, string uniqueNamePrefix = null, string nameField = "name") {
+                if (!CheckForArray(true)) return null;
+                
+                string new_name = UniqueName(uniqueNamePrefix, nameField);
+                
+                
+                prop.InsertArrayElementAtIndex(i);
+/*
+                EditorProp newElement = new EditorProp( prop.GetArrayElementAtIndex(i) );
+                
+                arrayElements.Insert(i, newElement);
+
+
+                Debug.Log("inserted at " + i);
+
+                //prop.MoveArrayElement();
+ */
+                RebuildArray();
+                if (new_name != null) {
+                    arrayElements[i][nameField].SetValue(new_name);
+                }
+                return arrayElements[i];
+                //return newElement;
+            }
+
         
 
 
             public EditorProp AddNew (string uniqueNamePrefix = null, string nameField = "name") {
-
-                //Debug.Log("checking");
                 if (!CheckForArray(true)) return null;
-
                 
-                //int newID = AssetObjectsEditor.GenerateNewIDList(1, new HashSet<int>().Generate( packs.arraySize, i => packs[i][idField].intValue ))[0];
-                string origName = uniqueNamePrefix;
-                string new_name = origName;
-                if (uniqueNamePrefix != null) {
-
-                    int trying = 0;
-                    while (!NameUnique(new_name, nameField) && trying <= 999 ) {
-                        new_name = origName + " " + trying.ToString();
-                        trying ++;
-                    }
-                }
+                string new_name = UniqueName(uniqueNamePrefix, nameField);
             
                 int l = prop.arraySize;
                 prop.InsertArrayElementAtIndex(l);
-                arrayElements.Add( new EditorProp( prop.GetArrayElementAtIndex(l) ) );
-                EditorProp newElement = arrayElements.Last();
-
-                if (uniqueNamePrefix != null) {
-                    newElement[nameField].SetValue(new_name);
-                }
-
-
+                EditorProp newElement = new EditorProp( prop.GetArrayElementAtIndex(l) );
+                arrayElements.Add( newElement );
+                if (new_name != null) newElement[nameField].SetValue(new_name);
                 return newElement;
             }
             public void DeleteAt (int index) {
@@ -161,8 +181,6 @@ namespace AssetObjectsPacks {
 
         #region GETTERS_SETTERS
             #region GETTERS
-
-
                 public int intValue { get { 
                     if (!CheckEditorPropType(EditorPropType.Property)) return 0;
                     return prop.intValue;
@@ -190,7 +208,6 @@ namespace AssetObjectsPacks {
                 public Object objRefValue { get { 
                     if (!CheckEditorPropType(EditorPropType.Property)) return null;
                     return prop.objectReferenceValue;
-                    
                 } }
             #endregion
             #region SETTERS
@@ -221,6 +238,10 @@ namespace AssetObjectsPacks {
             #endregion
         #endregion
 
+
+        public void CopySubProps (EditorProp copy, IEnumerable<string> props) {
+            foreach (var p in props) this[p].CopyProp(copy[p]);
+        }
         public void CopyProp (EditorProp copy) {
             if (!CheckEditorPropType(EditorPropType.Property)) return;
 

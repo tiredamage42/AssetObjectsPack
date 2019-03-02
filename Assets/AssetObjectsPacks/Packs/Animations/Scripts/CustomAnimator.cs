@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
 namespace AssetObjectsPacks.Animations {
 
@@ -108,7 +109,7 @@ namespace AssetObjectsPacks.Animations {
 
             in htis case, when the animation is done
         */
-        System.Action endEvent;
+        List<System.Action> endEvents;
 
 
         /*
@@ -121,8 +122,11 @@ namespace AssetObjectsPacks.Animations {
             in this case, this component tracks when the animator is exiting an animation
             that has been played
         */
-        void UseAssetObject(AssetObject assetObject, System.Action endEvent) {
-            this.endEvent = endEvent;
+        void UseAssetObject(AssetObject assetObject, List<System.Action> endEvents) {
+            if (this.endEvents != null) {
+                this.endEvents.Clear();
+            }
+            this.endEvents = endEvents;
 
             //get asset object parameter values
             int animID = assetObject.id;
@@ -137,9 +141,12 @@ namespace AssetObjectsPacks.Animations {
 
         // let the player know the event is done if this component is keeping track of that
         void TriggerEndEvent () {
-            if (endEvent == null) return;
-            endEvent();
-            endEvent = null;
+            foreach (var endEvent in endEvents) {
+                endEvent();    
+            }
+            //if (endEvent == null) return;
+            //endEvent();
+            //endEvent = null;
         }
         
 

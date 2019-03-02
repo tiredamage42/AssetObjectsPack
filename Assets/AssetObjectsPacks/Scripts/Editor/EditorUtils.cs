@@ -51,7 +51,7 @@ namespace AssetObjectsPacks {
             return null;
         }
 
-        public static T[] GetAllAssetsOfType<T> () where T : Object {
+        public static IEnumerable<T> GetAllAssetsOfType<T> () where T : Object {
             string nm = typeof(T).Name;
             string[] guids = AssetDatabase.FindAssets("t:"+ nm);  
             int l = guids.Length;
@@ -59,7 +59,7 @@ namespace AssetObjectsPacks {
                 Debug.LogWarning("No " + nm + " Objects Found");
                 return null;
             }
-            return new T[l].Generate( i => AssetDatabase.LoadAssetAtPath<T>(AssetDatabase.GUIDToAssetPath(guids[i])) );
+            return l.Generate(i => AssetDatabase.LoadAssetAtPath<T>(AssetDatabase.GUIDToAssetPath(guids[i])));
         }
 
         public static string RemoveDirectory (string path) {

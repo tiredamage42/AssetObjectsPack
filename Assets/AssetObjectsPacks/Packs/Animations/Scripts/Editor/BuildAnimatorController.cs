@@ -2,6 +2,7 @@
 using UnityEditor.Animations;
 using UnityEditor;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace AssetObjectsPacks.Animations {
     struct ClipIDPair {
@@ -55,8 +56,8 @@ namespace AssetObjectsPacks.Animations {
 
             //filter out unused file paths
             if (usedOnly) {
-                int[] used_ids = AssetObjectsEditor.GetAllUsedIDs(animationsPackName);
-                if (used_ids.Length == 0) return;
+                IEnumerable<int> used_ids = AssetObjectsEditor.GetAllUsedIDs(animationsPackName);
+                if (used_ids.Count() == 0) return;
                 allPaths = allPaths.Where(f => used_ids.Contains(AssetObjectsEditor.GetObjectIDFromPath(f))).ToArray();
             } 
             

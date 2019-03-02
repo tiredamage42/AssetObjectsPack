@@ -13,43 +13,45 @@ MonoBehaviour:
   m_Name: 90l
   m_EditorClassIdentifier: 
   multi_edit_instance:
+    isCopy: 0
     objRef: {fileID: 0}
     id: 0
     parameters:
     - name: Duration
-      paramType: 1
-      BoolValue: 0
-      FloatValue: -1
-      IntValue: 0
-      StringValue: 
-    - name: Mirror
-      paramType: 2
+      pType: 1
       BoolValue: 0
       FloatValue: -1
       IntValue: 0
       StringValue: 
     - name: Speed
-      paramType: 1
+      pType: 1
+      BoolValue: 0
+      FloatValue: 1
+      IntValue: 0
+      StringValue: 
+    - name: Mirror
+      pType: 2
       BoolValue: 0
       FloatValue: 1
       IntValue: 0
       StringValue: 
     - name: Looped
-      paramType: 0
+      pType: 0
       BoolValue: 0
       FloatValue: 1
       IntValue: 0
       StringValue: 
     - name: Transition
-      paramType: 1
+      pType: 1
       BoolValue: 0
       FloatValue: 0.25
       IntValue: 0
       StringValue: 
   hiddenIDs: 
   baseState:
+    isNew: 0
+    name: Base State
     conditionBlock: 
-    subStates: []
     assetObjects: []
-    name: 
+    subStates: []
   assetObjectPackID: 0

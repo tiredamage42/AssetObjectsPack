@@ -33,7 +33,6 @@ namespace AssetObjectsPacks {
             return baseStyles[i];
         }
         public static GUIStyle box { get { return ReturnOrBuild(8, GUI.skin.box); } }
-        
         public static GUIStyle toolbarButton { get { return ReturnOrBuild(0, EditorStyles.toolbarButton); } }
         public static GUIStyle label { get { return ReturnOrBuild(1, EditorStyles.label); } }
         public static GUIStyle helpBox { get { return ReturnOrBuild(2, EditorStyles.helpBox); } }
@@ -45,135 +44,160 @@ namespace AssetObjectsPacks {
 
     }
     public static class GUIUtils {      
-          
-        public static void DrawProp (EditorProp prop) {
-            DoWithinColor(
-                EditorStyles.label, Colors.liteGray, () => 
-                EditorGUILayout.PropertyField(prop.prop)
-            );
-        }
-        public static void DrawProp (EditorProp prop, GUIContent content) {
-            DoWithinColor(
-                EditorStyles.label, Colors.liteGray, () => 
-            
-            EditorGUILayout.PropertyField(prop.prop, content)            );
 
-        }        
-        /*
-        public static void DrawProp (EditorProp prop, GUIContent content, GUILayoutOption[] options) {
-            DoWithinColor(
-                EditorStyles.label, Colors.liteGray, () => 
-            
-            EditorGUILayout.PropertyField(prop.prop, content, options)            );
-
-        }
-        */
-        public static void DrawProp (EditorProp prop, GUIContent content, GUILayoutOption options) {
-            DoWithinColor(
-                EditorStyles.label, Colors.liteGray, () => 
-            
-            EditorGUILayout.PropertyField(prop.prop, content, options)            );
-
-        }
-        const string sArraySize = "Array.size";
-        static bool showArray;
-        public static void DrawArrayProp (EditorProp array) {
-
-
-            
-            
-            DoWithinColor(
-                EditorStyles.foldout, Colors.liteGray, () => 
         
-            showArray = EditorGUILayout.Foldout(showArray, array.prop.displayName, true)
+        public static void DrawProp (EditorProp prop, params GUILayoutOption[] options) {
+            EditorGUILayout.PropertyField(prop.prop, GUIContent.none, options);
+        }
+        public static void DrawProp (EditorProp prop, GUIContent gui, params GUILayoutOption[] options) {
+            EditorGUILayout.BeginHorizontal();
+            Label(gui, options);
+            DrawProp(prop);
+            EditorGUILayout.EndHorizontal();
+        }
+        
+        static bool showArray;
+        public static void DrawObjArrayProp (EditorProp array) {
 
-
-            );
-
-            
-
+            //label and show
+            EditorGUILayout.BeginHorizontal();
+            showArray = SmallToggleButton(GUIContent.none, showArray, out _);
+            Label(new GUIContent(string.Format("<b>{0}</b>", array.prop.displayName)));
+            EditorGUILayout.EndHorizontal();
 
             if (showArray) {
+                //EditorGUI.indentLevel++;
+                BeginIndent();
 
-            EditorGUI.indentLevel++;
+                //Space();
 
-
+                //size of array
                 EditorGUILayout.BeginHorizontal();
-                Label(new GUIContent("Size:"), false);
-                int c = array.arraySize;// array[sArraySize].intValue;
+                Label(new GUIContent("Size:"), true);
+                int c = array.arraySize;
                 int newVal = EditorGUILayout.DelayedIntField(c);
                 if (newVal != c) {
-
                     if (newVal < c) {
-
-                        //int d = c - newVal;
-
                         for (int i = c-1; i >= newVal; i--) {
+                            if (array[i].objRefValue != null) array.DeleteAt(i);
                             array.DeleteAt(i);
                         }
                     }
                     else {
-                        for (int i = 0; i < newVal - c; i++) {
-                            array.AddNew();
-                        }
+                        for (int i = 0; i < newVal - c; i++) array.AddNew();
                     }
-
                 }
-                
                 EditorGUILayout.EndHorizontal();
-                
-                //DrawProp(array[sArraySize]);
-                //Debug.Log(c);
-                //Debug.Log(array[sArraySize].intValue);
-                
-                for (int i = 0; i < newVal; i++) DrawProp (array[i]);
-            EditorGUI.indentLevel--;
-            }
-        }
-        public static bool DrawTextProp (EditorProp prop, GUIContent content, GUILayoutOption option, bool delayed) {
-            EditorGUILayout.BeginHorizontal();
-            Label(content, option);
-            bool changed = DrawTextProp(prop, delayed);
-            EditorGUILayout.EndHorizontal();
-            return changed;
-        }
-        public static bool DrawTextProp (EditorProp prop, GUIContent content, bool fitContent, bool delayed) {
-            EditorGUILayout.BeginHorizontal();
-            Label(content, fitContent);
-            bool changed = DrawTextProp(prop, delayed);
-            EditorGUILayout.EndHorizontal();
-            return changed;
-        }
-        
-        public static bool DrawTextProp (EditorProp prop, bool delayed) {
-            return DrawTextProp(prop, GUILayout.ExpandWidth(true), delayed);
-        }   
-        public static bool DrawTextProp (EditorProp prop, GUIContent content, bool delayed) {
-            return DrawTextProp(prop, content, GUILayout.ExpandWidth(true), delayed);
-        }   
-        
-        public static bool DrawTextProp (EditorProp prop, GUILayoutOption option, bool delayed) {
-            string old_val = prop.stringValue;
-            string new_val;
-            if (delayed) {
-                new_val = EditorGUILayout.DelayedTextField(blank_content, old_val, option);
-            }
-            else {
-                new_val = EditorGUILayout.TextField(blank_content, old_val, option);
-            }
 
-            bool changed = new_val != old_val;
+                Space();
+
+                BeginIndent();
+
+
+                //array elements
+                for (int i = 0; i < newVal; i++) {
+                    DrawProp (array[i], new GUIContent("Element " + i + ":"), GUILayout.Width(64));
+                }
+                //EditorGUI.indentLevel--;
+                
+                EndIndent();
+                
+                EndIndent();
+            }
+        }
+        public static bool DrawTextProp (EditorProp prop, GUIContent content, TextFieldType type, bool overrideHotKeys, params GUILayoutOption[] options) {
+            EditorGUILayout.BeginHorizontal();
+            Label(content, options);
+            bool changed = DrawTextProp(prop, type, overrideHotKeys);
+            EditorGUILayout.EndHorizontal();
+            return changed;
+        }
+        public static bool DrawTextProp (EditorProp prop, TextFieldType type, bool overrideHotKeys, params GUILayoutOption[] options) {
+            bool changed;
+            string new_val = DrawTextField(prop.stringValue, type, overrideHotKeys, out changed, options);            
             if (changed) prop.SetValue( new_val );
             return changed;
         }
+        public static void DrawMultiLineStringProp (EditorProp prop, GUIContent gui, bool overrideHotKeys, params GUILayoutOption[] options) {
+            Label(gui);
+            bool changed;
+            string new_val = DrawTextField(prop.stringValue, TextFieldType.Area, overrideHotKeys, out changed, options);            
+            if (changed) prop.SetValue( new_val );
+        }
+        public enum TextFieldType {
+            Normal, Delayed, Area
+        }
+        public static string DrawTextField (string value, TextFieldType type, bool overrideHotKeys, out bool changed, params GUILayoutOption[] options) {
+            if (overrideHotKeys) NameNextControl(overrideKeyboardControlName);
+            
+            string newVal = "";
+            switch(type) {
+                case TextFieldType.Normal:
+                    newVal = EditorGUILayout.TextField(value, options);
+                    break;
+                case TextFieldType.Delayed:
+                    newVal = EditorGUILayout.DelayedTextField(value, options);
+                    break;
+                case TextFieldType.Area:
+                    newVal = EditorGUILayout.TextArea(value, options);
+                    break;
+            }
+            if (overrideHotKeys) {
+                UnityEngine.Event e = UnityEngine.Event.current;
+                bool clicked = e.type == EventType.MouseDown && e.button == 0;         
+                if (clicked && GUILayoutUtility.GetLastRect().Contains(e.mousePosition)) {
+                    FocusOnTextArea("");
+                }   
+            }
+            changed = newVal != value;
+            return newVal;
+        }
 
-        public static string DrawDirectoryField (string value, GUIContent content, GUILayoutOption lblOption, bool forceProject=true) {
+        public static void FocusOnTextArea (string name) {
+            EditorGUI.FocusTextInControl(name);
+            GUI.FocusControl(name);
+        }
+        public static void NameNextControl(string name) {
+            GUI.SetNextControlName(name);
+        }
+  
+        const string overrideKeyboardControlName = "overrideKeyboard";
+        public static bool KeyboardOverriden () {
+            return GUI.GetNameOfFocusedControl() == overrideKeyboardControlName;
+        }
+        //public static void NextControlOverridesKeyboard () {
+            // Set the internal name of the textfield
+        //    GUI.SetNextControlName(overrideKeyboardControlName);
+        //}
+        //public static void CheckLoseFocusLastRect () {
+            //if clicked outside, lose focus
+        //    bool lastRectClicked;
+        //    if (ClickHappened(out lastRectClicked)) {
+        //        if (!lastRectClicked) EditorGUI.FocusTextInControl("");
+        //    }
+        //}
+        //static bool ClickHappened (out bool lastElementClicked) {
+        //    UnityEngine.Event e = UnityEngine.Event.current;
+        //    bool click_happened = e.type == EventType.MouseDown && e.button == 0;            
+        //    lastElementClicked = false;
+        //    if (click_happened) lastElementClicked = GUILayoutUtility.GetLastRect().Contains(e.mousePosition);
+        //    return click_happened;
+        //}
+
+
+
+
+
+        public static string DrawDirectoryField (string value, GUIContent content, bool forceProject=true, params GUILayoutOption[] options) {
             
             EditorGUILayout.BeginHorizontal();
-            Label(content, lblOption);
+            Label(content, options);
+
             GUI.enabled = false;
-            EditorGUILayout.TextField(blank_content, value);
+            EditorGUILayout.TextField(GUIContent.none, value);
             GUI.enabled = true;
+            
+            //change to folder icon
             if (SmallButton(new GUIContent ("D", "Select Directory"))) {
                 string dPath = Application.dataPath;
                 string path = EditorUtility.OpenFolderPanel("Choose Directory", dPath, "");
@@ -185,71 +209,62 @@ namespace AssetObjectsPacks {
                     else value = path + "/";
                 }
             }
-            if (SmallButton(new GUIContent ("X", "Clear"), Colors.red, Colors.white)) value = "";
+            //delete
+            if (SmallDeleteButton()) value = "";
             EditorGUILayout.EndHorizontal();
+            
             return value;
         }
-        public static void DrawDirectoryField (EditorProp prop, GUIContent content, GUILayoutOption lblOption, bool forceProject=true) {
-            string newVal = DrawDirectoryField(prop.stringValue, content, lblOption, forceProject);
-            if (prop.stringValue != newVal) prop.SetValue(newVal);
+        
+        public static void DrawDirectoryField (EditorProp prop, GUIContent content, bool forceProject=true, params GUILayoutOption[] options) {
+            string old = prop.stringValue;
+            string newVal = DrawDirectoryField(old, content, forceProject, options);
+            if (old != newVal) prop.SetValue(newVal);
         }
+
+
 
 
 
 
         
-        const string overrideKeyboardControlName = "overrideKeyboard";
-        public static bool KeyboardOverriden () {
-            return GUI.GetNameOfFocusedControl() == overrideKeyboardControlName;
-        }
-        public static void NextControlOverridesKeyboard () {
-            // Set the internal name of the textfield
-            GUI.SetNextControlName(overrideKeyboardControlName);
-        }
-        public static void CheckLoseFocusLastRect () {
-            //if clicked outside, lose focus
-            bool lastRectClicked;
-            if (ClickHappened(out lastRectClicked)) {
-                if (!lastRectClicked) EditorGUI.FocusTextInControl("");
-            }
-        }
-        static bool ClickHappened (out bool lastElementClicked) {
-            UnityEngine.Event e = UnityEngine.Event.current;
-            bool click_happened = e.type == EventType.MouseDown && e.button == 0;            
-            lastElementClicked = false;
-            if (click_happened) lastElementClicked = GUILayoutUtility.GetLastRect().Contains(e.mousePosition);
-            return click_happened;
-        }
         public static void Label (GUIContent c, bool fit_content) {
-            Label(c, fit_content, Colors.liteGray);
+            Label(c, Colors.liteGray, fit_content);
         }
-        public static void Label (GUIContent c, GUILayoutOption option) {
-            Label(c, Colors.liteGray, option);
+        public static void Label (GUIContent c, Color32 text_color, bool fit_content) {
+            Label(c, text_color, fit_content ? GUILayout.Width(GUIStyles.label.CalcSize(c).x) : null);
         }
-        public static void Label (GUIContent c, bool fit_content, Color32 text_color) {
-            Label(c, text_color, fit_content ? GUILayout.Width(GUIStyles.label.CalcSize(c).x) : GUILayout.ExpandWidth(true));
+        public static void Label (GUIContent c, params GUILayoutOption[] options) {
+            Label(c, Colors.liteGray, options);
         }
-        public static void Label (GUIContent c, Color32 text_color, params GUILayoutOption[] option) {
-            DoWithinColor (GUIStyles.label, text_color, () => EditorGUILayout.LabelField(c, GUIStyles.label, option) );
+        public static void Label (GUIContent c, Color32 text_color, params GUILayoutOption[] options) {
+            DoWithinColor (GUIStyles.label, text_color, () => EditorGUILayout.LabelField(c, GUIStyles.label, options) );
         }
+        
         public static void Space(int count = 1) {
             for (int i = 0; i < count; i++) EditorGUILayout.Space();
         }
         static void DoWithinColor(GUIStyle style, Color32 text_color, Action fn) {
-            Color32 orig_txt = style.normal.textColor;
+            Color32 orig_txt0 = style.normal.textColor;
+            Color32 orig_txt1 = style.active.textColor;
             style.normal.textColor = text_color;
+            style.active.textColor = text_color;
             fn();
-            style.normal.textColor = orig_txt;
+            style.normal.textColor = orig_txt0;
+            style.active.textColor = orig_txt1;
         }
 
         static void DoWithinColor(Color32 color, GUIStyle style, Color32 text_color, Action fn) {
             Color32 orig_bg = GUI.backgroundColor;
-            Color32 orig_txt = style.normal.textColor;
+            Color32 orig_txt0 = style.normal.textColor;
+            Color32 orig_txt1 = style.active.textColor;
             style.normal.textColor = text_color;
+            style.active.textColor = text_color;
             GUI.backgroundColor = color;
             fn();
             GUI.backgroundColor = orig_bg;
-            style.normal.textColor = orig_txt;
+            style.normal.textColor = orig_txt0;
+            style.active.textColor = orig_txt1;
         }
         static void DoWithinColor(Color32 color, Action fn) {
             Color32 orig_bg = GUI.backgroundColor;
@@ -257,20 +272,19 @@ namespace AssetObjectsPacks {
             fn();
             GUI.backgroundColor = orig_bg;
         }
-        public static void StartBox (int space, Color32 color, params GUILayoutOption[] options) {
+        public static void StartBox (Color32 color, int space=0, params GUILayoutOption[] options) {
             DoWithinColor(color, () => EditorGUILayout.BeginVertical(GUI.skin.box, options) );
             Space(space);
         }
-        public static void StartBox (int space, Color32 color) {
-            DoWithinColor(color, () => EditorGUILayout.BeginVertical(GUI.skin.box) );
+        public static void StartBox (int space=0, params GUILayoutOption[] options) {
+            StartBox(Colors.medGray, space, options);
+        }
+        public static void EndBox (int space=0) {
             Space(space);
+            EditorGUILayout.EndVertical();
         }
-        public static void StartBox (int space) {
-            StartBox(space, Colors.medGray);
-        }
-        public static void StartBox (int space, params GUILayoutOption[] option) {
-            StartBox(space, Colors.medGray, option);
-        }
+        
+
         public static void BeginIndent (int indent_space = 1) {
             EditorGUILayout.BeginHorizontal();
             for (int i = 0; i < indent_space; i++) SmallButtonClear();
@@ -280,72 +294,55 @@ namespace AssetObjectsPacks {
             EditorGUILayout.EndVertical();
             EditorGUILayout.EndHorizontal();
         }
-        public static void EndBox (int space) {
-            Space(space);
-            EditorGUILayout.EndVertical();
-        }
+
         public static void StartCustomEditor () {
             EditorGUI.BeginChangeCheck();
-            DoWithinColor(Colors.darkGray, () => EditorGUILayout.BeginVertical(GUI.skin.window) );   
+            DoWithinColor(Colors.darkGray, () => EditorGUILayout.BeginVertical(GUI.skin.window, GUILayout.MinHeight(1)) );   
         }
         public static bool EndCustomEditor (EditorProp editor) {
             EditorGUILayout.EndVertical();
-
-            
             if (EditorGUI.EndChangeCheck() || editor.IsChanged()) {     
                 editor.SaveObject();
+
+                //Debug.Log("saved");
                 return true;
             }
             return false;
         }
 
-        public static void StartCustomEditorWindow () {
-            EditorGUI.BeginChangeCheck();
-            DoWithinColor(Colors.darkGray, () => EditorGUILayout.BeginVertical(GUI.skin.window) );   
-        }
         public static bool EndCustomEditorWindow () {
             EditorGUILayout.EndVertical();
             return EditorGUI.EndChangeCheck();
         }
 
-
         public static bool Button (GUIContent c, GUIStyle s, Color32 color, Color32 text_color, params GUILayoutOption[] options) {
             bool r = false;
-            bool origRT = s.richText;
-            s.richText = true;
             DoWithinColor(color, s, text_color, () => r = GUILayout.Button(c, s, options) );
-            s.richText = origRT;
             return r;
         }
-        public static bool Button (GUIContent c, GUIStyle s, Color32 color, Color32 text_color, Rect rt) {
+        public static bool Button (GUIContent c, GUIStyle s, Color32 color, Color32 text_color, Rect rt){
             bool r = false;
-            bool origRT = s.richText;
-            s.richText = true;
-            DoWithinColor(color, s, text_color, () => r = GUI.Button(rt, c, s));//, options) );
-            s.richText = origRT;
+            DoWithinColor(color, s, text_color, () => r = GUI.Button(rt, c, s));
             return r;
         }
-
         public static bool Button(GUIContent c, GUIStyle s, params GUILayoutOption[] options) {
             return Button(c, s, Colors.liteGray, Colors.black, options);
         }
+        public static bool Button (GUIContent c, GUIStyle s, bool fit_content) {
+            return Button(c, s, Colors.liteGray, Colors.black, fit_content );
+        }
+        public static bool Button (GUIContent c, GUIStyle s, Color32 color, Color32 text_color, bool fit_content) {
+            return Button(c, s, color, text_color, fit_content ? c.CalcWidth(s) : null );
+        }
 
-        /*
-        
-        public static bool Button (GUIContent c, GUIStyle s, Color32 color, Color32 text_color, GUILayoutOption option) {
-            return Button(c, s, color, text_color, new GUILayoutOption[] { option } );
+
+        public static bool SmallDeleteButton(string hint = "Delete") {
+            return SmallButton(new GUIContent ("", hint), Colors.red, Colors.white);
         }
-        */
-        public static bool ToggleButton (GUIContent c, bool fit_content, bool value, GUIStyle s, out bool changed) {
-            changed = Button(c, fit_content, s, Colors.Toggle(value), Colors.black);
-            return changed ? !value : value;
-        }
-        public static bool Button (GUIContent c, bool fit_content, GUIStyle s) {
-            return Button(c, fit_content, s, Colors.liteGray, Colors.black );
-        }
-        public static bool Button (GUIContent c, bool fit_content, GUIStyle s, Color32 color, Color32 text_color) {
-            return Button(c, s, color, text_color, new GUILayoutOption[]  { fit_content ? c.CalcWidth(s) : GUILayout.ExpandWidth(true) } );
-        }
+        //public static bool ToggleButton (GUIContent c, bool fit_content, bool value, GUIStyle s, out bool changed) {
+        //    changed = Button(c, fit_content, s, Colors.Toggle(value), Colors.black);
+        //    return changed ? !value : value;
+        //}
         public static bool SmallButton (GUIContent c, Color32 color, Color32 text_color) {
             return Button(c, small_button_style, color, text_color, smallButtonOpts );
         }
@@ -357,7 +354,7 @@ namespace AssetObjectsPacks {
             return changed ? !value : value;
         }
 
-        static readonly GUILayoutOption[] smallButtonOpts = new GUILayoutOption[] { GUILayout.Width(17), GUILayout.Height(15) };
+        static readonly GUILayoutOption[] smallButtonOpts = new GUILayoutOption[] { GUILayout.Width(12), GUILayout.Height(12) };
         static GUIStyle _sbs = null;
         static GUIStyle small_button_style {
             get {
@@ -369,7 +366,7 @@ namespace AssetObjectsPacks {
             }
         }
         public static void SmallButtonClear () {
-            SmallButton(blank_content, Colors.clear, Colors.clear);
+            SmallButton(GUIContent.none, Colors.clear, Colors.clear);
         }
 
 
@@ -428,7 +425,7 @@ namespace AssetObjectsPacks {
             return changed;
         }
             
-        public static readonly GUIContent blank_content = GUIContent.none;
+        //public static readonly GUIContent blank_content = GUIContent.none;
 
         public static GUILayoutOption CalcWidth(this GUIContent c, GUIStyle s) {
             return GUILayout.Width(s.CalcSize(c).x);

@@ -16,15 +16,9 @@ public class CameraMovement : MonoBehaviour
     public float move_speed = 50;
 
     public Vector2 x_rot_clamp = new Vector2(-90,90);
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
+    
     float x_rot, y_rot;
 
-    // Update is called once per frame
     void Update()
     {
         float mod = 0;

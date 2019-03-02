@@ -18,34 +18,46 @@ MonoBehaviour:
     assetType: UnityEngine.AnimationClip
     defaultParameters:
     - name: Duration
-      paramType: 1
-      BoolValue: 0
-      FloatValue: -1
-      IntValue: 0
-      StringValue: 
-    - name: Mirror
-      paramType: 2
+      pType: 1
       BoolValue: 0
       FloatValue: -1
       IntValue: 0
       StringValue: 
     - name: Speed
-      paramType: 1
+      pType: 1
       BoolValue: 0
       FloatValue: 1
       IntValue: 0
       StringValue: 
+    - name: Mirror
+      pType: 2
+      BoolValue: 0
+      FloatValue: -1
+      IntValue: 0
+      StringValue: 
     - name: Looped
-      paramType: 0
+      pType: 0
       BoolValue: 0
       FloatValue: -1
       IntValue: 0
       StringValue: 
     - name: Transition
-      paramType: 1
+      pType: 1
       BoolValue: 0
       FloatValue: 0.25
       IntValue: 0
       StringValue: 
     name: Animations
     id: 0
+  - dir: 
+    extensions: 
+    assetType: 
+    defaultParameters:
+    - name: Duration
+      pType: 1
+      BoolValue: 0
+      FloatValue: -1
+      IntValue: 0
+      StringValue: 
+    name: New Pack 0
+    id: 1

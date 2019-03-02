@@ -4,19 +4,21 @@ using UnityEditor;
 using System.Linq;
 namespace AssetObjectsPacks {
 
-    public class DragAndDrop 
+    public class DragAndDrop : ElementIndexTracker
     {
-        public bool hasDrags { get { return hi != -1 && lo != -1; } }
-        public int dragCount { get { return hasDrags ? (hi - lo) + 1 : 0; } }
 
         public bool dragging, checkedDown, hoveringOverReceiver, mouseDown, mouseUp;
-
         Vector2 origMouseOffset, mousePos;
-
-        int lo = -1, hi = -1, dragStartIndex = -1, dropReceiverIndex = -1, dragStartCollection = -1, dropReceiverCollection = -1;
+        int dragStartIndex = -1, dropReceiverIndex = -1, dragStartCollection = -1, dropReceiverCollection = -1;
         
         public bool IsBeingDragged(int i) {
-            return dragging && hasDrags && i>= lo && i <= hi;
+            return dragging && IsTracked(i);
+        }
+
+        public bool DrawAndUpdate(Rect[] rects, System.Action<int, Rect> drawDragHoverElement, ElementIndexTracker selected, out int receiverIndex, out int receiverCollection, out int droppedCollection, out IEnumerable<int> droppedIndicies) {
+            DrawDragGUIs (rects, drawDragHoverElement);
+            CheckNewDragStart (rects, selected);
+            return CheckDrop (out receiverIndex, out receiverCollection, out droppedCollection, out droppedIndicies);    
         }
 
         public void CheckElementRectForDragsOrDrops (int index, int collection, Rect rt, bool isReceiver, bool isDraggable, out bool beingDragged, out bool isDragHovered, out bool dropReceived) {
@@ -29,11 +31,9 @@ namespace AssetObjectsPacks {
             
             if (isDragHovered && isReceiver) hoveringOverReceiver = true;
                 
-            //bool startedDrag = isDraggable && hasMousePos && mouseDown;
             if (isDraggable && hasMousePos && mouseDown) {
                 dragStartIndex = index;
                 dragStartCollection = collection;
-                //Debug.Log("started drag: " + index);
             }
 
             dropReceived = isReceiver && isDragHovered && mouseUp;
@@ -41,10 +41,6 @@ namespace AssetObjectsPacks {
                 dropReceiverIndex = index;
                 dropReceiverCollection = collection;
             }
-
-            //if (hoveringOverReceiver) {
-            //    Debug.Log("hovering over receiver");
-            //}
         }
 
         public bool CheckDrop (out int receiverIndex, out int receiverCollection, out int droppedCollection, out IEnumerable<int> droppedIndicies) {
@@ -54,74 +50,65 @@ namespace AssetObjectsPacks {
             droppedCollection = dragStartCollection;
 
             droppedIndicies = null;
+            if (dragging) {
+                //Debug.Log("dragging " + lo + " / " + hi);
+            }
             if (mouseUp) {
-                droppedIndicies = new int[dragCount].Generate( i => i + lo );// GetDraggedIndiciesEnumerator().ToArray();
-
-                lo = hi = -1;
-                dragging = false;
+                if (dragging){
+                    droppedIndicies = GetTrackedEnumerable().ToArray();
+                    dragging = false;
+                }
+                ClearTracker();
             }
             return mouseUp && dropReceiverIndex != -1;
         }
 
-        public void CheckNewDragStart (Rect[] origRects, SelectionSystem selectionSystem) {
+        public void CheckNewDragStart (Rect[] origRects, ElementIndexTracker selected) {
             if (dragStartIndex == -1) return;
             int i = dragStartIndex;
+            
             dragStartIndex = -1;
             dragStartCollection = -1;
             dragging = false;      
-            
-            if (dragCount != 0) return;
-            
-            if (selectionSystem.IsSelected(i)) {
-                lo = selectionSystem.lo;
-                hi = selectionSystem.hi;
-                
-            }
-            else lo = hi = i;
 
-            //Debug.Log(lo + "/" + hi);
+            if (elementCount != 0) 
+                return;
+
+            //Debug.Log("grabbed index: "+ i);
+            if (selected.IsTracked(i)) {
+                Copy(selected);
+                //Debug.Log("grabbinh selection: " + lo + "/" + hi);
+            }
+            else {
+                lo = hi = i;
+                //Debug.Log("grabbinh single: " + lo + "/" + hi);
+
+            } 
             origMouseOffset = new Vector2(origRects[lo].x - mousePos.x, origRects[lo].y - mousePos.y);  
         }
-
-        public IEnumerable<int> GetDraggedIndiciesEnumerator () {
-            for (int i = lo; i <= hi; i++) yield return i;
-        }
-
         
         public void InputListen (){
             hoveringOverReceiver = false;
             dragStartIndex = -1;
             dropReceiverIndex = -1;
-
-
             UnityEngine.Event e = UnityEngine.Event.current;
             mousePos = e.mousePosition;
-
             mouseDown = e.type == EventType.MouseDown && e.button == 0 && !checkedDown;
             if (mouseDown) checkedDown = true;
-                
             mouseUp = e.type == EventType.MouseUp;
             if (mouseUp) checkedDown = false;
-                
-            if (!dragging) dragging = e.type == EventType.MouseDrag && dragCount != 0;
+            if (!dragging) dragging = e.type == EventType.MouseDrag && elementCount != 0;
         }
 
-        public void DrawDragGUIs (Rect[] origRects, System.Action<int, Rect> drawDragHoverElement) {
-            if (!dragging || dragCount == 0) return;
-
+        public void DrawDragGUIs (Rect[] rects, System.Action<int, Rect> drawDragHoverElement) {
+            if (!dragging || elementCount == 0) return;
             EditorWindow.mouseOverWindow.Repaint();
-            
             if (hoveringOverReceiver) EditorGUIUtility.AddCursorRect(new Rect(mousePos.x-5, mousePos.y-5, 10, 10), MouseCursor.ArrowPlus);
-            
-            float firstDragY = origRects[lo].y;
             float x = mousePos.x + origMouseOffset.x;
             float y = mousePos.y + origMouseOffset.y;
-            
-            foreach (var index in GetDraggedIndiciesEnumerator()) {
-                //Debug.Log("draing index " + index);
-                Rect r = origRects[index];
-                drawDragHoverElement(index, new Rect(x, y + r.y - firstDragY, r.width, r.height));
-            }                
+            foreach (var i in GetTrackedEnumerable().ToArray()) {
+                drawDragHoverElement(i, new Rect(x, y + rects[i].y - rects[lo].y, rects[i].width, rects[i].height));
+            }
         }
     }
 }

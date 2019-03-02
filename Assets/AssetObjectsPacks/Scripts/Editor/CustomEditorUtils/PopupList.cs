@@ -24,10 +24,9 @@ namespace AssetObjectsPacks {
                 m_ListElements.Add(new ListElement(label, selected));
             }
         }
-        public GUIStyle menuItem = "MenuItem";
-        public GUIStyle background = "grey_border";
-        InputData m_Data;
         const float k_LineHeight = 16, k_Margin = 5;
+        GUIStyle menuItem = "MenuItem", background = "grey_border";
+        InputData m_Data;
         int m_SelectedCompletionIndex = 0;
         public PopupList(InputData inputData){
             m_Data = inputData;

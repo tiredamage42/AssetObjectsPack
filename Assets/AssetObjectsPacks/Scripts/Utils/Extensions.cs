@@ -1,138 +1,38 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
+using System;
 
 namespace AssetObjectsPacks {
     public static class Extensions  {
-        public delegate T GetMethod<T> (int index);
 
-        public static T First<T> (this HashSet<T> h)  {
-            foreach (T e in h) return e;
-            return default(T);
+        public static IEnumerable<T> Generate<T> (this int c, Func<int, T> g) {
+            for (int i = 0; i < c; i++) yield return g(i);
         }
-        
-        /*
-        static IEnumerable<T> Generate<T>(GetMethod<T> get_obj_method, int count) {
-            for (int i = 0; i < count; i++) yield return get_obj_method(i);
+        public static IEnumerable<T> Generate<T, O> (this IEnumerable<O> c, Func<O, T> g) {
+            foreach (var o in c) yield return g(o);
         }
-        */
-        public static HashSet<T> ToHashSet<T>(this IEnumerable<T> a) {
-            return new HashSet<T>().Generate( a, o => o );
+        public static IEnumerable<int> Generate (this Vector2Int c) {
+            for (int i = c.x; i <= c.y; i++) yield return i;
         }
-
-        public delegate T TFromO<T, O> (O other);
-        public static HashSet<T> Generate<T, O> (this HashSet<T> h, HashSet<O> other, TFromO<T,O> t_from_o) {
-            h.Clear();
-            foreach (O o in other) h.Add( t_from_o(o) );
-            return h;
+        public static IEnumerable<int> Generate (this int c) {
+            return new Vector2Int(0, c - 1).Generate();
         }
-        public static HashSet<T> Generate<T, O> (this HashSet<T> h, IEnumerable<O> other, TFromO<T,O> t_from_o) {
-            h.Clear();
-            foreach (O o in other) h.Add( t_from_o(o) );
-            return h;
-        }
-
-
-        
-        public static HashSet<T> Generate<T>(this HashSet<T> h, int count, GetMethod<T> get_method) {
-            h.Clear();
-            for (int i = 0; i < count; i++) h.Add(get_method(i));
-            return h;   
-        }
-
-        public static List<T> Generate<T, O> (this List<T> h, IEnumerable<O> other, TFromO<T,O> t_from_o) {
-            h.Clear();
-            foreach (O o in other) h.Add( t_from_o(o) );
-            return h;
-        }
-        
-        public static List<T> Generate<T>(this List<T> h, int count, GetMethod<T> get_method) {
-            h.Clear();
-            for (int i = 0; i < count; i++) h.Add(get_method(i));
-            return h;   
-        }
-        
-
-
-
-
-
-
-        static void CheckArraySize<T> (ref T[] a, int c) {
-            if (a.Length != c) {
-                System.Array.Resize(ref a, c);
-            }
-        }
-        public static T[] Generate<T, O> (this T[] h, HashSet<O> other, TFromO<T,O> t_from_o) {
-
-            CheckArraySize(ref h, other.Count);
-            int i = 0;
-            foreach (O o in other){
-                h[i] = t_from_o(o);
-                i++;
-            } 
-            return h;
-        }
-        public static T[] Generate<T, O> (this T[] h, IList<O> other, TFromO<T,O> t_from_o) {
-            int c = other.Count;
-            CheckArraySize(ref h, c);
-            for (int i = 0; i < c; i++) h[i] = t_from_o( other[i] );
-            return h;
-        }
-        
-        public static T[] Generate<T>(this T[] h, int count, GetMethod<T> get_method) {
-            CheckArraySize(ref h, count);
-            for (int i = 0; i < count; i++) h[i] = get_method(i);
-            return h;   
-        }
-        public static T[] Generate<T>(this T[] h, GetMethod<T> get_method) {
-            for (int i = 0; i < h.Length; i++) h[i] = get_method(i);
-            return h;   
-        }
-
-        public static void Add<T> (this T[] a, T e) {
-            int l = a.Length;
-            System.Array.Resize(ref a, l + 1);
-            a[l] = e;
-        }
-        public static void Clear<T> (this T[] a) {
-            System.Array.Resize(ref a, 0);
-        }
-
-        public static void AddRange<T> (this HashSet<T> e, HashSet<T> r) {
-            foreach (var i in r) e.Add(i);
-
-        }
-
-            
-        
-        
-        
-        //public static HashSet<T> GenerateHashset<T>(this HashSet<T> a, GetMethod<T> get_obj_method, int count) {
-        //    return Generate(get_obj_method, count).ToHashSet();
-        //}
-        //public static T[] GenerateArray<T>(this T[] a, GetMethod<T> get_obj_method, int count) {
-        //    return Generate(get_obj_method, count).ToArray();
-        //}
-/*
-        public static List<T> ToList<T>(this T[] a) {
-            int l = a.Length;
-            List<T> r = new List<T>(l);
-            for (int i = 0; i < l; i++) r.Add(a[i]);
+        public static List<T> ToList<T>(this IEnumerable<T> a) {
+            List<T> r = new List<T>(a.Count());
+            r.AddRange(a);
             return r;
         }
- */
-
+        public static HashSet<T> ToHashSet<T>(this IEnumerable<T> a) {
+            HashSet<T> r = new HashSet<T>();
+            r.AddRange(a);
+            return r;        
+        }
+        public static void AddRange<T> (this HashSet<T> e, IEnumerable<T> r) {
+            foreach (var i in r) e.Add(i);
+        }
         public static T Last<T> (this IList<T> a) {
             return a[a.Count - 1];
-        }
-        public static T[] ToArray<T> (this ISet<T> s) {
-            T[] r = new T[s.Count];
-            int u = 0;
-            foreach (T t in s) {
-                r[u] = t;
-                u++;
-            }
-            return r;
         }
         public static IList<T> Slice<T>(this IList<T> x, int a=0, int b=-1) {
             if (b < 0) b = x.Count + b;
@@ -140,17 +40,6 @@ namespace AssetObjectsPacks {
             for (int i = a; i <= b; i++) r.Add( x[i] ); 
             return r;
         }
-        /*
-        public static bool Contains(this int[] a, int e) {
-            int l = a.Length;
-            for (int i = 0; i < l; i++) {
-                if (a[i] == e) return true;
-            }
-            return false;
-        }
-        */
-        
-
         public static T RandomChoice<T>(this IList<T> l) {
             return l[UnityEngine.Random.Range(0, l.Count)];
         }

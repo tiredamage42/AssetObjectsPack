@@ -15,29 +15,44 @@ namespace AssetObjectsPacks {
 
             GUIUtils.StartCustomEditor();
 
-            //GUIUtils.Space(1);
-
-            GUIUtils.StartBox(0);
+            GUIUtils.StartBox(1);
 
             EditorGUI.indentLevel++;
-            
 
-            GUIUtils.DrawProp(so[Cue.sendMessageField], new GUIContent("Send Message: ", "Method should take a Transform for parameter"));
+
+            GUIUtils.DrawMultiLineStringProp(
+                so[Cue.sendMessageField], 
+                new GUIContent("<b>Send Messages</b> (seperated by commas): ", "Methods should take a Transform for parameter"), 
+                false, GUILayout.MinHeight(32)
+            );
+            
+            GUIUtils.Space();
 
             GUIUtils.DrawProp(so[Cue.snap_player_style_field], new GUIContent("Snap Style", "If the event should wait for the player to snap to the event transform before being considered ready"));
+                
             if (target.snapPlayerStyle == Cue.SnapPlayerStyle.Smooth) {
-                EditorGUI.indentLevel++;
+                EditorGUI.indentLevel--;
+                GUIUtils.BeginIndent(2);
+                GUIUtils.StartBox(Colors.darkGray);
                 GUIUtils.DrawProp(so[Cue.smooth_pos_time_field], new GUIContent("Position Time (s)"));
                 GUIUtils.DrawProp(so[Cue.smooth_rot_time_field], new GUIContent("Rotation Time (s)"));
-                EditorGUI.indentLevel--;
+                GUIUtils.EndBox();
+                GUIUtils.EndIndent();
+                EditorGUI.indentLevel++;
+                GUIUtils.Space();
             }
-            GUIUtils.DrawProp(so[Cue.playlist_field]);
-            if (target.playlist == null) {
-                GUIUtils.DrawArrayProp( so[Cue.event_packs_field] );
-            }
+                
+            GUIUtils.DrawProp(so[Cue.playlist_field], new GUIContent("Playlist", "Playlist to trigger"));
+            
             EditorGUI.indentLevel--;
             
-            GUIUtils.EndBox(0);
+            if (target.playlist == null) {
+                GUIUtils.Space();
+                GUIUtils.DrawObjArrayProp( so[Cue.event_packs_field] );
+            }
+
+
+            GUIUtils.EndBox(1);
 
             GUIUtils.EndCustomEditor(so);
                 

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using System.Linq;
 
 namespace AssetObjectsPacks {
     public static class PackEditor 
@@ -86,12 +87,12 @@ namespace AssetObjectsPacks {
             return true;
         }
         static void AdjustParametersToPack (EditorProp parameters, EditorProp pack, bool clear) {
-            if (clear) CustomParameterEditor.ClearAndRebuildParameters(parameters, pack[defaultParametersField]);
+            if (clear) CustomParameterEditor.CopyParameterList(parameters, pack[defaultParametersField]);
             else CustomParameterEditor.UpdateParametersToReflectDefaults(parameters, pack[defaultParametersField]);
         }
 
         static void AddNewPackToPacksList (EditorProp packs) {
-            int newID = AssetObjectsEditor.GenerateNewIDList(1, new HashSet<int>().Generate( packs.arraySize, i => packs[i][idField].intValue ))[0];
+            int newID = AssetObjectsEditor.GenerateNewIDList(1, packs.arraySize.Generate( i => packs[i][idField].intValue ).ToHashSet())[0];
 
             string origName = "New Pack";
             string new_name = origName;
@@ -131,58 +132,85 @@ namespace AssetObjectsPacks {
             static bool showWarnings;
 
             static GUIContent[] GetNameGUIs (EditorProp packs) {
-                return new GUIContent[packs.arraySize].Generate( i => new GUIContent(packs[i][nameField].stringValue) );
+                return packs.arraySize.Generate( i => new GUIContent(packs[i][nameField].stringValue) ).ToArray();
             }
             public static GUIContent[] GetDefaultParamNameGUIs(int packIndex) {
+                if (packIndex < 0) return null;
                 EditorProp pack = PacksManagerEditor.GetPacksList()[packIndex];
-                return new GUIContent[pack[defaultParametersField].arraySize].Generate( i => CustomParameterEditor.GUI.GetNameGUI(pack[defaultParametersField][i]) );
+                return pack[defaultParametersField].arraySize.Generate( i => CustomParameterEditor.GUI.GetNameGUI(pack[defaultParametersField][i]) ).ToArray();
             }
             public static void DrawPacks (EditorProp packs, ref int packIndex) {
+                
                 GUIUtils.StartBox(1);
                 EditorGUILayout.BeginHorizontal();
                 if (packs.arraySize != 0) GUIUtils.Tabs(GetNameGUIs(packs), ref packIndex);
-                if (GUIUtils.Button(new GUIContent("Add New Pack"), false, GUIStyles.toolbarButton, Colors.green, Colors.black)) AddNewPackToPacksList(packs);
+                if (GUIUtils.Button(new GUIContent("Add New Pack"), GUIStyles.toolbarButton, Colors.green, Colors.black)) AddNewPackToPacksList(packs);
                 EditorGUILayout.EndHorizontal();
+
                 GUIUtils.EndBox(1);
-                if (packs.arraySize != 0) {
+                
+                if (packs.arraySize != 0 && packIndex > -1) {
                     if (DrawPack(packs[packIndex])) packs.DeleteAt(packIndex);
                 }
                 if (packIndex >= packs.arraySize) packIndex = packs.arraySize-1;
             }
             static bool DrawPack(EditorProp pack){
-                GUILayoutOption packsFieldsWidth = GUILayout.Width(100);
+                GUILayoutOption packsFieldsWidth = GUILayout.ExpandWidth(true);// GUILayout.Width(100);
 
                 GUIUtils.StartBox(1);
                 //name
-                GUIUtils.DrawTextProp(pack[nameField], new GUIContent("Pack Name"), packsFieldsWidth, false);
+                GUIUtils.DrawTextProp(pack[nameField], new GUIContent("Pack Name"), GUIUtils.TextFieldType.Normal, false, packsFieldsWidth);
                 //asset type
-                GUIUtils.DrawTextProp(pack[assetTypeField], new GUIContent("Asset Type", "The asset type or component to the pack targets"), packsFieldsWidth, false);
+                GUIUtils.DrawTextProp(pack[assetTypeField], new GUIContent("Asset Type", "The asset type or component to the pack targets"), GUIUtils.TextFieldType.Normal, false, packsFieldsWidth);
                 //directory
-                GUIUtils.DrawDirectoryField(pack[dirField], new GUIContent("Objects Directory", "The directory where the assets are held"), packsFieldsWidth, true);
+                GUIUtils.DrawDirectoryField(pack[dirField], new GUIContent("Objects Directory", "The directory where the assets are held"), true, packsFieldsWidth);
                 //file extensions
-                GUIUtils.DrawTextProp(pack[extensionsField], new GUIContent("File Extensions", "The file extensions to look for in the directory, seperated by commas.\nExample: '.fbx, .wav, .mp3'"), packsFieldsWidth, false);
+                GUIUtils.DrawTextProp(pack[extensionsField], new GUIContent("File Extensions", "The file extensions to look for in the directory, seperated by commas.\nExample: '.fbx, .wav, .mp3'"), GUIUtils.TextFieldType.Normal, false, packsFieldsWidth);
                 GUIUtils.EndBox(1);
                 
                 //default params
                 GUIUtils.StartBox(0);
                 GUIUtils.Label(new GUIContent ("Asset Object Default Parameters:"), false);    
 
-                GUIUtils.StartBox(0, Colors.darkGray);
-                CustomParameterEditor.GUI.DrawParamsList(pack[defaultParametersField], true, null, out _);
-                GUIUtils.EndBox(0);
+                GUIUtils.StartBox(Colors.darkGray);
+                DrawParamsList(pack[defaultParametersField]);
+                GUIUtils.EndBox();
                 
-                GUIUtils.EndBox(0);      
+                GUIUtils.EndBox();      
 
                 //delete pack
                 bool delete = false;
                 GUIUtils.StartBox(1);
-                if (GUIUtils.Button(new GUIContent("Delete Pack"), false, GUIStyles.button, Colors.red, Colors.white )) {
+                if (GUIUtils.Button(new GUIContent("Delete Pack"), GUIStyles.button, Colors.red, Colors.white )) {
                     if (EditorUtility.DisplayDialog("Delete Pack", "Are you sure you want to delete this pack?", "Delete Pack", "Cancel")) {
                         delete = true;
                     }
                 }
                 GUIUtils.EndBox(1);
                 return delete;
+            }
+
+            public static void DrawParamsList (EditorProp parameters) {
+                GUIUtils.StartBox (0);
+                if (GUIUtils.Button(new GUIContent("Add Parameter"), GUIStyles.miniButton, true)) parameters.AddNew("New Parameter");
+                
+                int deleteParamIndex = -1;
+                int l = parameters.arraySize;
+                for (int i = 0; i < l; i++) {
+                    UnityEngine.GUI.enabled = i != 0;
+                    EditorGUILayout.BeginHorizontal();
+
+                    if (i == 0) GUIUtils.SmallButtonClear();
+                    else if (GUIUtils.SmallDeleteButton()) deleteParamIndex = i;
+                    
+                    CustomParameterEditor.GUI.DrawParameter(parameters[i]);
+                    
+                    EditorGUILayout.EndHorizontal();
+                    UnityEngine.GUI.enabled = true;
+                }
+                if (deleteParamIndex >= 0) parameters.DeleteAt(deleteParamIndex);
+                
+                GUIUtils.EndBox(1);
             }
 
             public static bool DrawErrorsAndWarnings (string[] errors, string[] warnings, int noIDcount, int packIndex) {
@@ -199,13 +227,13 @@ namespace AssetObjectsPacks {
                 if (warnings.Length > 0) {
 
                     GUIContent c = new GUIContent( string.Format( "<b>{0}</b> Warnings ( {1} )", showWarnings ? " V " : " > ", warnings.Length ) );
-                    if (GUIUtils.Button(c, true, GUIStyles.button, Colors.yellow, Colors.black)) {
+                    if (GUIUtils.Button(c, GUIStyles.button, Colors.yellow, Colors.black, true)) {
                         showWarnings = !showWarnings;
                     }
                     if (showWarnings) {
                         for (int i = 0; i < warnings.Length; i++) EditorGUILayout.HelpBox(warnings[i], MessageType.Warning);
                         if (noIDcount != 0) {
-                            if (GUIUtils.Button(new GUIContent("Generate IDs"), false, GUIStyles.button, Colors.green, Colors.black)) {
+                            if (GUIUtils.Button(new GUIContent("Generate IDs"), GUIStyles.button, Colors.green, Colors.black)) {
                                 if (EditorUtility.DisplayDialog("Generate IDs", "Generating IDs will rename assets without IDs, are you sure?", "Generate IDs", "Cancel")) {
                                     GenerateIDsForPack(packIndex);
                                     genIDs = true;

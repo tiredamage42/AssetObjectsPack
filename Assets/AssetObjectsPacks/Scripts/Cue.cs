@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-
+using System.Collections.Generic;
 namespace AssetObjectsPacks {
 
     [System.Serializable] public class Cue : MonoBehaviour
@@ -13,6 +13,35 @@ namespace AssetObjectsPacks {
         
         public Playlist playlist;
         public Event[] events;
+
+
+
+        Dictionary<string, Event> packName2Event = new Dictionary<string, Event>();
+        
+        //check only at runtime
+        public Event GetEventByName (string packName) {
+            int l = events.Length;
+            if (events.Length == 0) return null;
+            if (l != packName2Event.Count) {
+                for (int i = 0; i < l; i++) {
+                    string thisPackName = AssetObjectsManager.instance.packs.FindPackByID( events[i].assetObjectPackID, out _).name;
+                    packName2Event.Add(thisPackName, events[i]);
+                }
+            }
+            Event e;
+            if (packName2Event.TryGetValue(packName, out e)) {
+                return e;
+            }
+            return null;
+
+        }
+
+
+
+
+
+
+
         
         public string sendMessage;
 
@@ -27,11 +56,5 @@ namespace AssetObjectsPacks {
             Gizmos.color = Color.green;
             Gizmos.DrawWireSphere(transform.position, .25f);
         }
-
-
     }
 }
-
-
-
-

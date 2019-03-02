@@ -44,7 +44,7 @@ namespace AssetObjectsPacks {
             
             void OnGUI()
             {
-                GUIUtils.StartCustomEditorWindow();
+                GUIUtils.StartCustomEditor();
                 GUIUtils.StartBox(0);            
                 
                 GUIUtils.Tabs(outerTabs, ref outerTab);

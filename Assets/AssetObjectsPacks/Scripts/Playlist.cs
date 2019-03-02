@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 namespace AssetObjectsPacks {
     public class Playlist : MonoBehaviour {
 
@@ -18,7 +19,7 @@ namespace AssetObjectsPacks {
         Channel[] _channels;
         public Channel[] channels {
             get {
-                if (_channels == null || _channels.Length == 0) _channels = new Channel[transform.childCount].Generate( i => { return new Channel(transform.GetChild(i)); } );
+                if (_channels == null || _channels.Length == 0) _channels = transform.childCount.Generate( i => new Channel(transform.GetChild(i)) ).ToArray();
                 return _channels;
             }
         }
@@ -120,25 +121,86 @@ namespace AssetObjectsPacks {
                     }     
                 }
 
+                    const string cueTransformParamString = "cuetransform";
+                    const string cuePositionParamString = "cueposition";
+                    const string cueParamString = "cue";
+                    
+                    object ParamFromString(Cue cue, Transform cueTransform, string paramString) {
+                        string lower = paramString.ToLower();
+                        if (lower == cuePositionParamString) return cueTransform.position;
+                        else if (lower == cueTransformParamString) return cueTransform;
+                        else if (lower == cueParamString) return cue;
+
+                        string[] spl = paramString.Split(':');
+                        string pType = spl[0];
+                        string pVal = spl[1];
+
+                        switch (pType) {
+                            case "i": return int.Parse(pVal);
+                            case "f": return float.Parse(pVal);
+                            case "b": return bool.Parse(pVal);
+                            case "s": return spl[1];
+                        }
+
+                        return null;
+                    }
+
+                    void BroadcastMessage (Cue cue, EventPlayer player, Transform cueTransform, string message) {
+                        string msgName = message;
+                        if (message.Contains("(")) {
+                            string[] split = message.Split('(');
+
+                            msgName = split[0];
+
+                            string paramsS = split[1];
+
+                            int l = paramsS.Length;
+                            
+                            string parmChecks = paramsS.Substring(0, l - 1);
+                            
+                            string[] paramStrings = parmChecks.Contains(',') ? parmChecks.Split(',') : new string[] { parmChecks };
+
+                            l = paramStrings.Length;
+
+                            object[] parameters = new object[l];
+                            
+                            for (int i = 0; i < l; i++) parameters[i] = ParamFromString(cue, cueTransform, paramStrings[i]);
+                            
+                            player.SendMessage(msgName, parameters, SendMessageOptions.RequireReceiver);
+                        }
+                        else {
+                            player.SendMessage(msgName, SendMessageOptions.RequireReceiver);
+                        }
+                    }
+                    void BroadcastMessageList (Cue cue, EventPlayer player, Transform cueTransform, string messages) {
+                        messages = messages.Replace(" ", string.Empty).Trim();
+                        if (messages.Contains("/")) {
+                            string[] spl = messages.Split('/');
+                            for (int i = 0; i < spl.Length; i++) {
+                               BroadcastMessage(cue, player, cueTransform, spl[i]);
+                            }
+                        }
+                        else {
+                            BroadcastMessage(cue, player, cueTransform, messages);
+                        }
+                    }
+
+
                 public void Play (EventPlayer player, Transform interestTransform, Cue cue) {
-                    //Debug.Log("playing cue!" + cue.name);
                     isPlaying = true;
 
                     if (cue.sendMessage != "") {
-                        Debug.Log("sending message");
-                        player.SendMessage(cue.sendMessage, interestTransform, SendMessageOptions.RequireReceiver);
+                        BroadcastMessageList(cue, player, interestTransform, cue.sendMessage);
                     }
+
                     if (cue.playlist != null) {
                         cue.playlist.InitializePerformance(new EventPlayer[] {player}, interestTransform.position, interestTransform.rotation, OnPlaylistEnd);
                         return;
                     }
 
-                    player.PlayEvents(cue.events, OnEventEnd);
+                    player.PlayEvents_Cue(cue.events, OnEventEnd);
                 }
 
-
-               
-                
                 void OnPlaylistEnd () {
                     Deactivate();
                 }
@@ -243,7 +305,7 @@ namespace AssetObjectsPacks {
                 
                 int channel_count = playlist.channels.Length;
                 if (channels.Length != channel_count) {
-                    channels = new PerformanceChannel[channel_count].Generate( i => new PerformanceChannel() );
+                    channels = channel_count.Generate(i => new PerformanceChannel()).ToArray();
                 }
 
                 if (interestTransforms.Count != channel_count) {

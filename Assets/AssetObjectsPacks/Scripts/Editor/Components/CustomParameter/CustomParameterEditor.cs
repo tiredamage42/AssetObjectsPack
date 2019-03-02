@@ -8,40 +8,27 @@ namespace AssetObjectsPacks {
 
         public static void CopyParameterList (EditorProp orig, EditorProp toCopy) {
             orig.Clear();
-            for (int p = 0; p < toCopy.arraySize; p++) CopyParameter(orig.AddNew(), toCopy[p]);
-        }
-        public static void AddParameterToList (EditorProp parameters) {
-            EditorProp newParam = parameters.AddNew();
-            newParam[nameField].SetValue( "Parameter Name" );
+            int l = toCopy.arraySize;
+            for (int p = 0; p < l; p++) CopyParameter(orig.AddNew(), toCopy[p]);
         }
         public static void DefaultDurationParameter (EditorProp parameter) {
             parameter[nameField].SetValue( "Duration" );
             parameter[typeField].SetValue( (int)CustomParameter.ParamType.FloatValue );
             parameter[CustomParameter.ParamType.FloatValue.ToString()].SetValue( -1.0f );
         }
-        static EditorProp GetParamProperty(EditorProp parameter) {
+        public static EditorProp GetParamValueProperty(EditorProp parameter) {
             return parameter[((CustomParameter.ParamType)parameter[typeField].intValue).ToString()];
         }
         public static void CopyParameter(EditorProp orig, EditorProp to_copy) {
             orig[nameField].CopyProp(to_copy[nameField]);
             orig[typeField].CopyProp(to_copy[typeField]);
-            GetParamProperty(orig).CopyProp(GetParamProperty(to_copy));
-        }
-        public static void ClearAndRebuildParameters(EditorProp parameters, EditorProp defaultParams) {
-            parameters.Clear();
-            int l = defaultParams.arraySize;    
-            for (int i = 0; i < l; i++) {
-                EditorProp newParam = parameters.AddNew();
-                CopyParameter(newParam, defaultParams[i]);
-            }
+            GetParamValueProperty(orig).CopyProp(GetParamValueProperty(to_copy));
         }
         public static void UpdateParametersToReflectDefaults (EditorProp parameters, EditorProp defaultParams) {
-            //Debug.Log("Updating params");
             int c_p = parameters.arraySize;
             int c_d = defaultParams.arraySize;
 
             Func<EditorProp, string> GetParamName = (EditorProp parameter) => parameter[nameField].stringValue;
-            Func<EditorProp, int> GetParamType = (EditorProp parameter) => parameter[typeField].intValue;
 
             //check for parameters to delete
             for (int i = c_p - 1; i >= 0; i--) {                    
@@ -95,10 +82,9 @@ namespace AssetObjectsPacks {
             parameters.DeleteAt(parameters.arraySize-1);
             
             //check type changes
+            Func<EditorProp, int> GetParamType = (EditorProp parameter) => parameter[typeField].intValue;
             for (int i = 0; i < c_d; i++) {
-                EditorProp defParam = defaultParams[i];
-                EditorProp param = parameters[i];
-                if (GetParamType(param) != GetParamType(defParam)) CopyParameter(param, defParam);
+                if (GetParamType(parameters[i]) != GetParamType(defaultParams[i])) CopyParameter(parameters[i], defaultParams[i]);
             }
         }
     
@@ -106,66 +92,19 @@ namespace AssetObjectsPacks {
             public static GUIContent GetNameGUI (EditorProp parameter) {
                 return new GUIContent(parameter[nameField].stringValue);
             }
-            public static void DrawAOParameters (EditorProp parameters, GUILayoutOption[] paramWidths, bool doMulti, out int multiParamSet) {
-                multiParamSet = -1;
-                //GUIUtils.StartBox(0);
-                EditorGUILayout.BeginHorizontal();
-                GUIContent blank = GUIUtils.blank_content;
-                int l = parameters.arraySize;  
-                for (int i = 0; i < l; i++) {
-                    GUIUtils.DrawProp( GetParamProperty( parameters[i] ), blank, paramWidths[i]);
-                    if (doMulti){
-                        if (GUIUtils.SmallButton(new GUIContent("S", "Set Values"))) multiParamSet = i;
-                    }
-                    else {
-                        GUIUtils.SmallButtonClear();   
-                    }
-                }
-                EditorGUILayout.EndHorizontal();
-                //GUIUtils.EndBox(0);
-            }
-            public static void DrawParamsList (EditorProp parameters, bool pm, GUIContent deleteContainerGUI, out bool deleteContainer) {
-                GUIUtils.StartBox (0);
+            public static void DrawParameter(EditorProp parameter) {        
+                //name
+                GUIUtils.DrawTextProp(parameter[nameField], GUIUtils.TextFieldType.Normal, false, GUILayout.MinWidth(32));
                 
-                EditorGUILayout.BeginHorizontal();
-
-                deleteContainer = false;
-
-                if (!pm) deleteContainer = GUIUtils.SmallButton(deleteContainerGUI, Colors.red, Colors.white);
-                
-                if (GUIUtils.Button(new GUIContent("Add Parameter"), true, GUIStyles.miniButton)) AddParameterToList(parameters);
-                
-                EditorGUILayout.EndHorizontal();
-                
-                if (!pm) GUIUtils.BeginIndent();
-                
-                int deleteParamIndex = -1;
-                for (int i = 0; i < parameters.arraySize; i++) {
-                    bool d;
-                    UnityEngine.GUI.enabled = i != 0 || !pm;
-                    DrawParameter(pm, parameters[i], out d);
-                    UnityEngine.GUI.enabled = true;
-                    if(d) deleteParamIndex = i;
-                }
-                if (deleteParamIndex >= 0) parameters.DeleteAt(deleteParamIndex);
-
-                if (!pm) GUIUtils.EndIndent();
-                
-                GUIUtils.EndBox(1);
-            }
-            static void DrawParameter(bool pm, EditorProp parameter, out bool delete) {        
-                GUIContent blank = GUIUtils.blank_content;
-                EditorGUILayout.BeginHorizontal();
-                delete = GUIUtils.SmallButton(new GUIContent("D", "Delete Parameter"), Colors.red, Colors.white);
-               
-                GUIUtils.NextControlOverridesKeyboard();
-                GUIUtils.DrawTextProp(parameter[nameField], GUILayout.MinWidth(32), true);
-                GUIUtils.CheckLoseFocusLastRect();
-
+                //type
                 GUILayoutOption pFieldWidth = GUILayout.Width(75);
-                GUIUtils.DrawProp(parameter[typeField], blank, pFieldWidth);
-                GUIUtils.DrawProp(GetParamProperty( parameter), blank, pFieldWidth);
-                EditorGUILayout.EndHorizontal();
+                EditorProp typeProp = parameter[typeField];
+                int origValue = typeProp.intValue;
+                int newValue = (int)(CustomParameter.ParamType)EditorGUILayout.EnumPopup((CustomParameter.ParamType)origValue, pFieldWidth);
+                if (newValue != origValue) typeProp.SetValue( newValue );
+                
+                //value
+                GUIUtils.DrawProp(GetParamValueProperty( parameter), pFieldWidth);
             }
         }
     }
