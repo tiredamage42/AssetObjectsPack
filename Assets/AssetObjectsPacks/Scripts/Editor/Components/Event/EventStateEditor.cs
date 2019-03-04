@@ -20,6 +20,7 @@ namespace AssetObjectsPacks {
             for (int i = 0; i < l; i++) lastState = GetEventStateByName(lastState[subStatesField], split[i]);
             return lastState;
         }
+
         
         public static void ResetNewRecursive (EditorProp state, bool doSubs, int depth = 0) {
             state[isNewField].SetValue(false);
@@ -32,25 +33,19 @@ namespace AssetObjectsPacks {
             return state[assetObjectsField][poolIndex - state[subStatesField].arraySize];
         }
         public static void DuplicateEventState(EditorProp parentState, int poolIndex) {
-            //Debug.Log("duplicating state");
             EditorProp state = parentState[subStatesField][poolIndex];
             CopyEventState(parentState[subStatesField].InsertAtIndex(poolIndex + 1, state[nameField].stringValue + " Copy"), state, false, false );    
-        }
-        public static void DuplicateEventState(EditorProp baseState, string parentPath, int poolIndex) {
-            DuplicateEventState(GetEventStateByPath(baseState, parentPath), poolIndex);
-        }
-
-        public static void DuplicateIndiciesInState(EditorProp baseState, string parentPath, IEnumerable<int> indicies) {
-            DuplicateIndiciesInState(GetEventStateByPath(baseState, parentPath), indicies.ToHashSet());
         }
         public static void DuplicateIndiciesInState (EditorProp parentState, HashSet<int> indicies) {
 
             foreach (var i in indicies) {
-
-                //Debug.Log("duplicating " + i);
                 //ao
-                if (i >= parentState[subStatesField].arraySize) AssetObjectEditor.DuplicateAO (parentState[assetObjectsField], i - parentState[subStatesField].arraySize);
-                else DuplicateEventState(parentState, i);
+                if (i >= parentState[subStatesField].arraySize) {
+                    AssetObjectEditor.DuplicateAO (parentState[assetObjectsField], i - parentState[subStatesField].arraySize);
+                }
+                else {
+                    DuplicateEventState(parentState, i);
+                }
             }
         }
 
@@ -66,10 +61,6 @@ namespace AssetObjectsPacks {
             for (int i = 0; i < toCopy[subStatesField].arraySize; i++) CopyEventState(es[subStatesField].AddNew(), toCopy[subStatesField][i], true, doAOs);
         }
 
-        public static void GetValues(EditorProp baseState, string atPath, int atIndex, out int id, out string elName, out bool isNewDir, out bool isCopy, out bool isSubstate) {
-            GetValues(GetEventStateByPath(baseState, atPath), atIndex, out id, out elName, out isNewDir, out isCopy, out isSubstate);
-        }
-        
         public static void GetValues(EditorProp state, int atIndex, out int id, out string elName, out bool isNewDir, out bool isCopy, out bool isSubstate) {
             isNewDir = false;
             elName = null;
@@ -101,10 +92,23 @@ namespace AssetObjectsPacks {
             newEventState[subStatesField].Clear();
             newEventState[assetObjectsField].Clear();
         }
-
+        public static void CheckAllAOsForNullObjects (EditorProp eventState, System.Func<int, Object> getObjForID ) {
+            for (int i = 0; i < eventState[assetObjectsField].arraySize; i++) {
+                AssetObjectEditor.CheckForNullObject(eventState[assetObjectsField][i], getObjForID);
+            }
+            for (int i = 0; i < eventState[subStatesField].arraySize; i++) {
+                CheckAllAOsForNullObjects(eventState[subStatesField][i], getObjForID);      
+            }
+        }
         public static void UpdatEventStatesAgainstDefaults(EditorProp state, int packIndex) {
-            for (int i = 0; i < state[assetObjectsField].arraySize; i++) AssetObjectEditor.MakeAssetObjectDefault(state[assetObjectsField][i], packIndex, false);
-            for (int i = 0; i < state[subStatesField].arraySize; i++) UpdatEventStatesAgainstDefaults(state[subStatesField][i], packIndex);   
+            for (int i = 0; i < state[assetObjectsField].arraySize; i++) {
+                AssetObjectEditor.MakeAssetObjectDefault(state[assetObjectsField][i], packIndex, false);
+            }
+
+            for (int i = 0; i < state[subStatesField].arraySize; i++) {
+
+                UpdatEventStatesAgainstDefaults(state[subStatesField][i], packIndex);   
+            }
         }
 
         public static void ResetBaseState (EditorProp baseEventState) {
@@ -139,18 +143,10 @@ namespace AssetObjectsPacks {
             return true;
         }
         
-        public static string NewEventState (EditorProp parentState) {
+        public static void NewEventState (EditorProp parentState) {
             ResetNewRecursive(parentState, false);
             EditorProp newState = parentState[subStatesField].AddNew("New Event State");
             MakeNewEventStateDefault(newState);
-            return newState[nameField].stringValue;
-        }
-        public static string NewEventState (EditorProp baseState, string parentDir) {
-            return NewEventState(GetEventStateByPath(baseState, parentDir));        
-        }
-            
-        public static bool DeleteIndiciesFromState (EditorProp baseState, string dirPath, IEnumerable<int> deleteIndicies) {
-            return DeleteIndiciesFromState(baseState, GetEventStateByPath(baseState, dirPath), deleteIndicies);             
         }
         public static bool DeleteIndiciesFromState (EditorProp baseState, EditorProp state, IEnumerable<int> deleteIndicies) {                    
             if (deleteIndicies.Count() == 0) return false;
@@ -165,8 +161,12 @@ namespace AssetObjectsPacks {
         }
                 
         static void AddAOsAndSubAOsToBaseList(EditorProp baseState, EditorProp state) {
-            for (int i = 0; i < state[assetObjectsField].arraySize; i++) AssetObjectEditor.CopyAssetObject(baseState[assetObjectsField].AddNew(), state[assetObjectsField][i]);
-            for (int i = 0; i < state[subStatesField].arraySize; i++) AddAOsAndSubAOsToBaseList(baseState, state[subStatesField][i]);
+            for (int i = 0; i < state[assetObjectsField].arraySize; i++) {
+                AssetObjectEditor.CopyAssetObject(baseState[assetObjectsField].AddNew(), state[assetObjectsField][i]);
+            }
+            for (int i = 0; i < state[subStatesField].arraySize; i++) {
+                AddAOsAndSubAOsToBaseList(baseState, state[subStatesField][i]);
+            }
         }
         static bool DeleteState (EditorProp baseState, EditorProp parentState, EditorProp state, ref int preDeleteSelection) {
             if (preDeleteSelection == -1) {
@@ -191,7 +191,6 @@ namespace AssetObjectsPacks {
                     break;
                 }
             }
-            //Debug.Log("Deleting state: " + state[nameField].stringValue);
             parentState[subStatesField].DeleteAt(atIndex);
 
 
@@ -214,9 +213,6 @@ namespace AssetObjectsPacks {
             else newState[nameField].SetValue(newName);
 
 
-        }
-        public static void QuickRenameNewEventState (EditorProp baseState, string directory, int index, string newName) {
-            QuickRenameNewEventState(GetEventStateByPath(baseState, directory), index, newName);
         }
         
         public static void MoveAOsToEventState(EditorProp baseState, IEnumerable<int> indicies, string origDir, string targetDir)
@@ -243,6 +239,43 @@ namespace AssetObjectsPacks {
 
 
         public static class GUI {
+
+            public static void DrawEventStateSoloMuteElement (EditorProp state, int poolIndex) {
+                if (poolIndex < state[subStatesField].arraySize) {
+                    return;
+                }
+
+                int i = poolIndex - state[subStatesField].arraySize;
+
+                bool changedMute;
+                bool newMute = GUIUtils.SmallToggleButton(new GUIContent("M", "Mute"), AssetObjectEditor.GetMute(state[assetObjectsField][i]), out changedMute );
+                if (changedMute) {
+                    AssetObjectEditor.SetMute(state[assetObjectsField][i], newMute);
+                    if (newMute) {
+                        AssetObjectEditor.SetSolo(state[assetObjectsField][i], false);
+                        
+
+                    }
+                }
+                bool changedSolo;
+                bool newSolo = GUIUtils.SmallToggleButton(new GUIContent("M", "Mute"), AssetObjectEditor.GetSolo(state[assetObjectsField][i]), out changedSolo );
+                if (changedSolo) {
+
+
+                    AssetObjectEditor.SetSolo(state[assetObjectsField][i], newSolo);
+                    if (newSolo) {
+                        AssetObjectEditor.SetMute(state[assetObjectsField][i], false);
+                        for (int x = 0; x < state[assetObjectsField].arraySize; x++) {
+                            if (x == i) {                    
+                                continue;
+                            }
+                            AssetObjectEditor.SetSolo(state[assetObjectsField][x], false);
+
+                        }
+                    }
+                }
+                
+            }
             
             static bool DrawStateName (EditorProp state, bool drawingBase, out string changeName) {
                 UnityEngine.GUI.enabled = !drawingBase;

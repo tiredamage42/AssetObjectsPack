@@ -3,112 +3,87 @@ using UnityEngine;
 using UnityEditor;
 using System.Linq;
 namespace AssetObjectsPacks {
-
     public class DragAndDrop : ElementIndexTracker
     {
+        public bool dragging, checkedDown, receiverHovered, mouseDown, mouseUp;
+        Vector2Int dropInfo, dragInfo;
+        GUIContent dragGUI, multipleGUI = new GUIContent("< Multiple >");
 
-        public bool dragging, checkedDown, hoveringOverReceiver, mouseDown, mouseUp;
-        Vector2 origMouseOffset, mousePos;
-        int dragStartIndex = -1, dropReceiverIndex = -1, dragStartCollection = -1, dropReceiverCollection = -1;
-        
-        public bool IsBeingDragged(int i) {
-            return dragging && IsTracked(i);
+        public void DrawDraggedGUIs(){
+            if (!dragging || elementCount == 0) return;
+            
+            EditorWindow.mouseOverWindow.Repaint();
+
+            Vector2 mp = UnityEngine.Event.current.mousePosition;
+            if (receiverHovered) EditorGUIUtility.AddCursorRect(new Rect(mp.x-5, mp.y-5, 10, 10), MouseCursor.ArrowPlus);
+            
+            GUIUtils.Label(new Rect(mp.x, mp.y - 8, GUIStyles.label.CalcSize(dragGUI).x, 16), dragGUI, receiverHovered ? Colors.black : Colors.liteGray);
         }
-
-        public bool DrawAndUpdate(Rect[] rects, System.Action<int, Rect> drawDragHoverElement, ElementIndexTracker selected, out int receiverIndex, out int receiverCollection, out int droppedCollection, out IEnumerable<int> droppedIndicies) {
-            DrawDragGUIs (rects, drawDragHoverElement);
-            CheckNewDragStart (rects, selected);
+        
+        
+        public bool DrawAndUpdate(ElementIndexTracker selected, out int receiverIndex, out int receiverCollection, out int droppedCollection, out IEnumerable<int> droppedIndicies) {
+            CheckNewDragStart (selected);
             return CheckDrop (out receiverIndex, out receiverCollection, out droppedCollection, out droppedIndicies);    
         }
 
-        public void CheckElementRectForDragsOrDrops (int index, int collection, Rect rt, bool isReceiver, bool isDraggable, out bool beingDragged, out bool isDragHovered, out bool dropReceived) {
-            
-            bool hasMousePos = rt.Contains(mousePos);
 
-            beingDragged = isDraggable && IsBeingDragged(index);
-            
-            isDragHovered = hasMousePos && dragging && !beingDragged;
-            
-            if (isDragHovered && isReceiver) hoveringOverReceiver = true;
-                
-            if (isDraggable && hasMousePos && mouseDown) {
-                dragStartIndex = index;
-                dragStartCollection = collection;
-            }
+        public void CheckElementRectForDragsOrDrops (GUIContent gui, bool hasMousePos, int index, int collection, bool isReceiver, bool isDraggable, out bool beingDragged, out bool receiverHovered, out bool dropReceived) {
+            bool dragStarted = isDraggable && hasMousePos && mouseDown;
+            beingDragged = isDraggable && dragging && IsTracked(index);
+            receiverHovered = isReceiver && hasMousePos && dragging && !beingDragged;
+            dropReceived = receiverHovered && mouseUp;
+                        
+            this.receiverHovered = this.receiverHovered || receiverHovered;
 
-            dropReceived = isReceiver && isDragHovered && mouseUp;
-            if (dropReceived) {
-                dropReceiverIndex = index;
-                dropReceiverCollection = collection;
+            Vector2Int info = new Vector2Int(index, collection);
+            if (dragStarted) {
+                dragInfo = info;
+                dragGUI = gui;
             }
+            if (dropReceived) dropInfo = info;
         }
-
+        
         public bool CheckDrop (out int receiverIndex, out int receiverCollection, out int droppedCollection, out IEnumerable<int> droppedIndicies) {
             
-            receiverIndex = dropReceiverIndex;
-            receiverCollection = dropReceiverCollection;
-            droppedCollection = dragStartCollection;
+            receiverIndex = dropInfo.x;
+            receiverCollection = dropInfo.y;
+            droppedCollection = dragInfo.y;
 
             droppedIndicies = null;
-            if (dragging) {
-                //Debug.Log("dragging " + lo + " / " + hi);
-            }
             if (mouseUp) {
-                if (dragging){
+                if (receiverIndex != -1) {
                     droppedIndicies = GetTrackedEnumerable().ToArray();
                     dragging = false;
                 }
                 ClearTracker();
+                checkedDown = false;
+                dragInfo.y = -1;
             }
-            return mouseUp && dropReceiverIndex != -1;
+            return receiverIndex != -1;
+        
         }
 
-        public void CheckNewDragStart (Rect[] origRects, ElementIndexTracker selected) {
-            if (dragStartIndex == -1) return;
-            int i = dragStartIndex;
-            
-            dragStartIndex = -1;
-            dragStartCollection = -1;
+        public void CheckNewDragStart (ElementIndexTracker selected) {
+            if (dragInfo.x == -1) return;
             dragging = false;      
-
-            if (elementCount != 0) 
-                return;
-
-            //Debug.Log("grabbed index: "+ i);
-            if (selected.IsTracked(i)) {
+            if (elementCount != 0) return;
+            lo = hi = dragInfo.x;
+            if (selected.IsTracked(dragInfo.x)) {
                 Copy(selected);
-                //Debug.Log("grabbinh selection: " + lo + "/" + hi);
+                dragGUI = multipleGUI;
             }
-            else {
-                lo = hi = i;
-                //Debug.Log("grabbinh single: " + lo + "/" + hi);
-
-            } 
-            origMouseOffset = new Vector2(origRects[lo].x - mousePos.x, origRects[lo].y - mousePos.y);  
+            
         }
         
         public void InputListen (){
-            hoveringOverReceiver = false;
-            dragStartIndex = -1;
-            dropReceiverIndex = -1;
+            receiverHovered = false;
+            dragInfo.x = dropInfo.x = -1;
+            
             UnityEngine.Event e = UnityEngine.Event.current;
-            mousePos = e.mousePosition;
             mouseDown = e.type == EventType.MouseDown && e.button == 0 && !checkedDown;
             if (mouseDown) checkedDown = true;
             mouseUp = e.type == EventType.MouseUp;
-            if (mouseUp) checkedDown = false;
             if (!dragging) dragging = e.type == EventType.MouseDrag && elementCount != 0;
-        }
-
-        public void DrawDragGUIs (Rect[] rects, System.Action<int, Rect> drawDragHoverElement) {
-            if (!dragging || elementCount == 0) return;
-            EditorWindow.mouseOverWindow.Repaint();
-            if (hoveringOverReceiver) EditorGUIUtility.AddCursorRect(new Rect(mousePos.x-5, mousePos.y-5, 10, 10), MouseCursor.ArrowPlus);
-            float x = mousePos.x + origMouseOffset.x;
-            float y = mousePos.y + origMouseOffset.y;
-            foreach (var i in GetTrackedEnumerable().ToArray()) {
-                drawDragHoverElement(i, new Rect(x, y + rects[i].y - rects[lo].y, rects[i].width, rects[i].height));
-            }
         }
     }
 }

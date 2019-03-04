@@ -31,7 +31,6 @@ namespace AssetObjectsPacks {
             return false;
         }
 
-
         public EditorProp (SerializedProperty prop) {
             this.prop = prop;
             editorPropType = prop.isArray && prop.propertyType != SerializedPropertyType.String ? EditorPropType.Array : EditorPropType.Property;
@@ -134,38 +133,18 @@ namespace AssetObjectsPacks {
             }
             public EditorProp InsertAtIndex (int i, string uniqueNamePrefix = null, string nameField = "name") {
                 if (!CheckForArray(true)) return null;
-                
                 string new_name = UniqueName(uniqueNamePrefix, nameField);
-                
-                
                 prop.InsertArrayElementAtIndex(i);
-/*
-                EditorProp newElement = new EditorProp( prop.GetArrayElementAtIndex(i) );
-                
-                arrayElements.Insert(i, newElement);
-
-
-                Debug.Log("inserted at " + i);
-
-                //prop.MoveArrayElement();
- */
                 RebuildArray();
-                if (new_name != null) {
-                    arrayElements[i][nameField].SetValue(new_name);
-                }
+                if (new_name != null) arrayElements[i][nameField].SetValue(new_name);
                 return arrayElements[i];
-                //return newElement;
             }
-
-        
-
 
             public EditorProp AddNew (string uniqueNamePrefix = null, string nameField = "name") {
                 if (!CheckForArray(true)) return null;
                 
-                string new_name = UniqueName(uniqueNamePrefix, nameField);
-            
-                int l = prop.arraySize;
+                string new_name = UniqueName(uniqueNamePrefix, nameField);            
+                int l = arraySize;
                 prop.InsertArrayElementAtIndex(l);
                 EditorProp newElement = new EditorProp( prop.GetArrayElementAtIndex(l) );
                 arrayElements.Add( newElement );
@@ -230,6 +209,7 @@ namespace AssetObjectsPacks {
                 public void SetValue (Object value) { 
                     if (!CheckEditorPropType(EditorPropType.Property)) return;
                     prop.objectReferenceValue = value; 
+                    prop.objectReferenceInstanceIDValue = value.GetInstanceID();
                 }
                 public void SetValue (string value) { 
                     if (!CheckEditorPropType(EditorPropType.Property)) return;

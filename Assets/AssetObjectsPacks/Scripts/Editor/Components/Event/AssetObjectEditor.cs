@@ -6,9 +6,25 @@ namespace AssetObjectsPacks {
 
     public static class AssetObjectEditor {
         const string objRefField = "objRef", idField = "id", paramsField = "parameters", isCopyField = "isCopy";
+        const string soloField = "solo", muteField = "mute";
         public static void MakeAssetObjectDefault (EditorProp ao, int packIndex, bool clear) {
             PackEditor.AdjustParametersToPack(ao[paramsField], packIndex, clear);
         }
+
+        public static bool GetMute (EditorProp ao) {
+            return ao[muteField].boolValue;
+        }
+        public static bool GetSolo (EditorProp ao) {
+            return ao[soloField].boolValue;
+        }
+        public static void SetMute (EditorProp ao, bool value) {
+            ao[muteField].SetValue( value );
+        }
+        public static void SetSolo (EditorProp ao, bool value) {
+            ao[soloField].SetValue( value );
+        }
+
+
         public static int GetID(EditorProp ao) {
             return ao[idField].intValue;
         }
@@ -35,6 +51,14 @@ namespace AssetObjectsPacks {
         public static void CopyParameters(IEnumerable<EditorProp> aos, EditorProp aoCopy, int paramIndex) {
             foreach (EditorProp ao in aos) CustomParameterEditor.CopyParameter (ao[paramsField][paramIndex], aoCopy[paramsField][paramIndex] );      
         }
+        public static void CheckForNullObject(EditorProp ao, System.Func<int, Object> getObjForID) {
+            if (ao[objRefField].objRefValue == null) {
+                Object o = getObjForID( ao[idField].intValue );
+                Debug.Log("Getting new obj: " + o.name);
+                ao[objRefField].SetValue( o );
+            }
+        }
+
         public static class GUI {    
             public static void DrawAssetObjectEdit (EditorProp ao, bool drawingSingle, GUIContent[] paramLabels, GUILayoutOption[] paramWidths, out int setParam) {                
                 GUIUtils.BeginIndent();
@@ -56,6 +80,8 @@ namespace AssetObjectsPacks {
                 //fields
                 EditorGUILayout.BeginHorizontal();
                 for (int i = 0; i < paramLabels.Length; i++) {
+
+                    //Debug.Log(paramLabels[i].text);
                     GUIUtils.DrawProp( CustomParameterEditor.GetParamValueProperty( ao[paramsField][i] ), paramWidths[i]);
                     GUIUtils.SmallButtonClear();   
                 }

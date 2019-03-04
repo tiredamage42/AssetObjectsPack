@@ -18,6 +18,7 @@ public class MovementController : MonoBehaviour
     public AssetObjectsPacks.Event turnsEvent;
     public AssetObjectsPacks.Event movesEvent;
     public AssetObjectsPacks.Event stillsEvent;
+    public AssetObjectsPacks.Event jumpsEvent;
     
     public string animationPackName = "Animations";
     public float[] turnThresholds = new float[] { 25.5f, 10, 1 };
@@ -26,8 +27,11 @@ public class MovementController : MonoBehaviour
     public bool doAutoTurn;
     [Range(0,1)] public int stance;
 
+    public float dirTurnChangeThreshold = 45;
+    public float animTurnAngleThreshold = 22.5f;
+
     
-    [Range(0,2)] public int direction;
+    [Range(0,3)] public int direction;
     public bool allowStrafe;
     public float minStrafeDistance = 1;
 
@@ -37,9 +41,9 @@ public class MovementController : MonoBehaviour
     
     
     //[Header("Debug:")]
-    bool trackingWaypoint;
-    bool isTurning;
-    bool doingAnimation;
+    public bool trackingWaypoint;
+    public bool isTurning;
+    public bool doingAnimation;
     const string turnAngleName = "TurnAngle";
     const string turnRightName = "ToRight";
     const string speedName = "Speed";
@@ -60,7 +64,6 @@ public class MovementController : MonoBehaviour
     public void SetMovementTarget(Vector3 newTarget) {
         movementTarget = newTarget;
     }
-
 
     void OnStillAnimFail () {
         Debug.LogError("Couldnt find any still anims");
@@ -87,6 +90,7 @@ public class MovementController : MonoBehaviour
         player[directionName].SetValue(direction);
     }
 
+
     void SetMovementControllerSpeed_Cue(object[] parameters) {
 
         int newSpeed = (int)parameters[1];
@@ -94,25 +98,23 @@ public class MovementController : MonoBehaviour
 
         lastSpeed = speed;
         if (speed == 0) {
+            //Debug.Log("stoping cue");
             direction = 0;
-            
-            CheckForCueEventOverride (parameters, stillsEvent);
+
+            CheckForCueEventOverride (parameters, stillsEvent);            
             
             SetCurrentSpeedStanceDireciton();
             
             player.SubscribeToEventFail(animationPackName, OnStillAnimFail);
             
             endEvent = player.OverrideEndEvent();
-            //Debug.Log("stoping cue");
-            
             startedStandStill = true;
+            
         }
         else {
             //other callbacks handle animations and end events
         }
     }
-
-
 
     int lastSpeed = -1;
     //plain movement no destination (manual set)
@@ -123,27 +125,68 @@ public class MovementController : MonoBehaviour
 
         if (changed) {
             if (speed == 0) {
+
                 direction = 0;
+                Debug.Log("stopped");
             }
-
-            SetCurrentSpeedStanceDireciton();
-
-            bool hasEventEndAlready = endEvent != null;
-            if (!hasEventEndAlready) endEvent = player.OverrideEndEvent();
             else {
-                //just so it doesnt try doing it itself
-                player.OverrideEndEvent(); 
-            }
-            
-            if (speed == 0) player.SubscribeToEventFail(animationPackName, OnStillAnimFail);
-            else player.SubscribeToEventFail(animationPackName, OnMoveAnimFail);      
-            
-            player.PlayEvent(speed == 0 ? stillsEvent : movesEvent, false);
+                                Debug.Log("went");
 
-            //so it's ready to play another event wihtout complications (these are looped anywyas)
-            if (!hasEventEndAlready) TriggerEndEvent();
+            }
+
             
+            bool asInterrupter = !isJumping;
+            System.Action callback = OnMoveAnimFail;
+            if (speed == 0) callback = OnStillAnimFail;
+            Debug.Log("playing evnt");
+            SwitchLoopState (asInterrupter, speed == 0 ? stillsEvent : movesEvent, callback);
+              
         }
+    }
+
+    void CheckSpeedDirectionChanges(int speed, int direction) {
+        bool changed = speed != lastSpeed || direction != lastDirection || (speed == 0 && direction != 0);
+        
+        lastSpeed = speed;
+        this.speed = speed;
+
+        lastDirection = direction;
+        this.direction = direction;
+        
+
+        if (changed) {
+            if (speed == 0) {
+
+                lastDirection = 0;
+                this.direction = 0;
+
+                Debug.Log("stopped");
+            }
+            else {
+                Debug.Log("went");
+
+            }
+
+            
+            bool asInterrupter = !isJumping;
+
+
+            System.Action callback = OnMoveAnimFail;
+            if (speed == 0) callback = OnStillAnimFail;
+            Debug.Log("playing evnt");
+            SwitchLoopState (asInterrupter, speed == 0 ? stillsEvent : movesEvent, callback);
+              
+        }
+    }
+
+    void SwitchLoopState (bool asInterrupter, AssetObjectsPacks.Event loopEvent, System.Action failCallback) {
+        if (asInterrupter) {
+            doingAnimation = false;
+        }
+        SetCurrentSpeedStanceDireciton();
+        player.SubscribeToEventFail(animationPackName, failCallback);      
+        player.PlayEvent(loopEvent, false, true, asInterrupter);
+    
     }
 
     int lastDirection = -9999;
@@ -159,29 +202,13 @@ public class MovementController : MonoBehaviour
         bool changed = direction != lastDirection;
         lastDirection = direction;
         this.direction = direction;
-
         if (changed) {
-            
-            SetCurrentSpeedStanceDireciton();
-
-            bool hasEventEndAlready = endEvent != null;
-            if (!hasEventEndAlready) endEvent = player.OverrideEndEvent();
-            else {
-                //just so it doesnt try doing it itself
-                player.OverrideEndEvent(); 
-            }
-            
-            player.SubscribeToEventFail(animationPackName, OnMoveAnimFail);      
-            
-            player.PlayEvent(movesEvent, false);
-
-            //so it's ready to play another event wihtout complications (these are looped anywyas)
-            if (!hasEventEndAlready) TriggerEndEvent();
-            
+            Debug.Log("changing loopstates for direction");
+            bool asInterrupter = !isJumping;
+            SwitchLoopState (asInterrupter, movesEvent, OnMoveAnimFail);
         }
     }
 
-    
     void CheckForCueEventOverride (object[] parameters, AssetObjectsPacks.Event overrideEvent) {
         AssetObjectsPacks.Cue cue = (AssetObjectsPacks.Cue)parameters[0];
         if (cue.GetEventByName(animationPackName) == null) {
@@ -212,7 +239,7 @@ public class MovementController : MonoBehaviour
 
         //check threshold
         if (DistanceToWaypointAboveThreshold()) {
-            PrepareForMoveAnimAttempt(false, false);
+            PrepareForMoveAnimAttempt(false, false, true);
         }
         else {
             SkipCueAnimWithinThreshold();
@@ -232,8 +259,8 @@ public class MovementController : MonoBehaviour
         SetMovementTarget(pos);
         float angleFwd;
         Vector3 targetDir;        
-        if (TargetAngleAboveTurnThreshold (false, speed == 0 ? 0 : direction, transform.position, transform.forward, movementTarget, turnThresholds[speed], out targetDir, out angleFwd)) {
-            PrepareForTurnAnimationAttempt (angleFwd, targetDir, false, false);
+        if (TargetAngleAboveTurnThreshold (speed == 0 ? 0 : direction, transform.position, transform.forward, movementTarget, animTurnAngleThreshold, out targetDir, out angleFwd)) {
+            PrepareForTurnAnimationAttempt (angleFwd, targetDir, false, false, true);
         }
         else {
             SkipCueAnimWithinThreshold();
@@ -243,43 +270,81 @@ public class MovementController : MonoBehaviour
         endEvent = player.OverrideEndEvent();
     }
 
+    public bool isJumping;
+
+    void OnEndJump () {
+        isJumping = false;
+
+    }
+    void OnJumpFail () {
+        Debug.LogError("couldnt find jump anim");
+    }
+
+    public void TriggerJump () {
+        if (!isJumping) {
+            isJumping = true;
+            player.SubscribeToAssetObjectUseEnd(animationPackName, OnEndJump);
+            player.SubscribeToEventFail(animationPackName, OnJumpFail);
+            SetCurrentSpeedStanceDireciton();
+            player.PlayEvent(jumpsEvent, false, false, true);
+        }
+    }
+
+    Vector3 attemptTurnDir;
     public void TurnTo (Vector3 target, bool interruptPlaylists) {
         //direction = 0;
         SetMovementTarget(target);
         float angleFwd;
         Vector3 targetDir;
 
-        if (TargetAngleAboveTurnThreshold (false, speed == 0 ? 0 : direction, transform.position, transform.forward, movementTarget, turnThresholds[speed], out targetDir, out angleFwd)) {
+        if (TargetAngleAboveTurnThreshold (
+            speed == 0 ? 0 : direction, transform.position, 
+            transform.forward, 
+            movementTarget, 
+            animTurnAngleThreshold, 
+            out targetDir, out angleFwd
+        ) && !isJumping) {
+
             endEvent = player.OverrideEndEvent();
-            PrepareForTurnAnimationAttempt(angleFwd, targetDir, true, interruptPlaylists);
-            TriggerEndEvent();
+            PrepareForTurnAnimationAttempt(angleFwd, targetDir, true, interruptPlaylists, true);
+            //TriggerEndEvent();
+        }
+        else {
+            if (angleFwd >= turnThresholds[speed]) {
+                attemptTurnDir = targetDir;
+                //just slerp helper
+                isTurning = true;
+            }
+
         }
     }
 
 
-    void PrepareForTurnAnimationAttempt (float angleFwd, Vector3 dirToTarget, bool doAttempt, bool interruptPlaylist) {
+    void PrepareForTurnAnimationAttempt (float angleFwd, Vector3 dirToTarget, bool doAttempt, bool interruptPlaylist, bool asInterrupter) {
         doingAnimation = true;
         isTurning = true;
+        attemptTurnDir = dirToTarget;
 
-        player.SubscribeToEventEnd(animationPackName, OnEndTurnAnimation);
+        player.SubscribeToAssetObjectUseEnd(animationPackName, OnEndTurnAnimation);
         player.SubscribeToEventFail(animationPackName, OnTurnAnimFail);
         
-        SetCurrentSpeedStanceDireciton();
             
-        player[turnAngleName].SetValue(angleFwd);
-        float angleRight = Vector3.Angle(transform.right, dirToTarget);
-        player[turnRightName].SetValue(angleRight <= 90);
+        player[turnAngleName].SetValue(angleFwd);        
+        player[turnRightName].SetValue(Vector3.Angle(transform.right, dirToTarget) <= 90);
+        SetCurrentSpeedStanceDireciton();
 
-        if (doAttempt) player.PlayEvent(turnsEvent, interruptPlaylist);
+        if (doAttempt) player.PlayEvent(turnsEvent, interruptPlaylist, false, asInterrupter);
     }
-    void PrepareForMoveAnimAttempt (bool doAttempt, bool interruptPlaylist) {
+    void PrepareForMoveAnimAttempt (bool doAttempt, bool interruptPlaylist, bool asInterrupter) {
+        direction = GetDirection(transform.position, movementTarget, interestPoint, allowStrafe, minStrafeDistance);
+        
         trackingWaypoint = true;
 
         player.SubscribeToEventFail(animationPackName, OnMoveAnimFail);
-        direction = GetDirection(transform.position, movementTarget, interestPoint, allowStrafe, minStrafeDistance);
+        
         SetCurrentSpeedStanceDireciton();
             
-        if (doAttempt) player.PlayEvent(movesEvent, interruptPlaylist);
+        if (doAttempt) player.PlayEvent(movesEvent, interruptPlaylist, false, asInterrupter);
     }
 
 
@@ -291,7 +356,9 @@ public class MovementController : MonoBehaviour
 
             endEvent = player.OverrideEndEvent();
 
-            PrepareForMoveAnimAttempt(true, interruptPlaylists);
+            bool asInterrupter = true;
+
+            PrepareForMoveAnimAttempt(true, interruptPlaylists, asInterrupter);
 
             TriggerEndEvent();
 
@@ -303,7 +370,7 @@ public class MovementController : MonoBehaviour
 
         }
     }
-    //0 fwd 1 left 2 right
+    //0 fwd 1 left 2 right 3 back
 
 
     void Awake () {
@@ -333,14 +400,20 @@ public class MovementController : MonoBehaviour
     void Update () {
         DebugLoop();
         //in case manual speed change
-        SetMovementControllerDirection(direction);
-        SetMovementControllerSpeed(speed);
+
+        CheckSpeedDirectionChanges(speed, direction);
+
+        //SetMovementControllerSpeed(speed);
+        //SetMovementControllerDirection(direction);
 
         CheckStandingStillTransition();
         CheckWayPointTracking();
         CheckAutoTurn();
     }
     void FixedUpdate () {
+    }
+    void LateUpdate () {
+
         UpdateSleprTurnHelper();
     }
     
@@ -361,12 +434,20 @@ public class MovementController : MonoBehaviour
 
 
     void UpdateSleprTurnHelper () {
-        if ((isTurning || trackingWaypoint) && !doingAnimation){
+        if ((isTurning || trackingWaypoint) && (!doingAnimation)){
 
 
             Vector3 targetDir;
             float angleFwd;
-            if (TargetAngleAboveTurnThreshold (isTurning, speed == 0 ? 0 : direction, transform.position, transform.forward, movementTarget, turnThresholds[speed], out targetDir, out angleFwd)) {
+
+            bool targetAngleAboveHelpTurnThreshold = TargetAngleAboveTurnThreshold (
+                speed == 0 ? 0 : direction, transform.position, transform.forward, movementTarget, turnThresholds[speed], 
+                out targetDir, out angleFwd
+            );
+
+            //bool targetDirChangedFromAttempt = doAutoTurn && Vector3.Angle(targetDir, attemptTurnDir) > dirTurnChangeThreshold;
+
+            if (targetAngleAboveHelpTurnThreshold){//} && !targetDirChangedFromAttempt) {
                 
                 transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(targetDir), Time.deltaTime * turnHelpSpeeds[speed]);
             }
@@ -375,7 +456,21 @@ public class MovementController : MonoBehaviour
                 if (isTurning) 
                     OnEndTurn();
             }
+
+
+            if (isTurning && doAutoTurn){
+
+
+                //float angleFwd;
+                //bool targetAngleAboveHelpTurnThreshold = TargetAngleAboveTurnThreshold (speed == 0 ? 0 : direction, transform.position, transform.forward, movementTarget, turnThresholds[speed], out targetDir, out angleFwd);
+                bool targetDirChangedFromAttempt = Vector3.Angle(targetDir, attemptTurnDir) > dirTurnChangeThreshold;
+                if (targetDirChangedFromAttempt) {
+                    OnEndTurn();
+                }
+                
+            }
         }
+
     }
     
     void CheckAutoTurn () {
@@ -403,23 +498,11 @@ public class MovementController : MonoBehaviour
         }
     }
 
-    static bool TargetAngleAboveTurnThreshold (bool debug, int direction, Vector3 position, Vector3 faceDir, Vector3 target, float threshold, out Vector3 dir, out float angleFwd) {
+    static bool TargetAngleAboveTurnThreshold (int direction, Vector3 position, Vector3 faceDir, Vector3 target, float threshold, out Vector3 dir, out float angleFwd) {
         
         dir = GetTargetLookDirection(direction, position, target);
         angleFwd = Vector3.Angle(faceDir, dir);
-
-        if (debug) {
-
-            //Debug.DrawRay(position, dir, Color.green);
-        
-            //Debug.DrawRay(position, faceDir, Color.red);
-
-            //Debug.LogError(angleFwd + "/ " + (angleFwd >= threshold));
-
-            //Debug.Break();
-        }
-        
-        
+ 
         return angleFwd >= threshold;
     }
     static Vector3 GetTargetLookDirection(int direction, Vector3 position, Vector3 target) {
@@ -433,6 +516,9 @@ public class MovementController : MonoBehaviour
         }
         else if (direction == 2) {
             return Vector3.Cross(startToDest.normalized, Vector3.up);
+        }
+        else if (direction == 3) {
+            return -startToDest;
         }
         return startToDest;
     }
@@ -461,30 +547,26 @@ public class MovementController : MonoBehaviour
         float angle = Vector3.Angle(midToInterest, startToDest);
 
         /*
+            ideal  angle fr look position is 90 or -90
         
             a -------------- b
-                    |
-                    |
-                    |
-                interest point
+                    /
+                   /
+                  /
+            interest point
 
-            ideal  angle fr look position is 90 or -90
         */
 
-        if (angle <= 45 || angle >= 135) {
-            //angle is too acute or obtuse between interest (enemy point) and destination
-            //for strafing
-
-            //Debug.LogError ("angle is too acute or obtuse");
-            //Debug.Break ();
-            return 0;
-        }
+        //angle is too acute or obtuse between interest (enemy point) and destination
+        //for strafing (backwards or forwards)
+        if (angle <= 45 || angle >= 135) return angle >= 135 ? 0 : 3;
+        
 
         /*
-                interest point
-                    |
-                    |
-                    |
+              interest point
+                  \
+                   \
+                    \
             a -------------- b
                     |
                     | <- startToDestPerp
@@ -493,20 +575,10 @@ public class MovementController : MonoBehaviour
         */
         Vector3 startToDestPerp = Vector3.Cross(startToDest.normalized, Vector3.up);
 
-        //Debug.DrawRay(midPoint, startToDestPerp.normalized, Color.green, startToDestPerp.magnitude);
-        
         angle = Vector3.Angle(startToDestPerp, midToInterest);
 
-        if (angle <= 45) {
-            //Debug.LogError ("strafing right towards destination");
-            //Debug.Break ();
-            return 2;
-        }
-        else {
-            //Debug.LogError ("strafing left towards destination");   
-            //Debug.Break ();
-            return 1;
-        }
+        return angle <= 45 ? 2 : 1;
+    
     }
         
 }

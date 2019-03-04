@@ -1,8 +1,4 @@
-﻿//using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-namespace AssetObjectsPacks {
+﻿namespace AssetObjectsPacks {
     public abstract class ElementIndexTracker {
         public int lo = -1, hi = -1;
         public bool hasElements { get { return hi != -1 && lo != -1; } }
@@ -13,7 +9,6 @@ namespace AssetObjectsPacks {
             index = lo;
             return singleElement;
         }
-        
         public void ClearTracker () {
             lo = hi = -1;
         }
@@ -24,10 +19,9 @@ namespace AssetObjectsPacks {
             lo = other.lo;
             hi = other.hi;
         }
-        public IEnumerable<int> GetTrackedEnumerable () {
+        public System.Collections.Generic.IEnumerable<int> GetTrackedEnumerable () {
             if (!hasElements) return null;
-            return new Vector2Int(lo, hi).Generate();
-            //for (int i = lo; i <= hi; i++) yield return i;
+            return new UnityEngine.Vector2Int(lo, hi).Generate();
         }        
     }
 }

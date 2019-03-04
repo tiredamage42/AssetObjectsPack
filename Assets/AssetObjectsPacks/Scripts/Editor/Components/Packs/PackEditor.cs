@@ -155,7 +155,7 @@ namespace AssetObjectsPacks {
                 if (packIndex >= packs.arraySize) packIndex = packs.arraySize-1;
             }
             static bool DrawPack(EditorProp pack){
-                GUILayoutOption packsFieldsWidth = GUILayout.ExpandWidth(true);// GUILayout.Width(100);
+                GUILayoutOption packsFieldsWidth = GUILayout.Width(100);
 
                 GUIUtils.StartBox(1);
                 //name
@@ -170,7 +170,7 @@ namespace AssetObjectsPacks {
                 
                 //default params
                 GUIUtils.StartBox(0);
-                GUIUtils.Label(new GUIContent ("Asset Object Default Parameters:"), false);    
+                GUIUtils.Label(new GUIContent ("Asset Object Default Parameters:"));    
 
                 GUIUtils.StartBox(Colors.darkGray);
                 DrawParamsList(pack[defaultParametersField]);

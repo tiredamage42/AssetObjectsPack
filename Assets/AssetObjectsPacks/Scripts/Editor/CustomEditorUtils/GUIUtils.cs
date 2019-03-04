@@ -163,30 +163,11 @@ namespace AssetObjectsPacks {
   
         const string overrideKeyboardControlName = "overrideKeyboard";
         public static bool KeyboardOverriden () {
-            return GUI.GetNameOfFocusedControl() == overrideKeyboardControlName;
+            return IsFocused(overrideKeyboardControlName);
         }
-        //public static void NextControlOverridesKeyboard () {
-            // Set the internal name of the textfield
-        //    GUI.SetNextControlName(overrideKeyboardControlName);
-        //}
-        //public static void CheckLoseFocusLastRect () {
-            //if clicked outside, lose focus
-        //    bool lastRectClicked;
-        //    if (ClickHappened(out lastRectClicked)) {
-        //        if (!lastRectClicked) EditorGUI.FocusTextInControl("");
-        //    }
-        //}
-        //static bool ClickHappened (out bool lastElementClicked) {
-        //    UnityEngine.Event e = UnityEngine.Event.current;
-        //    bool click_happened = e.type == EventType.MouseDown && e.button == 0;            
-        //    lastElementClicked = false;
-        //    if (click_happened) lastElementClicked = GUILayoutUtility.GetLastRect().Contains(e.mousePosition);
-        //    return click_happened;
-        //}
-
-
-
-
+        public static bool IsFocused(string controlName) {
+            return GUI.GetNameOfFocusedControl() == controlName;
+        }
 
         public static string DrawDirectoryField (string value, GUIContent content, bool forceProject=true, params GUILayoutOption[] options) {
             
@@ -240,6 +221,12 @@ namespace AssetObjectsPacks {
         public static void Label (GUIContent c, Color32 text_color, params GUILayoutOption[] options) {
             DoWithinColor (GUIStyles.label, text_color, () => EditorGUILayout.LabelField(c, GUIStyles.label, options) );
         }
+        public static void Label (Rect r, GUIContent c, Color32 text_color) {
+            DoWithinColor (GUIStyles.label, text_color, () => GUI.Label(r, c, GUIStyles.label) );
+        }
+
+
+
         
         public static void Space(int count = 1) {
             for (int i = 0; i < count; i++) EditorGUILayout.Space();
@@ -284,7 +271,6 @@ namespace AssetObjectsPacks {
             EditorGUILayout.EndVertical();
         }
         
-
         public static void BeginIndent (int indent_space = 1) {
             EditorGUILayout.BeginHorizontal();
             for (int i = 0; i < indent_space; i++) SmallButtonClear();
@@ -339,10 +325,7 @@ namespace AssetObjectsPacks {
         public static bool SmallDeleteButton(string hint = "Delete") {
             return SmallButton(new GUIContent ("", hint), Colors.red, Colors.white);
         }
-        //public static bool ToggleButton (GUIContent c, bool fit_content, bool value, GUIStyle s, out bool changed) {
-        //    changed = Button(c, fit_content, s, Colors.Toggle(value), Colors.black);
-        //    return changed ? !value : value;
-        //}
+        
         public static bool SmallButton (GUIContent c, Color32 color, Color32 text_color) {
             return Button(c, small_button_style, color, text_color, smallButtonOpts );
         }
@@ -425,8 +408,6 @@ namespace AssetObjectsPacks {
             return changed;
         }
             
-        //public static readonly GUIContent blank_content = GUIContent.none;
-
         public static GUILayoutOption CalcWidth(this GUIContent c, GUIStyle s) {
             return GUILayout.Width(s.CalcSize(c).x);
         }

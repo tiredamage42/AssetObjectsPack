@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1284b611740a6448d90c4ebacf05b26a, type: 3}
-  m_Name: Turns
+  m_Name: Turns 1
   m_EditorClassIdentifier: 
   multi_edit_instance:
     isCopy: 0
@@ -276,7 +276,7 @@ MonoBehaviour:
               - name: TimeOffset
                 pType: 1
                 BoolValue: 0
-                FloatValue: 0
+                FloatValue: 0.12
                 IntValue: 0
                 StringValue: 
             subStates: []
@@ -506,7 +506,7 @@ MonoBehaviour:
               - name: Speed
                 pType: 1
                 BoolValue: 0
-                FloatValue: 1
+                FloatValue: 1.25
                 IntValue: 0
                 StringValue: 
               - name: Mirror
@@ -536,7 +536,7 @@ MonoBehaviour:
               - name: TimeOffset
                 pType: 1
                 BoolValue: 0
-                FloatValue: 0
+                FloatValue: 0.35
                 IntValue: 0
                 StringValue: 
             subStates: []
@@ -1164,7 +1164,7 @@ MonoBehaviour:
             - name: Speed
               pType: 1
               BoolValue: 0
-              FloatValue: 1
+              FloatValue: 1.25
               IntValue: 0
               StringValue: 
             - name: Mirror

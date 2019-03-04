@@ -11,11 +11,9 @@ namespace AssetObjectsPacks {
         public bool SearchBarGUI () {
             string lastSearch = searchFilter;
             string defaultSearch = searchFilter.IsEmpty() ? "Search" : searchFilter;
-            
             string searchResult = GUIUtils.DrawTextField(defaultSearch, GUIUtils.TextFieldType.Delayed, true, out _, GUILayout.MaxWidth(128));
-            
             if (searchResult != defaultSearch) searchFilter = searchResult;
-            
+    
             return searchFilter != lastSearch;
         }
     }

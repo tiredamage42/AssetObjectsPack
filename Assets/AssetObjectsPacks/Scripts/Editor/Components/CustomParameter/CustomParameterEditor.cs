@@ -40,7 +40,10 @@ namespace AssetObjectsPacks {
                         break;
                     }
                 }
-                if (!inDefParams) parameters.DeleteAt(i);
+                if (!inDefParams) {
+                    Debug.Log("Deleting param: " + name);
+                    parameters.DeleteAt(i);
+                }
             }
 
             //check for parameters that need adding
@@ -54,7 +57,11 @@ namespace AssetObjectsPacks {
                         break;
                     }
                 }
-                if (!inParams) CopyParameter(parameters.AddNew(), defParam);
+                if (!inParams) {
+                    Debug.Log("adding param: " + defParamName);
+                    
+                    CopyParameter(parameters.AddNew(), defParam);
+                }
             }
             
             //reorder to same order
@@ -66,6 +73,9 @@ namespace AssetObjectsPacks {
                 string defParamName = GetParamName(defaultParams[d]);
                 EditorProp parameter = parameters[d];
                 if (GetParamName(parameter) == defParamName) continue;
+
+                Debug.Log("moving param: " + GetParamName(parameter));
+                    
                 EditorProp trueParam = null;
                 for (int p = d + 1; p < c_p; p++) {
                     trueParam = parameters[p];
@@ -84,7 +94,10 @@ namespace AssetObjectsPacks {
             //check type changes
             Func<EditorProp, int> GetParamType = (EditorProp parameter) => parameter[typeField].intValue;
             for (int i = 0; i < c_d; i++) {
-                if (GetParamType(parameters[i]) != GetParamType(defaultParams[i])) CopyParameter(parameters[i], defaultParams[i]);
+                if (GetParamType(parameters[i]) != GetParamType(defaultParams[i])) {
+                    Debug.Log("chaning: " + GetParamName(parameters[i]) + " from " + GetParamType(parameters[i]) + " to " + GetParamType(defaultParams[i]));
+                    CopyParameter(parameters[i], defaultParams[i]);
+                }
             }
         }
     

@@ -5,8 +5,9 @@ namespace AssetObjectsPacks {
         #if UNITY_EDITOR
         public bool isCopy;
         #endif
-
+        public bool solo, mute;
         public Object objRef;
+
         public int id;
         public CustomParameter[] parameters;
         Dictionary<string, CustomParameter> paramDict = new Dictionary<string, CustomParameter>();

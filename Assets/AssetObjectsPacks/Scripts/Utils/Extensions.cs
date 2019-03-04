@@ -15,9 +15,9 @@ namespace AssetObjectsPacks {
         public static IEnumerable<int> Generate (this Vector2Int c) {
             for (int i = c.x; i <= c.y; i++) yield return i;
         }
-        public static IEnumerable<int> Generate (this int c) {
-            return new Vector2Int(0, c - 1).Generate();
-        }
+        //public static IEnumerable<int> Generate (this int c) {
+        //    return new Vector2Int(0, c - 1).Generate();
+        //}
         public static List<T> ToList<T>(this IEnumerable<T> a) {
             List<T> r = new List<T>(a.Count());
             r.AddRange(a);
@@ -40,6 +40,15 @@ namespace AssetObjectsPacks {
             for (int i = a; i <= b; i++) r.Add( x[i] ); 
             return r;
         }
+        public static void ToggleElement<T> (this IList<T> e, T o) {
+            if (e.Contains(o)) e.Remove(o);
+            else e.Add(o);
+        }
+        public static void ToggleElement<T> (this HashSet<T> e, T o) {
+            if (e.Contains(o)) e.Remove(o);
+            else e.Add(o);
+        }
+        
         public static T RandomChoice<T>(this IList<T> l) {
             return l[UnityEngine.Random.Range(0, l.Count)];
         }

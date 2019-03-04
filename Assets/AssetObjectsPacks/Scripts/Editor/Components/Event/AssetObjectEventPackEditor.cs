@@ -33,10 +33,18 @@ namespace AssetObjectsPacks {
         EditorProp so;
 
         //ScaleConstraint Icon = duplicate
-
         //_Help = help
 
         BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+
+        bool didAOCheck;
+        void CheckAllAOsForNullObjects () {
+            if (didAOCheck) return;
+            didAOCheck = true;
+            EventStateEditor.CheckAllAOsForNullObjects (so[Event.baseStateField], GetObjectRefForID);
+            so.SaveObject();
+
+        }
        
         #region CUSTOM_INSPECTOR_METHODS
         public override bool HasPreviewGUI() { 
@@ -52,10 +60,13 @@ namespace AssetObjectsPacks {
             so = new EditorProp (serializedObject);
             EventStateEditor.ResetNewRecursive(so[Event.baseStateField], true);    
             EnableCurrentPack();
+
         }
         public override void OnInspectorGUI() {
             base.OnInspectorGUI();
             GUIUtils.StartCustomEditor();
+            CheckAllAOsForNullObjects();
+            
             DrawEvent();
 
             if (!(forceRebuild && generateNewIDs)) {
@@ -73,27 +84,33 @@ namespace AssetObjectsPacks {
         
 
         #region ELEMENT_SELECT_CALLBACKS
-        string OnDirectoryCreate (string parentDir) {
+        void OnDirectoryCreate () {
             if (viewTab == 0) {
-                return EventStateEditor.NewEventState(so[Event.baseStateField], parentDir);
+                EventStateEditor.NewEventState(curState);//, parentDir);
             }
             else {
 
             }
-            return null;
-        }
-        void OnSelectionChange() {
-            RebuildPreviewEditor();
         }
         
         void OnNameNewDirectory(int poolIndex, string newName) {
             if (viewTab == 0) {
-                EventStateEditor.QuickRenameNewEventState(baseState, selectionSystem.curPath, poolIndex, newName);
+                EventStateEditor.QuickRenameNewEventState(curState, poolIndex, newName);
                 namedNewDir = true;
             }            
         }
 
         EditorProp baseState { get { return so[Event.baseStateField]; } }
+
+        EditorProp curState, curParentState;
+
+        void OnCurrentPathChange (string newPath) {
+
+            if (viewTab == 0) {
+                curState = EventStateEditor.GetEventStateByPath(baseState, newPath);
+            }
+
+        }
 
         void GetIDsInDirectory (string directory, bool useRepeats, HashSet<int> ids) {
             if (viewTab == 0) {
@@ -112,7 +129,7 @@ namespace AssetObjectsPacks {
             }
         }
 
-        IEnumerable<ElementSelectionSystem.Element> GetPoolElements (string atPath) {
+        IEnumerable<SelectionElement> GetPoolElements (string atPath) {
             int c = allPaths.Length;
 
             EditorProp currentEventState = null;
@@ -130,13 +147,23 @@ namespace AssetObjectsPacks {
                 int id;
                 string path = "";
                 bool isNewDir = false, isCopy = false;
+                string renameName = "";
+                System.Action<int> elementPrefix = null;
+                System.Action<int, string> onRename = null;
                 if (viewTab == 0) {
                     string elName;
                     bool isSubstate;
                     EventStateEditor.GetValues(currentEventState, i, out id, out elName, out isNewDir, out isCopy, out isSubstate);
+                    renameName = elName;
+                    
                     path = atPath + (atPath.IsEmpty() ? "" : "/");
+
                     if (isSubstate) path = path + elName + "/";
+                    
                     else path = path + AssetObjectsEditor.RemoveIDFromPath(id2path[id]).Replace("/", "-");
+                    
+                    elementPrefix = ExtraElementPrefix;
+                    onRename = OnNameNewDirectory;
                     
                 }
                 else {
@@ -149,28 +176,39 @@ namespace AssetObjectsPacks {
                     if (ignoreIDs.Contains(id)) continue;
                     path = AssetObjectsEditor.RemoveIDFromPath(allPaths[i]);   
                 }
-                yield return new ElementSelectionSystem.Element(id, path, i, isNewDir, isCopy);
+                yield return new SelectionElement(id, path, i, isNewDir, isCopy, elementPrefix, onRename, renameName);
             }
         }
 
         StateToggler hiddenIDsToggler = new StateToggler();
-        
-
-
         bool createdDirectory, hiddenToggleSuccess;
 
+        void ExtraElementPrefix (int poolIndex) {
+
+            if (viewTab == 0) {
+                //EditorProp curEventState = EventStateEditor.GetEventStateByPath(so[Event.baseStateField], curViewPath);
+                EventStateEditor.GUI.DrawEventStateSoloMuteElement(curState, poolIndex);
+            }
+
+
+            
+
+
+        }
+
+
+
+            
     
-        void ExtraToolbarButtons (string curViewPath, KeyboardListener k) {
+        void ExtraToolbarButtons (KeyboardListener k) {
 
             hiddenToggleSuccess = createdDirectory = duplicated = removeOrAdd = false;
             
             if (!showingHidden) {
 
                 //add directory
-            
                 if (GUIUtils.Button(new GUIContent(EditorGUIUtility.IconContent("Folder Icon").image, "Add Folder"), GUIStyles.toolbarButton, iconWidth)) {
-                    //string origDirName = OnDirectoryCreate(viewTab, curViewPath);
-                    selectionSystem.OnDirectoryCreate(OnDirectoryCreate(curViewPath));
+                    OnDirectoryCreate();
                     createdDirectory = true;
                 }
             
@@ -186,9 +224,7 @@ namespace AssetObjectsPacks {
                 ToggleHiddenButtonGUI(k);    
             }
 
-            GUI.enabled = selectionSystem.justFilesSelected;
             CheckPreviewToggle(k);
-            GUI.enabled = true;
         }
         void OpenImportSettingsButton (string icon) {
             if (GUIUtils.Button(new GUIContent(EditorGUIUtility.IconContent(icon).image, "Open import settings on selection"), GUIStyles.toolbarButton, iconWidth)) OpenImportSettings();
@@ -202,51 +238,45 @@ namespace AssetObjectsPacks {
         void AddOrRemoveButtons (int viewTab, string iconAdd, string iconRemove, KeyboardListener k) {
             if (viewTab == 0) RemoveFilesButton(iconRemove, k);   
             else if (viewTab == 1) AddFilesButton(iconAdd, k);
-            if (removeOrAdd) {
-                if (viewTab == 0) removeOrAdd = EventStateEditor.DeleteIndiciesFromState(so[Event.baseStateField], selectionSystem.curPath, selectionSystem.GetPoolIndiciesInSelection(true));    
-                //no repeats (should be none anywyas)                    
-                else if (viewTab == 1) removeOrAdd = EventStateEditor.AddIDsToState(so[Event.baseStateField], 
-                selectionSystem.GetIDsInSelectionDeep(
-                    "Add Objects", "Selection contains directories, Add all sub objects?"
-
-                ), packIndex, GetObjectRefForID);
-            }
         }
 
         void DuplicateButton (KeyboardListener k) {
             GUI.enabled = selectionSystem.hasSelection;
             duplicated = GUIUtils.Button(EditorGUIUtility.IconContent("ScaleConstraint Icon", "Duplicate"), GUIStyles.toolbarButton, iconWidth) || (k[KeyCode.D] && (k.command || k.ctrl));
             GUI.enabled = true;
-            if (duplicated) EventStateEditor.DuplicateIndiciesInState(so[Event.baseStateField], selectionSystem.curPath, selectionSystem.GetSelectionEnumerable());
+            if (duplicated) EventStateEditor.DuplicateIndiciesInState(curState, selectionSystem.GetSelectionEnumerable().ToHashSet());
             so.SaveObject();
         }
+
         void ToggleHiddenButtonGUI (KeyboardListener k) {
-            hiddenIDsToggler.ToggleStateButton(
-                EditorGUIUtility.IconContent("animationvisibilitytoggleon", "Toggle the hidden status of the selection (if any, else all shown elements)"),
-                GUIStyles.toolbarButton, iconWidth, k[KeyCode.H], GetHiddenToggleSelection, out hiddenToggleSuccess 
-            );
-        }
-        IEnumerable<int> GetHiddenToggleSelection () {
-            return selectionSystem.GetIDsInSelectionDeep(
+            GUIContent c = EditorGUIUtility.IconContent("animationvisibilitytoggleon", "Toggle the hidden status of the selection (if any, else all shown elements)");
+            hiddenToggleSuccess = (GUIUtils.Button(c, GUIStyles.toolbarButton, iconWidth) || k[KeyCode.H]) && hiddenIDsToggler.ToggleState(
+                selectionSystem.GetIDsInSelectionDeep(
                 "Hide/Unhide Directory", "Selection contains directories, hidden status of all sub elements will be toggled"
+            ).ToHashSet()
             );
+
+
+        
         }
 
 
 
         void OnDirDragDrop(IEnumerable<int> dragIndicies, string origDir, string targetDir) {
             if (viewTab == 0) {
-                //Debug.Log("list view drag to dir " + targetDir);
                 EventStateEditor.MoveAOsToEventState(so[Event.baseStateField], dragIndicies, origDir, targetDir);
             }
             else if (viewTab == 1) {
-                //Debug.Log("project view drag to dir " + targetDir);
+
             }
         }        
         #endregion
 
         void EnableCurrentPack () {
-            selectionSystem.OnEnable(GetPoolElements, GetIDsInDirectory, OnSelectionChange, OnDirDragDrop, ExtraToolbarButtons, OnNameNewDirectory);
+            selectionSystem.OnEnable(
+                GetPoolElements, GetIDsInDirectory, 
+                RebuildPreviewEditor, OnDirDragDrop, ExtraToolbarButtons//, 
+            );
             hiddenIDsToggler.OnEnable(so[Event.hiddenIDsField]);
 
             if (AssetObjectsEditor.packManager == null) return;
@@ -267,14 +297,8 @@ namespace AssetObjectsPacks {
             if (enabled) RebuildPreviewEditor();
         }
         
-
-        //to do add button
         void CheckPreviewToggle (KeyboardListener k) {
-
-            //SceneViewFx = preview
-        
             bool togglePreview = GUIUtils.Button(EditorGUIUtility.IconContent("SceneViewFx", "Open Preview"), GUIStyles.toolbarButton, iconWidth) || (k[KeyCode.P]);
-            
             if (togglePreview) TogglePreview(!previewOpen);
         }
         
@@ -288,7 +312,6 @@ namespace AssetObjectsPacks {
             IEnumerable<int> idsInSelection = selectionSystem.GetIDsInSelection();
             
             if (idsInSelection == null || idsInSelection.Count() == 0) {
-                //TogglePreview(false);
                 return;
             } 
             
@@ -314,9 +337,6 @@ namespace AssetObjectsPacks {
         int viewTab;
         public bool showingHidden { get { return viewTab == 2; } }
         
-
-        
-
         void DrawEvent () {
 
             PacksManager pm = AssetObjectsEditor.packManager;
@@ -324,7 +344,7 @@ namespace AssetObjectsPacks {
 
                 GUIUtils.StartBox(0);
                 EditorGUILayout.BeginHorizontal();        
-                GUIUtils.Label(new GUIContent("<b>Pack Type : </b>"), true);
+                GUIUtils.Label(new GUIContent("<b>Pack Type:</b> "), true);
 
                 if (GUIUtils.Button(new GUIContent(packIndex == -1 ? "None" : pm.packs[packIndex].name), GUIStyles.toolbarButton, true)) {
 
@@ -347,15 +367,11 @@ namespace AssetObjectsPacks {
                         PackEditor.GetErrorsAndWarnings (packIndex, out errorStrings, out warningStrings, out noIDsCount);
                         InitializeAllFilePaths();
                         forceRebuild = true;
-                        
-                        //GUIUtility.ExitGUI();
                     }
                 }
-                //else {
 
-                    if (errorStrings.Length != 0) return;
-                    if (viewTab == 0) forceRebuild = DrawEditToolbar() || forceRebuild;
-                //}   
+                if (errorStrings.Length != 0) return;
+                if (viewTab == 0) forceRebuild = DrawEditToolbar() || forceRebuild;
 
 
                 GUIContent[] viewTabGUIs = new GUIContent[] {
@@ -367,8 +383,25 @@ namespace AssetObjectsPacks {
                 bool changedTabView = GUIUtils.Tabs(viewTabGUIs, ref this.viewTab);
             
                     selectionSystem.DrawElements();
-                
 
+
+
+                if (removeOrAdd) {
+                    if (viewTab == 0) {
+                        removeOrAdd = EventStateEditor.DeleteIndiciesFromState(baseState, curState, selectionSystem.GetPoolIndiciesInSelection(true));    
+                    }
+                    else if (viewTab == 1) {
+                        //no repeats (should be none anywyas)                    
+
+                        removeOrAdd = EventStateEditor.AddIDsToState(
+                            baseState, 
+                            selectionSystem.GetIDsInSelectionDeep("Add Objects", "Selection contains directories, Add all sub-objects?"), 
+                            packIndex, 
+                            GetObjectRefForID
+                        );
+                    }
+                }
+                
 
                 forceRebuild = forceRebuild || namedNewDir || changedTabView || removeOrAdd || duplicated || createdDirectory || hiddenToggleSuccess;
                 forceReset = forceRebuild && changedTabView;
@@ -378,7 +411,6 @@ namespace AssetObjectsPacks {
                 createdDirectory = false;
                 hiddenToggleSuccess = false;
                 namedNewDir = false;
-                //changedTabView = false;
             }
         }
             
@@ -396,10 +428,11 @@ namespace AssetObjectsPacks {
 
                 InitializeAllFilePaths();
 
-                EventStateEditor.UpdatEventStatesAgainstDefaults(so[Event.baseStateField], packIndex);
+                EventStateEditor.UpdatEventStatesAgainstDefaults(baseState, packIndex);
                 
                 AssetObjectEditor.MakeAssetObjectDefault(so[Event.multi_edit_instance_field], packIndex, true);
                 paramlabels = PackEditor.GUI.GetDefaultParamNameGUIs(packIndex);
+                so.SaveObject();
                 
                 selectionSystem.Initialize();
                 hiddenIDsToggler.Initialize();
@@ -439,7 +472,7 @@ namespace AssetObjectsPacks {
         GUIContent GetEditToolbarTitle (bool hasSelection, bool singleSelection, string selectedPath){
             string title = "Multi-Edit <b>All</b> Objects";
             if (hasSelection) {
-                if (singleSelection) title = "Editing: <b>" + selectedPath + "</b>";
+                if (singleSelection) title = "<b>" + selectedPath + "</b>";
                 else title = "Multi-Edit <b>Selected</b> Objects";
             }
             return new GUIContent(title);
@@ -454,7 +487,7 @@ namespace AssetObjectsPacks {
             GUIUtils.StartBox(1);
             EditorProp curEventState = EventStateEditor.GetEventStateByPath(so[Event.baseStateField], selectionSystem.curPath);
 
-            string parentPath = selectionSystem.CalcLastFolder(selectionSystem.curPath);
+            string parentPath = selectionSystem.parentPath;
             
             EditorProp curParentEventState = (curEventState != so[Event.baseStateField]) ? EventStateEditor.GetEventStateByPath(so[Event.baseStateField], parentPath) : null;
         
@@ -472,20 +505,23 @@ namespace AssetObjectsPacks {
                 shouldRebuild = true;
             }
             
+            GUIUtils.EndBox(1);
+
+            DrawAOEditToolbar(curEventState);
+
+            return shouldRebuild;
+        }
+        void DrawAOEditToolbar (EditorProp curEventState) {
+            GUIUtils.StartBox(0);
+            int setParam = -1;
             bool hasSelection = selectionSystem.hasSelection;
             bool singleSelection = selectionSystem.singleSelection;
-            ElementSelectionSystem.Element selectedElement = selectionSystem.selectedElement;
-            GUIUtils.EndBox(1);
-            GUIUtils.StartBox(0);
-                        
-            int setParam = -1;
+            SelectionElement selectedElement = selectionSystem.selectedElement;
             GUI.enabled = !singleDirectorySelected;
-            GUIUtils.Label(GetEditToolbarTitle (hasSelection, singleSelection, selectedElement.path));
+            GUIUtils.Label(GetEditToolbarTitle (hasSelection, singleSelection, selectedElement.filePath));
             AssetObjectEditor.GUI.DrawAssetObjectEdit(GetAOPropForEditToolbar (curEventState, singleSelection, selectedElement.id, selectedElement.poolIndex), hasSelection && singleSelection, paramlabels, paramWidths, out setParam);
             GUI.enabled = true;
-
             GUIUtils.EndBox(1);
-            
             if (setParam != -1) {
                 AssetObjectEditor.CopyParameters(
                     selectionSystem.GetPoolIndiciesInSelectionOrAllShown().Generate(i=>EventStateEditor.GetAOatPoolID(curEventState, i)),
@@ -493,7 +529,7 @@ namespace AssetObjectsPacks {
                     setParam
                 );
             }
-            return shouldRebuild;
+
         }
 
         void OpenImportSettings () {

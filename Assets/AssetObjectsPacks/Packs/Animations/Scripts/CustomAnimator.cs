@@ -99,7 +99,7 @@ namespace AssetObjectsPacks.Animations {
 
             //tell the event player to call this component's "Use Asset Object" method
             //whenever it plays an event that uses the "Animations" pack
-            eventPlayer.SubscribeToEventPlay("Animations", UseAssetObject);
+            eventPlayer.LinkAsPlayer("Animations", UseAssetObject);
         }
 
         /*
@@ -109,7 +109,7 @@ namespace AssetObjectsPacks.Animations {
 
             in htis case, when the animation is done
         */
-        List<System.Action> endEvents;
+        List<System.Action> endUseCallbacks;
 
 
         /*
@@ -122,11 +122,11 @@ namespace AssetObjectsPacks.Animations {
             in this case, this component tracks when the animator is exiting an animation
             that has been played
         */
-        void UseAssetObject(AssetObject assetObject, List<System.Action> endEvents) {
-            if (this.endEvents != null) {
-                this.endEvents.Clear();
+        void UseAssetObject(AssetObject assetObject, bool asInterrupter, List<System.Action> endUseCallbacks) {
+            if (this.endUseCallbacks != null) {
+                this.endUseCallbacks.Clear();
             }
-            this.endEvents = endEvents;
+            this.endUseCallbacks = endUseCallbacks;
 
             //get asset object parameter values
             int animID = assetObject.id;
@@ -134,24 +134,28 @@ namespace AssetObjectsPacks.Animations {
             float speed = assetObject["Speed"].FloatValue;
             bool looped = assetObject["Looped"].BoolValue;
             int mirror = assetObject["Mirror"].IntValue;
-
+            int layer = assetObject["Layer"].IntValue;
+            float timeOffset = assetObject["TimeOffset"].FloatValue;
             
-            Play(animID, false, (mirror == 2) ? Random.value < .5f : mirror == 1, looped, transition, speed);
+            if (timeOffset != 0) {
+                //Debug.Log(assetObject.objRef.GetType());
+                //Debug.Log(assetObject.objRef.name);
+                
+                timeOffset = timeOffset * ((AnimationClip)assetObject.objRef).length;
+            } 
+
+            Play(animID, asInterrupter, (mirror == 2) ? Random.value < .5f : mirror == 1, looped, transition, speed, layer, timeOffset);
         }
 
         // let the player know the event is done if this component is keeping track of that
-        void TriggerEndEvent () {
-            foreach (var endEvent in endEvents) {
-                endEvent();    
+        void BroadcastEndUse () {
+            if (endUseCallbacks != null) {
+                foreach (var endUse in endUseCallbacks) {
+                    endUse();    
+                }
             }
-            //if (endEvent == null) return;
-            //endEvent();
-            //endEvent = null;
         }
         
-
-
-
 
         public const string sMirror = "Mirror", sSpeed = "Speed", sActiveLoop = "ActiveLoop", sShots = "OneShots";
         public static readonly string[] sLoopNames = new string[] {"Loops0", "Loops1"};
@@ -183,42 +187,44 @@ namespace AssetObjectsPacks.Animations {
 
         //doing it after transition end looks janky
         void OnOneShotExitTransitionStart () {
-            TriggerEndEvent();
+            BroadcastEndUse();
         }
         void OnOneShotTransitionEnd() {
 
         }
 
-    
-        void Play (int id, bool interrupt, bool mirror, bool loop, float transition, float speed) {
-            if (loop) PlayLoop(id, interrupt, mirror, transition, speed);
-            else PlayOneShot(id, mirror, transition, speed);
+        void Play (int id, bool interrupt, bool mirror, bool loop, float transition, float speed, int layer, float timeOffset) {
+            if (loop) PlayLoop(id, interrupt, mirror, transition, speed, layer, timeOffset);
+            else PlayOneShot(id, mirror, transition, speed, layer, timeOffset);
         }
-        void PlayLoop (int id, bool interrupt, bool mirror, float transition, float speed, int layer = 0) {
+        void PlayLoop (int id, bool interrupt, bool mirror, float transition, float speed, int layer, float timeOffset) {
 
             bool do_transition = (playingOneShot && interrupt) || !playingOneShot;
-            
-            if (do_transition) activeLoops = (activeLoops + 1) % 2;
+                
+            if (do_transition) {
+                activeLoops = (activeLoops + 1) % 2;
+            }
             //if we're doing it in the background of a one shot just change the current active loopset
 
-            //Debug.Log("playing loop at loopset: " + activeLoops);
             anim.SetFloat(pLoopIndicies[activeLoops], id);
             anim.SetFloat(pLoopSpeeds[activeLoops], speed);
             anim.SetBool(pLoopMirrors[activeLoops], mirror);
 
-            if (do_transition) anim.CrossFadeInFixedTime(sLoopNames[activeLoops], transition, layer);
+            if (do_transition) {
+
+                anim.CrossFadeInFixedTime(sLoopNames[activeLoops], transition, layer, timeOffset);
+            }
             
             anim.SetInteger(pActiveLoopSet, activeLoops);
         }
             
-
-        void PlayOneShot(int id, bool mirror, float transition, float speed, int layer = 0) {
+        void PlayOneShot(int id, bool mirror, float transition, float speed, int layer, float timeOffset) {
 
             anim.SetBool(pMirror, mirror);
             anim.SetFloat(pSpeed, speed);
 
-            anim.CrossFadeInFixedTime(id.ToString(), transition, layer);
-
+            //non looped states are named as their ids
+            anim.CrossFadeInFixedTime(id.ToString(), transition, layer, timeOffset);
             playingOneShot = true;
         }
 

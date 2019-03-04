@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1284b611740a6448d90c4ebacf05b26a, type: 3}
-  m_Name: Moves
+  m_Name: Moves 1
   m_EditorClassIdentifier: 
   multi_edit_instance:
     isCopy: 0

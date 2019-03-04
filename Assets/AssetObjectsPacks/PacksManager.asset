@@ -47,6 +47,18 @@ MonoBehaviour:
       FloatValue: 0.25
       IntValue: 0
       StringValue: 
+    - name: Layer
+      pType: 2
+      BoolValue: 0
+      FloatValue: 0.25
+      IntValue: 0
+      StringValue: 
+    - name: TimeOffset
+      pType: 1
+      BoolValue: 0
+      FloatValue: 0
+      IntValue: 0
+      StringValue: 
     name: Animations
     id: 0
   - dir: 
