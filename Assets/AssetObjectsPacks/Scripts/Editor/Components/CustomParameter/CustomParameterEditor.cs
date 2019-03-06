@@ -14,10 +14,17 @@ namespace AssetObjectsPacks {
         public static void DefaultDurationParameter (EditorProp parameter) {
             parameter[nameField].SetValue( "Duration" );
             parameter[typeField].SetValue( (int)CustomParameter.ParamType.FloatValue );
+
             parameter[CustomParameter.ParamType.FloatValue.ToString()].SetValue( -1.0f );
+//            parameter["value"].SetValue( -1.0f );
+
+
+        
         }
         public static EditorProp GetParamValueProperty(EditorProp parameter) {
             return parameter[((CustomParameter.ParamType)parameter[typeField].intValue).ToString()];
+        //    return parameter["value"];
+        
         }
         public static void CopyParameter(EditorProp orig, EditorProp to_copy) {
             orig[nameField].CopyProp(to_copy[nameField]);

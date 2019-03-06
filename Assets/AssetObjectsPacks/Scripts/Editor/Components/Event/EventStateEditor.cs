@@ -239,38 +239,37 @@ namespace AssetObjectsPacks {
 
 
         public static class GUI {
+            static readonly GUIContent muteGUI = new GUIContent("", "Mute");
+            static readonly GUIContent soloGUI = new GUIContent("", "Solo");
 
-            public static void DrawEventStateSoloMuteElement (EditorProp state, int poolIndex) {
+            public static void DrawEventStateSoloMuteElement (EditorProp state, int poolIndex, Color32 soloOn, Color32 soloOff, Color32 muteOn, Color32 muteOff) {
+                
                 if (poolIndex < state[subStatesField].arraySize) {
                     return;
                 }
 
                 int i = poolIndex - state[subStatesField].arraySize;
+                EditorProp ao = state[assetObjectsField][i];
 
                 bool changedMute;
-                bool newMute = GUIUtils.SmallToggleButton(new GUIContent("M", "Mute"), AssetObjectEditor.GetMute(state[assetObjectsField][i]), out changedMute );
-                if (changedMute) {
-                    AssetObjectEditor.SetMute(state[assetObjectsField][i], newMute);
-                    if (newMute) {
-                        AssetObjectEditor.SetSolo(state[assetObjectsField][i], false);
-                        
 
-                    }
+                bool newMute = GUIUtils.SmallToggleButton(muteGUI, AssetObjectEditor.GetMute(ao), muteOn, muteOff, GUIStyles.toolbarButton, out changedMute );
+                if (changedMute) {
+                    //Debug.Log("set mute");
+                    
+                    AssetObjectEditor.SetMute(ao, newMute);
+                    if (newMute) AssetObjectEditor.SetSolo(ao, false);
                 }
                 bool changedSolo;
-                bool newSolo = GUIUtils.SmallToggleButton(new GUIContent("M", "Mute"), AssetObjectEditor.GetSolo(state[assetObjectsField][i]), out changedSolo );
+                bool newSolo = GUIUtils.SmallToggleButton(soloGUI, AssetObjectEditor.GetSolo(ao), soloOn, soloOff, GUIStyles.toolbarButton, out changedSolo );
                 if (changedSolo) {
-
-
-                    AssetObjectEditor.SetSolo(state[assetObjectsField][i], newSolo);
+                    //Debug.Log("set solo");
+                    AssetObjectEditor.SetSolo(ao, newSolo);
                     if (newSolo) {
-                        AssetObjectEditor.SetMute(state[assetObjectsField][i], false);
+                        AssetObjectEditor.SetMute(ao, false);
                         for (int x = 0; x < state[assetObjectsField].arraySize; x++) {
-                            if (x == i) {                    
-                                continue;
-                            }
+                            if (x == i) continue;
                             AssetObjectEditor.SetSolo(state[assetObjectsField][x], false);
-
                         }
                     }
                 }

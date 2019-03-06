@@ -6,53 +6,69 @@ namespace AssetObjectsPacks {
     enum EditorPropType { Property, Array, SO }
     public class EditorProp {
         EditorPropType editorPropType;
-        public SerializedProperty prop;
-        SerializedObject obj;
-        bool _wasChanged;
+        EditorProp baseObject;
+        public SerializedProperty property;
+        SerializedObject serializedObject;
+        bool wasChanged;
+
+
+        bool isBaseObject { get { return serializedObject != null; } }
+
+        public string displayName { get { return isBaseObject ? serializedObject.targetObject.name : property.displayName; } }
 
         public void SetChanged () {
-            _wasChanged = true;
+            baseObject.wasChanged = true;
         }
+
+
         Dictionary<string, EditorProp> name2Prop = new Dictionary<string, EditorProp>();
 
-        public void ResetChanged () {
-            _wasChanged = false;
-            foreach (var e in arrayElements) e.ResetChanged();
-            foreach (var n in name2Prop.Keys) name2Prop[n].ResetChanged();
-        }
+        //public void ResetChanged () {
+            //wasChanged = false;
+            //foreach (var e in arrayElements) e.ResetChanged();
+            //foreach (var n in name2Prop.Keys) name2Prop[n].ResetChanged();
+        //}
         public bool IsChanged() {
-            if (_wasChanged) return true;
-            foreach (var e in arrayElements) {
-                if (e.IsChanged()) return true;
-            }
-            foreach (var n in name2Prop.Keys) {
-                if (name2Prop[n].IsChanged()) return true;
-            }
-            return false;
+            return wasChanged;
+            //if (_wasChanged) return true;
+            //foreach (var e in arrayElements) {
+            //    if (e.IsChanged()) return true;
+            //}
+            //foreach (var n in name2Prop.Keys) {
+            //    if (name2Prop[n].IsChanged()) return true;
+            //}
+            //return false;
         }
 
-        public EditorProp (SerializedProperty prop) {
-            this.prop = prop;
-            editorPropType = prop.isArray && prop.propertyType != SerializedPropertyType.String ? EditorPropType.Array : EditorPropType.Property;
-            if (editorPropType == EditorPropType.Array) RebuildArray(); 
+        EditorProp (SerializedProperty property, EditorProp baseObject) {
+            this.property = property;
+            this.baseObject = baseObject;
+            editorPropType = property.isArray && property.propertyType != SerializedPropertyType.String ? EditorPropType.Array : EditorPropType.Property;
+            if (editorPropType == EditorPropType.Array) {
+                RebuildArray(); 
+            }
         }
-        public EditorProp (SerializedObject obj) {
-            this.obj = obj;
+
+        public EditorProp (SerializedObject serializedObject) {
+            this.serializedObject = serializedObject;
+            this.baseObject = this;
             editorPropType = EditorPropType.SO;
         }
 
         bool CheckEditorPropType (EditorPropType shouldBe) {
             if (shouldBe != editorPropType) {
-                Debug.LogError ( (editorPropType == EditorPropType.SO ? obj.targetObject.name : prop.displayName) + "(" + editorPropType.ToString() + ") isnt type: " + shouldBe.ToString());
+                Debug.LogError ( (editorPropType == EditorPropType.SO ? serializedObject.targetObject.name : property.displayName) + "(" + editorPropType.ToString() + ") isnt type: " + shouldBe.ToString());
                 return false;
             }
             return true;
         }
         public void SaveObject () {
             if (!CheckEditorPropType(EditorPropType.SO)) return;
-            obj.ApplyModifiedProperties();
-            EditorUtility.SetDirty(obj.targetObject);
-            ResetChanged();
+            serializedObject.ApplyModifiedProperties();
+            EditorUtility.SetDirty(serializedObject.targetObject);
+            wasChanged = false;
+
+            //ResetChanged();
         }
 
         //get property/relative
@@ -60,7 +76,8 @@ namespace AssetObjectsPacks {
             get {
                 EditorProp customProp;
                 if (!name2Prop.TryGetValue(name, out customProp)) {
-                    customProp = new EditorProp ( editorPropType == EditorPropType.SO ? obj.FindProperty ( name ) : prop.FindPropertyRelative ( name ) );
+                    
+                    customProp = new EditorProp ( editorPropType == EditorPropType.SO ? serializedObject.FindProperty ( name ) : property.FindPropertyRelative ( name ), baseObject );
                     name2Prop.Add(name, customProp);
                 }
                 return customProp;
@@ -83,11 +100,11 @@ namespace AssetObjectsPacks {
             }
             bool CheckForArray(bool change) {
                 if (!CheckEditorPropType(EditorPropType.Array)) return false;
-                if (change) _wasChanged = true;
+                if (change) SetChanged();// wasChanged = true;
                 return true;
             }
             void RebuildArray () {
-                arrayElements = arraySize.Generate(i => new EditorProp( prop.GetArrayElementAtIndex(i) ) ).ToList();
+                arrayElements = arraySize.Generate(i => new EditorProp( property.GetArrayElementAtIndex(i), baseObject ) ).ToList();
             }
             public bool ContainsElementsWithDuplicateNames (out string duplicateName, string checkNameField="name") {
                 duplicateName = string.Empty;
@@ -107,7 +124,7 @@ namespace AssetObjectsPacks {
 
             public void Clear () {
                 if (!CheckForArray(true)) return;
-                prop.ClearArray();
+                property.ClearArray();
                 arrayElements.Clear();
             }
 
@@ -134,7 +151,7 @@ namespace AssetObjectsPacks {
             public EditorProp InsertAtIndex (int i, string uniqueNamePrefix = null, string nameField = "name") {
                 if (!CheckForArray(true)) return null;
                 string new_name = UniqueName(uniqueNamePrefix, nameField);
-                prop.InsertArrayElementAtIndex(i);
+                property.InsertArrayElementAtIndex(i);
                 RebuildArray();
                 if (new_name != null) arrayElements[i][nameField].SetValue(new_name);
                 return arrayElements[i];
@@ -145,15 +162,15 @@ namespace AssetObjectsPacks {
                 
                 string new_name = UniqueName(uniqueNamePrefix, nameField);            
                 int l = arraySize;
-                prop.InsertArrayElementAtIndex(l);
-                EditorProp newElement = new EditorProp( prop.GetArrayElementAtIndex(l) );
+                property.InsertArrayElementAtIndex(l);
+                EditorProp newElement = new EditorProp( property.GetArrayElementAtIndex(l), baseObject );
                 arrayElements.Add( newElement );
                 if (new_name != null) newElement[nameField].SetValue(new_name);
                 return newElement;
             }
             public void DeleteAt (int index) {
                 if (!CheckForArray(true)) return;
-                prop.DeleteArrayElementAtIndex(index);
+                property.DeleteArrayElementAtIndex(index);
                 RebuildArray(); 
             }
         #endregion
@@ -162,58 +179,58 @@ namespace AssetObjectsPacks {
             #region GETTERS
                 public int intValue { get { 
                     if (!CheckEditorPropType(EditorPropType.Property)) return 0;
-                    return prop.intValue;
+                    return property.intValue;
                 } }
                 public float floatValue { get { 
                     if (!CheckEditorPropType(EditorPropType.Property)) return 0;
-                    return prop.floatValue; 
+                    return property.floatValue; 
                 } }
                 public bool boolValue { get { 
                     if (!CheckEditorPropType(EditorPropType.Property)) return false;
-                    return prop.boolValue; 
+                    return property.boolValue; 
                 } }
                 public string stringValue { get { 
                     if (!CheckEditorPropType(EditorPropType.Property)) return "";
-                    return prop.stringValue; 
+                    return property.stringValue; 
                 } }
                 public int enumValueIndex { get { 
                     if (!CheckEditorPropType(EditorPropType.Property)) return 0;
-                    return prop.enumValueIndex; 
+                    return property.enumValueIndex; 
                 } }
                 public int arraySize { get { 
                     if (!CheckEditorPropType(EditorPropType.Array)) return 0;
-                    return prop.arraySize; 
+                    return property.arraySize; 
                 } }
                 public Object objRefValue { get { 
                     if (!CheckEditorPropType(EditorPropType.Property)) return null;
-                    return prop.objectReferenceValue;
+                    return property.objectReferenceValue;
                 } }
             #endregion
             #region SETTERS
                 public void SetEnumValue (int value) { 
                     if (!CheckEditorPropType(EditorPropType.Property)) return;
-                    prop.enumValueIndex = value; 
+                    property.enumValueIndex = value; 
                 }
                 public void SetValue (bool value) { 
                     if (!CheckEditorPropType(EditorPropType.Property)) return;
-                    prop.boolValue = value; 
+                    property.boolValue = value; 
                 }
                 public void SetValue (float value) { 
                     if (!CheckEditorPropType(EditorPropType.Property)) return;
-                    prop.floatValue = value; 
+                    property.floatValue = value; 
                 }
                 public void SetValue (int value) { 
                     if (!CheckEditorPropType(EditorPropType.Property)) return;
-                    prop.intValue = value; 
+                    property.intValue = value; 
                 }
                 public void SetValue (Object value) { 
                     if (!CheckEditorPropType(EditorPropType.Property)) return;
-                    prop.objectReferenceValue = value; 
-                    prop.objectReferenceInstanceIDValue = value.GetInstanceID();
+                    property.objectReferenceValue = value; 
+                    property.objectReferenceInstanceIDValue = value.GetInstanceID();
                 }
                 public void SetValue (string value) { 
                     if (!CheckEditorPropType(EditorPropType.Property)) return;
-                    prop.stringValue = value; 
+                    property.stringValue = value; 
                 }
             #endregion
         #endregion
@@ -225,35 +242,35 @@ namespace AssetObjectsPacks {
         public void CopyProp (EditorProp copy) {
             if (!CheckEditorPropType(EditorPropType.Property)) return;
 
-            SerializedProperty c = copy.prop;
-            if (prop.propertyType != c.propertyType) {
-                Debug.LogError("Incompatible types (" + prop.displayName + "," + c.displayName + ") (" + prop.propertyType + ", " + c.propertyType + ")");
+            SerializedProperty c = copy.property;
+            if (property.propertyType != c.propertyType) {
+                Debug.LogError("Incompatible types (" + property.displayName + "," + c.displayName + ") (" + property.propertyType + ", " + c.propertyType + ")");
                 return;
             }
 
             //_wasChanged = true; 
-            switch (prop.propertyType){
-                case SerializedPropertyType.Integer	            :   prop.intValue              =    c.intValue              ;break;
-                case SerializedPropertyType.Boolean	            :   prop.boolValue             =    c.boolValue             ;break;
-                case SerializedPropertyType.Float	            :   prop.floatValue            =    c.floatValue            ;break;
-                case SerializedPropertyType.String	            :   prop.stringValue           =    c.stringValue           ;break;
-                case SerializedPropertyType.Color	            :   prop.colorValue            =    c.colorValue            ;break;
-                case SerializedPropertyType.ObjectReference	    :   prop.objectReferenceValue  =    c.objectReferenceValue  ;break;
-                case SerializedPropertyType.Enum	            :   prop.enumValueIndex        =    c.enumValueIndex        ;break;
-                case SerializedPropertyType.Vector2	            :   prop.vector2Value          =    c.vector2Value          ;break;
-                case SerializedPropertyType.Vector3	            :   prop.vector3Value          =    c.vector3Value          ;break;
-                case SerializedPropertyType.Vector4	            :   prop.vector4Value          =    c.vector4Value          ;break;
-                case SerializedPropertyType.Rect	            :   prop.rectValue             =    c.rectValue             ;break;
-                case SerializedPropertyType.AnimationCurve	    :   prop.animationCurveValue   =    c.animationCurveValue   ;break;
-                case SerializedPropertyType.Bounds	            :   prop.boundsValue           =    c.boundsValue           ;break;
-                case SerializedPropertyType.Quaternion	        :   prop.quaternionValue       =    c.quaternionValue       ;break;
-                case SerializedPropertyType.ExposedReference    :   prop.exposedReferenceValue =    c.exposedReferenceValue ;break;
-                case SerializedPropertyType.Vector2Int          :   prop.vector2IntValue       =    c.vector2IntValue       ;break;
-                case SerializedPropertyType.Vector3Int          :   prop.vector3IntValue       =    c.vector3IntValue       ;break;
-                case SerializedPropertyType.RectInt	            :   prop.rectIntValue          =    c.rectIntValue          ;break;
-                case SerializedPropertyType.BoundsInt	        :   prop.boundsIntValue        =    c.boundsIntValue        ;break;
+            switch (property.propertyType){
+                case SerializedPropertyType.Integer	            :   property.intValue              =    c.intValue              ;break;
+                case SerializedPropertyType.Boolean	            :   property.boolValue             =    c.boolValue             ;break;
+                case SerializedPropertyType.Float	            :   property.floatValue            =    c.floatValue            ;break;
+                case SerializedPropertyType.String	            :   property.stringValue           =    c.stringValue           ;break;
+                case SerializedPropertyType.Color	            :   property.colorValue            =    c.colorValue            ;break;
+                case SerializedPropertyType.ObjectReference	    :   property.objectReferenceValue  =    c.objectReferenceValue  ;break;
+                case SerializedPropertyType.Enum	            :   property.enumValueIndex        =    c.enumValueIndex        ;break;
+                case SerializedPropertyType.Vector2	            :   property.vector2Value          =    c.vector2Value          ;break;
+                case SerializedPropertyType.Vector3	            :   property.vector3Value          =    c.vector3Value          ;break;
+                case SerializedPropertyType.Vector4	            :   property.vector4Value          =    c.vector4Value          ;break;
+                case SerializedPropertyType.Rect	            :   property.rectValue             =    c.rectValue             ;break;
+                case SerializedPropertyType.AnimationCurve	    :   property.animationCurveValue   =    c.animationCurveValue   ;break;
+                case SerializedPropertyType.Bounds	            :   property.boundsValue           =    c.boundsValue           ;break;
+                case SerializedPropertyType.Quaternion	        :   property.quaternionValue       =    c.quaternionValue       ;break;
+                case SerializedPropertyType.ExposedReference    :   property.exposedReferenceValue =    c.exposedReferenceValue ;break;
+                case SerializedPropertyType.Vector2Int          :   property.vector2IntValue       =    c.vector2IntValue       ;break;
+                case SerializedPropertyType.Vector3Int          :   property.vector3IntValue       =    c.vector3IntValue       ;break;
+                case SerializedPropertyType.RectInt	            :   property.rectIntValue          =    c.rectIntValue          ;break;
+                case SerializedPropertyType.BoundsInt	        :   property.boundsIntValue        =    c.boundsIntValue        ;break;
                 
-                default:Debug.LogError("Not implemented: " + prop.propertyType);break;
+                default:Debug.LogError("Not implemented: " + property.propertyType);break;
             }
         }
     }

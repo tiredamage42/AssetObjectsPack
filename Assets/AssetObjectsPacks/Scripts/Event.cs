@@ -155,13 +155,42 @@ namespace AssetObjectsPacks {
                     check = null;
                 }
 
-                if (check == null || !check.MatchesParameter(nameSplit)) {
+                bool matchesParameter = false;
+                if (check != null) {
+                    string valueString;
+                    //Debug.Log(nameSplit[0] + " / " + nameSplit[1]);
+                    matchesParameter = check.MatchesParameter(nameSplit[0], GetCompareMode(nameSplit[1], out valueString), valueString);
+                }
+                if (check == null || !matchesParameter) {
                     if (debug) {
                         Debug.Log("parameter failed" + parameter);
                     }
                     return false;
                 }
                 return true;
+        }
+
+        static CustomParameter.CompareMode GetCompareMode(string compareAndValue, out string valString) {
+            if (compareAndValue.StartsWith("<=")) {
+                valString = compareAndValue.Substring(2);
+                return CustomParameter.CompareMode.LessThenOrEqual;
+            }
+            else if (compareAndValue.StartsWith(">=")) {
+                valString = compareAndValue.Substring(2);
+                return CustomParameter.CompareMode.MoreThanOrEqual;
+            }
+            else if (compareAndValue.StartsWith(">")) {
+                valString = compareAndValue.Substring(1);
+                return CustomParameter.CompareMode.MoreThan;
+            }
+            else if (compareAndValue.StartsWith("<")) {
+                valString = compareAndValue.Substring(1);
+                return CustomParameter.CompareMode.LessThan;
+            }
+            else {
+                valString = compareAndValue;
+                return CustomParameter.CompareMode.Equals;
+            }
         }
 
 

@@ -11,59 +11,73 @@ namespace AssetObjectsPacks {
         Editor preview;
         Dictionary<int, string> id2path;
         GUIContent[] paramlabels;
+        GUILayoutOption[] _paramWidths;
         GUILayoutOption[] paramWidths {
             get {
                 if (_paramWidths == null || _paramWidths.Length == 0) {
-                    int c = paramlabels.Length;
-                    _paramWidths = new GUILayoutOption[c];
-                    for (int i = 0; i < c; i++) _paramWidths[i] = paramlabels[i].CalcWidth(GUIStyles.label);
+                    _paramWidths = new GUILayoutOption[paramlabels.Length];
+                    for (int i = 0; i < paramlabels.Length; i++) _paramWidths[i] = paramlabels[i].CalcWidth(GUIStyles.label);
                 }
                 return _paramWidths;
             }
         }
-        GUILayoutOption[] _paramWidths;
         GUILayoutOption iconWidth = GUILayout.Width(20);
         
         string[] allPaths, errorStrings, warningStrings;
         string objectsDirectory, fileExtensions, assetType;
-        bool initializeAfterPackChange, previewOpen, removeOrAdd, duplicated;
-        bool singleDirectorySelected { get { return selectionSystem.singleSelection && selectionSystem.selectedElement.id == -1; } }
+        bool previewOpen, removeOrAdd, duplicated;
         int noIDsCount, packIndex;
         ElementSelectionSystem selectionSystem = new ElementSelectionSystem();
         EditorProp so;
 
+
+        BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+        bool didAOCheck;
+
         //ScaleConstraint Icon = duplicate
         //_Help = help
 
-        BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
-
-        bool didAOCheck;
         void CheckAllAOsForNullObjects () {
             if (didAOCheck) return;
             didAOCheck = true;
             EventStateEditor.CheckAllAOsForNullObjects (so[Event.baseStateField], GetObjectRefForID);
             so.SaveObject();
-
         }
+
        
-        #region CUSTOM_INSPECTOR_METHODS
         public override bool HasPreviewGUI() { 
             return previewOpen;
         }
         public override void OnInteractivePreviewGUI(Rect r, GUIStyle background) { 
-            if (preview != null) preview.OnInteractivePreviewGUI(r, background); 
+            if (preview != null) 
+                preview.OnInteractivePreviewGUI(r, background); 
         }
         public override void OnPreviewSettings() { 
             if (preview != null) preview.OnPreviewSettings();
         }
         void OnEnable () {
+            Debug.Log("on eneable");
             so = new EditorProp (serializedObject);
             EventStateEditor.ResetNewRecursive(so[Event.baseStateField], true);    
             EnableCurrentPack();
-
         }
+
+        Color32 soloOff = new Color32(84,114,87,255); //84 114,87
+        Color32 soloOn = Colors.green;
+        Color32 muteOff = new Color32(123,97,67,255);
+        Color32 muteOn = Colors.yellow; //123 97 67
+        
+
         public override void OnInspectorGUI() {
-            base.OnInspectorGUI();
+            //base.OnInspectorGUI();
+
+            //soloOff = EditorGUILayout.ColorField("solo off", soloOff);
+            //soloOn = EditorGUILayout.ColorField("solo on", soloOn);
+            
+            //muteOff = EditorGUILayout.ColorField("mute off", muteOff);
+            //muteOn = EditorGUILayout.ColorField("mute on", muteOn);
+            
+
             GUIUtils.StartCustomEditor();
             CheckAllAOsForNullObjects();
             
@@ -80,13 +94,9 @@ namespace AssetObjectsPacks {
             forceReset = false;
         }
 
-        #endregion
-        
-
-        #region ELEMENT_SELECT_CALLBACKS
         void OnDirectoryCreate () {
             if (viewTab == 0) {
-                EventStateEditor.NewEventState(curState);//, parentDir);
+                EventStateEditor.NewEventState(curState);
             }
             else {
 
@@ -104,12 +114,11 @@ namespace AssetObjectsPacks {
 
         EditorProp curState, curParentState;
 
-        void OnCurrentPathChange (string newPath) {
-
+        void OnCurrentPathChange () {
             if (viewTab == 0) {
-                curState = EventStateEditor.GetEventStateByPath(baseState, newPath);
+                curState = EventStateEditor.GetEventStateByPath(baseState, selectionSystem.curPath);
+                curParentState = (curState != baseState) ? EventStateEditor.GetEventStateByPath(baseState, selectionSystem.parentPath) : null;
             }
-
         }
 
         void GetIDsInDirectory (string directory, bool useRepeats, HashSet<int> ids) {
@@ -186,14 +195,41 @@ namespace AssetObjectsPacks {
         void ExtraElementPrefix (int poolIndex) {
 
             if (viewTab == 0) {
-                //EditorProp curEventState = EventStateEditor.GetEventStateByPath(so[Event.baseStateField], curViewPath);
-                EventStateEditor.GUI.DrawEventStateSoloMuteElement(curState, poolIndex);
+                EventStateEditor.GUI.DrawEventStateSoloMuteElement(curState, poolIndex, soloOn, soloOff, muteOn, muteOff);
             }
+        }
 
 
-            
+        static readonly string[] toolbarIcons = new string[] {
+            "Folder Icon", //add directory
+            "_Popup", //import settings
+            "Toolbar Plus", 
+            "Toolbar Minus", //add / remove from list
+            "ScaleConstraint Icon", //duplicate
+            "animationvisibilitytoggleon", //hide / unhide
+        };
+        static readonly string[] toolbarIconsHints = new string[] {
+            "Add New State", 
+            "Open import settings for selection",
+            "Add Selected To Event",
+            "Remove Selected From Event",
+            "Duplicate",
+            "Toggle the hidden status of the selection (if any, else all shown elements)",
+        };
 
 
+        GUIContent[] _tGUIs;
+        GUIContent[] toolbarGUIs {
+            get {
+                if (_tGUIs == null) {
+                    int l = toolbarIcons.Length;
+                    _tGUIs = new GUIContent[l];
+                    for (int i = 0; i < l; i++) {
+                        _tGUIs[i] = new GUIContent(EditorGUIUtility.IconContent(toolbarIcons[i]).image, toolbarIconsHints[i]);
+                    }
+                }
+                return _tGUIs;
+            }
         }
 
 
@@ -207,14 +243,14 @@ namespace AssetObjectsPacks {
             if (!showingHidden) {
 
                 //add directory
-                if (GUIUtils.Button(new GUIContent(EditorGUIUtility.IconContent("Folder Icon").image, "Add Folder"), GUIStyles.toolbarButton, iconWidth)) {
+                if (GUIUtils.Button(toolbarGUIs[0], GUIStyles.toolbarButton, iconWidth)) {
                     OnDirectoryCreate();
                     createdDirectory = true;
                 }
             
                 GUI.enabled = selectionSystem.hasSelection;
-                OpenImportSettingsButton("_Popup");
-                AddOrRemoveButtons( viewTab, "Toolbar Plus", "Toolbar Minus", k );
+                OpenImportSettingsButton();
+                AddOrRemoveButtons( viewTab, k );
 
             
                 GUI.enabled = true;
@@ -226,38 +262,38 @@ namespace AssetObjectsPacks {
 
             CheckPreviewToggle(k);
         }
-        void OpenImportSettingsButton (string icon) {
-            if (GUIUtils.Button(new GUIContent(EditorGUIUtility.IconContent(icon).image, "Open import settings on selection"), GUIStyles.toolbarButton, iconWidth)) OpenImportSettings();
+        void OpenImportSettingsButton () {
+            if (GUIUtils.Button(toolbarGUIs[1], GUIStyles.toolbarButton, iconWidth)) OpenImportSettings();
         }
-        void AddFilesButton (string icon, KeyboardListener k) {                
-            removeOrAdd = GUIUtils.Button(new GUIContent(EditorGUIUtility.IconContent(icon).image, "Add Selected To Event"), GUIStyles.toolbarButton, iconWidth) || k[KeyCode.Return];
+        void AddFilesButton (KeyboardListener k) {                
+            removeOrAdd = GUIUtils.Button(toolbarGUIs[2], GUIStyles.toolbarButton, iconWidth) || k[KeyCode.Return];
         }
-        void RemoveFilesButton (string icon, KeyboardListener k) {                
-            removeOrAdd = GUIUtils.Button(new GUIContent(EditorGUIUtility.IconContent(icon).image, "Remove Selected From Event"), GUIStyles.toolbarButton, iconWidth) || (k[KeyCode.Delete] || k[KeyCode.Backspace]);
+        void RemoveFilesButton (KeyboardListener k) {                
+            removeOrAdd = GUIUtils.Button(toolbarGUIs[3], GUIStyles.toolbarButton, iconWidth) || (k[KeyCode.Delete] || k[KeyCode.Backspace]);
         }   
-        void AddOrRemoveButtons (int viewTab, string iconAdd, string iconRemove, KeyboardListener k) {
-            if (viewTab == 0) RemoveFilesButton(iconRemove, k);   
-            else if (viewTab == 1) AddFilesButton(iconAdd, k);
+        void AddOrRemoveButtons (int viewTab, KeyboardListener k) {
+            if (viewTab == 0) RemoveFilesButton(k);   
+            else if (viewTab == 1) AddFilesButton(k);
         }
 
         void DuplicateButton (KeyboardListener k) {
             GUI.enabled = selectionSystem.hasSelection;
-            duplicated = GUIUtils.Button(EditorGUIUtility.IconContent("ScaleConstraint Icon", "Duplicate"), GUIStyles.toolbarButton, iconWidth) || (k[KeyCode.D] && (k.command || k.ctrl));
+            duplicated = GUIUtils.Button(toolbarGUIs[4], GUIStyles.toolbarButton, iconWidth) || (k[KeyCode.D] && (k.command || k.ctrl));
             GUI.enabled = true;
             if (duplicated) EventStateEditor.DuplicateIndiciesInState(curState, selectionSystem.GetSelectionEnumerable().ToHashSet());
             so.SaveObject();
         }
 
-        void ToggleHiddenButtonGUI (KeyboardListener k) {
-            GUIContent c = EditorGUIUtility.IconContent("animationvisibilitytoggleon", "Toggle the hidden status of the selection (if any, else all shown elements)");
-            hiddenToggleSuccess = (GUIUtils.Button(c, GUIStyles.toolbarButton, iconWidth) || k[KeyCode.H]) && hiddenIDsToggler.ToggleState(
-                selectionSystem.GetIDsInSelectionDeep(
-                "Hide/Unhide Directory", "Selection contains directories, hidden status of all sub elements will be toggled"
-            ).ToHashSet()
-            );
-
-
-        
+            
+        void ToggleHiddenButtonGUI (KeyboardListener k) {            
+            hiddenToggleSuccess = (GUIUtils.Button(toolbarGUIs[5], GUIStyles.toolbarButton, iconWidth) || k[KeyCode.H]) 
+                && hiddenIDsToggler.ToggleState(
+                    selectionSystem.GetIDsInSelectionDeep(
+                        "Hide/Unhide Directory", 
+                        "Selection contains directories, hidden status of all sub elements will be toggled"
+                    ).ToHashSet()
+                );
+                
         }
 
 
@@ -270,12 +306,12 @@ namespace AssetObjectsPacks {
 
             }
         }        
-        #endregion
-
+        
         void EnableCurrentPack () {
             selectionSystem.OnEnable(
                 GetPoolElements, GetIDsInDirectory, 
-                RebuildPreviewEditor, OnDirDragDrop, ExtraToolbarButtons//, 
+                RebuildPreviewEditor, OnDirDragDrop, ExtraToolbarButtons,
+                OnCurrentPathChange 
             );
             hiddenIDsToggler.OnEnable(so[Event.hiddenIDsField]);
 
@@ -293,7 +329,6 @@ namespace AssetObjectsPacks {
             var previewResizer = inspector.GetType().GetField("m_PreviewResizer", flags).GetValue(inspector);
             bool expanded = (bool)previewResizer.GetType().GetMethod("GetExpanded", flags).Invoke(previewResizer, new object[] {});
             if (expanded != enabled) previewResizer.GetType().GetMethod("ToggleExpanded", flags).Invoke(previewResizer, new object[] {});
-            
             if (enabled) RebuildPreviewEditor();
         }
         
@@ -336,6 +371,13 @@ namespace AssetObjectsPacks {
         bool forceRebuild, forceReset, generateNewIDs, namedNewDir;
         int viewTab;
         public bool showingHidden { get { return viewTab == 2; } }
+        GUIContent[] viewTabGUIs = new GUIContent[] {
+            new GUIContent("Event Pack"),
+            new GUIContent("Project"),
+            new GUIContent("Hidden"),
+        };
+        GUIContent packtypegui = new GUIContent("<b>Pack Type:</b> ");
+        GUIContent helpGUI = new GUIContent(" Help ");
         
         void DrawEvent () {
 
@@ -344,16 +386,16 @@ namespace AssetObjectsPacks {
 
                 GUIUtils.StartBox(0);
                 EditorGUILayout.BeginHorizontal();        
-                GUIUtils.Label(new GUIContent("<b>Pack Type:</b> "), true);
+                GUIUtils.Label(packtypegui, true);
 
                 if (GUIUtils.Button(new GUIContent(packIndex == -1 ? "None" : pm.packs[packIndex].name), GUIStyles.toolbarButton, true)) {
-
                     GUIUtils.ShowPopUpAtMouse(packsPopup);
                 }
 
                 GUILayout.FlexibleSpace();
 
-                if (GUIUtils.Button(new GUIContent(" Help "), GUIStyles.toolbarButton, Colors.selected, Colors.black, true)) HelpWindow.Init();
+                if (GUIUtils.Button(helpGUI, GUIStyles.toolbarButton, Colors.selected, Colors.black, true)) 
+                    HelpWindow.Init();
 
                 EditorGUILayout.EndHorizontal();
 
@@ -373,18 +415,9 @@ namespace AssetObjectsPacks {
                 if (errorStrings.Length != 0) return;
                 if (viewTab == 0) forceRebuild = DrawEditToolbar() || forceRebuild;
 
-
-                GUIContent[] viewTabGUIs = new GUIContent[] {
-                    new GUIContent("Event Pack"),
-                    new GUIContent("Project"),
-                    new GUIContent("Hidden"),
-                };
-                            
                 bool changedTabView = GUIUtils.Tabs(viewTabGUIs, ref this.viewTab);
             
-                    selectionSystem.DrawElements();
-
-
+                selectionSystem.DrawElements();
 
                 if (removeOrAdd) {
                     if (viewTab == 0) {
@@ -469,32 +502,31 @@ namespace AssetObjectsPacks {
         void InitializeAllFilePaths () {
             allPaths = AssetObjectsEditor.GetAllAssetObjectPaths (objectsDirectory, fileExtensions, false, out id2path);
         }
-        GUIContent GetEditToolbarTitle (bool hasSelection, bool singleSelection, string selectedPath){
-            string title = "Multi-Edit <b>All</b> Objects";
-            if (hasSelection) {
-                if (singleSelection) title = "<b>" + selectedPath + "</b>";
-                else title = "Multi-Edit <b>Selected</b> Objects";
+
+        GUIContent defaultEditGUI = new GUIContent("Multi-Edit <b>All</b> Objects");
+        GUIContent selectEditGUI = new GUIContent("Multi-Edit <b>Selected</b> Objects");
+        
+        
+        GUIContent GetEditToolbarTitle (SelectionElement selectedElement){
+            GUIContent gui = defaultEditGUI;
+            if (selectionSystem.hasSelection) {
+                if (selectedElement != null && selectedElement.id != -1) gui = new GUIContent("<b>" + selectedElement.filePath + "</b>");
+                else gui = selectEditGUI;
             }
-            return new GUIContent(title);
+            return gui;
         }
-        EditorProp GetAOPropForEditToolbar (EditorProp eventState, bool singleSelection, int selectedID, int selectedPoolID) {
-            return (!singleSelection || selectedID == -1) ? so[Event.multi_edit_instance_field] : EventStateEditor.GetAOatPoolID(eventState, selectedPoolID);
+        EditorProp GetAOPropForEditToolbar (SelectionElement selectedElement) {
+            return (selectedElement == null || selectedElement.id == -1) ? so[Event.multi_edit_instance_field] : EventStateEditor.GetAOatPoolID(curState, selectedElement.poolIndex);
         }
         
         bool DrawEditToolbar (){
             bool shouldRebuild = false;
 
             GUIUtils.StartBox(1);
-            EditorProp curEventState = EventStateEditor.GetEventStateByPath(so[Event.baseStateField], selectionSystem.curPath);
-
-            string parentPath = selectionSystem.parentPath;
             
-            EditorProp curParentEventState = (curEventState != so[Event.baseStateField]) ? EventStateEditor.GetEventStateByPath(so[Event.baseStateField], parentPath) : null;
-        
             string newStateName;
             bool deletedState, changedStateName;
-            EventStateEditor.GUI.DrawEventState(so[Event.baseStateField], curParentEventState, curEventState, out deletedState, out changedStateName, out newStateName);
-
+            EventStateEditor.GUI.DrawEventState(baseState, curParentState, curState, out deletedState, out changedStateName, out newStateName);
             if (changedStateName) {
                 selectionSystem.ChangeCurrentDirectoryName(newStateName);
                 shouldRebuild = true;
@@ -504,40 +536,48 @@ namespace AssetObjectsPacks {
                 selectionSystem.ForceBackFolder();
                 shouldRebuild = true;
             }
+/*
+ */
             
             GUIUtils.EndBox(1);
 
-            DrawAOEditToolbar(curEventState);
+
+            DrawAOEditToolbar();
 
             return shouldRebuild;
         }
-        void DrawAOEditToolbar (EditorProp curEventState) {
-            GUIUtils.StartBox(0);
+        void DrawAOEditToolbar () {
             int setParam = -1;
-            bool hasSelection = selectionSystem.hasSelection;
-            bool singleSelection = selectionSystem.singleSelection;
+            
             SelectionElement selectedElement = selectionSystem.selectedElement;
-            GUI.enabled = !singleDirectorySelected;
-            GUIUtils.Label(GetEditToolbarTitle (hasSelection, singleSelection, selectedElement.filePath));
-            AssetObjectEditor.GUI.DrawAssetObjectEdit(GetAOPropForEditToolbar (curEventState, singleSelection, selectedElement.id, selectedElement.poolIndex), hasSelection && singleSelection, paramlabels, paramWidths, out setParam);
-            GUI.enabled = true;
+            GUI.enabled = selectedElement == null || selectedElement.id != -1;
+            
+            GUIUtils.StartBox(0);
+            GUIUtils.Label(GetEditToolbarTitle (selectedElement));
+            AssetObjectEditor.GUI.DrawAssetObjectEdit(GetAOPropForEditToolbar (selectedElement), 
+                selectedElement != null, 
+                paramlabels, paramWidths, out setParam
+            );
             GUIUtils.EndBox(1);
+            
+            GUI.enabled = true;
+            
             if (setParam != -1) {
                 AssetObjectEditor.CopyParameters(
-                    selectionSystem.GetPoolIndiciesInSelectionOrAllShown().Generate(i=>EventStateEditor.GetAOatPoolID(curEventState, i)),
+                    selectionSystem.GetPoolIndiciesInSelectionOrAllShown().Generate(i=>EventStateEditor.GetAOatPoolID(curState, i)),
                     so[Event.multi_edit_instance_field], 
                     setParam
                 );
             }
-
         }
 
+        
         void OpenImportSettings () {
             //no repeat ids
             IEnumerable<int> idsInSelection = selectionSystem.GetIDsInSelection();
-            
-            
+
             Object[] rootAssets = idsInSelection.Generate( id => AssetDatabase.LoadAssetAtPath(objectsDirectory + id2path[id], typeof(Object))).ToArray();
+            
             Animations.EditImportSettings.CreateWizard(rootAssets);
         }
     }

@@ -20,25 +20,10 @@ public class PlayerController : MonoBehaviour
     }
 
     
-    void SetMovementTarget (Vector3 dir) {
-        dir.y = 0;
-        dir.Normalize();
-        movement.SetMovementTarget(transform.position + dir * 500);
-    }
-
     void CheckDirectionalMovement () {
-        int direction = 0;
-        int leftRight = 0;
+        Movement.Direction direction = Movement.Direction.Forward;
 
         Vector3 dir = Vector3.zero;
-        if (Input.GetKey(KeyCode.A)) {
-            dir -= cam.transform.right;
-            leftRight -= 1;
-        }
-        if (Input.GetKey(KeyCode.D)) {
-            dir += cam.transform.right;
-            leftRight += 1;
-        }
         int fwdBwd = 0;
         if (Input.GetKey(KeyCode.W)) {
             dir += cam.transform.forward;
@@ -48,19 +33,33 @@ public class PlayerController : MonoBehaviour
             dir -= cam.transform.forward;
             fwdBwd -= 1;
         }
-        if (leftRight != 0) {
-            direction = leftRight == -1 ? 1 : 2;
+        
+        int leftRight = 0;
+        if (Input.GetKey(KeyCode.A)) {
+            dir -= cam.transform.right;
+            leftRight -= 1;
+        }
+        if (Input.GetKey(KeyCode.D)) {
+            dir += cam.transform.right;
+            leftRight += 1;
         }
         if (fwdBwd != 0) {
-            direction = fwdBwd == -1 ? 3 : 0;
+            direction = fwdBwd == -1 ? Movement.Direction.Backwards : Movement.Direction.Forward;
+        }
+        else if (leftRight != 0) {
+            direction = leftRight == -1 ? Movement.Direction.Left : Movement.Direction.Right;
         }
 
-        int speed = (dir != Vector3.zero) ? 1 : 0;
+        bool noInput = dir == Vector3.zero;
+        if (noInput) dir = cam.transform.forward;
 
-        SetMovementTarget( dir == Vector3.zero ? cam.transform.forward : dir );
 
-        movement.speed = Input.GetKey(KeyCode.LeftShift) ? speed * 2 : speed;
-
+        dir.y = 0;
+        dir.Normalize();
+        movement.SetMovementTarget(transform.position + dir * 500);
+    
+        int speed = noInput ? 0 : (Input.GetKey(KeyCode.LeftShift) ? 2 : 1);
+        movement.speed = speed;
         movement.direction = direction;
 
         if (Input.GetKeyDown(KeyCode.Space)) {
@@ -68,11 +67,8 @@ public class PlayerController : MonoBehaviour
         }
 
     }
-
-    // Update is called once per frame
     void Update()
     {
         CheckDirectionalMovement();
-        
     }
 }

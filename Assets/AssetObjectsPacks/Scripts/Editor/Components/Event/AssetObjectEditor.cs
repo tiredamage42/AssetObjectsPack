@@ -60,11 +60,11 @@ namespace AssetObjectsPacks {
         }
 
         public static class GUI {    
+            static readonly GUIContent multiSetGUI = new GUIContent("S", "Set Values");
             public static void DrawAssetObjectEdit (EditorProp ao, bool drawingSingle, GUIContent[] paramLabels, GUILayoutOption[] paramWidths, out int setParam) {                
                 GUIUtils.BeginIndent();
 
                 setParam = -1;
-                GUIContent multiSetGUI = new GUIContent("S", "Set Values");
                 //labels
                 EditorGUILayout.BeginHorizontal();
                 for (int i = 0; i < paramLabels.Length; i++) {
@@ -73,7 +73,8 @@ namespace AssetObjectsPacks {
                     if (!drawingSingle){
                         if (GUIUtils.SmallButton(multiSetGUI)) setParam = i;
                     }
-                    else GUIUtils.SmallButtonClear();
+                    else 
+                        GUIUtils.SmallButtonClear();
                 }
                 EditorGUILayout.EndHorizontal();
 

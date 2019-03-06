@@ -48,8 +48,8 @@ namespace AssetObjectsPacks {
         }
         public void SubscribeToEventFail(string packName, Action onEventFail) {
             SubscribeToEvent(pack2failEvents, packName, onEventFail);
-        
         }
+        
 
         public Action cueEventEndCallback;
 
@@ -57,6 +57,10 @@ namespace AssetObjectsPacks {
         //public bool playing_event;
         
         void Update () {
+            if (endAfterPlay) {
+                EndEvent();
+                endAfterPlay = false;
+            }
             //if (!playing_event || current_duration < 0) //maybe if override end event as well
             if (current_duration < 0 || endEventOverriden) 
                 return;
@@ -87,6 +91,13 @@ namespace AssetObjectsPacks {
         public Action OverrideEndEvent () {
             endEventOverriden = true;
             return EndEvent;
+        }
+        bool endAfterPlay;
+        public void EndAfterPlay () {
+            endAfterPlay = true;
+        }
+        public void SkipPlay (string packName) {
+            OverrideEventToPlay(packName, null);
         }
 
 
@@ -155,7 +166,7 @@ namespace AssetObjectsPacks {
             AssetObject o = filteredList.RandomChoice();
 
             if (isMain && !endEventOverriden && !simple) {
-                current_duration = o["Duration"].FloatValue;
+                current_duration = o["Duration"].GetValue<float>();
                 if (current_duration >= 0) {
                     Debug.Log(o.objRef.name + " set duration to " + current_duration);
                 }

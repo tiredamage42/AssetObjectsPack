@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+
 namespace AssetObjectsPacks {
     public class Playlist : MonoBehaviour {
 
         void OnDrawGizmos () {
             Gizmos.color = Color.blue;
-            Gizmos.DrawWireSphere(transform.position, .5f);
+            Gizmos.DrawWireCube(transform.position, Vector3.one);
         }
 
         [System.Serializable] public class Channel {
@@ -19,7 +20,8 @@ namespace AssetObjectsPacks {
         Channel[] _channels;
         public Channel[] channels {
             get {
-                if (_channels == null || _channels.Length == 0) _channels = transform.childCount.Generate( i => new Channel(transform.GetChild(i)) ).ToArray();
+                int c = transform.childCount;
+                if (_channels == null || _channels.Length != c) _channels = c.Generate( i => new Channel(transform.GetChild(i)) ).ToArray();
                 return _channels;
             }
         }
@@ -27,14 +29,9 @@ namespace AssetObjectsPacks {
         // channels play cues at same time, and change cues at same time when ready
         // as opposed to staggered (whenever last cue is done)
         public bool syncChannels; 
-        //public bool interruptsOthers;
-        //public int scene_weight = 0; //higher numbers override lower numbers (explosion knockdown > hit reaction)
         public bool isLooped;
         
 
-        /*
-        maybe make some non interruptable
-        */
         public void InitializePerformance (EventPlayer[] players, Vector3 position, Quaternion rotation, System.Action onEndPerformance) {
 
             int channelCount = channels.Length;
@@ -46,28 +43,13 @@ namespace AssetObjectsPacks {
             for (int a = 0; a < playerCount; a++) {
                 for (int s = 0; s < players[a].current_playlists.Count; s++) {
                     if (players[a].current_playlists[s].playlist == this) {
-                        Debug.LogError(name + " is already an active scene for: " + players[a].name);
+                        Debug.LogError(name + " is already an active playlist for: " + players[a].name);
                         return;
                     }
                 }   
             }
-            /*
-            //maybe weight scale
-            if (interruptsOthers) {
-                for (int a = 0; a < players_count; a++) {
-                    //get players current scenes and interrupt them
-                    List<Performance> players_currrent_scenes = players[a].current_scenes;
-                    for (int s = 0; s < players_currrent_scenes.Count; s++) {
-                        players_currrent_scenes[s].InterruptPerformance();
-                    }
-                    players[a].current_scenes.Clear();
-                    //players[a].InterruptAnimation();
-                }
-            }
-             */
-
-            Performance performance = AssetObjectsManager.GetNewPerformance();
             
+            Performance performance = AssetObjectsManager.GetNewPerformance();
             performance.InitializePerformance (this, position, rotation, players, onEndPerformance);
 
         }
@@ -131,12 +113,15 @@ namespace AssetObjectsPacks {
                         else if (lower == cueTransformParamString) return cueTransform;
                         else if (lower == cueParamString) return cue;
 
+                        //Debug.Log(paramString);
+
                         string[] spl = paramString.Split(':');
                         string pType = spl[0];
                         string pVal = spl[1];
 
                         switch (pType) {
                             case "i": return int.Parse(pVal);
+
                             case "f": return float.Parse(pVal);
                             case "b": return bool.Parse(pVal);
                             case "s": return spl[1];
@@ -387,71 +372,6 @@ namespace AssetObjectsPacks {
                 jump points have their own scene
             */
         
-
-        //anim in charge of face direction and move towards waypoint
-
-        //ai in charge of stance (with different animation behavior variations)
-
-/*
-
-        public class CharacterAnimator : MonoBehaviour {
-            //do root movement stuff with char controller component
-
-            public Vector3 target_point;
-            public Vector3 interest_point;
-            public float min_strafe_travel_dist = 1;
-        
-            int GetDirection (bool allow_strafe) {
-                if (!allow_strafe) {
-                    return 0;
-                }
-
-                Vector3 pos = transform.position;
-
-                Vector3 dir_to_dest = target_point - pos;
-                dir_to_dest.y = 0;
-                if (dir_to_dest.magnitude < min_strafe_travel_dist) {
-                    return 0;
-                }
-
-                Debug.DrawRay(pos, dir_to_dest, Color.blue, dir_to_dest.magnitude);
-
-                Vector3 dir_to_interest_point = interest_point - pos;
-                dir_to_interest_point.y = 0;
-
-                Debug.DrawRay(pos, dir_to_interest_point, Color.red, dir_to_interest_point.magnitude);
-
-                float angle = Vector3.Angle(dir_to_interest_point, dir_to_dest);
-                if (angle <= 45 || angle >= 135) {
-                    //angle is too acute or obtuse between interest (enemy point) and destination
-                    //for strafing
-                    Debug.LogError ("angle is too acute or obtuse");
-                    Debug.Break ();
-                    return 0;
-                }
-
-                Vector3 dir_to_dest_perp = Vector3.Cross(dir_to_dest.normalized, Vector3.up);
-                //dir_to_dest_perp.y = 0;
-                Debug.DrawRay(pos, dir_to_dest_perp.normalized, Color.green, dir_to_dest_perp.magnitude);
-                angle = Vector3.Angle(dir_to_dest_perp, dir_to_interest_point);
-                if (angle <= 45) {
-                    Debug.LogError ("strafing left towards destination");
-                    Debug.Break ();
-                    return 2;
-                }
-                else {
-                    Debug.LogError ("strafing right towards destination");   
-                    Debug.Break ();
-                    return 1;
-                }
-            }
-        }
-        */
-        /*
-            figure out different variants of strafe / fwd during same go to animation scene
-        */
-   
-   
 
 
 

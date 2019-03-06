@@ -46,8 +46,7 @@ MonoBehaviour:
   playlist: {fileID: 0}
   events:
   - {fileID: 11400000, guid: 1e8278874d17f4217a967c008066069d, type: 2}
-  sendMessage: "SetMovementControllerSpeed_Cue(cue, i:1) / MovementControllerGoTo_Cue(cue,
-    cue position)\r"
+  sendMessage: "MovementControllerGoTo_Cue(cue, cue position, i:-1, i:-1)\r"
   snapPlayerStyle: 0
   smoothPositionTime: 1
   smoothRotationTime: 1

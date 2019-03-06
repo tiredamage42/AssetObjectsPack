@@ -16,7 +16,6 @@ namespace AssetObjectsPacks {
             if (page >= max_pages) page = Mathf.Max(0, max_pages - 1);
             int min = page * elementsPerPage;
             int max = Mathf.Min(min + elementsPerPage, l - 1);
-
             pagesGUI = new GUIContent("Page: " + (page + 1) + " / " + max_pages);
             return unpaginated.Slice(min, max);
         }
@@ -26,7 +25,6 @@ namespace AssetObjectsPacks {
             int newVal = page + offset;
             if (newVal < 0 || newVal >= max_pages) return false;
             page += offset;
-            //pagesGUI = new GUIContent("Page: " + (page + 1) + " / " + max_pages);
             return true;
         }
     }

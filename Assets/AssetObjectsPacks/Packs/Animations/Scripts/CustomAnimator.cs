@@ -129,22 +129,23 @@ namespace AssetObjectsPacks.Animations {
             this.endUseCallbacks = endUseCallbacks;
 
             //get asset object parameter values
-            int animID = assetObject.id;
-            float transition = assetObject["Transition"].FloatValue;
-            float speed = assetObject["Speed"].FloatValue;
-            bool looped = assetObject["Looped"].BoolValue;
-            int mirror = assetObject["Mirror"].IntValue;
-            int layer = assetObject["Layer"].IntValue;
-            float timeOffset = assetObject["TimeOffset"].FloatValue;
-            
+            int mirrorMode = assetObject["Mirror"].GetValue<int>();  
+            bool mirror = (mirrorMode == 2) ? Random.value < .5f : mirrorMode == 1;          
+            float timeOffset = assetObject["TimeOffset"].GetValue<float>();
             if (timeOffset != 0) {
-                //Debug.Log(assetObject.objRef.GetType());
-                //Debug.Log(assetObject.objRef.name);
-                
                 timeOffset = timeOffset * ((AnimationClip)assetObject.objRef).length;
             } 
 
-            Play(animID, asInterrupter, (mirror == 2) ? Random.value < .5f : mirror == 1, looped, transition, speed, layer, timeOffset);
+            Play(
+                assetObject.id, 
+                asInterrupter, 
+                mirror, 
+                assetObject["Looped"].GetValue<bool>(), 
+                assetObject["Transition"].GetValue<float>(), 
+                assetObject["Speed"].GetValue<float>(), 
+                assetObject["Layer"].GetValue<int>(), 
+                timeOffset
+            );
         }
 
         // let the player know the event is done if this component is keeping track of that
@@ -211,7 +212,6 @@ namespace AssetObjectsPacks.Animations {
             anim.SetBool(pLoopMirrors[activeLoops], mirror);
 
             if (do_transition) {
-
                 anim.CrossFadeInFixedTime(sLoopNames[activeLoops], transition, layer, timeOffset);
             }
             

@@ -47,7 +47,7 @@ namespace AssetObjectsPacks {
 
         
         public static void DrawProp (EditorProp prop, params GUILayoutOption[] options) {
-            EditorGUILayout.PropertyField(prop.prop, GUIContent.none, options);
+            EditorGUILayout.PropertyField(prop.property, GUIContent.none, options);
         }
         public static void DrawProp (EditorProp prop, GUIContent gui, params GUILayoutOption[] options) {
             EditorGUILayout.BeginHorizontal();
@@ -62,7 +62,7 @@ namespace AssetObjectsPacks {
             //label and show
             EditorGUILayout.BeginHorizontal();
             showArray = SmallToggleButton(GUIContent.none, showArray, out _);
-            Label(new GUIContent(string.Format("<b>{0}</b>", array.prop.displayName)));
+            Label(new GUIContent(string.Format("<b>{0}</b>", array.displayName)));
             EditorGUILayout.EndHorizontal();
 
             if (showArray) {
@@ -271,9 +271,9 @@ namespace AssetObjectsPacks {
             EditorGUILayout.EndVertical();
         }
         
-        public static void BeginIndent (int indent_space = 1) {
+        public static void BeginIndent (int indentSpace = 1) {
             EditorGUILayout.BeginHorizontal();
-            for (int i = 0; i < indent_space; i++) SmallButtonClear();
+            for (int i = 0; i < indentSpace; i++) SmallButtonClear();
             EditorGUILayout.BeginVertical();
         }
         public static void EndIndent () {
@@ -289,8 +289,7 @@ namespace AssetObjectsPacks {
             EditorGUILayout.EndVertical();
             if (EditorGUI.EndChangeCheck() || editor.IsChanged()) {     
                 editor.SaveObject();
-
-                //Debug.Log("saved");
+                Debug.Log("saved");
                 return true;
             }
             return false;
@@ -322,8 +321,11 @@ namespace AssetObjectsPacks {
         }
 
 
+        static readonly GUIContent deleteButtonGUI = new GUIContent("");
+
         public static bool SmallDeleteButton(string hint = "Delete") {
-            return SmallButton(new GUIContent ("", hint), Colors.red, Colors.white);
+            deleteButtonGUI.tooltip = hint;
+            return SmallButton(deleteButtonGUI, Colors.red, Colors.white);
         }
         
         public static bool SmallButton (GUIContent c, Color32 color, Color32 text_color) {
@@ -332,18 +334,26 @@ namespace AssetObjectsPacks {
         public static bool SmallButton (GUIContent c) {
             return Button(c, small_button_style, Colors.liteGray, Colors.black, smallButtonOpts );
         }
-        public static bool SmallToggleButton (GUIContent c, bool value, out bool changed) {
-            changed = SmallButton(c, Colors.Toggle(value), Colors.black);
+        public static bool SmallToggleButton (GUIContent c, bool value, Color32 onColor, Color32 offColor, GUIStyle style, out bool changed) {
+            //changed = SmallButton(c, value ? onColor : offColor, Colors.black);
+            changed = Button(c, GUIStyles.miniButton, value ? onColor : offColor, Colors.black, smallButtonOpts);
             return changed ? !value : value;
         }
 
-        static readonly GUILayoutOption[] smallButtonOpts = new GUILayoutOption[] { GUILayout.Width(12), GUILayout.Height(12) };
+        public static bool SmallToggleButton (GUIContent c, bool value, out bool changed) {
+            changed = SmallButton(c, value ? Colors.selected : Colors.liteGray, Colors.black);
+            return changed ? !value : value;
+        }
+
+        static readonly GUILayoutOption[] smallButtonOpts = new GUILayoutOption[] { 
+            GUILayout.Width(12), GUILayout.Height(12) 
+        };
         static GUIStyle _sbs = null;
         static GUIStyle small_button_style {
             get {
                 if (_sbs == null) {
                     _sbs = new GUIStyle(GUIStyles.miniButton);
-                    _sbs.fontSize = 7;
+                    //_sbs.fontSize = 7;
                 }
                 return _sbs;
             }

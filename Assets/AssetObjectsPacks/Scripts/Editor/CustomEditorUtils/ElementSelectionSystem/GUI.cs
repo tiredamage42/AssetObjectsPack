@@ -40,9 +40,10 @@ namespace AssetObjectsPacks {
             this.dragDrop = dragDrop;
         }
         
-        public static SelectionElement empty {
-            get { return new SelectionElement(-1, "", -1, false, false, null, null, ""); }
-        }
+        //public static SelectionElement empty {
+        //    get { return new SelectionElement(-1, "", -1, false, false, null, null, ""); }
+        //}
+
 
         public bool Draw () {
             bool pressed = false;
@@ -88,8 +89,9 @@ namespace AssetObjectsPacks {
                 Color32 txtColor = drawSelected || drawDirectory ? Colors.black : (isCopy ? Colors.green : Colors.liteGray);
 
                 UnityEngine.GUI.enabled = guiEnabled;
-                //bool 
+
                 pressed = GUIUtils.Button(gui, s, Colors.Toggle(drawSelected), txtColor, displayRect);
+
                 UnityEngine.GUI.enabled = true;
 
                 s.normal.background = t;
@@ -137,9 +139,9 @@ namespace AssetObjectsPacks {
             string lastSearch = search;
             string defSearch = search.IsEmpty() ? "Search" : search;
             string searchResult = GUIUtils.DrawTextField(defSearch, GUIUtils.TextFieldType.Delayed, true, out _, searchBarWidth);
-            
             if (searchResult != defSearch) search = searchResult;
             searchChanged = search != lastSearch;
+            
             toolbarButtons(k);
             
             EditorGUILayout.EndHorizontal();

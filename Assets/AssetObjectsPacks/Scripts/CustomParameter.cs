@@ -1,38 +1,53 @@
 ﻿using UnityEngine;
+using System;
 namespace AssetObjectsPacks {
-    [System.Serializable] public class CustomParameter {
+    [Serializable] public class CustomParameter {
         public enum ParamType { BoolValue = 0, FloatValue = 1, IntValue = 2, StringValue = 3, };
         public string name;
         public ParamType paramType {
             get { return (ParamType) pType; }
             private set { pType = (int)value; }
         }
-        public int pType;
-        public bool BoolValue;
-        public float FloatValue;
-        public int IntValue;
-        public string StringValue;
+        [SerializeField] int pType;
+        [SerializeField] bool BoolValue;
+        [SerializeField] float FloatValue;
+        [SerializeField] int IntValue;
+        [SerializeField] string StringValue;
 
-        public CustomParameter (string name, float value) {
-            paramType = ParamType.FloatValue;
-            this.name = name;
-            this.FloatValue = value;
+        Func<object> valueLink;
+
+        public T GetValue<T>() {
+            return (T)(valueLink != null ? valueLink() : GetValue());
         }
-        public CustomParameter (string name, bool value) {
-            paramType = ParamType.BoolValue;
-            this.name = name;
-            this.BoolValue = value;
+        object GetValue () {
+            switch (paramType) {
+                case ParamType.BoolValue: return BoolValue;
+                case ParamType.FloatValue: return FloatValue;
+                case ParamType.IntValue: return IntValue;
+                case ParamType.StringValue: return StringValue;
+            }
+            return null;
         }
-        public CustomParameter (string name, int value) {
-            paramType = ParamType.IntValue;
+
+        public CustomParameter (string name, object value) {
             this.name = name;
-            this.IntValue = value;
+            paramType = SType2PType(value.GetType());
+            SetValue(value);
         }
-        public CustomParameter (string name, string value) {
-            paramType = ParamType.StringValue;
+        public CustomParameter (string name, Func<object> valueLink) {
             this.name = name;
-            this.StringValue = value;
+            this.paramType = SType2PType(valueLink().GetType());
+            this.valueLink = valueLink;
         }
+        
+        static ParamType SType2PType (Type sType) {
+            if (sType == typeof(float)) return ParamType.FloatValue;
+            else if (sType == typeof(int)) return ParamType.IntValue;
+            else if (sType == typeof(bool)) return ParamType.BoolValue;
+            else if (sType == typeof(string)) return ParamType.StringValue;
+            return ParamType.BoolValue;
+        }
+
 
         bool CheckCompatibleSet (ParamType trying) {
             if (paramType != trying) {
@@ -42,67 +57,61 @@ namespace AssetObjectsPacks {
             return false;
         }
 
-        public void SetValue (float value) {
-            if (CheckCompatibleSet(ParamType.FloatValue)) return;
-            this.FloatValue = value;
-        }
-        public void SetValue (bool value) {
-            if (CheckCompatibleSet(ParamType.BoolValue)) return;
-            this.BoolValue = value;
-        }
-        public void SetValue (int value) {
-            if (CheckCompatibleSet(ParamType.IntValue)) return;
-            this.IntValue = value;
-        }
-        public void SetValue (string value) {
-            if (CheckCompatibleSet(ParamType.StringValue)) return;
-            this.StringValue = value;
+        public void SetValue (object value) {
+            
+            ParamType vType = SType2PType(value.GetType());
+            if (CheckCompatibleSet(vType)) return;
+            switch ( vType ) {
+                case ParamType.IntValue: this.IntValue = (int)value; break;
+                case ParamType.FloatValue: this.FloatValue = (float)value; break;
+                case ParamType.BoolValue: this.BoolValue = (bool)value; break;
+                case ParamType.StringValue: this.StringValue = (string)value; break;
+            }
         }
 
-        public bool MatchesParameter(string[] paramStringSplit) {
-            string pName = paramStringSplit[0];
-            string pVals = paramStringSplit[1];
-
+        public enum CompareMode {
+            Equals, MoreThan, LessThan, MoreThanOrEqual, LessThenOrEqual
+        }
+        
+        public bool MatchesParameter(string pName, CompareMode compareMode, string valueStrig){
             if (pName != name) {
                 Debug.LogWarning("Name Mismatch! " + pName + " / " + name);
                 return false;
             }
             switch ( paramType ) {
                 case ParamType.IntValue:
-                
-                    if (pVals.StartsWith("<")) return IntValue < int.Parse(pVals.Substring(1));
-                    else if (pVals.StartsWith(">")) return IntValue > int.Parse(pVals.Substring(1));
-                    return IntValue == int.Parse(pVals);
-
+                {
+                    int checkVal = int.Parse(valueStrig);
+                    int intValue = GetValue<int>();
+                    switch (compareMode) {
+                        case CompareMode.Equals: return intValue == checkVal;
+                        case CompareMode.MoreThan: return intValue > checkVal;
+                        case CompareMode.MoreThanOrEqual: return intValue >= checkVal;
+                        case CompareMode.LessThan: return intValue < checkVal;
+                        case CompareMode.LessThenOrEqual: return intValue <= checkVal;
+                    }
+                    return false;
+                }
                 case ParamType.FloatValue:
-
-                    if (pVals.StartsWith("<")) return FloatValue < float.Parse(pVals.Substring(1));
-                    else if (pVals.StartsWith(">")) return FloatValue > float.Parse(pVals.Substring(1));                    
-                    return FloatValue == float.Parse(pVals);
-
+                {
+                    float checkVal = float.Parse(valueStrig);
+                    float floatValue = GetValue<float>();
+                    switch (compareMode) {
+                        case CompareMode.Equals: return floatValue == checkVal;
+                        case CompareMode.MoreThan: return floatValue > checkVal;
+                        case CompareMode.MoreThanOrEqual: return floatValue >= checkVal;
+                        case CompareMode.LessThan: return floatValue < checkVal;
+                        case CompareMode.LessThenOrEqual: return floatValue <= checkVal;
+                    }
+                    return false;
+                }
                 case ParamType.BoolValue:
-                    return bool.Parse(pVals) == BoolValue;
+                    return bool.Parse(valueStrig) == GetValue<bool>();
 
                 case ParamType.StringValue:
-                    return pVals == StringValue;
+                    return valueStrig == GetValue<string>();
             }
             return true; 
         }
-/*
-        public bool MatchesParameter (CustomParameter other_parameter) {
-            if (other_parameter.name != name) {
-                Debug.LogWarning("Name Mismatch! " + other_parameter.name + " / " + name);
-                return false;
-            }
-            if (other_parameter.paramType != paramType) return false;
-            switch (paramType) {
-                case ParamType.BoolValue: return other_parameter.BoolValue == BoolValue;
-                case ParamType.IntValue: return other_parameter.IntValue == IntValue;
-                case ParamType.FloatValue: return other_parameter.FloatValue == FloatValue;
-                case ParamType.StringValue: return other_parameter.StringValue == StringValue;
-            }
-            return true;
-        }
- */
     }
 }

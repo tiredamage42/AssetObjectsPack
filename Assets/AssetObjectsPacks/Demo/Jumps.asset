@@ -14,6 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   multi_edit_instance:
     isCopy: 0
+    solo: 0
+    mute: 0
     objRef: {fileID: 0}
     id: 0
     parameters:
@@ -71,6 +73,8 @@ MonoBehaviour:
       conditionBlock: Speed:0
       assetObjects:
       - isCopy: 0
+        solo: 0
+        mute: 0
         objRef: {fileID: 7400002, guid: dad86114867244d1aa1a2076fd1c49dd, type: 3}
         id: 7462
         parameters:
@@ -117,6 +121,8 @@ MonoBehaviour:
           IntValue: 0
           StringValue: 
       - isCopy: 0
+        solo: 0
+        mute: 0
         objRef: {fileID: 7400002, guid: 38eca18aed99a421faf86d085e09e644, type: 3}
         id: 7461
         parameters:
@@ -163,6 +169,8 @@ MonoBehaviour:
           IntValue: 0
           StringValue: 
       - isCopy: 0
+        solo: 0
+        mute: 0
         objRef: {fileID: 7400002, guid: 50a17d35b28a847ceb3e1fa6f8a74774, type: 3}
         id: 7460
         parameters:
@@ -209,6 +217,8 @@ MonoBehaviour:
           IntValue: 0
           StringValue: 
       - isCopy: 0
+        solo: 0
+        mute: 0
         objRef: {fileID: 7400002, guid: 572e0aee5da564891b753d800126361a, type: 3}
         id: 5262
         parameters:
@@ -255,6 +265,8 @@ MonoBehaviour:
           IntValue: 0
           StringValue: 
       - isCopy: 0
+        solo: 0
+        mute: 0
         objRef: {fileID: 7400002, guid: 346099ee9857f4452b012755c1598961, type: 3}
         id: 5261
         parameters:
@@ -301,6 +313,8 @@ MonoBehaviour:
           IntValue: 0
           StringValue: 
       - isCopy: 0
+        solo: 0
+        mute: 0
         objRef: {fileID: 7400002, guid: ab6b6b281f0f1452c941648e51b74ce8, type: 3}
         id: 5260
         parameters:
@@ -347,6 +361,8 @@ MonoBehaviour:
           IntValue: 0
           StringValue: 
       - isCopy: 0
+        solo: 0
+        mute: 0
         objRef: {fileID: 7400002, guid: 34d5b2048ca644650b65c9ea20ce170d, type: 3}
         id: 867
         parameters:
@@ -403,6 +419,8 @@ MonoBehaviour:
         conditionBlock: Direction:3
         assetObjects:
         - isCopy: 0
+          solo: 0
+          mute: 0
           objRef: {fileID: 7400002, guid: 16c407b5bffd7499b8dfc9f677d0512e, type: 3}
           id: 672
           parameters:
@@ -449,6 +467,8 @@ MonoBehaviour:
             IntValue: 0
             StringValue: 
         - isCopy: 0
+          solo: 0
+          mute: 0
           objRef: {fileID: 7400002, guid: 0786a94800dc940008e1c3867c8c53c1, type: 3}
           id: 673
           parameters:
@@ -495,6 +515,8 @@ MonoBehaviour:
             IntValue: 0
             StringValue: 
         - isCopy: 0
+          solo: 0
+          mute: 0
           objRef: {fileID: 7400002, guid: ad20401f8a23342a293b29410476b8b6, type: 3}
           id: 674
           parameters:
@@ -541,6 +563,8 @@ MonoBehaviour:
             IntValue: 0
             StringValue: 
         - isCopy: 0
+          solo: 0
+          mute: 0
           objRef: {fileID: 7400002, guid: 38de31643d91d4bdeb7d54fbeab0e66d, type: 3}
           id: 1504
           parameters:
@@ -597,6 +621,8 @@ MonoBehaviour:
           conditionBlock: Speed:2
           assetObjects:
           - isCopy: 0
+            solo: 0
+            mute: 0
             objRef: {fileID: 7400002, guid: 40e801aea56914b7f8ed2113e914d46d, type: 3}
             id: 3013
             parameters:
@@ -643,6 +669,8 @@ MonoBehaviour:
               IntValue: 0
               StringValue: 
           - isCopy: 0
+            solo: 0
+            mute: 0
             objRef: {fileID: 7400002, guid: ed06ab031d9124074a546ac7933393ff, type: 3}
             id: 677
             parameters:
@@ -689,6 +717,8 @@ MonoBehaviour:
               IntValue: 0
               StringValue: 
           - isCopy: 0
+            solo: 0
+            mute: 0
             objRef: {fileID: 7400002, guid: feadbcefa4138473997168a51793f28a, type: 3}
             id: 676
             parameters:
@@ -735,6 +765,8 @@ MonoBehaviour:
               IntValue: 0
               StringValue: 
           - isCopy: 0
+            solo: 0
+            mute: 0
             objRef: {fileID: 7400002, guid: e3f75f70f866e425693a2857a09e233d, type: 3}
             id: 675
             parameters:
@@ -786,6 +818,8 @@ MonoBehaviour:
           conditionBlock: Speed:1
           assetObjects:
           - isCopy: 0
+            solo: 0
+            mute: 0
             objRef: {fileID: 7400002, guid: 75fa1f0558b4e46b8b67354370a969fd, type: 3}
             id: 3012
             parameters:
@@ -832,6 +866,8 @@ MonoBehaviour:
               IntValue: 0
               StringValue: 
           - isCopy: 0
+            solo: 0
+            mute: 0
             objRef: {fileID: 7400002, guid: b59ad726fe53f4a90953aa82bccc30fb, type: 3}
             id: 3011
             parameters:
@@ -878,6 +914,8 @@ MonoBehaviour:
               IntValue: 0
               StringValue: 
           - isCopy: 0
+            solo: 0
+            mute: 0
             objRef: {fileID: 7400002, guid: d187568d8eb0e48379dd258a4aa623c6, type: 3}
             id: 3010
             parameters:
@@ -924,6 +962,8 @@ MonoBehaviour:
               IntValue: 0
               StringValue: 
           - isCopy: 0
+            solo: 0
+            mute: 0
             objRef: {fileID: 7400002, guid: 50482e24639cf4c2db02c3b42a461cce, type: 3}
             id: 3009
             parameters:
@@ -970,6 +1010,8 @@ MonoBehaviour:
               IntValue: 0
               StringValue: 
           - isCopy: 0
+            solo: 0
+            mute: 0
             objRef: {fileID: 7400002, guid: aa3c4283d8c004c4396d3f137da0897b, type: 3}
             id: 3008
             parameters:
@@ -1016,6 +1058,8 @@ MonoBehaviour:
               IntValue: 0
               StringValue: 
           - isCopy: 0
+            solo: 0
+            mute: 0
             objRef: {fileID: 7400002, guid: 332ad0127c1aa46db81c8ddfeb57c8b7, type: 3}
             id: 3007
             parameters:
@@ -1062,6 +1106,8 @@ MonoBehaviour:
               IntValue: 0
               StringValue: 
           - isCopy: 0
+            solo: 0
+            mute: 0
             objRef: {fileID: 7400002, guid: cca129c169f284298a354cb9558d39a1, type: 3}
             id: 3006
             parameters:
@@ -1108,6 +1154,8 @@ MonoBehaviour:
               IntValue: 0
               StringValue: 
           - isCopy: 0
+            solo: 0
+            mute: 0
             objRef: {fileID: 7400002, guid: 6166e82042121435bbeb9cf3a4e50329, type: 3}
             id: 3005
             parameters:
@@ -1164,6 +1212,8 @@ MonoBehaviour:
           conditionBlock: Speed:1
           assetObjects:
           - isCopy: 0
+            solo: 0
+            mute: 0
             objRef: {fileID: 7400002, guid: 52f907fff45df45bbb8b4ca63e2d24c3, type: 3}
             id: 5130
             parameters:
@@ -1215,6 +1265,8 @@ MonoBehaviour:
           conditionBlock: Speed:2
           assetObjects:
           - isCopy: 0
+            solo: 0
+            mute: 0
             objRef: {fileID: 7400002, guid: f7705fdb302204bc186ebdac26627dd9, type: 3}
             id: 4582
             parameters:
@@ -1271,6 +1323,8 @@ MonoBehaviour:
           conditionBlock: Speed:1
           assetObjects:
           - isCopy: 0
+            solo: 0
+            mute: 0
             objRef: {fileID: 7400002, guid: e2321f2ed19264a1d95426f1f529400f, type: 3}
             id: 4596
             parameters:
@@ -1322,6 +1376,8 @@ MonoBehaviour:
           conditionBlock: Speed:2
           assetObjects:
           - isCopy: 0
+            solo: 0
+            mute: 0
             objRef: {fileID: 7400002, guid: 15cf8c283922948a0becc97f497dd2c6, type: 3}
             id: 2965
             parameters:

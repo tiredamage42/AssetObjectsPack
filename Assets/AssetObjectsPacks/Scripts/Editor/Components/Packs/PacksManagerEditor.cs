@@ -9,7 +9,7 @@ namespace AssetObjectsPacks {
         
         public static EditorProp GetPacksList () {
             if (AssetObjectsEditor.packManager == null) return null;
-            return new EditorProp ( new SerializedObject ( AssetObjectsEditor.packManager ).FindProperty( packsField ) );
+            return new EditorProp ( new SerializedObject ( AssetObjectsEditor.packManager ) )[ packsField ];
         }
 
         const string packsField = "packs";

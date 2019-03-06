@@ -5,14 +5,12 @@ using System.Linq;
 using System;
 namespace AssetObjectsPacks {
 
-
     /*
     
     call on path change
     keep new element as index in ev editor
 
-    
-     */
+    */
     public class ElementSelectionSystem  {
         public bool singleSelection { get { return selectionSystem.singleElement; } }
         public bool hasSelection { get { return selectionSystem.hasElements; } }
@@ -20,35 +18,35 @@ namespace AssetObjectsPacks {
             get {
                 int index;
                 bool singleSelection = selectionSystem.HasSingleElement(out index);
-                if (!hasSelection || !singleSelection) return SelectionElement.empty;
+                if (!hasSelection || !singleSelection) return null;
                 return elements[1][index];
             }
         }
         SelectionSystem selectionSystem = new SelectionSystem();
-        
-        string searchFilter;
-
         Pagination pagination= new Pagination();
         DragAndDrop dragDrop = new DragAndDrop();
-    
+        
+        string searchFilter;
         public string curPath = "";
-        Action onSelectionChange;
+        Action onSelectionChange, onChangeDisplayPath;
         Action<IEnumerable<int>, string, string> onDirDragDrop;
         Action<KeyboardListener> toolbarButtons;
         bool shouldRebuild, shouldResetPage;
         Func<string, IEnumerable<SelectionElement>> getPoolElements;
         Action<string, bool, HashSet<int>> getIDsInDirectory;
-        public void OnEnable (Func<string, IEnumerable<SelectionElement>> getPoolElements, Action<string, bool, HashSet<int>> getIDsInDirectory, Action onSelectionChange, Action<IEnumerable<int>, string, string> onDirDragDrop, Action<KeyboardListener> toolbarButtons) {
+        SelectionElement[][] elements = new SelectionElement[][] {
+            null, null
+        };
+        public string parentPath { get { return CalcLastFolder(curPath); } }
+        
+        public void OnEnable (Func<string, IEnumerable<SelectionElement>> getPoolElements, Action<string, bool, HashSet<int>> getIDsInDirectory, Action onSelectionChange, Action<IEnumerable<int>, string, string> onDirDragDrop, Action<KeyboardListener> toolbarButtons, Action onChangeDisplayPath) {
+            this.onChangeDisplayPath = onChangeDisplayPath;
             this.getIDsInDirectory = getIDsInDirectory;
             this.toolbarButtons = toolbarButtons;
             this.onDirDragDrop = onDirDragDrop;
             this.onSelectionChange = onSelectionChange;
             this.getPoolElements = getPoolElements;
         }
-
-        SelectionElement[][] elements = new SelectionElement[][] {
-            null, null
-        };
 
         public void DrawElements (){
             KeyboardListener keyboardListener = new KeyboardListener();
@@ -78,7 +76,6 @@ namespace AssetObjectsPacks {
             bool movedFolder = (folderBack && MoveFolder()) || (forwardDir != null && MoveFolder(forwardDir));
             
             selectionChanged = selectionSystem.HandlDirectionalSelection(keyboardListener[KeyCode.UpArrow], keyboardListener[KeyCode.DownArrow], keyboardListener.shift, elements[1].Length - 1) || selectionChanged;
-
 
             shouldRebuild = droppedOnReceiver || movedFolder || searchChanged|| paginationSuccess;            
             shouldResetPage = movedFolder;
@@ -121,15 +118,14 @@ namespace AssetObjectsPacks {
                 selectionChanged = true;
             }
         }
-        string CalcLastFolder(string dir) {
-            if (dir.IsEmpty() || !dir.Contains("/")) return string.Empty;
-            return dir.Substring(0, dir.LastIndexOf("/"));
-        }
         public void ForceBackFolder () {
             MoveFolder();
             DoReset(false, true);
         }
-        public string parentPath { get { return CalcLastFolder(curPath); } }
+        string CalcLastFolder(string dir) {
+            if (dir.IsEmpty() || !dir.Contains("/")) return string.Empty;
+            return dir.Substring(0, dir.LastIndexOf("/"));
+        }
         
         public void ChangeCurrentDirectoryName (string newName) {
             if (curPath.Contains("/")) {
@@ -147,6 +143,7 @@ namespace AssetObjectsPacks {
             }
             else curPath = toPath;
 
+            onChangeDisplayPath ();
             return true;
         }
         
@@ -195,8 +192,15 @@ namespace AssetObjectsPacks {
 
 
         void DoReset (bool resetPath, bool resetPage) {
-            if (resetPath) curPath = "";
-            if (resetPage) pagination.ResetPage();
+            if (resetPath) {
+                curPath = "";
+                onChangeDisplayPath();
+            }
+
+            if (resetPage) {
+                pagination.ResetPage();
+            }
+
             selectionSystem.ClearTracker();   
             dragDrop.ClearTracker();
             RebuildDisplayedElements();
@@ -205,12 +209,14 @@ namespace AssetObjectsPacks {
 
         void RebuildDisplayedElements() {    
             elements[1] = pagination.Paginate(BuildElementsList (curPath, true)).ToArray();
+            
             List<SelectionElement> prevElement = new List<SelectionElement>();
             if (!curPath.IsEmpty()) {
                 string prevPath = parentPath;
                 prevElement = BuildElementsList (prevPath, false);    
                 prevElement.Insert(0, new SelectionElement(prevPath, new GUIContent(" << " + (prevPath.IsEmpty() ? "Base" : prevPath))));
             }
+
             elements[0] = prevElement.ToArray();
 
             for (int e = 0; e < elements.Length; e++) {
@@ -218,14 +224,6 @@ namespace AssetObjectsPacks {
                     elements[e][i].Initialize(i, selectionSystem, dragDrop, e == 0, curPath);
                 }
             }
-        }
-
-        static string DirDisplayName (int folderOffset, string path, out bool isFile) {
-            isFile = true;
-            if (!path.Contains("/")) return path;
-            string[] sp = path.Split('/');
-            isFile = folderOffset == sp.Length - 1;
-            return sp[folderOffset];
         }
 
         List<SelectionElement> BuildElementsList (string dir, bool showFiles) {
@@ -243,9 +241,15 @@ namespace AssetObjectsPacks {
             string dirPrefix = dir + (dir.IsEmpty() ? "" : "/");
                     
             foreach (var e in poolElements) {
-                bool isFile;
-                string name = DirDisplayName (folderOffset, e.filePath, out isFile);
                 
+                bool isFile = true;
+                string name = e.filePath;
+                if (name.Contains("/")) {
+                    string[] sp = name.Split('/');
+                    isFile = folderOffset == sp.Length - 1;
+                    name = sp[folderOffset];
+                }
+
                 if (isFile) {
                     if (showFiles) {
                         e.SetGUI(new GUIContent( name ));
