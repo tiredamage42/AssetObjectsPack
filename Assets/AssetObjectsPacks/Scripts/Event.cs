@@ -32,31 +32,9 @@ namespace AssetObjectsPacks {
 
         }
 
-        public static IEnumerable<Vector2Int> ParseParenthesisPairs(string text) {
-            var lastStartPos = -1;
-            int l = text.Length;
+        
 
-            for (int i = 0; i < l; i++) {
-                if (text[i] == '(') {
-                    lastStartPos = i;
-                }
-                else if (text[i] == ')') {
-                    if (lastStartPos == -1) {
-                        throw new System.ArgumentException(string.Format("mismatched end bracket at index {0}", i));
-                    }
-                    else {
-                        int b = lastStartPos;
-                        lastStartPos = -1;
-                        yield return new Vector2Int(b, i);
-                    } 
-                }
-            } 
-            if (lastStartPos != -1) 
-            {
-                throw new System.ArgumentException(string.Format("mismatched start brackets{0}", ""));
-            }
-        }
-
+/*
 
 
         static bool CheckPossibleParam(bool isParenthesisBlock, string paramBlock, Dictionary<string, CustomParameter> paramChecks, bool debug) {
@@ -68,7 +46,7 @@ namespace AssetObjectsPacks {
             List<string> parenthesisSeperated = new List<string>();
             List<bool> isParenthesisElement = new List<bool>();
        
-            IEnumerable<Vector2Int> pairs = ParseParenthesisPairs(input);
+            IEnumerable<Vector2Int> pairs = CustomScripting.ParsePairs(input, "()", name);
             
             if (pairs.Count() == 0) {
                 parenthesisSeperated.Add(input);
@@ -141,7 +119,6 @@ namespace AssetObjectsPacks {
             return met;
         }
 
-
         static bool ParamStringMet (string parameter, Dictionary<string, CustomParameter> paramsCheck, bool debug) {
                 string[] nameSplit = parameter.Split(':');
                 string paramName = nameSplit[0];
@@ -208,6 +185,7 @@ namespace AssetObjectsPacks {
             
             return BlockMet(conditionBlock.Replace(" ", string.Empty), paramsCheck, debug);
         }
+ */
 
 
     }
@@ -233,7 +211,8 @@ namespace AssetObjectsPacks {
 
 
         void GetFilteredStates (EventState eventState, Dictionary<string, CustomParameter> parameters, List<AssetObject> ret, bool debug) {
-            if (eventState.PassesConditionCheck(parameters, debug)) {
+            //if (eventState.PassesConditionCheck(parameters, debug)) {
+            if (CustomScripting.StatementValue(eventState.conditionBlock, parameters, debug, name)) {
                 
                 ret.AddRange(eventState.GetAssetObjects());
                 
@@ -249,7 +228,7 @@ namespace AssetObjectsPacks {
 
             if (ret.Count == 0) {
                 Debug.LogWarning("Couldnt find any assets on: " + this.name);
-                GetFilteredStates(baseState, parameters, ret, true);
+                //GetFilteredStates(baseState, parameters, ret, true);
                 //Debug.Break();
             }
             return ret;

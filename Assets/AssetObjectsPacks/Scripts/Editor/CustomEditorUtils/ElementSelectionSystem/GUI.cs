@@ -86,7 +86,8 @@ namespace AssetObjectsPacks {
 
                 s.alignment = TextAnchor.MiddleLeft;
                         
-                Color32 txtColor = drawSelected || drawDirectory ? Colors.black : (isCopy ? Colors.green : Colors.liteGray);
+                //Color32 txtColor = drawSelected || drawDirectory ? Colors.black : (isCopy ? Colors.green : Colors.liteGray);
+                Color32 txtColor = drawSelected ? Colors.black : (isCopy ? Colors.green : Colors.liteGray);
 
                 UnityEngine.GUI.enabled = guiEnabled;
 

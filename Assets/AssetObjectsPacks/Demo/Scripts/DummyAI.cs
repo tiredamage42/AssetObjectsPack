@@ -3,7 +3,8 @@ using AssetObjectsPacks;
 
 public class DummyAI : MonoBehaviour{
     public bool agitated;
-    public PlaylistHolder walkScene;
+
+    public Playlist demoScene;
     EventPlayer player;
     void Awake () {
         player = GetComponent<EventPlayer>();        
@@ -13,7 +14,7 @@ public class DummyAI : MonoBehaviour{
     }
     
     void Start () {
-        walkScene.PlayPlaylist(new EventPlayer[] { player }, null);
+        demoScene.InitializePerformance(new EventPlayer[] { player }, true, null);
     }
 }
 

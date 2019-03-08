@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEditor;
+//using System.Linq;
 namespace AssetObjectsPacks {
     [CustomEditor(typeof(Cue))]
     public class CueEditor : Editor
@@ -18,11 +19,31 @@ namespace AssetObjectsPacks {
             GUIUtils.StartBox(1);
 
             EditorGUI.indentLevel++;
+            
+            GUIUtils.DrawProp(so[Cue.repeatsField], new GUIContent("Repeats", "How Many times this cue repeats"));
+            if (so[Cue.repeatsField].intValue < 1) {
+                so[Cue.repeatsField].SetValue(1);
+            }
+            
+
+            const float lineHeight = 16;
+
+            GUIUtils.DrawMultiLineStringProp(
+                so[Cue.messagesBlockField], 
+                new GUIContent("<b>Send Messages</b>:", ""), 
+                false, GUILayout.MinHeight(so[Cue.messagesBlockField].stringValue.Split('\n').Length * lineHeight)
+            );
 
 
             GUIUtils.DrawMultiLineStringProp(
                 so[Cue.sendMessageField], 
-                new GUIContent("<b>Send Messages</b> (seperated by commas): ", "Methods should take a Transform for parameter"), 
+                new GUIContent("<b>Send Messages</b> (seperated by slashes '/' ): ", ""), 
+                false, GUILayout.MinHeight(32)
+            );
+
+            GUIUtils.DrawMultiLineStringProp(
+                so[Cue.postMessageField], 
+                new GUIContent("<b>Post Play Messages</b> (seperated by slashes '/' ): ", ""), 
                 false, GUILayout.MinHeight(32)
             );
             
@@ -36,6 +57,9 @@ namespace AssetObjectsPacks {
                 GUIUtils.StartBox(Colors.darkGray);
                 GUIUtils.DrawProp(so[Cue.smooth_pos_time_field], new GUIContent("Position Time (s)"));
                 GUIUtils.DrawProp(so[Cue.smooth_rot_time_field], new GUIContent("Rotation Time (s)"));
+
+                GUIUtils.DrawProp(so[Cue.playImmediateField], new GUIContent("Play Immediate", "Play before the position snap"));
+
                 GUIUtils.EndBox();
                 GUIUtils.EndIndent();
                 EditorGUI.indentLevel++;
@@ -47,6 +71,9 @@ namespace AssetObjectsPacks {
             EditorGUI.indentLevel--;
             
             if (target.playlist == null) {
+
+                GUIUtils.DrawProp(so[Cue.overrideDurationField], new GUIContent("Override Duration", "negative values give control to the events"));
+            
                 GUIUtils.Space();
                 GUIUtils.DrawObjArrayProp( so[Cue.event_packs_field] );
             }

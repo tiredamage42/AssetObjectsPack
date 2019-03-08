@@ -6,7 +6,69 @@ using AssetObjectsPacks;
 
 public class MovementController : MonoBehaviour
 {
+    public bool usingRootMotion = true;
 
+    public void EnableRootMotion (bool enabled) {
+        usingRootMotion = enabled;
+    }
+    void EnableRootMotion_Cue (object[] parameters) {
+        EnableRootMotion((bool)parameters[0]);
+    }
+    public AnimatorUpdateMode turnUpdate = AnimatorUpdateMode.Normal;
+    public AnimatorUpdateMode moveUpdate { get { return anim.updateMode; } }
+    
+
+    Animator anim { get { return GetComponent<Animator>(); } }
+    CharacterController cc { get { return GetComponent<CharacterController>(); } }
+
+    Vector3 rootPosition;
+    Quaternion rootRotation;
+    
+    void OnAnimatorMove () {
+        rootPosition = anim.deltaPosition;
+        rootRotation = anim.deltaRotation;
+    }
+    void FixedUpdate () {
+        CheckGrounded();
+        UpdateLoop(AnimatorUpdateMode.AnimatePhysics, Time.fixedDeltaTime);
+    }
+    
+ public bool grounded;
+ public float groundDistanceCheckAir = .01f;
+ public float groundDistanceCheckGrounded = .25f;
+ public float groundRadiusCheck = .1f;
+
+ public LayerMask groundLayerMask;
+
+ const float groundCheckBuffer = .25f;
+ Vector3 groundNormal = Vector3.up;
+
+    float maxGroundAngle { get { return cc.slopeLimit; } }
+
+    //public bool ignoreGravity;
+
+ void CheckGrounded () {
+     float distanceCheck = groundCheckBuffer + (grounded ? groundDistanceCheckGrounded : groundDistanceCheckAir);
+
+     grounded = false;
+     groundNormal = Vector3.up;
+     Ray ray = new Ray(transform.position + Vector3.up * groundCheckBuffer,Vector3.down);
+     //Debug.DrawRay(ray.origin, ray.direction * distanceCheck, Color.red);
+     RaycastHit hit;
+     if (Physics.SphereCast(ray, groundRadiusCheck, out hit, distanceCheck, groundLayerMask)) {
+         groundNormal = hit.normal;
+
+         if (Vector3.Angle(groundNormal, Vector3.up) <= maxGroundAngle) {
+             grounded = true;
+         }
+     }
+}
+
+ public float minYVelocity = -1f;
+
+
+
+     
     public Transform debugTransformLook;
     void DebugLoop () {
         if (debugTransformLook) {
@@ -37,13 +99,13 @@ public class MovementController : MonoBehaviour
 
 
     [Header("Debug:")]
-    public bool _;
+    //public bool _;
     public bool trackingWaypoint, isTurning, doingAnimation, isJumping;
     
     const string turnAngleName = "TurnAngle", turnRightName = "ToRight";
     const string speedName = "Speed", directionName = "Direction", stanceName = "Stance";
     
-    System.Action endMovementCallback;
+    System.Action endTurnCallback, reachWaypointCallback;
     Vector3 interestPoint, movementTarget, attemptTurnDir;
     EventPlayer player;
     int lastSpeed = -1;
@@ -53,6 +115,10 @@ public class MovementController : MonoBehaviour
 
 
     void Awake () {
+
+        //cc.enabled = false;
+        anim.applyRootMotion = false;//true;
+            
         player = GetComponent<EventPlayer>();
         player.AddParameters(
             new CustomParameter[] {
@@ -78,7 +144,30 @@ public class MovementController : MonoBehaviour
             this controller's events
         */
         if (cue.GetEventByName(animationPackName) == null) {
-            player.OverrideEventToPlay(animationPackName, overrideEvent);    
+            player.OverrideEventToPlay(-1, animationPackName, overrideEvent);    
+        }
+    }
+
+    IEnumerator SetPhysics (object[] value, float delay) {
+        yield return new WaitForSeconds(delay);
+        UseGravity_Cue(value);
+
+    }
+
+    /* 
+        Message Broadcast from demo cue
+
+        parameters:
+            useGravity, delaytime (optional)
+
+        ignores character controller gravity for jump animations / platforming stuff
+    */
+    void UseGravity_Cue(object[] parameters) {
+        if (parameters.Length == 2) {
+            StartCoroutine(SetPhysics(new object[] { parameters[0] }, (float)parameters[1]));
+        }
+        else {
+            cc.enabled = (bool)parameters[0];
         }
     }
 
@@ -97,7 +186,8 @@ public class MovementController : MonoBehaviour
         SetSpeed(0);
         CheckForCueEventOverride (parameters, stillsEvent);       
         //set player to end cue right after playing
-        player.EndAfterPlay();     
+
+        //player.EndAfterPlay();     
     }
 
     /*
@@ -111,23 +201,25 @@ public class MovementController : MonoBehaviour
         (relative to the direction towards the movement target)
     */
     void MovementControllerTurnTo_Cue (object[] parameters) {        
-        if (InitializeTurn ((Vector3)parameters[1], false)){
+        if (InitializeTurn (-1, (Vector3)parameters[1], false)){
             CheckForCueEventOverride(parameters, turnsEvent);
         }
         else {
             //angle is below anim turn threshold
-            player.SkipPlay(animationPackName);
+            player.SkipPlay(-1, animationPackName);
         }
 
         //if above turn threshold 
         if (isTurning){
             //take control of the players end event
             //to call it when we're facing the movement target
-            endMovementCallback = player.OverrideEndEvent();
+            endTurnCallback = player.OverrideEndEvent(-1);
         }
         else {
             //already facing just end the cue
-            player.EndAfterPlay();
+            //turn to cue duration = 0  so if above doesnt override it just skips
+            
+            //player.EndAfterPlay();
         }
     }
 
@@ -143,21 +235,39 @@ public class MovementController : MonoBehaviour
     */
     void MovementControllerGoTo_Cue(object[] parameters) {
 
+        int paramSpeed = -1;
+        if (parameters.Length > 2) {
+            paramSpeed = (int)parameters[2];
+        }
+        Movement.Direction paramDir = Movement.Direction.Calculated;
+        if (parameters.Length > 3) {
+            paramDir = (Movement.Direction)((int)parameters[3]);
+        }
+            //Debug.Log("in message");
+        
+        foreach (object o in parameters) {
+            //Debug.Log(o);
+        }
+        Vector3 position = (Vector3)parameters[1];
+
         //returns true if distance is above arrival threshold
-        if (InitializeWayPointTracking ((Vector3)parameters[1], (int)parameters[2], (Movement.Direction)((int)parameters[3]))) {
+        if (InitializeWayPointTracking (position, paramSpeed, paramDir)) {
     
             //check if the cue needs an event specified
             CheckForCueEventOverride (parameters, movesEvent);
             
             //take control of the players end event
             //to call it when we've arrived at the waypoint
-            endMovementCallback = player.OverrideEndEvent();
+            reachWaypointCallback = player.OverrideEndEvent(-1);
         }
         else {
             //if we're wihtin the distance theshold skip playing any animation and end
             // the cue/event right after
-            player.SkipPlay(animationPackName);
-            player.EndAfterPlay();
+            player.SkipPlay(-1, animationPackName);
+
+            //move to cue duration = 0  so if above doesnt override it just skips
+
+            //player.EndAfterPlay();
         }
     }
 
@@ -171,11 +281,9 @@ public class MovementController : MonoBehaviour
         //returns true if distance is above arrival threshold
         if (InitializeWayPointTracking (position, newSpeed, newDirection)){
             //manually play the event 
-            //(simple since we're not tracking the event end via the player)
-            bool playSimple = true;
-            player.PlayEvent(movesEvent, interruptPlaylists, playSimple, interruptIfNotJumping);
+            player.PlayEvent(interruptPlaylists ? -1 : 0, movesEvent, 0, interruptIfNotJumping); //0 duration to just end event
             //set up the callback
-            endMovementCallback = onWayPointArrive;
+            reachWaypointCallback = onWayPointArrive;
         }
         else {
             //if we're within the threshold skip everything and just call the callback
@@ -188,13 +296,16 @@ public class MovementController : MonoBehaviour
         manually turn to a target position
     */
     public void TurnTo (Vector3 target, bool interruptPlaylists, System.Action onTurnSuccess = null) {
-        if (InitializeTurn(target, isJumping || (speed != 0 && !allowTurnWhenMove))) {
+        if (InitializeTurn(0, target, isJumping || (speed != 0 && !allowTurnWhenMove))) {
+
+            player.PlayEvent(interruptPlaylists ? -1 : 0, turnsEvent, -1, interruptIfNotJumping);
             //manually play turn event
-            player.PlayEvent(turnsEvent, interruptPlaylists, true, interruptIfNotJumping);
-            //set up the callback
+            //player.PlayEvent(turnsEvent, interruptPlaylists, true, interruptIfNotJumping);
         }
+
         if (isTurning) {
-            endMovementCallback = onTurnSuccess;
+            //set up the callback
+            endTurnCallback = onTurnSuccess;
         }
         else {
             //if we're within the threshold skip everything and just call the callback
@@ -236,7 +347,7 @@ public class MovementController : MonoBehaviour
             if (interruptIfNotJumping) {
                 InterruptCurrentAnimations();
             }
-            player.PlayEvent(speed == 0 ? stillsEvent : movesEvent, false, true, interruptIfNotJumping);    
+            player.PlayEvent(0, speed == 0 ? stillsEvent : movesEvent, 0, interruptIfNotJumping);
         }
     }
 
@@ -244,20 +355,19 @@ public class MovementController : MonoBehaviour
         doingAnimation = false;
     }
     
-    void OnEndJump () {
+    void OnEndJump (bool success) {
         isJumping = false;
+        cc.enabled = true;
     }
 
     public void TriggerJump () {
         if (!isJumping) {
+            cc.enabled = false;
             isJumping = true;
-            player.SubscribeToAssetObjectUseEnd(animationPackName, OnEndJump);
-            player.SubscribeToEventFail(animationPackName, OnEndJump);
-            player.PlayEvent(jumpsEvent, false, false, true);
+            player.SubscribeToPlayEnd(0, OnEndJump);
+            player.PlayEvent(0, jumpsEvent, -1, true);
         }
     }
-
-    
 
     public void SetInterestPoint (Vector3 position) {
         this.interestPoint = position;
@@ -269,21 +379,96 @@ public class MovementController : MonoBehaviour
         CheckWayPointTracking();
         CheckAutoTurn();
     }
-    void LateUpdate () {
+
+    void MoveCharacterController (Vector3 originalRootMotion, float deltaTime) {
+
+        float origYvelocity = originalRootMotion.y;
+
+        //sideways
+        Vector3 sidewaysRootMotion = new Vector3(originalRootMotion.z, 0, -originalRootMotion.x);
+        //get movement relevant to ground normal (avoids skips up slopes)
+        Vector3 rootMotion = Vector3.Cross(sidewaysRootMotion, groundNormal);
+        //add back original y velocity
+        rootMotion.y += origYvelocity;
+        
+        //add gravity
+        rootMotion.y = CalculateGravity(rootMotion.y, Physics.gravity.y, origYvelocity, deltaTime);
+
+        if (usingRootMotion) {
+            cc.Move(rootMotion);
+        }
+        
+    }
+
+    float currentGravity;
+    float CalculateGravity(float yVelocity, float gravity, float origYvelocity, float deltaTime){
+        bool rootMotionUpwards = origYvelocity > 0;
+        bool fallStarted = currentGravity != 0;
+    
+        if (grounded) {
+            currentGravity = 0;
+        }
+
+        //if the animation is trying to go upwards 
+        //and we havent started falling yet dont do anyting
+        if (rootMotionUpwards && !fallStarted) {
+            return yVelocity;
+        }
+
+        //if falling add to downward velocity
+        if (!grounded) {
+            currentGravity += gravity * deltaTime * deltaTime;
+
+            //cap downward velocity
+            if (currentGravity < minYVelocity) {
+                currentGravity = minYVelocity;
+            }    
+        }
+        //if grounded stick to floor, else use calculated gravity    
+        return grounded ? minYVelocity : currentGravity;
+    }
+
+    void RootMovementLoop (float deltaTime) {
+        if (cc && cc.enabled) {
+            MoveCharacterController(rootPosition, deltaTime);
+        }
+        else {
+            if (usingRootMotion) {
+                transform.position += rootPosition;
+            }
+        }
+    }
+    void RootRotationLoop () {
+        if (usingRootMotion) {
+            transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles + rootRotation.eulerAngles);
+        }
         UpdateSleprTurnHelper();
     }
-    
-    
-    void CheckAutoTurn () {
-        if (doAutoTurn && !isTurning) {
-            TurnTo(movementTarget, false);
+
+    void UpdateLoop (AnimatorUpdateMode checkMode, float deltaTime) {
+        if (!player.overrideMovement) {
+            if (turnUpdate == checkMode) RootRotationLoop();
+            if (moveUpdate == checkMode) RootMovementLoop(deltaTime);
         }
     }
 
+    void LateUpdate () {
+        UpdateLoop(AnimatorUpdateMode.Normal, Time.deltaTime);
+    }
     
+    void CheckAutoTurn () {
+        bool movingFwd = trackingWaypoint && direction == Movement.Direction.Forward;
+        //if (doAutoTurn && !isTurning ) {
+        if(doAutoTurn || movingFwd) {
+            if (!isTurning){  
+                TurnTo(movementTarget, false);
+            }
+        }
+    }
+
     void CheckWayPointTracking () {
         if (trackingWaypoint && !DistanceToWaypointAboveThreshold()) {
-            OnMovementSuccess(ref trackingWaypoint);        
+            OnWayPointSuccess();
         }
     }
 
@@ -297,62 +482,91 @@ public class MovementController : MonoBehaviour
     }
 
     void UpdateSleprTurnHelper () {
-        //update slerp turn when not animating turn
-        //if (doingAnimation) return;
-
         //update when turn triggered or when moving (while tracking a waypoint)
-        if (isTurning || trackingWaypoint){
+        if (isTurning){//} || trackingWaypoint){
 
             Vector3 targetDir = Vector3.zero;
-            float angleFwd;
-
+            
             bool targetAngleAboveHelpTurnThreshold = false;
 
-            if (!doingAnimation || (doAutoTurn && isTurning)){
-                targetAngleAboveHelpTurnThreshold = Movement.TargetAngleAboveTurnThreshold (GetDirection(), transform.position, transform.forward, movementTarget, turnAngleHelpThreshold, out targetDir, out angleFwd);
+            bool doingAutoTurnTurn = true;// doAutoTurn && isTurning;
+
+            if (!doingAnimation || doingAutoTurnTurn){ 
+                targetAngleAboveHelpTurnThreshold = Movement.TargetAngleAboveTurnThreshold (GetDirection(), transform.position, transform.forward, movementTarget, turnAngleHelpThreshold, out targetDir, out _);
+
             }
 
             if (!doingAnimation) {
 
                 //slerp if above turn threshold
                 if (targetAngleAboveHelpTurnThreshold){
-                    transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(targetDir), Time.deltaTime * turnHelpSpeeds[speed]);
+
+                    if (usingRootMotion){
+
+                        //Debug.Log("turning!");
+
+                        transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(targetDir), Time.deltaTime * turnHelpSpeeds[speed]);
+                    
+                    }
+                
+                
                 }
                 else {
-                    //if below end turn
-                    OnMovementSuccess(ref isTurning);
+                    //if below end turn if turning
+                    if (isTurning) {
+                        OnTurnSuccess();
+                    }
                 }
             }
 
-            if (isTurning && doAutoTurn){
+            if (doingAutoTurnTurn){
                 //if direction has changed too much from last attempt
                 //end the turn (retries if above threshold)
                 float curAngleFromLastAttempt = Vector3.Angle(targetDir, attemptTurnDir);
                 if (curAngleFromLastAttempt > dirTurnChangeThreshold) {
-                    OnMovementSuccess(ref isTurning);
+                    
+                        OnTurnSuccess();
                 }
             }
         }
     }
-    
-    void OnEndTurnAnimation () {
+
+
+    /*
+        if true:
+            player lets us know when the animation is done lpaying
+            then sets "isPlayingTurn" to false
+
+            slerp then turn takes over and makes sure that transform's forward 
+            is within the turn threshold
+
+        if false:    
+            player lets us know if there wasnt any animations found 
+
+    */
+    void OnEndTurnAnimation (bool success) {
+
+        Debug.Log("on end turn anim");
         doingAnimation = false;
     } 
 
     //calback for when turn is achieved or waypoint reached
-    void OnMovementSuccess(ref bool check) {
+    void OnSuccess (ref bool check, ref System.Action callback) {
         if (check) {
-            OnEndMovement();
+            if (callback != null) {
+                callback();
+                callback = null;
+            }
             check = false;
         }
     }
 
-    void OnEndMovement () {
-        if (endMovementCallback != null) {
-            endMovementCallback();
-            endMovementCallback = null;
-        }
-    }    
+    void OnTurnSuccess() {
+        OnSuccess(ref isTurning, ref endTurnCallback);
+    }
+    void OnWayPointSuccess() {
+        OnSuccess(ref trackingWaypoint, ref reachWaypointCallback);   
+    } 
 
     bool InitializeWayPointTracking (Vector3 wayPointPosition, int newSpeed, Movement.Direction newDirection) {
 
@@ -382,7 +596,7 @@ public class MovementController : MonoBehaviour
         return trackingWaypoint;
     }
 
-    bool InitializeTurn (Vector3 lookPoint, bool disableAnim) {
+    bool InitializeTurn (int layer, Vector3 lookPoint, bool disableAnim) {
         SetMovementTarget(lookPoint);
 
         float angleFwd;
@@ -394,23 +608,15 @@ public class MovementController : MonoBehaviour
 
         if (isTurning) {
             attemptTurnDir = targetDir;
+            //Debug.Log("trying turn");
         }
 
         if (doingAnimation) {
-            /*
-                player lets us know when the animation is done lpaying
-                then sets "isPlayingTurn" to false
-
-                slerp then turn takes over and makes sure that transform's forward 
-                is within the turn threshold
-            */
-            player.SubscribeToAssetObjectUseEnd(animationPackName, OnEndTurnAnimation);
-            /*
-                player lets us know if there wasnt any animations found 
-                (just calls OnEndTurnAnimation for now)
-            */
-            player.SubscribeToEventFail(animationPackName, OnEndTurnAnimation);
-
+            
+            //player.SubscribeToAssetObjectUseEnd(animationPackName, OnEndTurnAnimation);
+            player.SubscribeToPlayEnd(layer, OnEndTurnAnimation);
+            //Debug.Log("subscriped");
+            
             //set the angle parameter
             player[turnAngleName].SetValue(angleFwd);
             //check if turn is to right        
@@ -419,5 +625,4 @@ public class MovementController : MonoBehaviour
         }
         return doingAnimation;
     }
-        
 }

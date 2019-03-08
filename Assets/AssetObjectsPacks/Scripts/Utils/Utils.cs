@@ -2,12 +2,15 @@
 using UnityEngine;
 namespace AssetObjectsPacks {
     public static class StringUtils {
+        
+
+
         public static string PadToLength(this string s, int length, string pad = " ") {
             int r = length - s.Length;
             for (int i = 0; i < r; i++) s += pad;
             return s;
         }
-        public const string empty = "";
+        //public const string empty = "";
         public static bool IsEmpty(this string s) {
             return string.IsNullOrEmpty(s) || string.IsNullOrWhiteSpace(s);
         }

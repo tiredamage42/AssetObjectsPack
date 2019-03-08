@@ -56,9 +56,7 @@ namespace AssetObjectsPacks {
             }
             return false;
         }
-
-        public void SetValue (object value) {
-            
+        public void SetValue (object value) {   
             ParamType vType = SType2PType(value.GetType());
             if (CheckCompatibleSet(vType)) return;
             switch ( vType ) {
@@ -69,49 +67,6 @@ namespace AssetObjectsPacks {
             }
         }
 
-        public enum CompareMode {
-            Equals, MoreThan, LessThan, MoreThanOrEqual, LessThenOrEqual
-        }
         
-        public bool MatchesParameter(string pName, CompareMode compareMode, string valueStrig){
-            if (pName != name) {
-                Debug.LogWarning("Name Mismatch! " + pName + " / " + name);
-                return false;
-            }
-            switch ( paramType ) {
-                case ParamType.IntValue:
-                {
-                    int checkVal = int.Parse(valueStrig);
-                    int intValue = GetValue<int>();
-                    switch (compareMode) {
-                        case CompareMode.Equals: return intValue == checkVal;
-                        case CompareMode.MoreThan: return intValue > checkVal;
-                        case CompareMode.MoreThanOrEqual: return intValue >= checkVal;
-                        case CompareMode.LessThan: return intValue < checkVal;
-                        case CompareMode.LessThenOrEqual: return intValue <= checkVal;
-                    }
-                    return false;
-                }
-                case ParamType.FloatValue:
-                {
-                    float checkVal = float.Parse(valueStrig);
-                    float floatValue = GetValue<float>();
-                    switch (compareMode) {
-                        case CompareMode.Equals: return floatValue == checkVal;
-                        case CompareMode.MoreThan: return floatValue > checkVal;
-                        case CompareMode.MoreThanOrEqual: return floatValue >= checkVal;
-                        case CompareMode.LessThan: return floatValue < checkVal;
-                        case CompareMode.LessThenOrEqual: return floatValue <= checkVal;
-                    }
-                    return false;
-                }
-                case ParamType.BoolValue:
-                    return bool.Parse(valueStrig) == GetValue<bool>();
-
-                case ParamType.StringValue:
-                    return valueStrig == GetValue<string>();
-            }
-            return true; 
-        }
     }
 }

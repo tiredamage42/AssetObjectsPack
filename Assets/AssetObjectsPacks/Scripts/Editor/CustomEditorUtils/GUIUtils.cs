@@ -7,33 +7,60 @@ namespace AssetObjectsPacks {
 
         public static readonly Color32 red = new Color32(225,25,25,255);
         public static readonly Color32 yellow = new Color32 (255, 155, 0, 255);
-        public static readonly Color32 blue = new Color32(100,155,235,255);
+        public static readonly Color32 blue = new Color32(90,140,225,255);
+        //public static readonly Color32 blue = new Color32(100,100,255,255);
+        
         public static readonly Color32 green = new Color32(38,178,56,255);
         public static readonly Color32 clear = new Color32(0,0,0,0);
         public static readonly Color32 white = new Color32(255,255,255,255);
         public static readonly Color32 selected = blue;
         public static readonly Color32 black = new Color32 (0,0,0,255);
         public static readonly Color32 darkGray = new Color32(37,37,37,255);
-        public static readonly Color32 medGray = new Color32(80,80,80,255);
-        public static readonly Color32 liteGray = new Color32(175,175,175,255);
+        //public static readonly Color32 medGray = new Color32(80,80,80,255);
+        public static readonly Color32 medGray = new Color32(70,70,70,255);
+        
+        public static readonly Color32 liteGray = new Color32(190,190,190,255);
+        public static readonly Color32 medliteGray = new Color32(110,110,110,255);
+
         public static Color32 Toggle (bool isSelected) {
-            return isSelected ? selected : liteGray;
+            return isSelected ? selected : medliteGray;
         }
     }
 
     public static class GUIStyles {
 
-        const int stylesCount = 8;
+        private static GUISkin s_DarkSkin = EditorGUIUtility.GetBuiltinSkin(EditorSkin.Scene);
+/*
+            public static GUIStyle label = GetStyle("ControlLabel");
+            public static GUIStyle popup = GetStyle("MiniPopup");
+            public static GUIStyle textField = GetStyle("textField");
+
+            public static Color cursorColor = s_DarkSkin.settings.cursorColor;
+
+            private static GUIStyle GetStyle(string name)
+            {
+                return new GUIStyle(s_DarkSkin.GetStyle(name));
+            }
+ */
+
+        const int stylesCount = 10;
         static GUIStyle[] baseStyles = new GUIStyle[stylesCount];
         static GUIStyle ReturnOrBuild (int i, GUIStyle s) {
             if (baseStyles[i] == null) {
                 baseStyles[i] = new GUIStyle(s);
+                //baseStyles[i] = new GUIStyle(s_DarkSkin.GetStyle(s.name));
+                
                 baseStyles[i].richText = true;
             }
             return baseStyles[i];
         }
+        public static GUIStyle window { get { return ReturnOrBuild(9, GUI.skin.window); } }
         public static GUIStyle box { get { return ReturnOrBuild(8, GUI.skin.box); } }
-        public static GUIStyle toolbarButton { get { return ReturnOrBuild(0, EditorStyles.toolbarButton); } }
+        public static GUIStyle toolbarButton { get { 
+        
+            GUIStyle s = ReturnOrBuild(0, EditorStyles.toolbarButton); 
+            return s;
+        } }
         public static GUIStyle label { get { return ReturnOrBuild(1, EditorStyles.label); } }
         public static GUIStyle helpBox { get { return ReturnOrBuild(2, EditorStyles.helpBox); } }
         public static GUIStyle button { get { return ReturnOrBuild(3, GUI.skin.button); } }
@@ -202,12 +229,6 @@ namespace AssetObjectsPacks {
             string newVal = DrawDirectoryField(old, content, forceProject, options);
             if (old != newVal) prop.SetValue(newVal);
         }
-
-
-
-
-
-
         
         public static void Label (GUIContent c, bool fit_content) {
             Label(c, Colors.liteGray, fit_content);
@@ -219,10 +240,14 @@ namespace AssetObjectsPacks {
             Label(c, Colors.liteGray, options);
         }
         public static void Label (GUIContent c, Color32 text_color, params GUILayoutOption[] options) {
-            DoWithinColor (GUIStyles.label, text_color, () => EditorGUILayout.LabelField(c, GUIStyles.label, options) );
+            DoWithinColor (GUIStyles.label, text_color, () => 
+            EditorGUILayout.LabelField(c, GUIStyles.label, options)//; 
+            );
         }
         public static void Label (Rect r, GUIContent c, Color32 text_color) {
-            DoWithinColor (GUIStyles.label, text_color, () => GUI.Label(r, c, GUIStyles.label) );
+            DoWithinColor (GUIStyles.label, text_color, () => 
+            GUI.Label(r, c, GUIStyles.label)//;
+            );
         }
 
 
@@ -260,9 +285,12 @@ namespace AssetObjectsPacks {
             GUI.backgroundColor = orig_bg;
         }
         public static void StartBox (Color32 color, int space=0, params GUILayoutOption[] options) {
-            DoWithinColor(color, () => EditorGUILayout.BeginVertical(GUI.skin.box, options) );
+            DoWithinColor(color, () => 
+            EditorGUILayout.BeginVertical(GUIStyles.box, options) 
+            );
             Space(space);
         }
+
         public static void StartBox (int space=0, params GUILayoutOption[] options) {
             StartBox(Colors.medGray, space, options);
         }
@@ -283,7 +311,9 @@ namespace AssetObjectsPacks {
 
         public static void StartCustomEditor () {
             EditorGUI.BeginChangeCheck();
-            DoWithinColor(Colors.darkGray, () => EditorGUILayout.BeginVertical(GUI.skin.window, GUILayout.MinHeight(1)) );   
+            DoWithinColor(Colors.darkGray, () => 
+            EditorGUILayout.BeginVertical(GUIStyles.window, GUILayout.MinHeight(1)) //;
+            );   
         }
         public static bool EndCustomEditor (EditorProp editor) {
             EditorGUILayout.EndVertical();
@@ -310,13 +340,16 @@ namespace AssetObjectsPacks {
             DoWithinColor(color, s, text_color, () => r = GUI.Button(rt, c, s));
             return r;
         }
+
+        
         public static bool Button(GUIContent c, GUIStyle s, params GUILayoutOption[] options) {
-            return Button(c, s, Colors.liteGray, Colors.black, options);
+            return Button(c, s, Colors.medliteGray, Colors.liteGray, options);
         }
         public static bool Button (GUIContent c, GUIStyle s, bool fit_content) {
-            return Button(c, s, Colors.liteGray, Colors.black, fit_content );
+            return Button(c, s, Colors.medliteGray, Colors.liteGray, fit_content );
         }
         public static bool Button (GUIContent c, GUIStyle s, Color32 color, Color32 text_color, bool fit_content) {
+            
             return Button(c, s, color, text_color, fit_content ? c.CalcWidth(s) : null );
         }
 
@@ -332,16 +365,21 @@ namespace AssetObjectsPacks {
             return Button(c, small_button_style, color, text_color, smallButtonOpts );
         }
         public static bool SmallButton (GUIContent c) {
-            return Button(c, small_button_style, Colors.liteGray, Colors.black, smallButtonOpts );
+            return Button(c, small_button_style, 
+                Colors.medliteGray,                 
+                Colors.black, smallButtonOpts );
         }
-        public static bool SmallToggleButton (GUIContent c, bool value, Color32 onColor, Color32 offColor, GUIStyle style, out bool changed) {
-            //changed = SmallButton(c, value ? onColor : offColor, Colors.black);
+        public static bool SmallToggleButton (GUIContent c, bool value, Color32 onColor, Color32 offColor, out bool changed) {
             changed = Button(c, GUIStyles.miniButton, value ? onColor : offColor, Colors.black, smallButtonOpts);
             return changed ? !value : value;
         }
 
         public static bool SmallToggleButton (GUIContent c, bool value, out bool changed) {
-            changed = SmallButton(c, value ? Colors.selected : Colors.liteGray, Colors.black);
+            changed = SmallButton(
+                c, value ? Colors.selected : 
+                Colors.medliteGray, 
+                
+            Colors.black);
             return changed ? !value : value;
         }
 
@@ -405,7 +443,7 @@ namespace AssetObjectsPacks {
                         break;
                 }
 
-                DoWithinColor(Colors.Toggle(selected), () => pressed = GUILayout.Button(guis[i], s, o) );
+                DoWithinColor(Colors.Toggle(selected), s, selected ? Colors.black : Colors.liteGray, () => pressed = GUILayout.Button(guis[i], s, o) );
                 
                 if (pressed) {
                     current = i;

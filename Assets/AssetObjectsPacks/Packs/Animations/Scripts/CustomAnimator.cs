@@ -109,7 +109,7 @@ namespace AssetObjectsPacks.Animations {
 
             in htis case, when the animation is done
         */
-        List<System.Action> endUseCallbacks;
+        HashSet<System.Action> endUseCallbacks;
 
 
         /*
@@ -122,7 +122,7 @@ namespace AssetObjectsPacks.Animations {
             in this case, this component tracks when the animator is exiting an animation
             that has been played
         */
-        void UseAssetObject(AssetObject assetObject, bool asInterrupter, List<System.Action> endUseCallbacks) {
+        void UseAssetObject(AssetObject assetObject, bool asInterrupter, HashSet<System.Action> endUseCallbacks) {
             if (this.endUseCallbacks != null) {
                 this.endUseCallbacks.Clear();
             }
@@ -179,7 +179,7 @@ namespace AssetObjectsPacks.Animations {
 
         void Awake () {
             anim = GetComponent<Animator>();
-            anim.applyRootMotion = true;
+            //anim.applyRootMotion = false;// true;
             InitializeEventPlayer();
         }
         void Update () {

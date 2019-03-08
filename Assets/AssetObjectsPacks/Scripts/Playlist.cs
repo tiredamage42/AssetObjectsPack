@@ -5,9 +5,30 @@ using System.Linq;
 namespace AssetObjectsPacks {
     public class Playlist : MonoBehaviour {
 
+
+
+        Cue[] cues;
+
         void OnDrawGizmos () {
+            OnDrawGizmos(transform);
+        }
+
+        public void OnDrawGizmos(Transform baseTransform) {
             Gizmos.color = Color.blue;
-            Gizmos.DrawWireCube(transform.position, Vector3.one);
+            Gizmos.DrawWireCube(baseTransform.position, Vector3.one);
+            
+            //if (cues == null || cues.Length == 0) 
+                cues = GetComponentsInChildren<Cue>();
+
+            if (cues.Length == 0) {
+                Debug.Log("no cues in " + name);
+            }
+            
+            for (int i = 0; i < cues.Length; i++) {
+                Vector3 pos = baseTransform.position + (baseTransform.rotation * cues[i].transform.localPosition);
+                Gizmos.color = cues[i].gizmoColor;
+                Gizmos.DrawWireSphere(pos, .25f);
+            }
         }
 
         [System.Serializable] public class Channel {
@@ -17,6 +38,8 @@ namespace AssetObjectsPacks {
             }
         }
         
+/*
+*/
         Channel[] _channels;
         public Channel[] channels {
             get {
@@ -29,11 +52,15 @@ namespace AssetObjectsPacks {
         // channels play cues at same time, and change cues at same time when ready
         // as opposed to staggered (whenever last cue is done)
         public bool syncChannels; 
-        public bool isLooped;
         
-
-        public void InitializePerformance (EventPlayer[] players, Vector3 position, Quaternion rotation, System.Action onEndPerformance) {
-
+        public void InitializePerformance (EventPlayer[] players, bool looped, System.Action onEndPerformance) {
+            InitializePerformance(players, transform.position, transform.rotation, looped, onEndPerformance);
+        }
+        
+        public void InitializePerformance (EventPlayer[] players, Vector3 position, Quaternion rotation, bool looped, System.Action onEndPerformance) {
+            //Channel[] channels = transform.childCount.Generate( i => new Channel(transform.GetChild(i)) ).ToArray();
+            
+            
             int channelCount = channels.Length;
             int playerCount = players.Length;
             if (channelCount != playerCount) {
@@ -50,7 +77,7 @@ namespace AssetObjectsPacks {
             }
             
             Performance performance = AssetObjectsManager.GetNewPerformance();
-            performance.InitializePerformance (this, position, rotation, players, onEndPerformance);
+            performance.InitializePerformance (this, channels, players, position, rotation, looped, onEndPerformance);
 
         }
 
@@ -62,9 +89,22 @@ namespace AssetObjectsPacks {
                 Vector3 initialPlayerPos;
                 Quaternion initialPlayerRot;
                 float smooth_l0, smooth_l1, smooth_l0v, smooth_l1v;
-                public bool playerPositionReady, isActive, isPlaying;
+                public bool positionReady {
+                    get {
+                        return posReady || playImmediate;
+                    }
+                }
+                public bool isActive, isPlaying;
+
+                bool playImmediate, posReady;
+
+
+                CharacterController smoothedCC;
+                Transform interestTransform;
+                EventPlayer player;
+                Cue cue;
                 void CheckReadyTransform (EventPlayer player, Transform interestTransform, Cue cue) {
-                    if (playerPositionReady) 
+                    if (posReady) 
                         return;
                     
                     smooth_l0 = Mathf.SmoothDamp(smooth_l0, 1.0f, ref smooth_l0v, cue.smoothPositionTime);
@@ -76,15 +116,32 @@ namespace AssetObjectsPacks {
                     float threshold = .99f;
                     
                     if (smooth_l0 > threshold && smooth_l1 > threshold) {
+                    
                         player.transform.position = interestTransform.position;
                         player.transform.rotation = interestTransform.rotation;
-                        playerPositionReady = true;        
+
+                        player.overrideMovement = false;
+                        if (smoothedCC) {
+                            smoothedCC.enabled = true;
+                        }
+                        posReady = true;        
+                        CustomScripting.ExecuteMessageBlockStep (player.gameObject, cue, interestTransform.position, CustomScripting.onSnap);
+
+                        //Debug.Log("player ready");
+                        //Debug.Break();
                     }
                 }      
                 public void InitializeCue (EventPlayer player, Transform interestTransform, Transform performanceRoot, Cue cue) {
+                    this.cue = cue;
+                    this.interestTransform = interestTransform;
+                    this.player = player;
+                    this.playImmediate = cue.playImmediate;
+
+                    
                     isActive = true;
-                    playerPositionReady = true;
+                    posReady = true;
                     isPlaying = false;
+                    smoothedCC = null;
 
                     interestTransform.localPosition = cue.transform.localPosition;
                     //maybe zero out x and z rotation
@@ -95,17 +152,28 @@ namespace AssetObjectsPacks {
                             player.transform.rotation = interestTransform.rotation;
                             break;
                         case Cue.SnapPlayerStyle.Smooth:
-                            playerPositionReady = false;
+                            posReady = false;
+
+                            player.overrideMovement = true;
+                            
+                            
+                            smoothedCC = player.GetComponent<CharacterController>();
+                            if (smoothedCC) {
+                                smoothedCC.enabled = false;
+                            }
                             initialPlayerPos = player.transform.position;
                             initialPlayerRot = player.transform.rotation;
                             smooth_l0 = smooth_l1 = 0;
                             break;
                     }     
                 }
+                /* 
 
                     const string cueTransformParamString = "cuetransform";
                     const string cuePositionParamString = "cueposition";
                     const string cueParamString = "cue";
+                    const string nullParamString = "null";
+
                     
                     object ParamFromString(Cue cue, Transform cueTransform, string paramString) {
                         string lower = paramString.ToLower();
@@ -121,7 +189,6 @@ namespace AssetObjectsPacks {
 
                         switch (pType) {
                             case "i": return int.Parse(pVal);
-
                             case "f": return float.Parse(pVal);
                             case "b": return bool.Parse(pVal);
                             case "s": return spl[1];
@@ -170,34 +237,60 @@ namespace AssetObjectsPacks {
                         }
                     }
 
+                */
 
-                public void Play (EventPlayer player, Transform interestTransform, Cue cue) {
+                public bool Play (EventPlayer player, Transform interestTransform, Cue cue) {
+
+
+                    //Debug.Log("playing cue");
+                    //Debug.Break();
                     isPlaying = true;
 
-                    if (cue.sendMessage != "") {
-                        BroadcastMessageList(cue, player, interestTransform, cue.sendMessage);
-                    }
 
+                    CustomScripting.ExecuteMessageBlockStep (player.gameObject, cue, interestTransform.position, CustomScripting.onPlay);
+
+
+                    //if (cue.sendMessage != "") {
+                    //    BroadcastMessageList(cue, player, interestTransform, cue.sendMessage);
+                    //}
+                    
                     if (cue.playlist != null) {
-                        cue.playlist.InitializePerformance(new EventPlayer[] {player}, interestTransform.position, interestTransform.rotation, OnPlaylistEnd);
-                        return;
+                        cue.playlist.InitializePerformance(new EventPlayer[] {player}, interestTransform.position, interestTransform.rotation, false, OnPlaylistEnd);
+                        return false;
                     }
 
-                    player.PlayEvents_Cue(cue.events, OnEventEnd);
+                    player.SubscribeToPlayEnd(-1, OnEventEnd);
+
+                    player.PlayEvents_Cue(cue.events, cue.overrideDuration);//, OnEventEnd);
+                    return false;
                 }
 
                 void OnPlaylistEnd () {
+                    Debug.Log("on playlist end "  + cue.name);
+                    
                     Deactivate();
                 }
 
-                void OnEventEnd () {
-                    //Debug.Log("on cue end");
+                void OnEventEnd (bool success) {
+                    Debug.Log("on cue end " + cue.name);
                     Deactivate();
                 }
 
                 void Deactivate () {
-                    //player = null;
+
+                    CustomScripting.ExecuteMessageBlockStep (player.gameObject, cue, interestTransform.position, CustomScripting.onEnd);
+
+                    //if (cue.postMessage != "") {
+                    //    BroadcastMessageList(cue, player, interestTransform, cue.postMessage);
+                    //}
+
+
+                    cue = null;
+                    player = null;
+                    interestTransform = null;
                     isActive = false;
+
+
                 }
 
                 public void UpdateCue (EventPlayer player, Transform interestTransform, Cue cue) {
@@ -213,7 +306,7 @@ namespace AssetObjectsPacks {
             [System.Serializable] public class PerformanceChannel {
                 public EventPlayer player;
                 public bool isActive;
-                int cueIndex;
+                int cueIndex, curCueRepeats;
                 Playlist.Channel playlistChannel;
                 public PerformanceCue currentCue = new PerformanceCue();
 
@@ -221,6 +314,7 @@ namespace AssetObjectsPacks {
                     this.playlistChannel = playlistChannel;
                     this.player = player;
                     cueIndex = 0;
+                    curCueRepeats = 0;
                     isActive = true;
                     currentCue.InitializeCue(player, interestTransform, performanceRoot, playlistChannel.cues[cueIndex]);
                 }   
@@ -232,12 +326,41 @@ namespace AssetObjectsPacks {
                     currentCue.UpdateCue(player, interestTransform, playlistChannel.cues[cueIndex]);
                 }
                 public void OnCueEnd (Performance performance, Transform performanceRoot, Transform interestTransform) {
+                    curCueRepeats++;
+                    Debug.Log("on cue end, cueIndex: " + cueIndex + ", playlistChannel.cues.Length: " + playlistChannel.cues.Length + performance.playlist.name);
                     
+                    if (curCueRepeats < playlistChannel.cues[cueIndex].repeats) {
+                        Debug.Log("repeating" + performance.playlist.name);
+                    
+                        currentCue.InitializeCue(player, interestTransform, performanceRoot, playlistChannel.cues[cueIndex]);
+                        return;
+                    }
+
+
+
+
+                    
+                    curCueRepeats = 0;
                     cueIndex++;
+                    Debug.Log("going up cue, " + cueIndex + performance.playlist.name);
+                    if (cueIndex< playlistChannel.cues.Length) {
+                    Debug.Log("new cue, " + playlistChannel.cues[cueIndex].name);
+                        
+                    }
+
+                    while (cueIndex < playlistChannel.cues.Length && !playlistChannel.cues[cueIndex].gameObject.activeSelf) {
+                    
+                        cueIndex ++;
+                        Debug.Log("skipping inactive, " + cueIndex + performance.playlist.name);
+                    }
+
                     if (cueIndex >= playlistChannel.cues.Length) {
+                        Debug.Log("on channel performance end " + performance.playlist.name);
                         OnPerformanceEnd(performance);
                         return;
                     }
+
+
                     currentCue.InitializeCue(player, interestTransform, performanceRoot, playlistChannel.cues[cueIndex]);
                 }
                 public void OnPerformanceEnd (Performance performance) {
@@ -260,6 +383,7 @@ namespace AssetObjectsPacks {
             PerformanceChannel[] channels = new PerformanceChannel[0];
             EventPlayer[] orig_players;
             System.Action orig_performance_done_callback;
+            bool looped;
 
             public void InterruptPerformance () {
                 for (int i = 0; i < channels.Length; i++) {   
@@ -273,11 +397,12 @@ namespace AssetObjectsPacks {
             //    this.on_performance_done = null;
             //    this.parent_scene = null;
             //}
-            public void InitializePerformance (Playlist playlist, Vector3 position, Quaternion rotation, EventPlayer[] players, System.Action on_performance_done) {
+            public void InitializePerformance (Playlist playlist, Channel[] playlistChannels, EventPlayer[] players, Vector3 position, Quaternion rotation, bool looped, System.Action on_performance_done) {
                 this.on_performance_done = on_performance_done;
                 this.playlist = playlist;
+                this.looped = looped;
 
-                if (playlist.isLooped) {
+                if (looped) {
                     orig_players = players;
                     orig_performance_done_callback = on_performance_done;
                 }
@@ -288,7 +413,7 @@ namespace AssetObjectsPacks {
                 performance_root_transform.position = position;
                 performance_root_transform.rotation = rotation;
                 
-                int channel_count = playlist.channels.Length;
+                int channel_count = playlistChannels.Length;// playlist.channels.Length;
                 if (channels.Length != channel_count) {
                     channels = channel_count.Generate(i => new PerformanceChannel()).ToArray();
                 }
@@ -306,7 +431,8 @@ namespace AssetObjectsPacks {
 
                 for (int i = 0; i < channel_count; i++) {
                     players[i].current_playlists.Add(this);
-                    channels[i].InitializeChannel (players[i], playlist.channels[i], performance_root_transform, interestTransforms[i]);
+                    channels[i].InitializeChannel (players[i], playlistChannels[i], performance_root_transform, interestTransforms[i]);
+                
                 }
             }
             public void UpdatePerformance () {
@@ -317,34 +443,59 @@ namespace AssetObjectsPacks {
                 for (int i = 0; i < c; i++) {
 
                     PerformanceChannel playerChannel = channels[i];
-                    if (!playerChannel.currentCue.playerPositionReady) 
+                    if (!playerChannel.currentCue.positionReady) {
                         cuesReadySynced = false;
-                    if (playerChannel.currentCue.isActive) 
+                    }
+                    if (playerChannel.currentCue.isActive) {
                         cuesDoneSynced = false;
-                    if (playerChannel.isActive) 
+                    }
+                    if (playerChannel.isActive) {
                         allDone = false;
-                }
-                for (int i = 0; i < c; i++) {
-                    PerformanceChannel playerChannel = channels[i];
-                    if (!playerChannel.currentCue.isPlaying && ((cuesReadySynced || (!playerChannel.currentCue.playerPositionReady && !playlist.syncChannels))))
-                        playerChannel.PlayCue (interestTransforms[i]);
-                    if (cuesDoneSynced || (!playerChannel.currentCue.isActive && !playlist.syncChannels)) 
-                        playerChannel.OnCueEnd (this, performance_root_transform, interestTransforms[i]);
-                    if (allDone || (!playerChannel.isActive && !playlist.syncChannels)) 
-                        channels[i].OnPerformanceEnd(this);
+                    }
                 }
 
+                if (playlist.syncChannels) {
+                    for (int i = 0; i < c; i++) {
+                        PerformanceChannel playerChannel = channels[i];
+                        if (!playerChannel.currentCue.isPlaying && cuesReadySynced)
+                            playerChannel.PlayCue (interestTransforms[i]);
+
+                        if (cuesDoneSynced) 
+                            playerChannel.OnCueEnd (this, performance_root_transform, interestTransforms[i]);
+                        
+                        //if (allDone) 
+                        //    channels[i].OnPerformanceEnd(this);
+                    }
+
+                }
+                else {
+
+                    for (int i = 0; i < c; i++) {
+                        PerformanceChannel playerChannel = channels[i];
+                        if (!playerChannel.currentCue.isPlaying && playerChannel.currentCue.positionReady)
+                            playerChannel.PlayCue (interestTransforms[i]);
+                        
+                        if (!playerChannel.currentCue.isActive && playerChannel.isActive) {
+
+                            Debug.Log("ending cue cause not current cue active " + playlist.name);
+                            playerChannel.OnCueEnd (this, performance_root_transform, interestTransforms[i]);
+                        }
+                        
+                        //if (!playerChannel.isActive)
+                        //    channels[i].OnPerformanceEnd(this);
+                    }
+                }
 
                 if (allDone) {
+                    Debug.Log("all done");
                     if (on_performance_done != null) {
                         on_performance_done();
                         on_performance_done = null;
                     }
                     AssetObjectsManager.ReturnPerformanceToPool(performance_key);
-                    if (playlist.isLooped) {
 
-                        playlist.InitializePerformance(orig_players, performance_root_transform.position, performance_root_transform.rotation, orig_performance_done_callback);
-
+                    if (looped) {
+                        playlist.InitializePerformance(orig_players, performance_root_transform.position, performance_root_transform.rotation, looped, orig_performance_done_callback);
                     }
                     return;
                 }
@@ -355,30 +506,3 @@ namespace AssetObjectsPacks {
         }
     }
 }
-
-                
-
-        
-
-        
-
-
-
-
-
-        
-    
-            /*
-                jump points have their own scene
-            */
-        
-
-
-
-
-
-
-
-
-
-

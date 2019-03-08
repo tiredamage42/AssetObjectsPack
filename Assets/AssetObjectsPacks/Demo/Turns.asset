@@ -70,17 +70,17 @@ MonoBehaviour:
     subStates:
     - isNew: 0
       name: 45
-      conditionBlock: TurnAngle:<67 && TurnAngle:>22.5
+      conditionBlock: TurnAngle <67&&TurnAngle >22.5
       assetObjects: []
       subStates:
       - isNew: 0
         name: Left
-        conditionBlock: ToRight:false && Speed:0
+        conditionBlock: '!ToRight'
         assetObjects: []
         subStates:
         - isNew: 0
           name: Crouch
-          conditionBlock: Stance:1
+          conditionBlock: Stance==1
           assetObjects:
           - isCopy: 0
             solo: 0
@@ -133,12 +133,12 @@ MonoBehaviour:
           subStates: []
         - isNew: 0
           name: Stand
-          conditionBlock: Stance:0
+          conditionBlock: Stance==0
           assetObjects: []
           subStates:
           - isNew: 0
             name: Agitated
-            conditionBlock: Agitated:true
+            conditionBlock: Agitated
             assetObjects:
             - isCopy: 0
               solo: 0
@@ -239,7 +239,7 @@ MonoBehaviour:
             subStates: []
           - isNew: 0
             name: Passive
-            conditionBlock: Agitated:false
+            conditionBlock: '!Agitated'
             assetObjects:
             - isCopy: 0
               solo: 0
@@ -292,12 +292,12 @@ MonoBehaviour:
             subStates: []
       - isNew: 0
         name: Right
-        conditionBlock: ToRight:true
+        conditionBlock: ToRight
         assetObjects: []
         subStates:
         - isNew: 0
           name: Crouch
-          conditionBlock: Stance:1 && Speed:0
+          conditionBlock: Stance==1&&Speed==0
           assetObjects:
           - isCopy: 0
             solo: 0
@@ -350,12 +350,12 @@ MonoBehaviour:
           subStates: []
         - isNew: 0
           name: Stand
-          conditionBlock: Stance:0
+          conditionBlock: Stance==0
           assetObjects: []
           subStates:
           - isNew: 0
             name: Agitated
-            conditionBlock: Agitated:true && Speed:0
+            conditionBlock: Agitated
             assetObjects:
             - isCopy: 0
               solo: 0
@@ -456,7 +456,7 @@ MonoBehaviour:
             subStates: []
           - isNew: 0
             name: Passive
-            conditionBlock: Agitated:false && Speed:0
+            conditionBlock: '!Agitated'
             assetObjects:
             - isCopy: 0
               solo: 0
@@ -509,7 +509,7 @@ MonoBehaviour:
             subStates: []
           - isNew: 0
             name: Moving
-            conditionBlock: Speed:1
+            conditionBlock: Speed==1
             assetObjects:
             - isCopy: 0
               solo: 0
@@ -562,17 +562,17 @@ MonoBehaviour:
             subStates: []
     - isNew: 0
       name: 90
-      conditionBlock: TurnAngle:<122&&TurnAngle:>67
+      conditionBlock: TurnAngle <122&&TurnAngle >67
       assetObjects: []
       subStates:
       - isNew: 0
         name: Left
-        conditionBlock: ToRight:false
+        conditionBlock: '!ToRight'
         assetObjects: []
         subStates:
         - isNew: 0
           name: Crouch
-          conditionBlock: Stance:1 && Speed:0
+          conditionBlock: Stance==1&&Speed==0
           assetObjects:
           - isCopy: 0
             solo: 0
@@ -721,12 +721,12 @@ MonoBehaviour:
           subStates: []
         - isNew: 0
           name: Stand
-          conditionBlock: Stance:0
+          conditionBlock: Stance==0
           assetObjects: []
           subStates:
           - isNew: 0
             name: Agitated
-            conditionBlock: Agitated:true
+            conditionBlock: Agitated
             assetObjects:
             - isCopy: 0
               solo: 0
@@ -779,7 +779,7 @@ MonoBehaviour:
             subStates: []
           - isNew: 0
             name: Passive
-            conditionBlock: Agitated:false
+            conditionBlock: '!Agitated'
             assetObjects:
             - isCopy: 0
               solo: 0
@@ -880,12 +880,12 @@ MonoBehaviour:
             subStates: []
       - isNew: 0
         name: Right
-        conditionBlock: ToRight:true
+        conditionBlock: ToRight
         assetObjects: []
         subStates:
         - isNew: 0
           name: Crouch
-          conditionBlock: Stance:1&&Speed:0
+          conditionBlock: Stance==1&&Speed==0
           assetObjects:
           - isCopy: 0
             solo: 0
@@ -1034,12 +1034,12 @@ MonoBehaviour:
           subStates: []
         - isNew: 0
           name: Stand
-          conditionBlock: Stance:0&&Speed:0
+          conditionBlock: Stance==0&&Speed==0
           assetObjects: []
           subStates:
           - isNew: 0
             name: Agitated
-            conditionBlock: Agitated:true
+            conditionBlock: Agitated
             assetObjects:
             - isCopy: 0
               solo: 0
@@ -1140,7 +1140,7 @@ MonoBehaviour:
             subStates: []
           - isNew: 0
             name: Passive
-            conditionBlock: Agitated:false
+            conditionBlock: '!Agitated'
             assetObjects:
             - isCopy: 0
               solo: 0
@@ -1193,7 +1193,7 @@ MonoBehaviour:
             subStates: []
         - isNew: 0
           name: Moving
-          conditionBlock: Speed:1
+          conditionBlock: Speed==1
           assetObjects:
           - isCopy: 0
             solo: 0
@@ -1246,17 +1246,17 @@ MonoBehaviour:
           subStates: []
     - isNew: 0
       name: 135
-      conditionBlock: TurnAngle:<165 && TurnAngle:>122 && Speed:0
+      conditionBlock: TurnAngle <165&&TurnAngle >122&&Speed 0
       assetObjects: []
       subStates:
       - isNew: 0
         name: Left
-        conditionBlock: ToRight:false
+        conditionBlock: '!ToRight'
         assetObjects: []
         subStates:
         - isNew: 0
           name: Crouch
-          conditionBlock: Stance:1
+          conditionBlock: Stance==1
           assetObjects:
           - isCopy: 0
             solo: 0
@@ -1309,17 +1309,17 @@ MonoBehaviour:
           subStates: []
         - isNew: 0
           name: Stand
-          conditionBlock: Stance:0
+          conditionBlock: Stance==0
           assetObjects: []
           subStates:
           - isNew: 0
             name: Agitated
-            conditionBlock: Agitated:true
+            conditionBlock: Agitated
             assetObjects: []
             subStates: []
           - isNew: 0
             name: Passive
-            conditionBlock: Agitated:false
+            conditionBlock: '!Agitated'
             assetObjects:
             - isCopy: 0
               solo: 0
@@ -1372,12 +1372,12 @@ MonoBehaviour:
             subStates: []
       - isNew: 0
         name: Right
-        conditionBlock: ToRight:true
+        conditionBlock: ToRight
         assetObjects: []
         subStates:
         - isNew: 0
           name: Crouch
-          conditionBlock: Stance:1
+          conditionBlock: Stance==1
           assetObjects:
           - isCopy: 0
             solo: 0
@@ -1430,12 +1430,12 @@ MonoBehaviour:
           subStates: []
         - isNew: 0
           name: Stand
-          conditionBlock: Stance:0
+          conditionBlock: Stance==0
           assetObjects: []
           subStates:
           - isNew: 0
             name: Agitated
-            conditionBlock: Agitated:true
+            conditionBlock: Agitated
             assetObjects:
             - isCopy: 0
               solo: 0
@@ -1488,7 +1488,7 @@ MonoBehaviour:
             subStates: []
           - isNew: 0
             name: Passive
-            conditionBlock: Agitated:false
+            conditionBlock: '!Agitated'
             assetObjects:
             - isCopy: 0
               solo: 0
@@ -1541,17 +1541,17 @@ MonoBehaviour:
             subStates: []
     - isNew: 0
       name: 180
-      conditionBlock: TurnAngle:>165
+      conditionBlock: TurnAngle >165
       assetObjects: []
       subStates:
       - isNew: 0
         name: Stand
-        conditionBlock: Stance:0 && Speed:0
+        conditionBlock: Stance==0&&Speed==0
         assetObjects: []
         subStates:
         - isNew: 0
           name: Agitated
-          conditionBlock: Agitated:true
+          conditionBlock: Agitated
           assetObjects:
           - isCopy: 0
             solo: 0
@@ -1700,7 +1700,7 @@ MonoBehaviour:
           subStates: []
         - isNew: 0
           name: Passive
-          conditionBlock: Agitated:false
+          conditionBlock: '!Agitated'
           assetObjects:
           - isCopy: 0
             solo: 0
@@ -1801,7 +1801,7 @@ MonoBehaviour:
           subStates: []
       - isNew: 0
         name: Crouch
-        conditionBlock: Stance:1 && Speed:0
+        conditionBlock: Stance==1&&Speed==0
         assetObjects:
         - isCopy: 0
           solo: 0

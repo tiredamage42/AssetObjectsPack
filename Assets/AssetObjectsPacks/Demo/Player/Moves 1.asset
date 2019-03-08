@@ -70,17 +70,17 @@ MonoBehaviour:
     subStates:
     - isNew: 0
       name: Crouch
-      conditionBlock: Stance:1
+      conditionBlock: Stance==1
       assetObjects: []
       subStates:
       - isNew: 0
         name: Walk
-        conditionBlock: Speed:1
+        conditionBlock: Speed==1
         assetObjects: []
         subStates:
         - isNew: 0
           name: Fwd
-          conditionBlock: Direction:0
+          conditionBlock: Direction==0
           assetObjects:
           - isCopy: 0
             solo: 0
@@ -805,7 +805,7 @@ MonoBehaviour:
           subStates: []
         - isNew: 0
           name: Left
-          conditionBlock: Direction:1
+          conditionBlock: Direction==1
           assetObjects:
           - isCopy: 0
             solo: 0
@@ -1146,7 +1146,7 @@ MonoBehaviour:
           subStates: []
         - isNew: 0
           name: Right
-          conditionBlock: Direction:2
+          conditionBlock: Direction==2
           assetObjects:
           - isCopy: 0
             solo: 0
@@ -1535,7 +1535,7 @@ MonoBehaviour:
           subStates: []
         - isNew: 0
           name: Back
-          conditionBlock: Direction:3
+          conditionBlock: Direction==3
           assetObjects:
           - isCopy: 0
             solo: 0
@@ -2212,12 +2212,12 @@ MonoBehaviour:
           subStates: []
       - isNew: 0
         name: Run
-        conditionBlock: Speed:2
+        conditionBlock: Speed==2
         assetObjects: []
         subStates:
         - isNew: 0
           name: Fwd
-          conditionBlock: Direction:0
+          conditionBlock: Direction==0
           assetObjects:
           - isCopy: 0
             solo: 0
@@ -2510,7 +2510,7 @@ MonoBehaviour:
           subStates: []
         - isNew: 0
           name: Left
-          conditionBlock: Direction:1
+          conditionBlock: Direction==1
           assetObjects:
           - isCopy: 0
             solo: 0
@@ -2659,7 +2659,7 @@ MonoBehaviour:
           subStates: []
         - isNew: 0
           name: Right
-          conditionBlock: Direction:2
+          conditionBlock: Direction==2
           assetObjects:
           - isCopy: 0
             solo: 0
@@ -2952,7 +2952,7 @@ MonoBehaviour:
           subStates: []
         - isNew: 0
           name: Back
-          conditionBlock: Direction:3
+          conditionBlock: Direction==3
           assetObjects:
           - isCopy: 0
             solo: 0
@@ -3245,22 +3245,22 @@ MonoBehaviour:
           subStates: []
     - isNew: 0
       name: Stand
-      conditionBlock: Stance:0
+      conditionBlock: Stance==0
       assetObjects: []
       subStates:
       - isNew: 0
         name: Walk
-        conditionBlock: Speed:1
+        conditionBlock: Speed==1
         assetObjects: []
         subStates:
         - isNew: 0
           name: Forward
-          conditionBlock: Direction:0
+          conditionBlock: Direction==0
           assetObjects: []
           subStates:
           - isNew: 0
             name: Passive
-            conditionBlock: Agitated:false
+            conditionBlock: '!Agitated'
             assetObjects:
             - isCopy: 0
               solo: 0
@@ -3409,7 +3409,7 @@ MonoBehaviour:
             subStates: []
           - isNew: 0
             name: Agitated
-            conditionBlock: Agitated:true
+            conditionBlock: Agitated
             assetObjects:
             - isCopy: 0
               solo: 0
@@ -3461,7 +3461,7 @@ MonoBehaviour:
                 StringValue: 
             - isCopy: 0
               solo: 0
-              mute: 0
+              mute: 1
               objRef: {fileID: 7400002, guid: 7a869bafa3ada46d79237fcf6507db83, type: 3}
               id: 5125
               parameters:
@@ -3509,7 +3509,7 @@ MonoBehaviour:
                 StringValue: 
             - isCopy: 0
               solo: 0
-              mute: 0
+              mute: 1
               objRef: {fileID: 7400002, guid: a854814fb460944b09aa218ccbebf43b, type: 3}
               id: 5124
               parameters:
@@ -3605,7 +3605,7 @@ MonoBehaviour:
                 StringValue: 
             - isCopy: 0
               solo: 0
-              mute: 0
+              mute: 1
               objRef: {fileID: 7400002, guid: d75d3b755e60747b4a2f7c600ff47034, type: 3}
               id: 4368
               parameters:
@@ -3653,7 +3653,7 @@ MonoBehaviour:
                 StringValue: 
             - isCopy: 0
               solo: 0
-              mute: 0
+              mute: 1
               objRef: {fileID: 7400002, guid: 389c890903b4a4916a6b4682ccedca2a, type: 3}
               id: 4365
               parameters:
@@ -3797,7 +3797,7 @@ MonoBehaviour:
                 StringValue: 
             - isCopy: 0
               solo: 0
-              mute: 0
+              mute: 1
               objRef: {fileID: 7400002, guid: a794b129f172048a5b4e83961791d372, type: 3}
               id: 214
               parameters:
@@ -3891,10 +3891,154 @@ MonoBehaviour:
                 FloatValue: 0
                 IntValue: 0
                 StringValue: 
+            - isCopy: 0
+              solo: 0
+              mute: 1
+              objRef: {fileID: 7400002, guid: 9beeb51aebc86426a88a1c365b094ab9, type: 3}
+              id: 163
+              parameters:
+              - name: Duration
+                pType: 1
+                BoolValue: 0
+                FloatValue: -1
+                IntValue: 0
+                StringValue: 
+              - name: Speed
+                pType: 1
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Mirror
+                pType: 2
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Looped
+                pType: 0
+                BoolValue: 1
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Transition
+                pType: 1
+                BoolValue: 1
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+              - name: Layer
+                pType: 2
+                BoolValue: 1
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+              - name: TimeOffset
+                pType: 1
+                BoolValue: 1
+                FloatValue: 0
+                IntValue: 0
+                StringValue: 
+            - isCopy: 0
+              solo: 0
+              mute: 0
+              objRef: {fileID: 7400002, guid: 7dd52f86f2fc847f1beda9ac36415857, type: 3}
+              id: 166
+              parameters:
+              - name: Duration
+                pType: 1
+                BoolValue: 0
+                FloatValue: -1
+                IntValue: 0
+                StringValue: 
+              - name: Speed
+                pType: 1
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Mirror
+                pType: 2
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Looped
+                pType: 0
+                BoolValue: 1
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Transition
+                pType: 1
+                BoolValue: 1
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+              - name: Layer
+                pType: 2
+                BoolValue: 1
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+              - name: TimeOffset
+                pType: 1
+                BoolValue: 1
+                FloatValue: 0
+                IntValue: 0
+                StringValue: 
+            - isCopy: 0
+              solo: 0
+              mute: 0
+              objRef: {fileID: 7400002, guid: b9ed259c66d4a4470a7ee5853b802aeb, type: 3}
+              id: 169
+              parameters:
+              - name: Duration
+                pType: 1
+                BoolValue: 0
+                FloatValue: -1
+                IntValue: 0
+                StringValue: 
+              - name: Speed
+                pType: 1
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Mirror
+                pType: 2
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Looped
+                pType: 0
+                BoolValue: 1
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Transition
+                pType: 1
+                BoolValue: 1
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+              - name: Layer
+                pType: 2
+                BoolValue: 1
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+              - name: TimeOffset
+                pType: 1
+                BoolValue: 1
+                FloatValue: 0
+                IntValue: 0
+                StringValue: 
             subStates: []
         - isNew: 0
           name: Left
-          conditionBlock: Direction:1
+          conditionBlock: Direction==1
           assetObjects:
           - isCopy: 0
             solo: 0
@@ -4042,7 +4186,7 @@ MonoBehaviour:
               StringValue: 
           - isCopy: 0
             solo: 0
-            mute: 0
+            mute: 1
             objRef: {fileID: 7400002, guid: c695f2b1bb3324cedb2a69226d9de660, type: 3}
             id: 2939
             parameters:
@@ -4186,7 +4330,7 @@ MonoBehaviour:
               StringValue: 
           - isCopy: 0
             solo: 0
-            mute: 0
+            mute: 1
             objRef: {fileID: 7400002, guid: 34d526f3cf3574768b16b59a1898108b, type: 3}
             id: 2936
             parameters:
@@ -4234,7 +4378,7 @@ MonoBehaviour:
               StringValue: 
           - isCopy: 0
             solo: 0
-            mute: 0
+            mute: 1
             objRef: {fileID: 7400002, guid: af941fb2f95d74fc0a4a75161364028a, type: 3}
             id: 861
             parameters:
@@ -4378,7 +4522,7 @@ MonoBehaviour:
               StringValue: 
           - isCopy: 0
             solo: 0
-            mute: 0
+            mute: 1
             objRef: {fileID: 7400002, guid: a04603fef72fb43a598a5c8830cd7bba, type: 3}
             id: 864
             parameters:
@@ -4523,7 +4667,7 @@ MonoBehaviour:
           subStates: []
         - isNew: 0
           name: Right
-          conditionBlock: Direction:2
+          conditionBlock: Direction==2
           assetObjects:
           - isCopy: 0
             solo: 0
@@ -4623,7 +4767,7 @@ MonoBehaviour:
               StringValue: 
           - isCopy: 0
             solo: 0
-            mute: 0
+            mute: 1
             objRef: {fileID: 7400002, guid: 2990301efeec04c04adc056467fb2b7e, type: 3}
             id: 5138
             parameters:
@@ -4767,7 +4911,7 @@ MonoBehaviour:
               StringValue: 
           - isCopy: 0
             solo: 0
-            mute: 0
+            mute: 1
             objRef: {fileID: 7400002, guid: f2c5baf2b12384c83a7cb2cfebb3f969, type: 3}
             id: 5135
             parameters:
@@ -4959,7 +5103,7 @@ MonoBehaviour:
               StringValue: 
           - isCopy: 0
             solo: 0
-            mute: 0
+            mute: 1
             objRef: {fileID: 7400002, guid: 47347e332a40f4f448d13f35cbf21226, type: 3}
             id: 855
             parameters:
@@ -5103,7 +5247,7 @@ MonoBehaviour:
               StringValue: 
           - isCopy: 0
             solo: 0
-            mute: 0
+            mute: 1
             objRef: {fileID: 7400002, guid: f1f808fc90c2143a58e144c784f4bf26, type: 3}
             id: 852
             parameters:
@@ -5152,7 +5296,7 @@ MonoBehaviour:
           subStates: []
         - isNew: 0
           name: Back
-          conditionBlock: Direction:3
+          conditionBlock: Direction==3
           assetObjects:
           - isCopy: 0
             solo: 0
@@ -5300,7 +5444,7 @@ MonoBehaviour:
               StringValue: 
           - isCopy: 0
             solo: 0
-            mute: 0
+            mute: 1
             objRef: {fileID: 7400002, guid: d442d9c71a7ce427882fa32adbf18aaf, type: 3}
             id: 684
             parameters:
@@ -5492,7 +5636,7 @@ MonoBehaviour:
               StringValue: 
           - isCopy: 0
             solo: 0
-            mute: 0
+            mute: 1
             objRef: {fileID: 7400002, guid: 83867037f0943429698b6f69b4c46bc9, type: 3}
             id: 1515
             parameters:
@@ -5541,156 +5685,12 @@ MonoBehaviour:
           subStates: []
       - isNew: 0
         name: Run
-        conditionBlock: Speed:2
-        assetObjects:
-        - isCopy: 0
-          solo: 0
-          mute: 0
-          objRef: {fileID: 7400002, guid: b9ed259c66d4a4470a7ee5853b802aeb, type: 3}
-          id: 169
-          parameters:
-          - name: Duration
-            pType: 1
-            BoolValue: 0
-            FloatValue: -1
-            IntValue: 0
-            StringValue: 
-          - name: Speed
-            pType: 1
-            BoolValue: 0
-            FloatValue: 1
-            IntValue: 0
-            StringValue: 
-          - name: Mirror
-            pType: 2
-            BoolValue: 0
-            FloatValue: 1
-            IntValue: 0
-            StringValue: 
-          - name: Looped
-            pType: 0
-            BoolValue: 1
-            FloatValue: 1
-            IntValue: 0
-            StringValue: 
-          - name: Transition
-            pType: 1
-            BoolValue: 1
-            FloatValue: 0.25
-            IntValue: 0
-            StringValue: 
-          - name: Layer
-            pType: 2
-            BoolValue: 1
-            FloatValue: 0.25
-            IntValue: 0
-            StringValue: 
-          - name: TimeOffset
-            pType: 1
-            BoolValue: 1
-            FloatValue: 0
-            IntValue: 0
-            StringValue: 
-        - isCopy: 0
-          solo: 0
-          mute: 0
-          objRef: {fileID: 7400002, guid: 7dd52f86f2fc847f1beda9ac36415857, type: 3}
-          id: 166
-          parameters:
-          - name: Duration
-            pType: 1
-            BoolValue: 0
-            FloatValue: -1
-            IntValue: 0
-            StringValue: 
-          - name: Speed
-            pType: 1
-            BoolValue: 0
-            FloatValue: 1
-            IntValue: 0
-            StringValue: 
-          - name: Mirror
-            pType: 2
-            BoolValue: 0
-            FloatValue: 1
-            IntValue: 0
-            StringValue: 
-          - name: Looped
-            pType: 0
-            BoolValue: 1
-            FloatValue: 1
-            IntValue: 0
-            StringValue: 
-          - name: Transition
-            pType: 1
-            BoolValue: 1
-            FloatValue: 0.25
-            IntValue: 0
-            StringValue: 
-          - name: Layer
-            pType: 2
-            BoolValue: 1
-            FloatValue: 0.25
-            IntValue: 0
-            StringValue: 
-          - name: TimeOffset
-            pType: 1
-            BoolValue: 1
-            FloatValue: 0
-            IntValue: 0
-            StringValue: 
-        - isCopy: 0
-          solo: 0
-          mute: 0
-          objRef: {fileID: 7400002, guid: 9beeb51aebc86426a88a1c365b094ab9, type: 3}
-          id: 163
-          parameters:
-          - name: Duration
-            pType: 1
-            BoolValue: 0
-            FloatValue: -1
-            IntValue: 0
-            StringValue: 
-          - name: Speed
-            pType: 1
-            BoolValue: 0
-            FloatValue: 1
-            IntValue: 0
-            StringValue: 
-          - name: Mirror
-            pType: 2
-            BoolValue: 0
-            FloatValue: 1
-            IntValue: 0
-            StringValue: 
-          - name: Looped
-            pType: 0
-            BoolValue: 1
-            FloatValue: 1
-            IntValue: 0
-            StringValue: 
-          - name: Transition
-            pType: 1
-            BoolValue: 1
-            FloatValue: 0.25
-            IntValue: 0
-            StringValue: 
-          - name: Layer
-            pType: 2
-            BoolValue: 1
-            FloatValue: 0.25
-            IntValue: 0
-            StringValue: 
-          - name: TimeOffset
-            pType: 1
-            BoolValue: 1
-            FloatValue: 0
-            IntValue: 0
-            StringValue: 
+        conditionBlock: Speed==2
+        assetObjects: []
         subStates:
         - isNew: 0
           name: Fwd
-          conditionBlock: Direction:0
+          conditionBlock: Direction==0
           assetObjects:
           - isCopy: 0
             solo: 0
@@ -5886,7 +5886,7 @@ MonoBehaviour:
               StringValue: 
           - isCopy: 0
             solo: 0
-            mute: 0
+            mute: 1
             objRef: {fileID: 7400002, guid: 49efda749a6924cc9b30e0ff71c7db76, type: 3}
             id: 164
             parameters:
@@ -6079,7 +6079,7 @@ MonoBehaviour:
           subStates: []
         - isNew: 0
           name: Left
-          conditionBlock: Direction:1
+          conditionBlock: Direction==1
           assetObjects:
           - isCopy: 0
             solo: 0
@@ -6900,7 +6900,7 @@ MonoBehaviour:
           subStates: []
         - isNew: 0
           name: Right
-          conditionBlock: Direction:2
+          conditionBlock: Direction==2
           assetObjects:
           - isCopy: 0
             solo: 0
@@ -7577,7 +7577,7 @@ MonoBehaviour:
           subStates: []
         - isNew: 0
           name: Back
-          conditionBlock: Direction:3
+          conditionBlock: Direction==3
           assetObjects:
           - isCopy: 0
             solo: 0

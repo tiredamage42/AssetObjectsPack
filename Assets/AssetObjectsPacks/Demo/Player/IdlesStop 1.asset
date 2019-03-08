@@ -14,6 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   multi_edit_instance:
     isCopy: 0
+    solo: 0
+    mute: 0
     objRef: {fileID: 0}
     id: 0
     parameters:
@@ -68,9 +70,11 @@ MonoBehaviour:
     subStates:
     - isNew: 0
       name: Crouch
-      conditionBlock: Stance:1
+      conditionBlock: Stance==1
       assetObjects:
       - isCopy: 0
+        solo: 0
+        mute: 0
         objRef: {fileID: 7400002, guid: c1b98362cb20e4cb5924381b9c39ac5c, type: 3}
         id: 4759
         parameters:
@@ -117,6 +121,8 @@ MonoBehaviour:
           IntValue: 0
           StringValue: 
       - isCopy: 0
+        solo: 0
+        mute: 0
         objRef: {fileID: 7400002, guid: 252b171321edb4815a13e77cda68de09, type: 3}
         id: 4758
         parameters:
@@ -163,6 +169,8 @@ MonoBehaviour:
           IntValue: 0
           StringValue: 
       - isCopy: 0
+        solo: 0
+        mute: 0
         objRef: {fileID: 7400002, guid: 54270017430d442c285b87ba366dd793, type: 3}
         id: 4757
         parameters:
@@ -209,6 +217,8 @@ MonoBehaviour:
           IntValue: 0
           StringValue: 
       - isCopy: 0
+        solo: 0
+        mute: 0
         objRef: {fileID: 7400002, guid: 8839c04c8a3e04a4a9d78f1dc3494c13, type: 3}
         id: 4756
         parameters:
@@ -255,6 +265,8 @@ MonoBehaviour:
           IntValue: 0
           StringValue: 
       - isCopy: 0
+        solo: 0
+        mute: 0
         objRef: {fileID: 7400002, guid: a468a1fa5f4204251a56a2042b8af3f7, type: 3}
         id: 4755
         parameters:
@@ -301,6 +313,8 @@ MonoBehaviour:
           IntValue: 0
           StringValue: 
       - isCopy: 0
+        solo: 0
+        mute: 0
         objRef: {fileID: 7400002, guid: 6facfe797ae5e4bc292265ea2f2e4153, type: 3}
         id: 4754
         parameters:
@@ -347,6 +361,8 @@ MonoBehaviour:
           IntValue: 0
           StringValue: 
       - isCopy: 0
+        solo: 0
+        mute: 0
         objRef: {fileID: 7400002, guid: 8a559d71c06d345cab328a886b1ed076, type: 3}
         id: 4753
         parameters:
@@ -393,6 +409,8 @@ MonoBehaviour:
           IntValue: 0
           StringValue: 
       - isCopy: 0
+        solo: 0
+        mute: 0
         objRef: {fileID: 7400002, guid: b245c858990fd4ac59ee548882da75ed, type: 3}
         id: 4752
         parameters:
@@ -439,6 +457,8 @@ MonoBehaviour:
           IntValue: 0
           StringValue: 
       - isCopy: 0
+        solo: 0
+        mute: 0
         objRef: {fileID: 7400002, guid: 5d8a48645aebe4ff8b67d478c10f1177, type: 3}
         id: 4751
         parameters:
@@ -485,6 +505,8 @@ MonoBehaviour:
           IntValue: 0
           StringValue: 
       - isCopy: 0
+        solo: 0
+        mute: 0
         objRef: {fileID: 7400002, guid: 4c9ef9dce9a9c49978a25867e987ba3f, type: 3}
         id: 3528
         parameters:
@@ -531,6 +553,8 @@ MonoBehaviour:
           IntValue: 0
           StringValue: 
       - isCopy: 0
+        solo: 0
+        mute: 0
         objRef: {fileID: 7400002, guid: de5c74a94c9264660859fe8623fbf404, type: 3}
         id: 730
         parameters:
@@ -577,6 +601,8 @@ MonoBehaviour:
           IntValue: 0
           StringValue: 
       - isCopy: 0
+        solo: 0
+        mute: 0
         objRef: {fileID: 7400002, guid: ce5633c4b902e40358a16ad4faf0a3c8, type: 3}
         id: 300
         parameters:
@@ -625,14 +651,16 @@ MonoBehaviour:
       subStates: []
     - isNew: 0
       name: Stand
-      conditionBlock: Stance:0
+      conditionBlock: Stance==0
       assetObjects: []
       subStates:
       - isNew: 0
         name: Agitated
-        conditionBlock: Agitated:true
+        conditionBlock: Agitated
         assetObjects:
         - isCopy: 0
+          solo: 0
+          mute: 0
           objRef: {fileID: 7400002, guid: e5964a390a7234a53860561a0fd01859, type: 3}
           id: 184
           parameters:
@@ -679,6 +707,8 @@ MonoBehaviour:
             IntValue: 0
             StringValue: 
         - isCopy: 0
+          solo: 0
+          mute: 0
           objRef: {fileID: 7400002, guid: e515d8e3591f844ec96e16063bfba249, type: 3}
           id: 185
           parameters:
@@ -725,6 +755,8 @@ MonoBehaviour:
             IntValue: 0
             StringValue: 
         - isCopy: 0
+          solo: 0
+          mute: 0
           objRef: {fileID: 7400002, guid: c4aab6f317c924f6c80044e298ea7fa0, type: 3}
           id: 186
           parameters:
@@ -771,6 +803,8 @@ MonoBehaviour:
             IntValue: 0
             StringValue: 
         - isCopy: 0
+          solo: 0
+          mute: 0
           objRef: {fileID: 7400002, guid: 72b78b636f34841c28cbd05da32541ad, type: 3}
           id: 193
           parameters:
@@ -817,6 +851,8 @@ MonoBehaviour:
             IntValue: 0
             StringValue: 
         - isCopy: 0
+          solo: 0
+          mute: 0
           objRef: {fileID: 7400002, guid: 98be67f747b9740ac924cb8ad51ab7ba, type: 3}
           id: 194
           parameters:
@@ -863,6 +899,8 @@ MonoBehaviour:
             IntValue: 0
             StringValue: 
         - isCopy: 0
+          solo: 0
+          mute: 0
           objRef: {fileID: 7400002, guid: 196880e9292e54a019ddb366c9d0612b, type: 3}
           id: 195
           parameters:
@@ -909,6 +947,8 @@ MonoBehaviour:
             IntValue: 0
             StringValue: 
         - isCopy: 0
+          solo: 0
+          mute: 0
           objRef: {fileID: 7400002, guid: f7cc9c81585c84a9a8935b8643c25aa7, type: 3}
           id: 202
           parameters:
@@ -955,6 +995,8 @@ MonoBehaviour:
             IntValue: 0
             StringValue: 
         - isCopy: 0
+          solo: 0
+          mute: 0
           objRef: {fileID: 7400002, guid: 24fe1ea043a464c7582b04db8b554293, type: 3}
           id: 203
           parameters:
@@ -1001,6 +1043,8 @@ MonoBehaviour:
             IntValue: 0
             StringValue: 
         - isCopy: 0
+          solo: 0
+          mute: 0
           objRef: {fileID: 7400002, guid: aba034243a8224b1997336ef0d04451e, type: 3}
           id: 204
           parameters:
@@ -1047,6 +1091,8 @@ MonoBehaviour:
             IntValue: 0
             StringValue: 
         - isCopy: 0
+          solo: 0
+          mute: 0
           objRef: {fileID: 7400002, guid: d67a402b93f694ab0bb21c4b73db430e, type: 3}
           id: 298
           parameters:
@@ -1093,6 +1139,8 @@ MonoBehaviour:
             IntValue: 0
             StringValue: 
         - isCopy: 0
+          solo: 0
+          mute: 0
           objRef: {fileID: 7400002, guid: e45731f2e010d4c10af74fa9a0a9a21b, type: 3}
           id: 308
           parameters:
@@ -1139,6 +1187,8 @@ MonoBehaviour:
             IntValue: 0
             StringValue: 
         - isCopy: 0
+          solo: 0
+          mute: 0
           objRef: {fileID: 7400002, guid: 8559024664eb14844b05e4cfc6e78e49, type: 3}
           id: 6248
           parameters:
@@ -1185,6 +1235,8 @@ MonoBehaviour:
             IntValue: 0
             StringValue: 
         - isCopy: 0
+          solo: 0
+          mute: 0
           objRef: {fileID: 7400002, guid: e14cbb494178746748ce584c314de2f4, type: 3}
           id: 6249
           parameters:
@@ -1233,9 +1285,11 @@ MonoBehaviour:
         subStates: []
       - isNew: 0
         name: Passive
-        conditionBlock: Agitated:false
+        conditionBlock: '!Agitated'
         assetObjects:
         - isCopy: 0
+          solo: 0
+          mute: 0
           objRef: {fileID: 7400002, guid: 214451205febc49d8a332b07bdfcdf6b, type: 3}
           id: 6247
           parameters:

@@ -22,6 +22,42 @@ MonoBehaviour:
     - name: Duration
       pType: 1
       BoolValue: 0
+      FloatValue: -1
+      IntValue: 0
+      StringValue: 
+    - name: Speed
+      pType: 1
+      BoolValue: 0
+      FloatValue: 1
+      IntValue: 0
+      StringValue: 
+    - name: Mirror
+      pType: 2
+      BoolValue: 0
+      FloatValue: 1
+      IntValue: 0
+      StringValue: 
+    - name: Looped
+      pType: 0
+      BoolValue: 0
+      FloatValue: 1
+      IntValue: 0
+      StringValue: 
+    - name: Transition
+      pType: 1
+      BoolValue: 0
+      FloatValue: 0.25
+      IntValue: 0
+      StringValue: 
+    - name: Layer
+      pType: 2
+      BoolValue: 0
+      FloatValue: 0.25
+      IntValue: 0
+      StringValue: 
+    - name: TimeOffset
+      pType: 1
+      BoolValue: 0
       FloatValue: 0
       IntValue: 0
       StringValue: 
@@ -34,7 +70,7 @@ MonoBehaviour:
     subStates:
     - isNew: 0
       name: Standing
-      conditionBlock: Speed:0
+      conditionBlock: Speed==0
       assetObjects:
       - isCopy: 0
         solo: 0
@@ -375,12 +411,12 @@ MonoBehaviour:
       subStates: []
     - isNew: 0
       name: Moving
-      conditionBlock: Speed:>0
+      conditionBlock: Speed >0
       assetObjects: []
       subStates:
       - isNew: 0
         name: Bwd
-        conditionBlock: Direction:3
+        conditionBlock: Direction==3
         assetObjects:
         - isCopy: 0
           solo: 0
@@ -577,12 +613,12 @@ MonoBehaviour:
         subStates: []
       - isNew: 0
         name: Fwd
-        conditionBlock: Direction:0
+        conditionBlock: Direction==0
         assetObjects: []
         subStates:
         - isNew: 0
           name: Run
-          conditionBlock: Speed:2
+          conditionBlock: Speed==2
           assetObjects:
           - isCopy: 0
             solo: 0
@@ -779,7 +815,7 @@ MonoBehaviour:
           subStates: []
         - isNew: 0
           name: Walk
-          conditionBlock: Speed:1
+          conditionBlock: Speed==1
           assetObjects:
           - isCopy: 0
             solo: 0
@@ -1168,12 +1204,12 @@ MonoBehaviour:
           subStates: []
       - isNew: 0
         name: Left
-        conditionBlock: Direction:1
+        conditionBlock: Direction==1
         assetObjects: []
         subStates:
         - isNew: 0
           name: Walk
-          conditionBlock: Speed:1
+          conditionBlock: Speed==1
           assetObjects:
           - isCopy: 0
             solo: 0
@@ -1226,7 +1262,7 @@ MonoBehaviour:
           subStates: []
         - isNew: 0
           name: Run
-          conditionBlock: Speed:2
+          conditionBlock: Speed==2
           assetObjects:
           - isCopy: 0
             solo: 0
@@ -1279,12 +1315,12 @@ MonoBehaviour:
           subStates: []
       - isNew: 0
         name: Right
-        conditionBlock: Direction:2
+        conditionBlock: Direction==2
         assetObjects: []
         subStates:
         - isNew: 0
           name: Walk
-          conditionBlock: Speed:1
+          conditionBlock: Speed==1
           assetObjects:
           - isCopy: 0
             solo: 0
@@ -1337,7 +1373,7 @@ MonoBehaviour:
           subStates: []
         - isNew: 0
           name: Run
-          conditionBlock: Speed:2
+          conditionBlock: Speed==2
           assetObjects:
           - isCopy: 0
             solo: 0

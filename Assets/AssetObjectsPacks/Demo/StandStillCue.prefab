@@ -43,10 +43,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ecc67e02a6ea43bfb7579cb062a1281, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gizmoColor: {r: 0, g: 1, b: 0, a: 1}
   playlist: {fileID: 0}
   events:
   - {fileID: 11400000, guid: 24ec89b7388e1481682c3b2af2e69b01, type: 2}
+  overrideDuration: -1
+  repeats: 1
+  playImmediate: 0
   sendMessage: 'StopMovement_Cue(cue) '
+  messagesBlock: onplay { StopMovement_Cue(cue); }
+  postMessage: 
   snapPlayerStyle: 0
   smoothPositionTime: 1
   smoothRotationTime: 1

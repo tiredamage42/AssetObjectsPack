@@ -5,11 +5,17 @@ namespace AssetObjectsPacks {
     [System.Serializable] public class Cue : MonoBehaviour
     {
         #if UNITY_EDITOR
-        public const string playlist_field = "playlist", event_packs_field = "events";
+        public const string playlist_field = "playlist", event_packs_field = "events", playImmediateField = "playImmediate";
+        public const string messagesBlockField = "messagesBlock";
+
+        public const string overrideDurationField = "overrideDuration", repeatsField = "repeats";
+
         public const string snap_player_style_field = "snapPlayerStyle";
-        public const string sendMessageField = "sendMessage";
+        public const string sendMessageField = "sendMessage", postMessageField = "postMessage";
         public const string smooth_pos_time_field = "smoothPositionTime", smooth_rot_time_field = "smoothRotationTime";
+        
         #endif
+        public Color gizmoColor = Color.green;
         
         public Playlist playlist;
         public Event[] events;
@@ -33,17 +39,25 @@ namespace AssetObjectsPacks {
                 return e;
             }
             return null;
-
         }
 
 
 
 
 
+        public float overrideDuration = -1;
+        public int repeats;
+        public bool playImmediate;
+
+
 
 
         
         public string sendMessage;
+
+        public string messagesBlock;
+
+        public string postMessage;
 
         //if the event should wait for the player to snap to the interest transform
         //before being considered ready
@@ -52,9 +66,11 @@ namespace AssetObjectsPacks {
         public float smoothPositionTime = 1;
         public float smoothRotationTime = 1;    
 
-        void OnDrawGizmos () {
-            Gizmos.color = Color.green;
-            Gizmos.DrawWireSphere(transform.position, .25f);
-        }
+        
+        
+        
+        
+        
+        
     }
 }

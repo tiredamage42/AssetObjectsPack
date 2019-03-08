@@ -5,6 +5,8 @@ using AssetObjectsPacks;
 public class PlayerController : MonoBehaviour
 {
 
+    [Range(0,1)] public float timeDilation = 1.0f;
+
     MovementController movement;
     Camera cam;
 
@@ -17,6 +19,8 @@ public class PlayerController : MonoBehaviour
         movement = GetComponent<MovementController>();
         movement.doAutoTurn = true;
         cam = Camera.main;
+
+        InitializeTimeSlow();
     }
 
     
@@ -65,10 +69,41 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space)) {
             movement.TriggerJump();
         }
+    }
 
+    float initialTimeScale, initialFixedDeltaTime, initialMaxDelta;
+    void InitializeTimeSlow () {
+        initialTimeScale = Time.timeScale;
+        initialFixedDeltaTime = Time.fixedDeltaTime;
+        initialMaxDelta = Time.maximumDeltaTime;
     }
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.Equals)) {
+            timeDilation += .1f;
+            if (timeDilation > 1) {
+                timeDilation = 1;
+            }
+        }
+        if (Input.GetKeyDown(KeyCode.Minus)) {
+            timeDilation -= .1f;
+            if (timeDilation < .1f) {
+                timeDilation = .1f;
+            }
+        }
+        Time.timeScale = initialTimeScale * timeDilation;
+        Time.fixedDeltaTime = initialFixedDeltaTime * timeDilation;
+        Time.maximumDeltaTime = initialMaxDelta * timeDilation;
+
+
+        //float newTimeScale = Time.timeScale * slowFactor;
+        //Time.timeScale = newTimeScale;
+        //Time.fixedDeltaTime = Time.fixedDeltaTime/slowFactor; //<<<<<<<<<<<<<
+        //Time.maximumDeltaTime = Time.maximumDeltaTime/slowFactor;//<<<<<<<<<<
+        
+        
+        
+
         CheckDirectionalMovement();
     }
 }
