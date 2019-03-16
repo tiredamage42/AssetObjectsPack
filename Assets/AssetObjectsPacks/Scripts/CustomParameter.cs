@@ -48,7 +48,6 @@ namespace AssetObjectsPacks {
             return ParamType.BoolValue;
         }
 
-
         bool CheckCompatibleSet (ParamType trying) {
             if (paramType != trying) {
                 Debug.LogWarning("Incompatible paramtype, trying to set " + trying.ToString() + " on a " + paramType);
@@ -66,7 +65,5 @@ namespace AssetObjectsPacks {
                 case ParamType.StringValue: this.StringValue = (string)value; break;
             }
         }
-
-        
     }
 }

@@ -103,30 +103,27 @@ namespace AssetObjectsPacks.Animations {
         }
 
         /*
-            when this component is in charge of determining the end of the event played
-            (when it's the main event on a cue, and the asset object is not timed)
-            it has to call the supplied callback to let the player know the event has ended
-
-            in htis case, when the animation is done
+            callbacks to call when one shot animation is done
         */
         HashSet<System.Action> endUseCallbacks;
-
 
         /*
             called when the attached event player plays an 
             "Animations" event and chooses an appropriate asset object
-        
-            if the endEvent callback is not null, then this component 
-            is in charge of deciding when the 'event' is done.  
+
+            endUseCallbacks should be called whenever the animation is done
         
             in this case, this component tracks when the animator is exiting an animation
             that has been played
         */
         void UseAssetObject(AssetObject assetObject, bool asInterrupter, HashSet<System.Action> endUseCallbacks) {
-            if (this.endUseCallbacks != null) {
-                this.endUseCallbacks.Clear();
-            }
+            //if (this.endUseCallbacks != null) {
+            //    this.endUseCallbacks.Clear();
+            //}
             this.endUseCallbacks = endUseCallbacks;
+
+            //Debug.Log("using ao");
+            
 
             //get asset object parameter values
             int mirrorMode = assetObject["Mirror"].GetValue<int>();  
@@ -135,25 +132,33 @@ namespace AssetObjectsPacks.Animations {
             if (timeOffset != 0) {
                 timeOffset = timeOffset * ((AnimationClip)assetObject.objRef).length;
             } 
+            bool looped = assetObject["Looped"].GetValue<bool>();
 
             Play(
                 assetObject.id, 
                 asInterrupter, 
                 mirror, 
-                assetObject["Looped"].GetValue<bool>(), 
+                looped, 
                 assetObject["Transition"].GetValue<float>(), 
                 assetObject["Speed"].GetValue<float>(), 
                 assetObject["Layer"].GetValue<int>(), 
                 timeOffset
             );
+
+            if (looped) {
+                BroadcastEndUse(); //dont leave loops hanging
+            }
         }
 
-        // let the player know the event is done if this component is keeping track of that
+        // let the player know the event is done
         void BroadcastEndUse () {
+            //Debug.Log("end animation");
             if (endUseCallbacks != null) {
                 foreach (var endUse in endUseCallbacks) {
+                    Debug.Log("callign callbacks");
                     endUse();    
                 }
+                endUseCallbacks.Clear();
             }
         }
         
@@ -175,15 +180,51 @@ namespace AssetObjectsPacks.Animations {
         //set up by the wizard included in this package
         Animator anim;
         int activeLoops;
-        bool playingOneShot, endCheck;
+        bool playingOneShot, endTransitionStartCheck;
 
         void Awake () {
             anim = GetComponent<Animator>();
-            //anim.applyRootMotion = false;// true;
             InitializeEventPlayer();
         }
         void Update () {
             CheckOneShotEndings();
+        }
+
+        void Play (int id, bool interrupt, bool mirror, bool loop, float transition, float speed, int layer, float timeOffset) {
+            if (loop) PlayLoop(id, interrupt, mirror, transition, speed, layer, timeOffset);
+            else PlayOneShot(id, mirror, transition, speed, layer, timeOffset);
+        }
+        void PlayLoop (int id, bool interrupt, bool mirror, float transition, float speed, int layer, float timeOffset) {
+            //Debug.Log("playing loop");
+            bool doTransition = (playingOneShot && interrupt) || !playingOneShot;
+                
+            if (doTransition) {
+                activeLoops = (activeLoops + 1) % 2;
+            }
+            //else if we're doing it in the background of a one shot 
+            //just change the parameters for the current active loopset
+
+            anim.SetFloat(pLoopIndicies[activeLoops], id);
+            anim.SetFloat(pLoopSpeeds[activeLoops], speed);
+            anim.SetBool(pLoopMirrors[activeLoops], mirror);
+
+            //if transitioning, crossfade to the new active loopset
+            if (doTransition) {
+                anim.CrossFadeInFixedTime(sLoopNames[activeLoops], transition, layer, timeOffset);
+            }
+            //set active loopset
+            anim.SetInteger(pActiveLoopSet, activeLoops);
+        }
+            
+        void PlayOneShot(int id, bool mirror, float transition, float speed, int layer, float timeOffset) {
+            //set mirror ansd speed parameters
+            anim.SetBool(pMirror, mirror);
+            anim.SetFloat(pSpeed, speed);
+            
+            //non looped states are named as their ids
+            anim.CrossFadeInFixedTime(id.ToString(), transition, layer, timeOffset);
+            
+            playingOneShot = true;
         }
 
         //doing it after transition end looks janky
@@ -194,64 +235,40 @@ namespace AssetObjectsPacks.Animations {
 
         }
 
-        void Play (int id, bool interrupt, bool mirror, bool loop, float transition, float speed, int layer, float timeOffset) {
-            if (loop) PlayLoop(id, interrupt, mirror, transition, speed, layer, timeOffset);
-            else PlayOneShot(id, mirror, transition, speed, layer, timeOffset);
-        }
-        void PlayLoop (int id, bool interrupt, bool mirror, float transition, float speed, int layer, float timeOffset) {
-
-            bool do_transition = (playingOneShot && interrupt) || !playingOneShot;
-                
-            if (do_transition) {
-                activeLoops = (activeLoops + 1) % 2;
-            }
-            //if we're doing it in the background of a one shot just change the current active loopset
-
-            anim.SetFloat(pLoopIndicies[activeLoops], id);
-            anim.SetFloat(pLoopSpeeds[activeLoops], speed);
-            anim.SetBool(pLoopMirrors[activeLoops], mirror);
-
-            if (do_transition) {
-                anim.CrossFadeInFixedTime(sLoopNames[activeLoops], transition, layer, timeOffset);
-            }
-            
-            anim.SetInteger(pActiveLoopSet, activeLoops);
-        }
-            
-        void PlayOneShot(int id, bool mirror, float transition, float speed, int layer, float timeOffset) {
-
-            anim.SetBool(pMirror, mirror);
-            anim.SetFloat(pSpeed, speed);
-
-            //non looped states are named as their ids
-            anim.CrossFadeInFixedTime(id.ToString(), transition, layer, timeOffset);
-            playingOneShot = true;
-        }
 
         //check when a non looped animation is starting its exit transition and ending its exit transition
         void CheckOneShotEndings (int layer = 0) {
         
-            AnimatorStateInfo current_state = anim.GetCurrentAnimatorStateInfo(layer);
-            AnimatorStateInfo next_state = anim.GetNextAnimatorStateInfo(layer);
+            AnimatorStateInfo currentState = anim.GetCurrentAnimatorStateInfo(layer);
+            AnimatorStateInfo nextState = anim.GetNextAnimatorStateInfo(layer);
 
-            bool current_is_shot = current_state.IsTag(sShots);
-            bool next_is_one_shot = next_state.IsTag(sShots);
+            bool currentIsOneShot = currentState.IsTag(sShots);
+            bool nextIsOneShot = nextState.IsTag(sShots);
 
+            //if in transition
             if (anim.IsInTransition(layer)) {
-                if (current_is_shot) {
-                    if (next_state.fullPathHash != current_state.fullPathHash) {
-                        if (!endCheck) {
-                            endCheck = true;
+                if (currentIsOneShot) {
+                    //currently exiting a one shot
+                    if (nextState.fullPathHash != currentState.fullPathHash) {
+                        //make sure this only happens one frame
+                        if (!endTransitionStartCheck) {
                             OnOneShotExitTransitionStart();
+                            endTransitionStartCheck = true;
                         }
                     }
                 }
             }
             else {
-                if (endCheck) {
-                    endCheck = false;
-                    if (!next_is_one_shot) playingOneShot = false;
+                //not in transition, but was exiting, so transition is done
+                if (endTransitionStartCheck) {
+                    
+                    //check if we're out of a one shot animation
+                    if (!nextIsOneShot) {
+                        playingOneShot = false;
+                    }
+
                     OnOneShotTransitionEnd();
+                    endTransitionStartCheck = false;
                 }
             }
         }

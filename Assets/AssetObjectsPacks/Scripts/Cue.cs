@@ -2,25 +2,54 @@
 using System.Collections.Generic;
 namespace AssetObjectsPacks {
 
-    [System.Serializable] public class Cue : MonoBehaviour
+
+    [System.Serializable] [ExecuteInEditMode]
+    public class Cue : MonoBehaviour
     {
-        #if UNITY_EDITOR
-        public const string playlist_field = "playlist", event_packs_field = "events", playImmediateField = "playImmediate";
-        public const string messagesBlockField = "messagesBlock";
 
-        public const string overrideDurationField = "overrideDuration", repeatsField = "repeats";
-
-        public const string snap_player_style_field = "snapPlayerStyle";
-        public const string sendMessageField = "sendMessage", postMessageField = "postMessage";
-        public const string smooth_pos_time_field = "smoothPositionTime", smooth_rot_time_field = "smoothRotationTime";
         
+        #if UNITY_EDITOR 
+
+        public RuntimeTransformTracker transformTracker = new RuntimeTransformTracker();
+        
+
+        void Update () {
+            transformTracker.PlayingUpdate(transform);
+        }
+        void OnEnable () {
+            transformTracker.OnEnable(transform);
+        }
+
         #endif
+
+
+
+
+
         public Color gizmoColor = Color.green;
-        
-        public Playlist playlist;
+        //public Transform playlist;
+        public bool useRandomPlaylist;
+
         public Event[] events;
 
+        public float overrideDuration = -1;
+        public int repeats;
+        public bool playImmediate;
 
+        //if the event should wait for the player to snap to the interest transform
+        //before being considered ready
+        public enum SnapPlayerStyle { None, Snap, Smooth };
+        public SnapPlayerStyle snapPlayerStyle;
+        public float smoothPositionTime = 1;
+        public float smoothRotationTime = 1;    
+
+        
+        public enum MessageEvent { OnStart = 0, OnPlay = 1, OnEnd = 2, OnSnap = 3 };
+        public string[] messageBlocks = new string[4] {"", "", "", ""};
+
+        public string GetMessageBlock(MessageEvent msgEvent) {
+            return messageBlocks[(int)msgEvent];
+        }
 
         Dictionary<string, Event> packName2Event = new Dictionary<string, Event>();
         
@@ -40,37 +69,5 @@ namespace AssetObjectsPacks {
             }
             return null;
         }
-
-
-
-
-
-        public float overrideDuration = -1;
-        public int repeats;
-        public bool playImmediate;
-
-
-
-
-        
-        public string sendMessage;
-
-        public string messagesBlock;
-
-        public string postMessage;
-
-        //if the event should wait for the player to snap to the interest transform
-        //before being considered ready
-        public enum SnapPlayerStyle { None, Snap, Smooth };
-        public SnapPlayerStyle snapPlayerStyle;
-        public float smoothPositionTime = 1;
-        public float smoothRotationTime = 1;    
-
-        
-        
-        
-        
-        
-        
     }
 }

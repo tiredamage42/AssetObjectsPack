@@ -40,10 +40,10 @@ namespace AssetObjectsPacks {
             for (int i = a; i <= b; i++) r.Add( x[i] ); 
             return r;
         }
-        public static void ToggleElement<T> (this IList<T> e, T o) {
-            if (e.Contains(o)) e.Remove(o);
-            else e.Add(o);
-        }
+        //public static void ToggleElement<T> (this IList<T> e, T o) {
+        //    if (e.Contains(o)) e.Remove(o);
+        //    else e.Add(o);
+        //}
         public static void ToggleElement<T> (this HashSet<T> e, T o) {
             if (e.Contains(o)) e.Remove(o);
             else e.Add(o);

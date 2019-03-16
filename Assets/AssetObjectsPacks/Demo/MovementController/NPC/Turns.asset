@@ -1,0 +1,2484 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1284b611740a6448d90c4ebacf05b26a, type: 3}
+  m_Name: Turns
+  m_EditorClassIdentifier: 
+  multi_edit_instance:
+    isCopy: 0
+    solo: 0
+    mute: 0
+    objRef: {fileID: 0}
+    id: 0
+    parameters:
+    - name: Duration
+      pType: 1
+      BoolValue: 0
+      FloatValue: -1
+      IntValue: 0
+      StringValue: 
+    - name: Speed
+      pType: 1
+      BoolValue: 0
+      FloatValue: 1
+      IntValue: 0
+      StringValue: 
+    - name: Mirror
+      pType: 2
+      BoolValue: 0
+      FloatValue: 1
+      IntValue: 0
+      StringValue: 
+    - name: Looped
+      pType: 0
+      BoolValue: 0
+      FloatValue: 1
+      IntValue: 0
+      StringValue: 
+    - name: Transition
+      pType: 1
+      BoolValue: 0
+      FloatValue: 0.25
+      IntValue: 0
+      StringValue: 
+    - name: Layer
+      pType: 2
+      BoolValue: 0
+      FloatValue: 0.25
+      IntValue: 0
+      StringValue: 
+    - name: TimeOffset
+      pType: 1
+      BoolValue: 0
+      FloatValue: 0
+      IntValue: 0
+      StringValue: 
+  hiddenIDs: 
+  baseState:
+    isNew: 0
+    name: Base State
+    conditionBlock: 
+    assetObjects: []
+    subStates:
+    - isNew: 0
+      name: 45
+      conditionBlock: TurnAngle <67&&TurnAngle >22.5
+      assetObjects: []
+      subStates:
+      - isNew: 0
+        name: Left
+        conditionBlock: '!ToRight && Speed == 0'
+        assetObjects: []
+        subStates:
+        - isNew: 0
+          name: Crouch
+          conditionBlock: Stance==1
+          assetObjects:
+          - isCopy: 0
+            solo: 0
+            mute: 0
+            objRef: {fileID: 7400002, guid: 9c209cdbd07754f2e984c60c6778b916, type: 3}
+            id: 6357
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+            - name: Layer
+              pType: 2
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+            - name: TimeOffset
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0
+              IntValue: 0
+              StringValue: 
+          subStates: []
+        - isNew: 0
+          name: Stand
+          conditionBlock: Stance==0
+          assetObjects: []
+          subStates:
+          - isNew: 0
+            name: Agitated
+            conditionBlock: Agitated
+            assetObjects:
+            - isCopy: 0
+              solo: 0
+              mute: 0
+              objRef: {fileID: 7400002, guid: bb807fbb2f5ca4e7ab51db061668c1e2, type: 3}
+              id: 3092
+              parameters:
+              - name: Duration
+                pType: 1
+                BoolValue: 0
+                FloatValue: -1
+                IntValue: 0
+                StringValue: 
+              - name: Speed
+                pType: 1
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Mirror
+                pType: 2
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Looped
+                pType: 0
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Transition
+                pType: 1
+                BoolValue: 0
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+              - name: Layer
+                pType: 2
+                BoolValue: 0
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+              - name: TimeOffset
+                pType: 1
+                BoolValue: 0
+                FloatValue: 0
+                IntValue: 0
+                StringValue: 
+            - isCopy: 0
+              solo: 0
+              mute: 0
+              objRef: {fileID: 7400002, guid: efd0886765c5947d3b282bec3ddddd55, type: 3}
+              id: 3551
+              parameters:
+              - name: Duration
+                pType: 1
+                BoolValue: 0
+                FloatValue: -1
+                IntValue: 0
+                StringValue: 
+              - name: Speed
+                pType: 1
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Mirror
+                pType: 2
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Looped
+                pType: 0
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Transition
+                pType: 1
+                BoolValue: 0
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+              - name: Layer
+                pType: 2
+                BoolValue: 0
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+              - name: TimeOffset
+                pType: 1
+                BoolValue: 0
+                FloatValue: 0
+                IntValue: 0
+                StringValue: 
+            subStates: []
+          - isNew: 0
+            name: Passive
+            conditionBlock: '!Agitated'
+            assetObjects:
+            - isCopy: 0
+              solo: 0
+              mute: 0
+              objRef: {fileID: 7400002, guid: 645e416a2ce8046f884acff0fa1b6248, type: 3}
+              id: 3542
+              parameters:
+              - name: Duration
+                pType: 1
+                BoolValue: 0
+                FloatValue: -1
+                IntValue: 0
+                StringValue: 
+              - name: Speed
+                pType: 1
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Mirror
+                pType: 2
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Looped
+                pType: 0
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Transition
+                pType: 1
+                BoolValue: 0
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+              - name: Layer
+                pType: 2
+                BoolValue: 0
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+              - name: TimeOffset
+                pType: 1
+                BoolValue: 0
+                FloatValue: 0
+                IntValue: 0
+                StringValue: 
+            subStates: []
+      - isNew: 0
+        name: Right
+        conditionBlock: ToRight
+        assetObjects: []
+        subStates:
+        - isNew: 0
+          name: Crouch
+          conditionBlock: Stance==1&&Speed==0
+          assetObjects:
+          - isCopy: 0
+            solo: 0
+            mute: 0
+            objRef: {fileID: 7400002, guid: ae221448e29a84acf81a9be60ca6daa7, type: 3}
+            id: 7674
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+            - name: Layer
+              pType: 2
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+            - name: TimeOffset
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0
+              IntValue: 0
+              StringValue: 
+          subStates: []
+        - isNew: 0
+          name: Stand
+          conditionBlock: Stance==0
+          assetObjects: []
+          subStates:
+          - isNew: 0
+            name: Agitated
+            conditionBlock: Agitated && Speed == 0
+            assetObjects:
+            - isCopy: 0
+              solo: 0
+              mute: 0
+              objRef: {fileID: 7400002, guid: ca0b52177b8904af2b7a7c8f890a30a7, type: 3}
+              id: 4643
+              parameters:
+              - name: Duration
+                pType: 1
+                BoolValue: 0
+                FloatValue: -1
+                IntValue: 0
+                StringValue: 
+              - name: Speed
+                pType: 1
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Mirror
+                pType: 2
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Looped
+                pType: 0
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Transition
+                pType: 1
+                BoolValue: 0
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+              - name: Layer
+                pType: 2
+                BoolValue: 0
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+              - name: TimeOffset
+                pType: 1
+                BoolValue: 0
+                FloatValue: 0
+                IntValue: 0
+                StringValue: 
+            - isCopy: 0
+              solo: 0
+              mute: 0
+              objRef: {fileID: 7400002, guid: d6cbe93a2b41c4d09adf0458fdd2c45e, type: 3}
+              id: 1601
+              parameters:
+              - name: Duration
+                pType: 1
+                BoolValue: 0
+                FloatValue: -1
+                IntValue: 0
+                StringValue: 
+              - name: Speed
+                pType: 1
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Mirror
+                pType: 2
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Looped
+                pType: 0
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Transition
+                pType: 1
+                BoolValue: 0
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+              - name: Layer
+                pType: 2
+                BoolValue: 0
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+              - name: TimeOffset
+                pType: 1
+                BoolValue: 0
+                FloatValue: 0
+                IntValue: 0
+                StringValue: 
+            subStates: []
+          - isNew: 0
+            name: Passive
+            conditionBlock: '!Agitated && Speed == 0'
+            assetObjects:
+            - isCopy: 0
+              solo: 0
+              mute: 0
+              objRef: {fileID: 7400002, guid: 09daca4314b784ee19a88055da6dee9b, type: 3}
+              id: 2131
+              parameters:
+              - name: Duration
+                pType: 1
+                BoolValue: 0
+                FloatValue: -1
+                IntValue: 0
+                StringValue: 
+              - name: Speed
+                pType: 1
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Mirror
+                pType: 2
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Looped
+                pType: 0
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Transition
+                pType: 1
+                BoolValue: 0
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+              - name: Layer
+                pType: 2
+                BoolValue: 0
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+              - name: TimeOffset
+                pType: 1
+                BoolValue: 0
+                FloatValue: 0
+                IntValue: 0
+                StringValue: 
+            subStates: []
+          - isNew: 0
+            name: Moving
+            conditionBlock: Speed==1
+            assetObjects:
+            - isCopy: 0
+              solo: 0
+              mute: 0
+              objRef: {fileID: 7400002, guid: bf230c910ef844436ad14f12b5a7e452, type: 3}
+              id: 4456
+              parameters:
+              - name: Duration
+                pType: 1
+                BoolValue: 0
+                FloatValue: -1
+                IntValue: 0
+                StringValue: 
+              - name: Speed
+                pType: 1
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Mirror
+                pType: 2
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Looped
+                pType: 0
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Transition
+                pType: 1
+                BoolValue: 0
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+              - name: Layer
+                pType: 2
+                BoolValue: 0
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+              - name: TimeOffset
+                pType: 1
+                BoolValue: 0
+                FloatValue: 0
+                IntValue: 0
+                StringValue: 
+            subStates: []
+    - isNew: 0
+      name: 90
+      conditionBlock: TurnAngle <122&&TurnAngle >67
+      assetObjects: []
+      subStates:
+      - isNew: 0
+        name: Left
+        conditionBlock: '!ToRight && Speed == 0'
+        assetObjects: []
+        subStates:
+        - isNew: 0
+          name: Crouch
+          conditionBlock: Stance==1&&Speed==0
+          assetObjects:
+          - isCopy: 0
+            solo: 0
+            mute: 0
+            objRef: {fileID: 7400002, guid: 499a6028bfd0d4b4691b55d63987a78f, type: 3}
+            id: 720
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+            - name: Layer
+              pType: 2
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+            - name: TimeOffset
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            solo: 0
+            mute: 0
+            objRef: {fileID: 7400002, guid: e10be7485efd44c49941ed55dd2ee3a5, type: 3}
+            id: 4907
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+            - name: Layer
+              pType: 2
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+            - name: TimeOffset
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            solo: 0
+            mute: 0
+            objRef: {fileID: 7400002, guid: 54deb9bd03b3643e8a344814d669466f, type: 3}
+            id: 2969
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+            - name: Layer
+              pType: 2
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+            - name: TimeOffset
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0
+              IntValue: 0
+              StringValue: 
+          subStates: []
+        - isNew: 0
+          name: Stand
+          conditionBlock: Stance==0
+          assetObjects: []
+          subStates:
+          - isNew: 0
+            name: Agitated
+            conditionBlock: Agitated
+            assetObjects:
+            - isCopy: 0
+              solo: 0
+              mute: 0
+              objRef: {fileID: 7400002, guid: 86cb51bdf3e0a4083968906abd3f4835, type: 3}
+              id: 3093
+              parameters:
+              - name: Duration
+                pType: 1
+                BoolValue: 0
+                FloatValue: -1
+                IntValue: 0
+                StringValue: 
+              - name: Speed
+                pType: 1
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Mirror
+                pType: 2
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Looped
+                pType: 0
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Transition
+                pType: 1
+                BoolValue: 0
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+              - name: Layer
+                pType: 2
+                BoolValue: 0
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+              - name: TimeOffset
+                pType: 1
+                BoolValue: 0
+                FloatValue: 0
+                IntValue: 0
+                StringValue: 
+            subStates: []
+          - isNew: 0
+            name: Passive
+            conditionBlock: '!Agitated'
+            assetObjects:
+            - isCopy: 0
+              solo: 0
+              mute: 0
+              objRef: {fileID: 7400002, guid: aaff052c1ccfc4548906229bc2ce3ec1, type: 3}
+              id: 2263
+              parameters:
+              - name: Duration
+                pType: 1
+                BoolValue: 0
+                FloatValue: -1
+                IntValue: 0
+                StringValue: 
+              - name: Speed
+                pType: 1
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Mirror
+                pType: 2
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Looped
+                pType: 0
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Transition
+                pType: 1
+                BoolValue: 0
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+              - name: Layer
+                pType: 2
+                BoolValue: 0
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+              - name: TimeOffset
+                pType: 1
+                BoolValue: 0
+                FloatValue: 0
+                IntValue: 0
+                StringValue: 
+            - isCopy: 0
+              solo: 0
+              mute: 0
+              objRef: {fileID: 7400002, guid: 1ed1f84b67e234d09a40fc7a1774b283, type: 3}
+              id: 299
+              parameters:
+              - name: Duration
+                pType: 1
+                BoolValue: 0
+                FloatValue: -1
+                IntValue: 0
+                StringValue: 
+              - name: Speed
+                pType: 1
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Mirror
+                pType: 2
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Looped
+                pType: 0
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Transition
+                pType: 1
+                BoolValue: 0
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+              - name: Layer
+                pType: 2
+                BoolValue: 0
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+              - name: TimeOffset
+                pType: 1
+                BoolValue: 0
+                FloatValue: 0
+                IntValue: 0
+                StringValue: 
+            subStates: []
+      - isNew: 0
+        name: Right
+        conditionBlock: ToRight
+        assetObjects: []
+        subStates:
+        - isNew: 0
+          name: Crouch
+          conditionBlock: Stance==1&&Speed==0
+          assetObjects:
+          - isCopy: 0
+            solo: 0
+            mute: 0
+            objRef: {fileID: 7400002, guid: 90e799f9fdf03449f8d2513f44b469a0, type: 3}
+            id: 721
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+            - name: Layer
+              pType: 2
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+            - name: TimeOffset
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            solo: 0
+            mute: 0
+            objRef: {fileID: 7400002, guid: 5a480faa006794f9a9916a788dc12e08, type: 3}
+            id: 6366
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+            - name: Layer
+              pType: 2
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+            - name: TimeOffset
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            solo: 0
+            mute: 0
+            objRef: {fileID: 7400002, guid: cf00fd3ea4a164450b0e88c278914e2d, type: 3}
+            id: 4976
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+            - name: Layer
+              pType: 2
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+            - name: TimeOffset
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0
+              IntValue: 0
+              StringValue: 
+          subStates: []
+        - isNew: 0
+          name: Stand
+          conditionBlock: Stance==0&&Speed==0
+          assetObjects: []
+          subStates:
+          - isNew: 0
+            name: Agitated
+            conditionBlock: Agitated
+            assetObjects:
+            - isCopy: 0
+              solo: 0
+              mute: 0
+              objRef: {fileID: 7400002, guid: cb53a13b3d054404e8b61221d7322a9e, type: 3}
+              id: 4640
+              parameters:
+              - name: Duration
+                pType: 1
+                BoolValue: 0
+                FloatValue: -1
+                IntValue: 0
+                StringValue: 
+              - name: Speed
+                pType: 1
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Mirror
+                pType: 2
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Looped
+                pType: 0
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Transition
+                pType: 1
+                BoolValue: 0
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+              - name: Layer
+                pType: 2
+                BoolValue: 0
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+              - name: TimeOffset
+                pType: 1
+                BoolValue: 0
+                FloatValue: 0
+                IntValue: 0
+                StringValue: 
+            - isCopy: 0
+              solo: 0
+              mute: 0
+              objRef: {fileID: 7400002, guid: b64f27d47448442f88d588ce527f24e7, type: 3}
+              id: 309
+              parameters:
+              - name: Duration
+                pType: 1
+                BoolValue: 0
+                FloatValue: -1
+                IntValue: 0
+                StringValue: 
+              - name: Speed
+                pType: 1
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Mirror
+                pType: 2
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Looped
+                pType: 0
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Transition
+                pType: 1
+                BoolValue: 0
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+              - name: Layer
+                pType: 2
+                BoolValue: 0
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+              - name: TimeOffset
+                pType: 1
+                BoolValue: 0
+                FloatValue: 0
+                IntValue: 0
+                StringValue: 
+            subStates: []
+          - isNew: 0
+            name: Passive
+            conditionBlock: '!Agitated'
+            assetObjects:
+            - isCopy: 0
+              solo: 0
+              mute: 0
+              objRef: {fileID: 7400002, guid: 93fc9a61e2382461f84dcddf9c095c52, type: 3}
+              id: 7796
+              parameters:
+              - name: Duration
+                pType: 1
+                BoolValue: 0
+                FloatValue: -1
+                IntValue: 0
+                StringValue: 
+              - name: Speed
+                pType: 1
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Mirror
+                pType: 2
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Looped
+                pType: 0
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Transition
+                pType: 1
+                BoolValue: 0
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+              - name: Layer
+                pType: 2
+                BoolValue: 0
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+              - name: TimeOffset
+                pType: 1
+                BoolValue: 0
+                FloatValue: 0
+                IntValue: 0
+                StringValue: 
+            subStates: []
+        - isNew: 0
+          name: Moving
+          conditionBlock: Speed==1
+          assetObjects:
+          - isCopy: 0
+            solo: 0
+            mute: 0
+            objRef: {fileID: 7400002, guid: 96a74f9977dd44b2f8093af8acb68c9d, type: 3}
+            id: 4455
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+            - name: Layer
+              pType: 2
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+            - name: TimeOffset
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0
+              IntValue: 0
+              StringValue: 
+          subStates: []
+    - isNew: 0
+      name: 135
+      conditionBlock: TurnAngle <165&&TurnAngle >122&&Speed 0
+      assetObjects: []
+      subStates:
+      - isNew: 0
+        name: Left
+        conditionBlock: '!ToRight'
+        assetObjects: []
+        subStates:
+        - isNew: 0
+          name: Crouch
+          conditionBlock: Stance==1
+          assetObjects:
+          - isCopy: 0
+            solo: 0
+            mute: 0
+            objRef: {fileID: 7400002, guid: 7e39652a10714442da33635eb30e5c19, type: 3}
+            id: 3522
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+            - name: Layer
+              pType: 2
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+            - name: TimeOffset
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0
+              IntValue: 0
+              StringValue: 
+          subStates: []
+        - isNew: 0
+          name: Stand
+          conditionBlock: Stance==0
+          assetObjects: []
+          subStates:
+          - isNew: 0
+            name: Agitated
+            conditionBlock: Agitated
+            assetObjects: []
+            subStates: []
+          - isNew: 0
+            name: Passive
+            conditionBlock: '!Agitated'
+            assetObjects:
+            - isCopy: 0
+              solo: 0
+              mute: 0
+              objRef: {fileID: 7400002, guid: 2c02a72ab11f94473b52e6202e97a6de, type: 3}
+              id: 7679
+              parameters:
+              - name: Duration
+                pType: 1
+                BoolValue: 0
+                FloatValue: -1
+                IntValue: 0
+                StringValue: 
+              - name: Speed
+                pType: 1
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Mirror
+                pType: 2
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Looped
+                pType: 0
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Transition
+                pType: 1
+                BoolValue: 0
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+              - name: Layer
+                pType: 2
+                BoolValue: 0
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+              - name: TimeOffset
+                pType: 1
+                BoolValue: 0
+                FloatValue: 0
+                IntValue: 0
+                StringValue: 
+            subStates: []
+      - isNew: 0
+        name: Right
+        conditionBlock: ToRight
+        assetObjects: []
+        subStates:
+        - isNew: 0
+          name: Crouch
+          conditionBlock: Stance==1
+          assetObjects:
+          - isCopy: 0
+            solo: 0
+            mute: 0
+            objRef: {fileID: 7400002, guid: 951cf3ec9475448268b2e3275315acb0, type: 3}
+            id: 7669
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+            - name: Layer
+              pType: 2
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+            - name: TimeOffset
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0
+              IntValue: 0
+              StringValue: 
+          subStates: []
+        - isNew: 0
+          name: Stand
+          conditionBlock: Stance==0
+          assetObjects: []
+          subStates:
+          - isNew: 0
+            name: Agitated
+            conditionBlock: Agitated
+            assetObjects:
+            - isCopy: 0
+              solo: 0
+              mute: 0
+              objRef: {fileID: 7400002, guid: 898bf0539317e41b3b4b9b90de48acdc, type: 3}
+              id: 4644
+              parameters:
+              - name: Duration
+                pType: 1
+                BoolValue: 0
+                FloatValue: -1
+                IntValue: 0
+                StringValue: 
+              - name: Speed
+                pType: 1
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Mirror
+                pType: 2
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Looped
+                pType: 0
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Transition
+                pType: 1
+                BoolValue: 0
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+              - name: Layer
+                pType: 2
+                BoolValue: 0
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+              - name: TimeOffset
+                pType: 1
+                BoolValue: 0
+                FloatValue: 0
+                IntValue: 0
+                StringValue: 
+            subStates: []
+          - isNew: 0
+            name: Passive
+            conditionBlock: '!Agitated'
+            assetObjects:
+            - isCopy: 0
+              solo: 0
+              mute: 0
+              objRef: {fileID: 7400002, guid: 8ff29fc46904342e1a040d5621230349, type: 3}
+              id: 6359
+              parameters:
+              - name: Duration
+                pType: 1
+                BoolValue: 0
+                FloatValue: -1
+                IntValue: 0
+                StringValue: 
+              - name: Speed
+                pType: 1
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Mirror
+                pType: 2
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Looped
+                pType: 0
+                BoolValue: 0
+                FloatValue: 1
+                IntValue: 0
+                StringValue: 
+              - name: Transition
+                pType: 1
+                BoolValue: 0
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+              - name: Layer
+                pType: 2
+                BoolValue: 0
+                FloatValue: 0.25
+                IntValue: 0
+                StringValue: 
+              - name: TimeOffset
+                pType: 1
+                BoolValue: 0
+                FloatValue: 0
+                IntValue: 0
+                StringValue: 
+            subStates: []
+    - isNew: 0
+      name: 180
+      conditionBlock: TurnAngle >165
+      assetObjects: []
+      subStates:
+      - isNew: 0
+        name: Stand
+        conditionBlock: Stance==0&&Speed==0
+        assetObjects: []
+        subStates:
+        - isNew: 0
+          name: Agitated
+          conditionBlock: Agitated
+          assetObjects:
+          - isCopy: 0
+            solo: 0
+            mute: 0
+            objRef: {fileID: 7400002, guid: a65c456a283a74401930b29007618dbe, type: 3}
+            id: 4645
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+            - name: Layer
+              pType: 2
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+            - name: TimeOffset
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            solo: 0
+            mute: 0
+            objRef: {fileID: 7400002, guid: 65f58af4176464131b5f6d6514923508, type: 3}
+            id: 3094
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+            - name: Layer
+              pType: 2
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+            - name: TimeOffset
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            solo: 0
+            mute: 0
+            objRef: {fileID: 7400002, guid: d6fd2f57cbbcd49d0a501eb4866e8077, type: 3}
+            id: 1598
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+            - name: Layer
+              pType: 2
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+            - name: TimeOffset
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0
+              IntValue: 0
+              StringValue: 
+          subStates: []
+        - isNew: 0
+          name: Passive
+          conditionBlock: '!Agitated'
+          assetObjects:
+          - isCopy: 0
+            solo: 0
+            mute: 0
+            objRef: {fileID: 7400002, guid: b472ff80e6ba84a00a9d760284533365, type: 3}
+            id: 6375
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+            - name: Layer
+              pType: 2
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+            - name: TimeOffset
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0
+              IntValue: 0
+              StringValue: 
+          - isCopy: 0
+            solo: 0
+            mute: 0
+            objRef: {fileID: 7400002, guid: eae9a853027134b2e96ab55b2ec1443b, type: 3}
+            id: 5038
+            parameters:
+            - name: Duration
+              pType: 1
+              BoolValue: 0
+              FloatValue: -1
+              IntValue: 0
+              StringValue: 
+            - name: Speed
+              pType: 1
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Mirror
+              pType: 2
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Looped
+              pType: 0
+              BoolValue: 0
+              FloatValue: 1
+              IntValue: 0
+              StringValue: 
+            - name: Transition
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+            - name: Layer
+              pType: 2
+              BoolValue: 0
+              FloatValue: 0.25
+              IntValue: 0
+              StringValue: 
+            - name: TimeOffset
+              pType: 1
+              BoolValue: 0
+              FloatValue: 0
+              IntValue: 0
+              StringValue: 
+          subStates: []
+      - isNew: 0
+        name: Crouch
+        conditionBlock: Stance==1&&Speed==0
+        assetObjects:
+        - isCopy: 0
+          solo: 0
+          mute: 0
+          objRef: {fileID: 7400002, guid: 97e1e72b6ec6c4319815a488f94b4cc3, type: 3}
+          id: 6360
+          parameters:
+          - name: Duration
+            pType: 1
+            BoolValue: 0
+            FloatValue: -1
+            IntValue: 0
+            StringValue: 
+          - name: Speed
+            pType: 1
+            BoolValue: 0
+            FloatValue: 1
+            IntValue: 0
+            StringValue: 
+          - name: Mirror
+            pType: 2
+            BoolValue: 0
+            FloatValue: 1
+            IntValue: 0
+            StringValue: 
+          - name: Looped
+            pType: 0
+            BoolValue: 0
+            FloatValue: 1
+            IntValue: 0
+            StringValue: 
+          - name: Transition
+            pType: 1
+            BoolValue: 0
+            FloatValue: 0.25
+            IntValue: 0
+            StringValue: 
+          - name: Layer
+            pType: 2
+            BoolValue: 0
+            FloatValue: 0.25
+            IntValue: 0
+            StringValue: 
+          - name: TimeOffset
+            pType: 1
+            BoolValue: 0
+            FloatValue: 0
+            IntValue: 0
+            StringValue: 
+        - isCopy: 0
+          solo: 0
+          mute: 0
+          objRef: {fileID: 7400002, guid: b08003b8cc6ee4c7e8b31f47f66eaaa4, type: 3}
+          id: 4977
+          parameters:
+          - name: Duration
+            pType: 1
+            BoolValue: 0
+            FloatValue: -1
+            IntValue: 0
+            StringValue: 
+          - name: Speed
+            pType: 1
+            BoolValue: 0
+            FloatValue: 1
+            IntValue: 0
+            StringValue: 
+          - name: Mirror
+            pType: 2
+            BoolValue: 0
+            FloatValue: 1
+            IntValue: 0
+            StringValue: 
+          - name: Looped
+            pType: 0
+            BoolValue: 0
+            FloatValue: 1
+            IntValue: 0
+            StringValue: 
+          - name: Transition
+            pType: 1
+            BoolValue: 0
+            FloatValue: 0.25
+            IntValue: 0
+            StringValue: 
+          - name: Layer
+            pType: 2
+            BoolValue: 0
+            FloatValue: 0.25
+            IntValue: 0
+            StringValue: 
+          - name: TimeOffset
+            pType: 1
+            BoolValue: 0
+            FloatValue: 0
+            IntValue: 0
+            StringValue: 
+        - isCopy: 0
+          solo: 0
+          mute: 0
+          objRef: {fileID: 7400002, guid: 85d46a7849695435fb1caeb19e8bc3c6, type: 3}
+          id: 2255
+          parameters:
+          - name: Duration
+            pType: 1
+            BoolValue: 0
+            FloatValue: -1
+            IntValue: 0
+            StringValue: 
+          - name: Speed
+            pType: 1
+            BoolValue: 0
+            FloatValue: 1
+            IntValue: 0
+            StringValue: 
+          - name: Mirror
+            pType: 2
+            BoolValue: 0
+            FloatValue: 1
+            IntValue: 0
+            StringValue: 
+          - name: Looped
+            pType: 0
+            BoolValue: 0
+            FloatValue: 1
+            IntValue: 0
+            StringValue: 
+          - name: Transition
+            pType: 1
+            BoolValue: 0
+            FloatValue: 0.25
+            IntValue: 0
+            StringValue: 
+          - name: Layer
+            pType: 2
+            BoolValue: 0
+            FloatValue: 0.25
+            IntValue: 0
+            StringValue: 
+          - name: TimeOffset
+            pType: 1
+            BoolValue: 0
+            FloatValue: 0
+            IntValue: 0
+            StringValue: 
+        - isCopy: 0
+          solo: 0
+          mute: 0
+          objRef: {fileID: 7400002, guid: b36374c8ed741417694277ea5e6bfdba, type: 3}
+          id: 2970
+          parameters:
+          - name: Duration
+            pType: 1
+            BoolValue: 0
+            FloatValue: -1
+            IntValue: 0
+            StringValue: 
+          - name: Speed
+            pType: 1
+            BoolValue: 0
+            FloatValue: 1
+            IntValue: 0
+            StringValue: 
+          - name: Mirror
+            pType: 2
+            BoolValue: 0
+            FloatValue: 1
+            IntValue: 0
+            StringValue: 
+          - name: Looped
+            pType: 0
+            BoolValue: 0
+            FloatValue: 1
+            IntValue: 0
+            StringValue: 
+          - name: Transition
+            pType: 1
+            BoolValue: 0
+            FloatValue: 0.25
+            IntValue: 0
+            StringValue: 
+          - name: Layer
+            pType: 2
+            BoolValue: 0
+            FloatValue: 0.25
+            IntValue: 0
+            StringValue: 
+          - name: TimeOffset
+            pType: 1
+            BoolValue: 0
+            FloatValue: 0
+            IntValue: 0
+            StringValue: 
+        subStates: []
+      - isNew: 0
+        name: Run
+        conditionBlock: Speed==2 && Stance == 0
+        assetObjects:
+        - isCopy: 0
+          solo: 0
+          mute: 0
+          objRef: {fileID: 7400000, guid: 5eac3c1ef6f5b4393a7460d203da07d4, type: 3}
+          id: 3225
+          parameters:
+          - name: Duration
+            pType: 1
+            BoolValue: 0
+            FloatValue: -1
+            IntValue: 0
+            StringValue: 
+          - name: Speed
+            pType: 1
+            BoolValue: 0
+            FloatValue: 1
+            IntValue: 0
+            StringValue: 
+          - name: Mirror
+            pType: 2
+            BoolValue: 0
+            FloatValue: 1
+            IntValue: 0
+            StringValue: 
+          - name: Looped
+            pType: 0
+            BoolValue: 0
+            FloatValue: 1
+            IntValue: 0
+            StringValue: 
+          - name: Transition
+            pType: 1
+            BoolValue: 0
+            FloatValue: 0.25
+            IntValue: 0
+            StringValue: 
+          - name: Layer
+            pType: 2
+            BoolValue: 0
+            FloatValue: 0.25
+            IntValue: 0
+            StringValue: 
+          - name: TimeOffset
+            pType: 1
+            BoolValue: 0
+            FloatValue: 0
+            IntValue: 0
+            StringValue: 
+        - isCopy: 0
+          solo: 0
+          mute: 0
+          objRef: {fileID: 7400000, guid: 2483a156f859447adb919d3c44dd4923, type: 3}
+          id: 3224
+          parameters:
+          - name: Duration
+            pType: 1
+            BoolValue: 0
+            FloatValue: -1
+            IntValue: 0
+            StringValue: 
+          - name: Speed
+            pType: 1
+            BoolValue: 0
+            FloatValue: 1
+            IntValue: 0
+            StringValue: 
+          - name: Mirror
+            pType: 2
+            BoolValue: 0
+            FloatValue: 1
+            IntValue: 0
+            StringValue: 
+          - name: Looped
+            pType: 0
+            BoolValue: 0
+            FloatValue: 1
+            IntValue: 0
+            StringValue: 
+          - name: Transition
+            pType: 1
+            BoolValue: 0
+            FloatValue: 0.25
+            IntValue: 0
+            StringValue: 
+          - name: Layer
+            pType: 2
+            BoolValue: 0
+            FloatValue: 0.25
+            IntValue: 0
+            StringValue: 
+          - name: TimeOffset
+            pType: 1
+            BoolValue: 0
+            FloatValue: 0
+            IntValue: 0
+            StringValue: 
+        - isCopy: 0
+          solo: 0
+          mute: 0
+          objRef: {fileID: 7400000, guid: 55d930e3c07d94c42823fb0dfdcc8741, type: 3}
+          id: 3223
+          parameters:
+          - name: Duration
+            pType: 1
+            BoolValue: 0
+            FloatValue: -1
+            IntValue: 0
+            StringValue: 
+          - name: Speed
+            pType: 1
+            BoolValue: 0
+            FloatValue: 1
+            IntValue: 0
+            StringValue: 
+          - name: Mirror
+            pType: 2
+            BoolValue: 0
+            FloatValue: 1
+            IntValue: 0
+            StringValue: 
+          - name: Looped
+            pType: 0
+            BoolValue: 0
+            FloatValue: 1
+            IntValue: 0
+            StringValue: 
+          - name: Transition
+            pType: 1
+            BoolValue: 0
+            FloatValue: 0.25
+            IntValue: 0
+            StringValue: 
+          - name: Layer
+            pType: 2
+            BoolValue: 0
+            FloatValue: 0.25
+            IntValue: 0
+            StringValue: 
+          - name: TimeOffset
+            pType: 1
+            BoolValue: 0
+            FloatValue: 0
+            IntValue: 0
+            StringValue: 
+        - isCopy: 0
+          solo: 0
+          mute: 0
+          objRef: {fileID: 7400000, guid: 4e0df14cd23a040f9a2358ab1d7586ee, type: 3}
+          id: 3222
+          parameters:
+          - name: Duration
+            pType: 1
+            BoolValue: 0
+            FloatValue: -1
+            IntValue: 0
+            StringValue: 
+          - name: Speed
+            pType: 1
+            BoolValue: 0
+            FloatValue: 1
+            IntValue: 0
+            StringValue: 
+          - name: Mirror
+            pType: 2
+            BoolValue: 0
+            FloatValue: 1
+            IntValue: 0
+            StringValue: 
+          - name: Looped
+            pType: 0
+            BoolValue: 0
+            FloatValue: 1
+            IntValue: 0
+            StringValue: 
+          - name: Transition
+            pType: 1
+            BoolValue: 0
+            FloatValue: 0.25
+            IntValue: 0
+            StringValue: 
+          - name: Layer
+            pType: 2
+            BoolValue: 0
+            FloatValue: 0.25
+            IntValue: 0
+            StringValue: 
+          - name: TimeOffset
+            pType: 1
+            BoolValue: 0
+            FloatValue: 0
+            IntValue: 0
+            StringValue: 
+        - isCopy: 0
+          solo: 0
+          mute: 0
+          objRef: {fileID: 7400000, guid: 85a95c649765b4df1890a6b6323a10e9, type: 3}
+          id: 3221
+          parameters:
+          - name: Duration
+            pType: 1
+            BoolValue: 0
+            FloatValue: -1
+            IntValue: 0
+            StringValue: 
+          - name: Speed
+            pType: 1
+            BoolValue: 0
+            FloatValue: 1
+            IntValue: 0
+            StringValue: 
+          - name: Mirror
+            pType: 2
+            BoolValue: 0
+            FloatValue: 1
+            IntValue: 0
+            StringValue: 
+          - name: Looped
+            pType: 0
+            BoolValue: 0
+            FloatValue: 1
+            IntValue: 0
+            StringValue: 
+          - name: Transition
+            pType: 1
+            BoolValue: 0
+            FloatValue: 0.25
+            IntValue: 0
+            StringValue: 
+          - name: Layer
+            pType: 2
+            BoolValue: 0
+            FloatValue: 0.25
+            IntValue: 0
+            StringValue: 
+          - name: TimeOffset
+            pType: 1
+            BoolValue: 0
+            FloatValue: 0
+            IntValue: 0
+            StringValue: 
+        - isCopy: 0
+          solo: 0
+          mute: 0
+          objRef: {fileID: 7400000, guid: 1c74fb5a7f2af4225ad1ac6e20e100d8, type: 3}
+          id: 3220
+          parameters:
+          - name: Duration
+            pType: 1
+            BoolValue: 0
+            FloatValue: -1
+            IntValue: 0
+            StringValue: 
+          - name: Speed
+            pType: 1
+            BoolValue: 0
+            FloatValue: 1
+            IntValue: 0
+            StringValue: 
+          - name: Mirror
+            pType: 2
+            BoolValue: 0
+            FloatValue: 1
+            IntValue: 0
+            StringValue: 
+          - name: Looped
+            pType: 0
+            BoolValue: 0
+            FloatValue: 1
+            IntValue: 0
+            StringValue: 
+          - name: Transition
+            pType: 1
+            BoolValue: 0
+            FloatValue: 0.25
+            IntValue: 0
+            StringValue: 
+          - name: Layer
+            pType: 2
+            BoolValue: 0
+            FloatValue: 0.25
+            IntValue: 0
+            StringValue: 
+          - name: TimeOffset
+            pType: 1
+            BoolValue: 0
+            FloatValue: 0
+            IntValue: 0
+            StringValue: 
+        - isCopy: 0
+          solo: 0
+          mute: 0
+          objRef: {fileID: 7400000, guid: b1b9eab800fb24147a2e57d7ef3a80c1, type: 3}
+          id: 3219
+          parameters:
+          - name: Duration
+            pType: 1
+            BoolValue: 0
+            FloatValue: -1
+            IntValue: 0
+            StringValue: 
+          - name: Speed
+            pType: 1
+            BoolValue: 0
+            FloatValue: 1
+            IntValue: 0
+            StringValue: 
+          - name: Mirror
+            pType: 2
+            BoolValue: 0
+            FloatValue: 1
+            IntValue: 0
+            StringValue: 
+          - name: Looped
+            pType: 0
+            BoolValue: 0
+            FloatValue: 1
+            IntValue: 0
+            StringValue: 
+          - name: Transition
+            pType: 1
+            BoolValue: 0
+            FloatValue: 0.25
+            IntValue: 0
+            StringValue: 
+          - name: Layer
+            pType: 2
+            BoolValue: 0
+            FloatValue: 0.25
+            IntValue: 0
+            StringValue: 
+          - name: TimeOffset
+            pType: 1
+            BoolValue: 0
+            FloatValue: 0
+            IntValue: 0
+            StringValue: 
+        - isCopy: 0
+          solo: 0
+          mute: 0
+          objRef: {fileID: 7400000, guid: 7ae929663984f487c86c1818abb7c672, type: 3}
+          id: 3218
+          parameters:
+          - name: Duration
+            pType: 1
+            BoolValue: 0
+            FloatValue: -1
+            IntValue: 0
+            StringValue: 
+          - name: Speed
+            pType: 1
+            BoolValue: 0
+            FloatValue: 1
+            IntValue: 0
+            StringValue: 
+          - name: Mirror
+            pType: 2
+            BoolValue: 0
+            FloatValue: 1
+            IntValue: 0
+            StringValue: 
+          - name: Looped
+            pType: 0
+            BoolValue: 0
+            FloatValue: 1
+            IntValue: 0
+            StringValue: 
+          - name: Transition
+            pType: 1
+            BoolValue: 0
+            FloatValue: 0.25
+            IntValue: 0
+            StringValue: 
+          - name: Layer
+            pType: 2
+            BoolValue: 0
+            FloatValue: 0.25
+            IntValue: 0
+            StringValue: 
+          - name: TimeOffset
+            pType: 1
+            BoolValue: 0
+            FloatValue: 0
+            IntValue: 0
+            StringValue: 
+        - isCopy: 0
+          solo: 0
+          mute: 0
+          objRef: {fileID: 7400000, guid: 6aafdaee0afe841bdb4684e9d4d3a0e6, type: 3}
+          id: 3217
+          parameters:
+          - name: Duration
+            pType: 1
+            BoolValue: 0
+            FloatValue: -1
+            IntValue: 0
+            StringValue: 
+          - name: Speed
+            pType: 1
+            BoolValue: 0
+            FloatValue: 1
+            IntValue: 0
+            StringValue: 
+          - name: Mirror
+            pType: 2
+            BoolValue: 0
+            FloatValue: 1
+            IntValue: 0
+            StringValue: 
+          - name: Looped
+            pType: 0
+            BoolValue: 0
+            FloatValue: 1
+            IntValue: 0
+            StringValue: 
+          - name: Transition
+            pType: 1
+            BoolValue: 0
+            FloatValue: 0.25
+            IntValue: 0
+            StringValue: 
+          - name: Layer
+            pType: 2
+            BoolValue: 0
+            FloatValue: 0.25
+            IntValue: 0
+            StringValue: 
+          - name: TimeOffset
+            pType: 1
+            BoolValue: 0
+            FloatValue: 0
+            IntValue: 0
+            StringValue: 
+        - isCopy: 0
+          solo: 1
+          mute: 0
+          objRef: {fileID: 7400000, guid: 5f8ffe4141cd142a1b3b84fc7bc0ec35, type: 3}
+          id: 4598
+          parameters:
+          - name: Duration
+            pType: 1
+            BoolValue: 0
+            FloatValue: -1
+            IntValue: 0
+            StringValue: 
+          - name: Speed
+            pType: 1
+            BoolValue: 0
+            FloatValue: 1
+            IntValue: 0
+            StringValue: 
+          - name: Mirror
+            pType: 2
+            BoolValue: 0
+            FloatValue: 1
+            IntValue: 0
+            StringValue: 
+          - name: Looped
+            pType: 0
+            BoolValue: 0
+            FloatValue: 1
+            IntValue: 0
+            StringValue: 
+          - name: Transition
+            pType: 1
+            BoolValue: 0
+            FloatValue: 0.25
+            IntValue: 0
+            StringValue: 
+          - name: Layer
+            pType: 2
+            BoolValue: 0
+            FloatValue: 0.25
+            IntValue: 0
+            StringValue: 
+          - name: TimeOffset
+            pType: 1
+            BoolValue: 0
+            FloatValue: 0
+            IntValue: 0
+            StringValue: 
+        subStates: []
+  assetObjectPackID: 0

@@ -41,7 +41,7 @@ namespace AssetObjectsPacks {
             if (didAOCheck) return;
             didAOCheck = true;
             EventStateEditor.CheckAllAOsForNullObjects (so[Event.baseStateField], GetObjectRefForID);
-            EventStateEditor.FixOldConditions(baseState);
+            //EventStateEditor.FixOldConditions(baseState);
             so.SaveObject();
 
         }

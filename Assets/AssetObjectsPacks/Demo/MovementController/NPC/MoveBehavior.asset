@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4830b1877ceb4e8b9cb312deb502619, type: 3}
+  m_Name: MoveBehavior
+  m_EditorClassIdentifier: 
+  turnCue: {fileID: 8160287640862645209, guid: 16eda1f2c5c914c08a7b8e4035fb4836, type: 3}
+  wayPointCue: {fileID: 8160287640862645209, guid: 330edfcc3d046490e93fca3dc76f4e7c,
+    type: 3}
+  moveCue: {fileID: 8160287640862645209, guid: 5dce4a7af633f4028b9b0d44294f998f, type: 3}
+  stillCue: {fileID: 8160287640862645209, guid: 940077bfb60914e0a95e75c217953317,
+    type: 3}
+  platformUpCueShort: {fileID: 3176877163273610085, guid: 818651ae2b2e4418c89e990769423deb,
+    type: 3}
+  platformDownCueShort: {fileID: 114442411507341536, guid: e9abe1ff4a76a4a9788f449110485656,
+    type: 3}
+  platformUpCueTall: {fileID: 3176877163273610085, guid: 06c8c47b9fd9545b4a7868136a069f8b,
+    type: 3}
+  platformDownCueTall: {fileID: 114442411507341536, guid: c2d1dd821286c4cd2ba191386795c69a,
+    type: 3}
+  turnsEvent: {fileID: 11400000, guid: ad1620ac5095f458c99d9d33a8d63ed7, type: 2}
+  jumpsEvent: {fileID: 11400000, guid: 797c73d360fc04ec394d7d93155d9a56, type: 2}
+  movesEvent: {fileID: 11400000, guid: 1e8278874d17f4217a967c008066069d, type: 2}
+  stillsEvent: {fileID: 11400000, guid: 24ec89b7388e1481682c3b2af2e69b01, type: 2}
+  turnUpdate: 0
+  moveUpdate: 0
+  groundDistanceCheckAir: 0.01
+  groundDistanceCheckGrounded: 0.1
+  groundRadiusCheck: 0.05
+  groundLayerMask:
+    serializedVersion: 2
+    m_Bits: 1
+  maxGroundAngle: 45
+  minYVelocity: -0.125
+  arriveThresholds:
+  - 0.1
+  - 0.15
+  - 0.2
+  arriveHelpThresholds:
+  - 0.1
+  - 0.15
+  - 0.2
+  moveHelpSpeeds:
+  - 1
+  - 2.5
+  - 4
+  turnHelpSpeeds:
+  - 1
+  - 2.5
+  - 4
+  dirTurnChangeThreshold: 30
+  animTurnAngleThreshold: 22.5
+  turnAngleHelpThreshold: 5
+  minStrafeDistance: 1
+  platformAngleThreshold: 45
+  platformLayerMask:
+    serializedVersion: 2
+    m_Bits: 1
+  platformUpDistanceAheadCheck: 1
+  platformRadiusCheck: 0.05
+  platformDownDistanceAheadCheck: 0.35

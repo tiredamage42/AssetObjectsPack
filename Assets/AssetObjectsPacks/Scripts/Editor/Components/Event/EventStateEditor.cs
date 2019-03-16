@@ -9,36 +9,7 @@ namespace AssetObjectsPacks {
     public static class EventStateEditor 
     {
 
-        static string FixOld (string old) {
-            if (old.Contains(":")) {
-                old = CustomScripting.StripAllSpace(old);
-                string updated = "";
-                int i = old.IndexOf(':');
-                if (old[i+1] == '<' || old[i+1] == '>') {
-                    updated = old.Replace(':', ' ');
-                }
-                else if (old[i+1] == 't' || old[i+1] == 'f') {
-                    updated = (old[i+1] == 't' ? "" : "!") + old.Split(':')[0];
-                }
-                else {
-                    updated = old.Replace(":", "==");
-                }
-                Debug.Log("updating: " + old + " // w // " + updated);
-                return updated;
-            }
-            return old;
-        }
-        public static void FixOldConditions(EditorProp state) {
-
-            state[conditionsBlockField].SetValue ( FixOld(state[conditionsBlockField].stringValue) );
-            
-            for (int i = 0; i < state[subStatesField].arraySize; i++) {
-
-                FixOldConditions(state[subStatesField][i]);
-            }
-        }
-
-
+        
         public const string assetObjectsField = "assetObjects", nameField = "name", conditionsBlockField = "conditionBlock", subStatesField = "subStates";
         public const string isNewField = "isNew";
 

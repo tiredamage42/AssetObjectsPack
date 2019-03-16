@@ -29,7 +29,7 @@ namespace AssetObjectsPacks {
 
     public static class GUIStyles {
 
-        private static GUISkin s_DarkSkin = EditorGUIUtility.GetBuiltinSkin(EditorSkin.Scene);
+        public static GUISkin s_DarkSkin = EditorGUIUtility.GetBuiltinSkin(EditorSkin.Scene);
 /*
             public static GUIStyle label = GetStyle("ControlLabel");
             public static GUIStyle popup = GetStyle("MiniPopup");
@@ -72,18 +72,116 @@ namespace AssetObjectsPacks {
     }
     public static class GUIUtils {      
 
+
+        public static void DrawEnumProp(EditorProp prop, Func<int, Enum> intToEnum, Func<Enum, int> enumToInt, params GUILayoutOption[] options) {
+            
+
+            prop.property.enumValueIndex = enumToInt(
+
+                EditorGUILayout.EnumPopup(
+                    intToEnum(prop.property.enumValueIndex), 
+                    new GUIStyle(GUIStyles.s_DarkSkin.GetStyle("MiniPopup")), 
+                    options
+                )
+            );
+        }
+        public static void DrawEnumProp (EditorProp prop, GUIContent gui, Func<int, Enum> intToEnum, Func<Enum, int> enumToInt, params GUILayoutOption[] options) {
+            //GUISkin skin = GUI.skin;
+            //GUI.skin = GUIStyles.s_DarkSkin;
+            
+            EditorGUILayout.BeginHorizontal();
+            Label(gui, options);
+            DrawEnumProp(prop, intToEnum, enumToInt);
+            EditorGUILayout.EndHorizontal();
+            //GUI.skin = skin;
+
+        }
+        public static void DrawToggleProp(EditorProp prop) {
+            
+
+            prop.property.boolValue = SmallToggleButton(GUIContent.none, prop.property.boolValue, out _);
+
+                //EditorGUILayout.Toggle(
+                //    prop.property.boolValue, 
+                //    new GUIStyle(GUIStyles.s_DarkSkin.GetStyle("Toggle")), 
+                //    options
+                //)
+            //;
+        }
+        public static bool DrawToggle(bool value) {
+            
+
+            return SmallToggleButton(GUIContent.none, value, out _);
+
+                //EditorGUILayout.Toggle(
+                //    prop.property.boolValue, 
+                //    new GUIStyle(GUIStyles.s_DarkSkin.GetStyle("Toggle")), 
+                //    options
+                //)
+            //;
+        }
+        
+        public static void DrawToggleProp (EditorProp prop, GUIContent gui, params GUILayoutOption[] options) {
+            //GUISkin skin = GUI.skin;
+            //GUI.skin = GUIStyles.s_DarkSkin;
+            
+            EditorGUILayout.BeginHorizontal();
+            
+            //EditorGUILayout.BeginHorizontal();
+            Label(gui, GUILayout.MaxWidth(EditorGUIUtility.labelWidth + EditorGUIUtility.fieldWidth));// GUILayout.Width(EditorGUIUtility.labelWidth * 2));// options);
+            //EditorGUILayout.EndHorizontal();
+            
+            //EditorGUILayout.BeginHorizontal();
+            for (int i = 0; i < EditorGUI.indentLevel + 1; i++) {
+             //   Debug.Log("indenting " + i);
+                SmallButtonClear();
+            }
+            DrawToggleProp(prop);
+            //EditorGUILayout.EndHorizontal();
+            EditorGUILayout.EndHorizontal();
+            
+            //GUI.skin = skin;
+
+        }
+
+        public static bool DrawToggle (bool value, GUIContent gui, params GUILayoutOption[] options) {
+            EditorGUILayout.BeginHorizontal();
+            Label(gui, GUILayout.MaxWidth(EditorGUIUtility.labelWidth + EditorGUIUtility.fieldWidth));// GUILayout.Width(EditorGUIUtility.labelWidth * 2));// options);
+            for (int i = 0; i < EditorGUI.indentLevel + 1; i++) {
+                SmallButtonClear();
+            }
+            bool val = DrawToggle(value);
+            //EditorGUILayout.EndHorizontal();
+            EditorGUILayout.EndHorizontal();
+            return val;
+            
+            //GUI.skin = skin;
+
+        }
+        
+        
+
         
         public static void DrawProp (EditorProp prop, params GUILayoutOption[] options) {
+            
+            //GUISkin skin = GUI.skin;
+            //GUI.skin = GUIStyles.s_DarkSkin;
             EditorGUILayout.PropertyField(prop.property, GUIContent.none, options);
+            //GUI.skin = skin;
         }
         public static void DrawProp (EditorProp prop, GUIContent gui, params GUILayoutOption[] options) {
+            //GUISkin skin = GUI.skin;
+            //GUI.skin = GUIStyles.s_DarkSkin;
+            
             EditorGUILayout.BeginHorizontal();
             Label(gui, options);
             DrawProp(prop);
             EditorGUILayout.EndHorizontal();
+            //GUI.skin = skin;
+
         }
         
-        static bool showArray;
+        static bool showArray = true;
         public static void DrawObjArrayProp (EditorProp array) {
 
             //label and show
@@ -147,10 +245,22 @@ namespace AssetObjectsPacks {
         }
         public static void DrawMultiLineStringProp (EditorProp prop, GUIContent gui, bool overrideHotKeys, params GUILayoutOption[] options) {
             Label(gui);
+            DrawMultiLineStringProp(prop, overrideHotKeys, options);
+        }
+        public static void DrawMultiLineStringProp (EditorProp prop, bool overrideHotKeys, params GUILayoutOption[] options) {
             bool changed;
             string new_val = DrawTextField(prop.stringValue, TextFieldType.Area, overrideHotKeys, out changed, options);            
             if (changed) prop.SetValue( new_val );
         }
+                    const float lineHeight = 16;
+
+        public static void DrawMultiLineExpandableString(EditorProp prop, bool overrideHotKeys) {
+            DrawMultiLineStringProp(prop, overrideHotKeys, GUILayout.MinHeight(prop.stringValue.Split('\n').Length * lineHeight));
+
+            //GUILayout.MinHeight(currentMsg.stringValue.Split('\n').Length * lineHeight)
+        }
+        
+        
         public enum TextFieldType {
             Normal, Delayed, Area
         }
@@ -352,6 +462,20 @@ namespace AssetObjectsPacks {
             
             return Button(c, s, color, text_color, fit_content ? c.CalcWidth(s) : null );
         }
+
+        public static bool ToggleButton (GUIContent c, GUIStyle s, bool value, Color32 onColor, Color32 offColor, out bool changed, params GUILayoutOption[] options) {
+            changed = Button(c, s, value ? onColor : offColor, Colors.black, options);
+            return changed ? !value : value;
+        }
+
+        public static bool ToggleButton (GUIContent c, GUIStyle s, bool value, out bool changed, params GUILayoutOption[] options) {
+            changed = Button(
+                c, s, value ? Colors.selected : Colors.medliteGray, 
+                
+            value ? Colors.black : Colors.liteGray);
+            return changed ? !value : value;
+        }
+
 
 
         static readonly GUIContent deleteButtonGUI = new GUIContent("");
