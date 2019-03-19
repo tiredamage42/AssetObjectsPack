@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 3476036525142301567}
   - component: {fileID: 3176877163273610085}
   m_Layer: 0
-  m_Name: PlatformUpRandomChoiceShort
+  m_Name: PlatformUpsShort
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -56,9 +56,9 @@ MonoBehaviour:
   smoothPositionTime: 1
   smoothRotationTime: 1
   messageBlocks:
+  - OverrideMovement_Cue(true);
   - 
-  - 
-  - 
+  - OverrideMovement_Cue(false);
   - 
 --- !u!1001 &3283910035693522076
 PrefabInstance:

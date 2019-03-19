@@ -3,7 +3,7 @@
 [CreateAssetMenu(fileName = "New Movement Behavior", menuName = "Movement/Behavior", order = 2)]
 public class MovementBehavior : ScriptableObject
 {
-    public AssetObjectsPacks.Cue turnCue, wayPointCue, moveCue, stillCue;
+    public AssetObjectsPacks.Cue turnCue, wayPointCue, moveCue, stillCue, jumpCue;
 
     public AssetObjectsPacks.Cue platformUpCueShort, platformDownCueShort;
     public AssetObjectsPacks.Cue platformUpCueTall, platformDownCueTall;
@@ -28,19 +28,17 @@ public class MovementBehavior : ScriptableObject
     public float[] arriveHelpThresholds = new float[] { .1f, .15f, .2f };
     public float[] moveHelpSpeeds = new float[] { 1, 2.5f, 4 };
 
+    public float maxMoveHelpSpeed = 10;
+
 
     [Header("Turning")]
+    public float turnAnimMinDistance = 5.0f;
+    public float turnHelpMinDistance = .25f;
+    
     public float[] turnHelpSpeeds = new float[] { 1, 2.5f, 4 };
     public float dirTurnChangeThreshold = 45;
     public float animTurnAngleThreshold = 22.5f;
     public float turnAngleHelpThreshold = 5.0f;
     public float minStrafeDistance = 1;
-
-    [Header("Platforming")]
-    public float platformAngleThreshold = 45;
-    public LayerMask platformLayerMask;
-    public float platformUpDistanceAheadCheck = 1.0f;
-    public float platformRadiusCheck = .05f;
-    public float platformDownDistanceAheadCheck = .35f;
     
 }

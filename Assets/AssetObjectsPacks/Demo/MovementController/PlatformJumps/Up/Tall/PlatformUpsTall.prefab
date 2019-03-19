@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 3476036525142301567}
   - component: {fileID: 3176877163273610085}
   m_Layer: 0
-  m_Name: PlatformUpRandomChoiceTall
+  m_Name: PlatformUpsTall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -56,9 +56,9 @@ MonoBehaviour:
   smoothPositionTime: 1
   smoothRotationTime: 1
   messageBlocks:
+  - OverrideMovement_Cue(true);
   - 
-  - 
-  - 
+  - OverrideMovement_Cue(false);
   - 
 --- !u!1001 &797676815599577408
 PrefabInstance:
@@ -126,6 +126,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1478356001019200707, guid: b26888143c3f64ed48915836c36ab4f7,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1478356001019200707, guid: b26888143c3f64ed48915836c36ab4f7,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b26888143c3f64ed48915836c36ab4f7, type: 3}
@@ -201,6 +211,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1478356001019200707, guid: 57940add553594a7698b50b2317e853b,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1478356001019200707, guid: 57940add553594a7698b50b2317e853b,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 57940add553594a7698b50b2317e853b, type: 3}

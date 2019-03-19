@@ -53,7 +53,7 @@ MonoBehaviour:
   smoothPositionTime: 1
   smoothRotationTime: 1
   messageBlocks:
-  - 
   - StartMovement_Cue(cue);
+  - 
   - 
   - 

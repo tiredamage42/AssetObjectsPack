@@ -1789,10 +1789,10 @@ GameObject:
   - component: {fileID: 1550164993}
   - component: {fileID: 1550164991}
   - component: {fileID: 1550164992}
-  - component: {fileID: 1550164990}
   - component: {fileID: 1550164989}
+  - component: {fileID: 1550164990}
   m_Layer: 0
-  m_Name: PlayerTest
+  m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1858,48 +1858,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 454298816c10148b5ac260d72fe247d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &1550164990
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1550164988}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: be95eb3a41f8b40d2bdd46a42795c490, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  debugTransformLook: {fileID: 0}
-  turnsEvent: {fileID: 11400000, guid: dc25cd3c3fe034081ad2635300c869c6, type: 2}
-  movesEvent: {fileID: 11400000, guid: bd26d50aea3074fe285b86ba6004cc47, type: 2}
-  stillsEvent: {fileID: 11400000, guid: 1791a14be71954340abffd8d86d7962d, type: 2}
-  jumpsEvent: {fileID: 11400000, guid: 4eb9c07765e694bde8aa085419ea641c, type: 2}
-  animationPackName: Animations
-  turnThresholds:
-  - 10
-  - 3
-  - 1
-  arriveThresholds:
-  - 0.1
-  - 0.15
-  - 0.2
-  turnHelpSpeeds:
-  - 2
-  - 7.5
-  - 7.5
-  doAutoTurn: 0
-  stance: 0
-  dirTurnChangeThreshold: 22.5
-  animTurnAngleThreshold: 22.5
-  direction: 0
-  allowStrafe: 0
-  minStrafeDistance: 1
-  speed: 0
-  trackingWaypoint: 0
-  isTurning: 0
-  doingAnimation: 0
-  isJumping: 0
+  overrideMovement: 0
 --- !u!114 &1550164989
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1912,6 +1871,43 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 931dc31d3514f41ed88e37a78a8cd068, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  timeDilation: 1
+--- !u!114 &1550164990
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1550164988}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be95eb3a41f8b40d2bdd46a42795c490, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  behavior: {fileID: 0}
+  direction: 0
+  speed: 0
+  stance: 0
+  rootMotion:
+    usingRootMotion: 1
+    calculateMoveSloped: 1
+    useGravity: 1
+    usePhysicsController: 1
+  mover:
+    allowStrafe: 0
+  turner:
+    doAutoTurn: 0
+    isTurning: 0
+    inTurnAnimation: 0
+  jumper:
+    isJumping: 0
+  platformer:
+    doAutoPlatform: 0
+    isPlatforming: 0
+  eventPlayer: {fileID: 0}
+  grounded: 0
+  groundNormal: {x: 0, y: 1, z: 0}
+  floorY: 0
 --- !u!1 &1552109866
 GameObject:
   m_ObjectHideFlags: 0

@@ -44,18 +44,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gizmoColor: {r: 0, g: 1, b: 0, a: 1}
-  playlist: {fileID: 0}
-  events:
-  - {fileID: 11400000, guid: 797c73d360fc04ec394d7d93155d9a56, type: 2}
+  useRandomPlaylist: 0
+  events: []
   overrideDuration: -1
   repeats: 1
   playImmediate: 0
-  messagesBlock: 
   snapPlayerStyle: 0
   smoothPositionTime: 1
   smoothRotationTime: 1
   messageBlocks:
+  - 'Jump_Cue(cue);
+
+    OverrideMovement_Cue(true);'
   - 
-  - 
-  - 
+  - OverrideMovement_Cue(false);
   - 

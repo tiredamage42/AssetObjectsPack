@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &7149153174379406560
+--- !u!1 &5761860441511019506
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,36 +8,36 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1706648872403659979}
-  - component: {fileID: 114442411507341536}
+  - component: {fileID: 3641272206507066458}
+  - component: {fileID: 8160287640862645209}
   m_Layer: 0
-  m_Name: PlatformDown-short_cueBase
+  m_Name: NavigateToCue
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &1706648872403659979
+--- !u!4 &3641272206507066458
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7149153174379406560}
+  m_GameObject: {fileID: 5761860441511019506}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0.0000009536743, y: 0.90226483, z: 0.021623328}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &114442411507341536
+--- !u!114 &8160287640862645209
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7149153174379406560}
+  m_GameObject: {fileID: 5761860441511019506}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8ecc67e02a6ea43bfb7579cb062a1281, type: 3}
@@ -45,16 +45,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gizmoColor: {r: 0, g: 1, b: 0, a: 1}
   useRandomPlaylist: 0
-  events:
-  - {fileID: 11400000, guid: deb7ff41638e847e6a6fa770bd6e36b4, type: 2}
+  events: []
   overrideDuration: -1
   repeats: 1
-  playImmediate: 1
-  snapPlayerStyle: 2
-  smoothPositionTime: 0.1
-  smoothRotationTime: 0.1
+  playImmediate: 0
+  snapPlayerStyle: 0
+  smoothPositionTime: 1
+  smoothRotationTime: 1
   messageBlocks:
-  - OverrideMovement_Cue(true);
+  - GoTo_Cue(cueposition);
   - 
-  - OverrideMovement_Cue(false);
+  - 
   - 

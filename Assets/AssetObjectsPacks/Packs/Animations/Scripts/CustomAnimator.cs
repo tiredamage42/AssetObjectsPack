@@ -117,12 +117,21 @@ namespace AssetObjectsPacks.Animations {
             that has been played
         */
         void UseAssetObject(AssetObject assetObject, bool asInterrupter, HashSet<System.Action> endUseCallbacks) {
-            //if (this.endUseCallbacks != null) {
-            //    this.endUseCallbacks.Clear();
-            //}
-            this.endUseCallbacks = endUseCallbacks;
+            bool looped = assetObject["Looped"].GetValue<bool>();
+            
 
-            //Debug.Log("using ao");
+            if (!looped) {
+
+                if (this.endUseCallbacks != null && this.endUseCallbacks.Count != 0) {
+                    //foreach (var endUse in endUseCallbacks) {
+                    //    endUse();    
+                    //}
+                    
+                    Debug.Log("clearing old callbacks");
+                    this.endUseCallbacks.Clear();
+                }
+                this.endUseCallbacks = endUseCallbacks;
+            }
             
 
             //get asset object parameter values
@@ -132,7 +141,6 @@ namespace AssetObjectsPacks.Animations {
             if (timeOffset != 0) {
                 timeOffset = timeOffset * ((AnimationClip)assetObject.objRef).length;
             } 
-            bool looped = assetObject["Looped"].GetValue<bool>();
 
             Play(
                 assetObject.id, 
@@ -146,16 +154,28 @@ namespace AssetObjectsPacks.Animations {
             );
 
             if (looped) {
-                BroadcastEndUse(); //dont leave loops hanging
+                //BroadcastEndUse(); //dont leave loops hanging
+            }
+            else {
+
+                lastPlayed = assetObject.objRef.name;
+                Debug.Log("playing: " + assetObject.objRef.name);
+
             }
         }
+        string lastPlayed;
 
         // let the player know the event is done
         void BroadcastEndUse () {
-            //Debug.Log("end animation");
+                            Debug.Log("stopped anim " + lastPlayed);
+                            
             if (endUseCallbacks != null) {
+                            
+
+                if (endUseCallbacks.Count != 0) {
+                    Debug.Log("call callbacks");
+                }
                 foreach (var endUse in endUseCallbacks) {
-                    Debug.Log("callign callbacks");
                     endUse();    
                 }
                 endUseCallbacks.Clear();
@@ -186,7 +206,7 @@ namespace AssetObjectsPacks.Animations {
             anim = GetComponent<Animator>();
             InitializeEventPlayer();
         }
-        void Update () {
+        void LateUpdate () {
             CheckOneShotEndings();
         }
 
@@ -195,7 +215,6 @@ namespace AssetObjectsPacks.Animations {
             else PlayOneShot(id, mirror, transition, speed, layer, timeOffset);
         }
         void PlayLoop (int id, bool interrupt, bool mirror, float transition, float speed, int layer, float timeOffset) {
-            //Debug.Log("playing loop");
             bool doTransition = (playingOneShot && interrupt) || !playingOneShot;
                 
             if (doTransition) {
@@ -225,7 +244,11 @@ namespace AssetObjectsPacks.Animations {
             anim.CrossFadeInFixedTime(id.ToString(), transition, layer, timeOffset);
             
             playingOneShot = true;
+            lastOneShotPlayTime = Time.time;
+            lastOneshotTransitionTime = transition;
+            endTransitionStartCheck = false;
         }
+        float lastOneShotPlayTime, lastOneshotTransitionTime;
 
         //doing it after transition end looks janky
         void OnOneShotExitTransitionStart () {
@@ -236,38 +259,34 @@ namespace AssetObjectsPacks.Animations {
         }
 
 
-        //check when a non looped animation is starting its exit transition and ending its exit transition
+        //check when a non looped animation is starting and ending its exit transition
         void CheckOneShotEndings (int layer = 0) {
+            if (!playingOneShot) return;
         
-            AnimatorStateInfo currentState = anim.GetCurrentAnimatorStateInfo(layer);
             AnimatorStateInfo nextState = anim.GetNextAnimatorStateInfo(layer);
 
-            bool currentIsOneShot = currentState.IsTag(sShots);
             bool nextIsOneShot = nextState.IsTag(sShots);
 
+            bool introTransition = Time.time - lastOneShotPlayTime <= lastOneshotTransitionTime + .1f;
+            if (introTransition) return;
+
             //if in transition
-            if (anim.IsInTransition(layer)) {
-                if (currentIsOneShot) {
-                    //currently exiting a one shot
-                    if (nextState.fullPathHash != currentState.fullPathHash) {
-                        //make sure this only happens one frame
-                        if (!endTransitionStartCheck) {
-                            OnOneShotExitTransitionStart();
-                            endTransitionStartCheck = true;
-                        }
-                    }
+            if (anim.IsInTransition(layer)){
+                if (!endTransitionStartCheck){
+                    OnOneShotExitTransitionStart();
+                    endTransitionStartCheck = true;
                 }
             }
             else {
+            
                 //not in transition, but was exiting, so transition is done
                 if (endTransitionStartCheck) {
-                    
                     //check if we're out of a one shot animation
                     if (!nextIsOneShot) {
                         playingOneShot = false;
                     }
-
                     OnOneShotTransitionEnd();
+
                     endTransitionStartCheck = false;
                 }
             }

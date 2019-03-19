@@ -158,8 +158,10 @@ namespace AssetObjectsPacks {
         static bool CheckForCompare(string input, string compareCheck, out string paramName, out string valueString) {
             if (input.Contains(compareCheck)) {
                 string[] split = input.Replace(compareCheck, "@").Split('@');
+                
                 valueString = split.Last();
                 paramName = split[0];
+                
                 return true;
             }
             valueString = paramName = null;

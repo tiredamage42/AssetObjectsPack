@@ -69,7 +69,7 @@ MonoBehaviour:
     assetObjects:
     - isCopy: 0
       solo: 0
-      mute: 0
+      mute: 1
       objRef: {fileID: 7400002, guid: 05c227df290f4426597293ec94fd2ac2, type: 3}
       id: 1383
       parameters:
@@ -213,7 +213,7 @@ MonoBehaviour:
         StringValue: 
     - isCopy: 0
       solo: 0
-      mute: 0
+      mute: 1
       objRef: {fileID: 7400002, guid: 5b7a1f8aa546c4e2dac9d69683752472, type: 3}
       id: 2734
       parameters:
@@ -837,7 +837,7 @@ MonoBehaviour:
         StringValue: 
     - isCopy: 0
       solo: 0
-      mute: 0
+      mute: 1
       objRef: {fileID: 7400002, guid: c7c06ee8400584a32b0fe5f126ae2362, type: 3}
       id: 4392
       parameters:
@@ -981,7 +981,7 @@ MonoBehaviour:
         StringValue: 
     - isCopy: 0
       solo: 0
-      mute: 0
+      mute: 1
       objRef: {fileID: 7400002, guid: f3d603eab28544c1f9907cc0fc257c12, type: 3}
       id: 4425
       parameters:
@@ -1126,54 +1126,6 @@ MonoBehaviour:
     - isCopy: 0
       solo: 0
       mute: 0
-      objRef: {fileID: 7400002, guid: adf47a354ccd6462e8b148aa25635dab, type: 3}
-      id: 4638
-      parameters:
-      - name: Duration
-        pType: 1
-        BoolValue: 0
-        FloatValue: -1
-        IntValue: 0
-        StringValue: 
-      - name: Speed
-        pType: 1
-        BoolValue: 0
-        FloatValue: 0.75
-        IntValue: 0
-        StringValue: 
-      - name: Mirror
-        pType: 2
-        BoolValue: 0
-        FloatValue: 1
-        IntValue: 0
-        StringValue: 
-      - name: Looped
-        pType: 0
-        BoolValue: 0
-        FloatValue: 1
-        IntValue: 0
-        StringValue: 
-      - name: Transition
-        pType: 1
-        BoolValue: 0
-        FloatValue: 0.1
-        IntValue: 0
-        StringValue: 
-      - name: Layer
-        pType: 2
-        BoolValue: 0
-        FloatValue: 0.25
-        IntValue: 0
-        StringValue: 
-      - name: TimeOffset
-        pType: 1
-        BoolValue: 0
-        FloatValue: 0
-        IntValue: 0
-        StringValue: 
-    - isCopy: 0
-      solo: 0
-      mute: 0
       objRef: {fileID: 7400002, guid: b6b1b2c764b5f43d19d285b20c57762c, type: 3}
       id: 4685
       parameters:
@@ -1221,7 +1173,7 @@ MonoBehaviour:
         StringValue: 
     - isCopy: 0
       solo: 0
-      mute: 0
+      mute: 1
       objRef: {fileID: 7400002, guid: ba046bd0770174506aca71f9d223e2c8, type: 3}
       id: 6118
       parameters:

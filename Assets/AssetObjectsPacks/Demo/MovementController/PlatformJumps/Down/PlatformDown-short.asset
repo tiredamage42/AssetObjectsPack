@@ -69,7 +69,7 @@ MonoBehaviour:
     assetObjects:
     - isCopy: 0
       solo: 0
-      mute: 0
+      mute: 1
       objRef: {fileID: 7400002, guid: 05c227df290f4426597293ec94fd2ac2, type: 3}
       id: 1383
       parameters:
@@ -213,7 +213,7 @@ MonoBehaviour:
         StringValue: 
     - isCopy: 0
       solo: 0
-      mute: 0
+      mute: 1
       objRef: {fileID: 7400002, guid: 5b7a1f8aa546c4e2dac9d69683752472, type: 3}
       id: 2734
       parameters:
@@ -357,7 +357,7 @@ MonoBehaviour:
         StringValue: 
     - isCopy: 0
       solo: 0
-      mute: 0
+      mute: 1
       objRef: {fileID: 7400002, guid: 3addfa6b0050e452e9f4d78214edc2c3, type: 3}
       id: 2743
       parameters:
@@ -501,7 +501,7 @@ MonoBehaviour:
         StringValue: 
     - isCopy: 0
       solo: 0
-      mute: 0
+      mute: 1
       objRef: {fileID: 7400002, guid: cbf8d95361c934f2ea0c4782e8ccd534, type: 3}
       id: 990
       parameters:
@@ -885,7 +885,7 @@ MonoBehaviour:
         StringValue: 
     - isCopy: 0
       solo: 0
-      mute: 0
+      mute: 1
       objRef: {fileID: 7400002, guid: cacbc2f34d9dc4ed0826fe5410f1011d, type: 3}
       id: 2740
       parameters:
@@ -1029,7 +1029,7 @@ MonoBehaviour:
         StringValue: 
     - isCopy: 0
       solo: 0
-      mute: 0
+      mute: 1
       objRef: {fileID: 7400002, guid: c7c06ee8400584a32b0fe5f126ae2362, type: 3}
       id: 4392
       parameters:
@@ -1173,7 +1173,7 @@ MonoBehaviour:
         StringValue: 
     - isCopy: 0
       solo: 0
-      mute: 0
+      mute: 1
       objRef: {fileID: 7400002, guid: f3d603eab28544c1f9907cc0fc257c12, type: 3}
       id: 4425
       parameters:
@@ -1221,7 +1221,7 @@ MonoBehaviour:
         StringValue: 
     - isCopy: 0
       solo: 0
-      mute: 0
+      mute: 1
       objRef: {fileID: 7400002, guid: bbb05d97339e54db4bb09beea769f417, type: 3}
       id: 4426
       parameters:
@@ -1413,7 +1413,7 @@ MonoBehaviour:
         StringValue: 
     - isCopy: 0
       solo: 0
-      mute: 0
+      mute: 1
       objRef: {fileID: 7400002, guid: ba046bd0770174506aca71f9d223e2c8, type: 3}
       id: 6118
       parameters:
@@ -1557,7 +1557,7 @@ MonoBehaviour:
         StringValue: 
     - isCopy: 0
       solo: 0
-      mute: 0
+      mute: 1
       objRef: {fileID: 7400002, guid: 66257168676ad4d2bb9f2feec84be444, type: 3}
       id: 6457
       parameters:

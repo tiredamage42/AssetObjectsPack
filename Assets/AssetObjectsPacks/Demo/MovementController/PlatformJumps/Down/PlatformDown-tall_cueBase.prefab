@@ -54,7 +54,7 @@ MonoBehaviour:
   smoothPositionTime: 0.1
   smoothRotationTime: 0.1
   messageBlocks:
+  - OverrideMovement_Cue(true);
   - 
-  - 
-  - 
+  - OverrideMovement_Cue(false);
   - 

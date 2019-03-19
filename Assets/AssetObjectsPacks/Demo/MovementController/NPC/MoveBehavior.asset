@@ -18,6 +18,7 @@ MonoBehaviour:
   moveCue: {fileID: 8160287640862645209, guid: 5dce4a7af633f4028b9b0d44294f998f, type: 3}
   stillCue: {fileID: 8160287640862645209, guid: 940077bfb60914e0a95e75c217953317,
     type: 3}
+  jumpCue: {fileID: 8160287640862645209, guid: b7ed3bc150e384a0fbe0d851ae7dc656, type: 3}
   platformUpCueShort: {fileID: 3176877163273610085, guid: 818651ae2b2e4418c89e990769423deb,
     type: 3}
   platformDownCueShort: {fileID: 114442411507341536, guid: e9abe1ff4a76a4a9788f449110485656,
@@ -42,28 +43,24 @@ MonoBehaviour:
   minYVelocity: -0.125
   arriveThresholds:
   - 0.1
-  - 0.15
-  - 0.2
+  - 0.25
+  - 0.5
   arriveHelpThresholds:
-  - 0.1
-  - 0.15
-  - 0.2
-  moveHelpSpeeds:
+  - 9999999
+  - 0.5
   - 1
-  - 2.5
-  - 4
+  moveHelpSpeeds:
+  - 5
+  - 0
+  - 0
+  maxMoveHelpSpeed: 3
+  turnAnimMinDistance: 3
+  turnHelpMinDistance: 0.25
   turnHelpSpeeds:
   - 1
-  - 2.5
+  - 3
   - 4
   dirTurnChangeThreshold: 30
   animTurnAngleThreshold: 22.5
   turnAngleHelpThreshold: 5
   minStrafeDistance: 1
-  platformAngleThreshold: 45
-  platformLayerMask:
-    serializedVersion: 2
-    m_Bits: 1
-  platformUpDistanceAheadCheck: 1
-  platformRadiusCheck: 0.05
-  platformDownDistanceAheadCheck: 0.35

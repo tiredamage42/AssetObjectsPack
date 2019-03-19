@@ -5,51 +5,30 @@ using System;
 /* 
     Incorporate a simple one shot jump animation
 */
-[System.Serializable] public class Jumper : MovementControllerComponent
+public class Jumper : MovementControllerComponent
 {
-    public bool isJumping;
-    Action onJumpDone;
-
+    bool overrideMovement { get { return !controller.grounded || controller.overrideMovement; } }
+    
+    
     /*
-        callback to give to the player to let us know when 
-        event is done playing
-        
-        success = wether or not an animation was found and played
+        callback called by cue message
+
+        parameters:
+            layer (internally set), cue, 
+            
+        makes the controller jump
     */
-    void OnEndPlay (bool success) {
-        isJumping = false;
-
-        //enable character controller
-        movementController.rootMotion.EnablePhysics(true);
-
-        //call calback if any
-        if (onJumpDone != null) {
-            onJumpDone();
-            onJumpDone = null;
+    void Jump_Cue (object[] parameters) {
+        int layer = (int)parameters[0];
+        Cue cue = (Cue)parameters[1];
+        // if cue doesn't have any animation events, override the player with this controller's events
+        if (!cue.GetEventByName(MovementController.animationPackName)) {
+            eventPlayer.OverrideEventToPlay(layer, behavior.jumpsEvent);    
         }
     }
-    public void Jump (System.Action onJumpDone = null) {
-        if (!isJumping && movementController.grounded) {
-            //disable physics characer controller
-            movementController.rootMotion.EnablePhysics(false);
 
-
-            //dont interrupt playlists
-            int playerLayerToUse = 0; 
-            //give duration control to the event
-            float duration = -1;
-            //will interrupt anyways, since it shouldnt be a loop
-            bool asInterrupter = true; 
-            
-            //call OnEndPlay when player is done playing event
-            eventPlayer.SubscribeToPlayEnd(playerLayerToUse, OnEndPlay);
-            //play event
-            eventPlayer.PlayEvent(playerLayerToUse, behavior.jumpsEvent, duration, asInterrupter);
-            
-            //set up the callback
-            this.onJumpDone = onJumpDone;   
-
-            isJumping = true;
-        }
+    public void Jump (Action onJumpDone = null) {
+        if (overrideMovement) return;
+        Playlist.InitializePerformance("jumper", behavior.jumpCue, eventPlayer, false, eventLayer, Vector3.zero, Quaternion.identity, true, onJumpDone);
     }
 }

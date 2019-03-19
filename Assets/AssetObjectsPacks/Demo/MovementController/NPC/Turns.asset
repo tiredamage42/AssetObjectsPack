@@ -1246,7 +1246,7 @@ MonoBehaviour:
           subStates: []
     - isNew: 0
       name: 135
-      conditionBlock: TurnAngle <165&&TurnAngle >122&&Speed 0
+      conditionBlock: TurnAngle <165&&TurnAngle >122&&Speed == 0
       assetObjects: []
       subStates:
       - isNew: 0

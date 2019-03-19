@@ -54,6 +54,6 @@ MonoBehaviour:
   smoothRotationTime: 1
   messageBlocks:
   - 
-  - MovementControllerTurnTo_Cue(cue,cueposition);
+  - TurnTo_Cue(cue,cueposition);
   - 
   - 

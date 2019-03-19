@@ -8,69 +8,94 @@ public class PlayerController : MonoBehaviour
     [Range(0,1)] public float timeDilation = 1.0f;
 
     MovementController movement;
+    EventPlayer eventPlayer;
     Camera cam;
 
     void Awake () {
-        EventPlayer player = GetComponent<EventPlayer>();        
-        player.AddParameters( new CustomParameter[] {
+        eventPlayer = GetComponent<EventPlayer>();        
+        eventPlayer.AddParameters( new CustomParameter[] {
             new CustomParameter("Agitated", false),
         } );
 
         movement = GetComponent<MovementController>();
-        movement.turner.doAutoTurn = true;
+        turner = GetComponent<Turner>();
+        jumper = GetComponent<Jumper>();
+        platformer = GetComponent<Platformer>();
+
+        turner.doAutoTurn = true;
+        turner.checkDirectionChange = true;
         cam = Camera.main;
 
         InitializeTimeSlow();
     }
 
+
+    
+    void CalculateSpeedAndDirection () {
+        Movement.Direction moveDir = Movement.Direction.Forward;
+        Vector3 faceDir = Vector3.zero;
+
+        float vertAxis = 0;
+        vertAxis += Input.GetKey(KeyCode.W) ? 1 : 0;
+        vertAxis += Input.GetKey(KeyCode.S) ? -1 : 0;
+        faceDir += cam.transform.forward * vertAxis;
+
+        float horizontalAxis = 0;
+        horizontalAxis += Input.GetKey(KeyCode.A) ? -1 : 0;
+        horizontalAxis += Input.GetKey(KeyCode.D) ? 1 : 0;
+        faceDir += cam.transform.right * horizontalAxis;
+
+        bool noInput = horizontalAxis == 0 && vertAxis == 0;
+
+        if (noInput) faceDir = cam.transform.forward;
+        faceDir.y = 0;
+        faceDir.Normalize();
+
+        turner.doAutoTurn = true;
+        turner.checkDirectionChange = true;
+        
+        turner.SetTurnTarget(transform.position + faceDir * 500);       
+
+        if (vertAxis != 0) {
+            moveDir = vertAxis < 0 ? Movement.Direction.Backwards : Movement.Direction.Forward;
+        }
+        else if (horizontalAxis != 0) {
+            moveDir = horizontalAxis < 0 ? Movement.Direction.Left : Movement.Direction.Right;
+        }
+
+        int speed = noInput ? 0 : (Input.GetKey(KeyCode.LeftShift) ? 2 : 1);
+
+        movement.speed = speed;
+        movement.direction = moveDir;
+
+    }
+
     
     void CheckDirectionalMovement () {
-        MovementController.Direction direction = MovementController.Direction.Forward;
 
-        Vector3 dir = Vector3.zero;
-        int fwdBwd = 0;
-        if (Input.GetKey(KeyCode.W)) {
-            dir += cam.transform.forward;
-            fwdBwd += 1;
-        }
-        if (Input.GetKey(KeyCode.S)) {
-            dir -= cam.transform.forward;
-            fwdBwd -= 1;
-        }
-        
-        int leftRight = 0;
-        if (Input.GetKey(KeyCode.A)) {
-            dir -= cam.transform.right;
-            leftRight -= 1;
-        }
-        if (Input.GetKey(KeyCode.D)) {
-            dir += cam.transform.right;
-            leftRight += 1;
-        }
-        if (fwdBwd != 0) {
-            direction = fwdBwd == -1 ? MovementController.Direction.Backwards : MovementController.Direction.Forward;
-        }
-        else if (leftRight != 0) {
-            direction = leftRight == -1 ? MovementController.Direction.Left : MovementController.Direction.Right;
-        }
+        if (!movement.overrideMovement) {
+            CalculateSpeedAndDirection();
 
-        bool noInput = dir == Vector3.zero;
-        if (noInput) dir = cam.transform.forward;
+            bool jumpAttempt = Input.GetKeyDown(KeyCode.Space);
 
+            bool hasPlatform = platformer.PlatformUpUpdate(jumpAttempt);
+            
+            if (hasPlatform) {
+                //Debug.LogError ("Has PLATFRm");
+            }
 
-        dir.y = 0;
-        dir.Normalize();
-
-        movement.turner.SetTurnTarget(transform.position + dir * 500);
-        
-        int speed = noInput ? 0 : (Input.GetKey(KeyCode.LeftShift) ? 2 : 1);
-        movement.speed = speed;
-        movement.direction = direction;
-
-        if (Input.GetKeyDown(KeyCode.Space)) {
-            movement.jumper.Jump();
+            if (jumpAttempt && !hasPlatform) {            
+                jumper.Jump();
+            }
         }
     }
+
+    Turner turner;
+    Jumper jumper;
+    Platformer platformer;
+
+
+
 
     float initialTimeScale, initialFixedDeltaTime, initialMaxDelta;
     void InitializeTimeSlow () {
