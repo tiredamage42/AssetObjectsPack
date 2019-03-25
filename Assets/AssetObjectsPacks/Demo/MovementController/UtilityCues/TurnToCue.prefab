@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 3641272206507066458}
   - component: {fileID: 8160287640862645209}
   m_Layer: 0
-  m_Name: TurnToCueBase
+  m_Name: TurnToCue
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -44,8 +44,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gizmoColor: {r: 0, g: 1, b: 0, a: 1}
+  behavior: {fileID: 0}
   useRandomPlaylist: 0
-  events: []
+  events:
+  - {fileID: 11400000, guid: ad1620ac5095f458c99d9d33a8d63ed7, type: 2}
   overrideDuration: -1
   repeats: 1
   playImmediate: 0
@@ -53,7 +55,7 @@ MonoBehaviour:
   smoothPositionTime: 1
   smoothRotationTime: 1
   messageBlocks:
-  - 
   - TurnTo_Cue(cue,cueposition);
+  - 
   - 
   - 

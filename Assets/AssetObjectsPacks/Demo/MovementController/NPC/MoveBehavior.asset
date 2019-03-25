@@ -18,21 +18,6 @@ MonoBehaviour:
   moveCue: {fileID: 8160287640862645209, guid: 5dce4a7af633f4028b9b0d44294f998f, type: 3}
   stillCue: {fileID: 8160287640862645209, guid: 940077bfb60914e0a95e75c217953317,
     type: 3}
-  jumpCue: {fileID: 8160287640862645209, guid: b7ed3bc150e384a0fbe0d851ae7dc656, type: 3}
-  platformUpCueShort: {fileID: 3176877163273610085, guid: 818651ae2b2e4418c89e990769423deb,
-    type: 3}
-  platformDownCueShort: {fileID: 114442411507341536, guid: e9abe1ff4a76a4a9788f449110485656,
-    type: 3}
-  platformUpCueTall: {fileID: 3176877163273610085, guid: 06c8c47b9fd9545b4a7868136a069f8b,
-    type: 3}
-  platformDownCueTall: {fileID: 114442411507341536, guid: c2d1dd821286c4cd2ba191386795c69a,
-    type: 3}
-  turnsEvent: {fileID: 11400000, guid: ad1620ac5095f458c99d9d33a8d63ed7, type: 2}
-  jumpsEvent: {fileID: 11400000, guid: 797c73d360fc04ec394d7d93155d9a56, type: 2}
-  movesEvent: {fileID: 11400000, guid: 1e8278874d17f4217a967c008066069d, type: 2}
-  stillsEvent: {fileID: 11400000, guid: 24ec89b7388e1481682c3b2af2e69b01, type: 2}
-  turnUpdate: 0
-  moveUpdate: 0
   groundDistanceCheckAir: 0.01
   groundDistanceCheckGrounded: 0.1
   groundRadiusCheck: 0.05
@@ -40,7 +25,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 1
   maxGroundAngle: 45
-  minYVelocity: -0.125
+  minYVelocity: -0.1
   arriveThresholds:
   - 0.1
   - 0.25
@@ -54,13 +39,12 @@ MonoBehaviour:
   - 0
   - 0
   maxMoveHelpSpeed: 3
-  turnAnimMinDistance: 3
-  turnHelpMinDistance: 0.25
+  waypointTurnHelpMinDistance: 0.25
+  waypointTurnAnimMinDistance: 2
   turnHelpSpeeds:
   - 1
   - 3
-  - 4
+  - 7.5
   dirTurnChangeThreshold: 30
   animTurnAngleThreshold: 22.5
   turnAngleHelpThreshold: 5
-  minStrafeDistance: 1

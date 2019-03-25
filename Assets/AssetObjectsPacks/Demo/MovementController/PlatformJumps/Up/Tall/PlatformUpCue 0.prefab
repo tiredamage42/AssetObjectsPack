@@ -44,6 +44,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gizmoColor: {r: 0, g: 1, b: 0, a: 1}
+  behavior: {fileID: 11400000, guid: a4870b91b800f4dfdac3f8fbf37bfa7a, type: 2}
   useRandomPlaylist: 0
   events:
   - {fileID: 11400000, guid: c4dc8e39f51cb40d78330288b5f67cfe, type: 2}
@@ -103,6 +104,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gizmoColor: {r: 0, g: 1, b: 0, a: 1}
+  behavior: {fileID: 0}
   useRandomPlaylist: 0
   events:
   - {fileID: 11400000, guid: c4dc8e39f51cb40d78330288b5f67cfe, type: 2}

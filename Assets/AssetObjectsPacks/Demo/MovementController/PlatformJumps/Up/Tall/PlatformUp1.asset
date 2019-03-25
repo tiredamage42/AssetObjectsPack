@@ -18,6 +18,7 @@ MonoBehaviour:
     mute: 0
     objRef: {fileID: 0}
     id: 0
+    packID: -1
     parameters:
     - name: Duration
       pType: 1
@@ -61,9 +62,9 @@ MonoBehaviour:
       FloatValue: 0
       IntValue: 0
       StringValue: 
-  hiddenIDs: 
-  baseState:
-    isNew: 0
+  hiddenIDs: []
+  allStates:
+  - isNew: 0
     name: Base State
     conditionBlock: 
     assetObjects:
@@ -72,6 +73,7 @@ MonoBehaviour:
       mute: 0
       objRef: {fileID: 7400002, guid: bed9346278fbd438ca537f2ede069df1, type: 3}
       id: 4722
+      packID: 0
       parameters:
       - name: Duration
         pType: 1
@@ -100,7 +102,7 @@ MonoBehaviour:
       - name: Transition
         pType: 1
         BoolValue: 0
-        FloatValue: 0.15
+        FloatValue: 0.1
         IntValue: 0
         StringValue: 
       - name: Layer
@@ -112,8 +114,107 @@ MonoBehaviour:
       - name: TimeOffset
         pType: 1
         BoolValue: 0
-        FloatValue: 0.075
+        FloatValue: 0.15
         IntValue: 0
         StringValue: 
-    subStates: []
-  assetObjectPackID: 0
+    - isCopy: 0
+      solo: 0
+      mute: 0
+      objRef: {fileID: 7400002, guid: 3ce4e449d123f4352ac83b599ac49e2d, type: 3}
+      id: 6334
+      packID: 0
+      parameters:
+      - name: Duration
+        pType: 1
+        BoolValue: 0
+        FloatValue: -1
+        IntValue: 0
+        StringValue: 
+      - name: Speed
+        pType: 1
+        BoolValue: 0
+        FloatValue: 1
+        IntValue: 0
+        StringValue: 
+      - name: Mirror
+        pType: 2
+        BoolValue: 0
+        FloatValue: 1
+        IntValue: 0
+        StringValue: 
+      - name: Looped
+        pType: 0
+        BoolValue: 0
+        FloatValue: 1
+        IntValue: 0
+        StringValue: 
+      - name: Transition
+        pType: 1
+        BoolValue: 0
+        FloatValue: 0.25
+        IntValue: 0
+        StringValue: 
+      - name: Layer
+        pType: 2
+        BoolValue: 0
+        FloatValue: 0.25
+        IntValue: 0
+        StringValue: 
+      - name: TimeOffset
+        pType: 1
+        BoolValue: 0
+        FloatValue: 0
+        IntValue: 0
+        StringValue: 
+    - isCopy: 0
+      solo: 0
+      mute: 0
+      objRef: {fileID: 7400002, guid: d4415e0e637f5412d8ccfda852c583e9, type: 3}
+      id: 7717
+      packID: 0
+      parameters:
+      - name: Duration
+        pType: 1
+        BoolValue: 0
+        FloatValue: -1
+        IntValue: 0
+        StringValue: 
+      - name: Speed
+        pType: 1
+        BoolValue: 0
+        FloatValue: 1
+        IntValue: 0
+        StringValue: 
+      - name: Mirror
+        pType: 2
+        BoolValue: 0
+        FloatValue: 1
+        IntValue: 0
+        StringValue: 
+      - name: Looped
+        pType: 0
+        BoolValue: 0
+        FloatValue: 1
+        IntValue: 0
+        StringValue: 
+      - name: Transition
+        pType: 1
+        BoolValue: 0
+        FloatValue: 0.25
+        IntValue: 0
+        StringValue: 
+      - name: Layer
+        pType: 2
+        BoolValue: 0
+        FloatValue: 0.25
+        IntValue: 0
+        StringValue: 
+      - name: TimeOffset
+        pType: 1
+        BoolValue: 0
+        FloatValue: 0
+        IntValue: 0
+        StringValue: 
+    subStatesIDs: 
+    stateID: 0
+  mainPackID: 0

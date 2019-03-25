@@ -44,8 +44,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gizmoColor: {r: 0, g: 1, b: 0, a: 1}
+  behavior: {fileID: 11400000, guid: 15bb8027de7544b7f867ef26ee15fb5e, type: 2}
   useRandomPlaylist: 0
-  events: []
+  events:
+  - {fileID: 11400000, guid: 24ec89b7388e1481682c3b2af2e69b01, type: 2}
   overrideDuration: 0
   repeats: 1
   playImmediate: 0

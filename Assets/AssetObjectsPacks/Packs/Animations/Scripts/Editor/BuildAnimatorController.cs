@@ -20,7 +20,7 @@ namespace AssetObjectsPacks.Animations {
             ScriptableWizard.DisplayWizard<AnimatorControllerBuilder>("Generate Anim Controller", "Generate");
         }
         void OnWizardCreate() {
-            PacksManager packs = AssetObjectsEditor.packManager;
+            PacksManager packs = PacksManager.instance;// AssetObjectsEditor.packManager;
             if (packs == null) {
                 Debug.LogError("Couldnt find pack manager");
                 return;
@@ -56,7 +56,7 @@ namespace AssetObjectsPacks.Animations {
 
             //filter out unused file paths
             if (usedOnly) {
-                IEnumerable<int> used_ids = AssetObjectsEditor.GetAllUsedIDs(animationsPackName);
+                IEnumerable<int> used_ids = AssetObjectsEditor.GetAllUsedIDs(PacksManager.Name2ID(animationsPackName));
                 if (used_ids.Count() == 0) return;
                 allPaths = allPaths.Where(f => used_ids.Contains(AssetObjectsEditor.GetObjectIDFromPath(f))).ToArray();
             } 

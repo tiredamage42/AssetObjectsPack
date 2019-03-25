@@ -8,18 +8,20 @@ namespace AssetObjectsPacks {
         public bool solo, mute;
         public Object objRef;
 
-        public int id;
+        public string messageBlock, conditionBlock;
+
+        public int id, packID;
         public CustomParameter[] parameters;
-        Dictionary<string, CustomParameter> paramDict = new Dictionary<string, CustomParameter>();
+        Dictionary<string, int> paramDict = new Dictionary<string, int>();
 
         public CustomParameter this [string paramName] {
             get {
                 int l = parameters.Length;
                 if (paramDict.Count != l) {
                     paramDict.Clear();
-                    for (int i = 0; i < l; i++) paramDict.Add(parameters[i].name, parameters[i]);
+                    for (int i = 0; i < l; i++) paramDict.Add(parameters[i].name, i);// parameters[i]);
                 }
-                return paramDict[paramName];
+                return parameters[paramDict[paramName]];
             }
         }
     }

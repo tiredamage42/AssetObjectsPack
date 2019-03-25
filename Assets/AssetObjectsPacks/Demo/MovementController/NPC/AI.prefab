@@ -1117,9 +1117,15 @@ GameObject:
   - component: {fileID: 1138660214}
   - component: {fileID: 1138660215}
   - component: {fileID: 1138660217}
+  - component: {fileID: 22595446}
+  - component: {fileID: 2511859608284325720}
+  - component: {fileID: 22595441}
+  - component: {fileID: 22595442}
+  - component: {fileID: 22595440}
   - component: {fileID: 1138660218}
+  - component: {fileID: 22595443}
   m_Layer: 0
-  m_Name: TestCharacter
+  m_Name: AI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1173,8 +1179,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 454298816c10148b5ac260d72fe247d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  duration_timer: 0
-  current_duration: 0
+  cueMoving: 0
 --- !u!114 &1138660215
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1199,29 +1204,101 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: be95eb3a41f8b40d2bdd46a42795c490, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  debugTransformLook: {fileID: 0}
-  turnsEvent: {fileID: 11400000, guid: ad1620ac5095f458c99d9d33a8d63ed7, type: 2}
-  movesEvent: {fileID: 11400000, guid: 1e8278874d17f4217a967c008066069d, type: 2}
-  stillsEvent: {fileID: 11400000, guid: 24ec89b7388e1481682c3b2af2e69b01, type: 2}
-  animationPackName: Animations
-  turnThresholds:
-  - 10
-  - 3
-  - 1
-  arriveThresholds:
-  - 0.1
-  - 0.15
-  - 0.2
-  turnHelpSpeeds:
-  - 2
-  - 2.5
-  - 4
-  doAutoTurn: 0
-  stance: 0
+  behavior: {fileID: 11400000, guid: b40f7161fdd2e4c47a9f09350e4bb268, type: 2}
   direction: 0
-  allowStrafe: 0
-  minStrafeDistance: 1
-  speed: 0
+  speed: 2
+  stance: 1
+  eventLayer: 0
+  overrideMove: 0
+--- !u!143 &22595446
+CharacterController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1138660213}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Height: 2
+  m_Radius: 0.2
+  m_SlopeLimit: 45
+  m_StepOffset: 0.3
+  m_SkinWidth: 0.01
+  m_MinMoveDistance: 0.001
+  m_Center: {x: 0, y: 1, z: 0}
+--- !u!114 &2511859608284325720
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1138660213}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7682d31e460254169b30026632d0e3ca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  updateMode: 2
+  eventLayer: 0
+  usingRootMotion: 1
+  calculateMoveSloped: 1
+  useGravity: 1
+  usePhysicsController: 1
+  grounded: 0
+--- !u!114 &22595441
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1138660213}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33c697bd1f32545ff8a034854b418aaa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  updateMode: 2
+  eventLayer: 0
+  doAutoPlatform: 1
+  layerMask:
+    serializedVersion: 2
+    m_Bits: 1
+--- !u!114 &22595442
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1138660213}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5976ca6a124284eef982ee8850b6253b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  updateMode: 2
+  eventLayer: 0
+  doAutoTurn: 0
+  autoTurnAnimate: 0
+  isTurning: 0
+  inTurnAnimation: 0
+  initializedTurnCue: 0
+--- !u!114 &22595440
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1138660213}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6dcf84a43ab14499ba21e383a5d6e85, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  updateMode: 2
+  eventLayer: 1
+  hasDestination: 0
 --- !u!114 &1138660218
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1234,8 +1311,34 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 287d78feb31434f5191667f22fb3b6d9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  agitated: 0
-  walkScene: {fileID: 0}
+  updateMode: 2
+  eventLayer: 2
+  debugTransformLook: {fileID: 0}
+  agitated: 1
+  demoScene: {fileID: 0}
+  aiBehavior: {fileID: 11400000, guid: 7fb546a94542c46258a183aec3739f2f, type: 2}
+--- !u!195 &22595443
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1138660213}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 0.2
+  m_Speed: 3.5
+  m_Acceleration: 8
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 0
+  m_AutoTraverseOffMeshLink: 0
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 2
+  m_BaseOffset: 0
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4
 --- !u!1 &1149496821
 GameObject:
   m_ObjectHideFlags: 0

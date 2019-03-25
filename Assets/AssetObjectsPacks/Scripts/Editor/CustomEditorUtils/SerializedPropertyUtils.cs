@@ -5,47 +5,24 @@ using System.Collections.Generic;
 namespace AssetObjectsPacks {
     enum EditorPropType { Property, Array, SO }
     public class EditorProp {
+        public SerializedProperty property;
         EditorPropType editorPropType;
         EditorProp baseObject;
-        public SerializedProperty property;
         SerializedObject serializedObject;
-        bool wasChanged;
-
-
-        bool isBaseObject { get { return serializedObject != null; } }
-
-        public string displayName { get { return isBaseObject ? serializedObject.targetObject.name : property.displayName; } }
-
-        public void SetChanged () {
-            baseObject.wasChanged = true;
-        }
-
-
+        public string displayName { get { return errored ? "ERRORED" : (isBaseObject ? serializedObject.targetObject.name : property.displayName); } }
+        bool isBaseObject { get { return editorPropType == EditorPropType.SO; } } 
+        bool errored;
         Dictionary<string, EditorProp> name2Prop = new Dictionary<string, EditorProp>();
-
-        //public void ResetChanged () {
-            //wasChanged = false;
-            //foreach (var e in arrayElements) e.ResetChanged();
-            //foreach (var n in name2Prop.Keys) name2Prop[n].ResetChanged();
-        //}
-        public bool IsChanged() {
-            return wasChanged;
-            //if (_wasChanged) return true;
-            //foreach (var e in arrayElements) {
-            //    if (e.IsChanged()) return true;
-            //}
-            //foreach (var n in name2Prop.Keys) {
-            //    if (name2Prop[n].IsChanged()) return true;
-            //}
-            //return false;
-        }
-
         EditorProp (SerializedProperty property, EditorProp baseObject) {
             this.property = property;
             this.baseObject = baseObject;
-            editorPropType = property.isArray && property.propertyType != SerializedPropertyType.String ? EditorPropType.Array : EditorPropType.Property;
-            if (editorPropType == EditorPropType.Array) {
-                RebuildArray(); 
+            editorPropType = EditorPropType.Property;
+            errored = property == null;
+            if (!errored) {
+                if (property.isArray && property.propertyType != SerializedPropertyType.String) {
+                    editorPropType = EditorPropType.Array;
+                    RebuildArray(); 
+                }
             }
         }
 
@@ -53,31 +30,48 @@ namespace AssetObjectsPacks {
             this.serializedObject = serializedObject;
             this.baseObject = this;
             editorPropType = EditorPropType.SO;
+            errored = serializedObject == null;
+            
         }
-
+        
         bool CheckEditorPropType (EditorPropType shouldBe) {
+            if (errored) {
+                Debug.LogError(displayName + " is errored");
+                return false;
+            }
             if (shouldBe != editorPropType) {
-                Debug.LogError ( (editorPropType == EditorPropType.SO ? serializedObject.targetObject.name : property.displayName) + "(" + editorPropType.ToString() + ") isnt type: " + shouldBe.ToString());
+                Debug.LogError ( displayName + "(" + editorPropType.ToString() + ") isnt type: " + shouldBe.ToString());
                 return false;
             }
             return true;
         }
-        public void SaveObject () {
-            if (!CheckEditorPropType(EditorPropType.SO)) return;
-            serializedObject.ApplyModifiedProperties();
-            EditorUtility.SetDirty(serializedObject.targetObject);
-            wasChanged = false;
 
-            //ResetChanged();
+        public void SaveObject () {
+            if (editorPropType != EditorPropType.SO) {
+                baseObject.SaveObject();
+                return;
+            }
+            if (!errored) {
+                serializedObject.ApplyModifiedProperties();
+                EditorUtility.SetDirty(serializedObject.targetObject);
+            }
         }
 
         //get property/relative
         public EditorProp this [string name] {
             get {
+                if (errored) return null;
+                
                 EditorProp customProp;
                 if (!name2Prop.TryGetValue(name, out customProp)) {
+                    SerializedProperty p = null;
+                    if (editorPropType == EditorPropType.SO)
+                        p = serializedObject.FindProperty ( name );
+                    else
+                        p = property.FindPropertyRelative ( name );
                     
-                    customProp = new EditorProp ( editorPropType == EditorPropType.SO ? serializedObject.FindProperty ( name ) : property.FindPropertyRelative ( name ), baseObject );
+                    if (p == null) Debug.Log("cant find param name: " + name + " on " + displayName);
+                    customProp = new EditorProp ( p, baseObject );
                     name2Prop.Add(name, customProp);
                 }
                 return customProp;
@@ -90,9 +84,10 @@ namespace AssetObjectsPacks {
             //index into array prop
             public EditorProp this [int index] {
                 get {
+        
                     if (!CheckForArray(false)) return null;
                     if (index < 0 || index >= arraySize) {
-                        Debug.LogError("Array index out of range");
+                        Debug.LogError("Array index out of range on " + displayName);
                         return null;
                     }
                     return arrayElements[index];
@@ -100,14 +95,15 @@ namespace AssetObjectsPacks {
             }
             bool CheckForArray(bool change) {
                 if (!CheckEditorPropType(EditorPropType.Array)) return false;
-                if (change) SetChanged();// wasChanged = true;
+                if (change) SaveObject();
                 return true;
             }
             void RebuildArray () {
                 arrayElements = arraySize.Generate(i => new EditorProp( property.GetArrayElementAtIndex(i), baseObject ) ).ToList();
             }
-            public bool ContainsElementsWithDuplicateNames (out string duplicateName, string checkNameField="name") {
+            public bool ContainsDuplicateNames (out string duplicateName, string checkNameField="name") {
                 duplicateName = string.Empty;
+                
                 if (!CheckForArray(false)) return false;
                 int l = arraySize;
                 for (int i = 0; i < l; i++) {
@@ -123,22 +119,19 @@ namespace AssetObjectsPacks {
             }
 
             public void Clear () {
+                
                 if (!CheckForArray(true)) return;
                 property.ClearArray();
                 arrayElements.Clear();
             }
-
             bool NameUnique(string name, string nameField) {
                 for (int i = 0; i < arraySize; i++) {
                     if (this[i][nameField].stringValue == name) return false;
                 }
                 return true;
             }
-
-
             string UniqueName (string prefix, string nameField) {
                 if (prefix == null) return null;
-                
                 string origName = prefix;
                 string new_name = origName;
                 int trying = 0;
@@ -149,6 +142,7 @@ namespace AssetObjectsPacks {
                 return new_name;
             }
             public EditorProp InsertAtIndex (int i, string uniqueNamePrefix = null, string nameField = "name") {
+                
                 if (!CheckForArray(true)) return null;
                 string new_name = UniqueName(uniqueNamePrefix, nameField);
                 property.InsertArrayElementAtIndex(i);
@@ -158,8 +152,8 @@ namespace AssetObjectsPacks {
             }
 
             public EditorProp AddNew (string uniqueNamePrefix = null, string nameField = "name") {
-                if (!CheckForArray(true)) return null;
                 
+                if (!CheckForArray(true)) return null;
                 string new_name = UniqueName(uniqueNamePrefix, nameField);            
                 int l = arraySize;
                 property.InsertArrayElementAtIndex(l);
@@ -169,7 +163,11 @@ namespace AssetObjectsPacks {
                 return newElement;
             }
             public void DeleteAt (int index) {
+                
                 if (!CheckForArray(true)) return;
+                if (property.propertyType == SerializedPropertyType.ObjectReference && objRefValue != null) {
+                    property.DeleteArrayElementAtIndex(index);
+                }
                 property.DeleteArrayElementAtIndex(index);
                 RebuildArray(); 
             }
@@ -177,6 +175,10 @@ namespace AssetObjectsPacks {
 
         #region GETTERS_SETTERS
             #region GETTERS
+                public Vector2Int vector2IntValue { get { 
+                    if (!CheckEditorPropType(EditorPropType.Property)) return Vector2Int.zero;
+                    return property.vector2IntValue;
+                } }
                 public int intValue { get { 
                     if (!CheckEditorPropType(EditorPropType.Property)) return 0;
                     return property.intValue;
@@ -207,6 +209,10 @@ namespace AssetObjectsPacks {
                 } }
             #endregion
             #region SETTERS
+                public void SetValue (Vector2Int value) { 
+                    if (!CheckEditorPropType(EditorPropType.Property)) return;
+                    property.vector2IntValue = value; 
+                }
                 public void SetEnumValue (int value) { 
                     if (!CheckEditorPropType(EditorPropType.Property)) return;
                     property.enumValueIndex = value; 
@@ -226,7 +232,6 @@ namespace AssetObjectsPacks {
                 public void SetValue (Object value) { 
                     if (!CheckEditorPropType(EditorPropType.Property)) return;
                     property.objectReferenceValue = value; 
-                    property.objectReferenceInstanceIDValue = value.GetInstanceID();
                 }
                 public void SetValue (string value) { 
                     if (!CheckEditorPropType(EditorPropType.Property)) return;
@@ -235,9 +240,10 @@ namespace AssetObjectsPacks {
             #endregion
         #endregion
 
-
         public void CopySubProps (EditorProp copy, IEnumerable<string> props) {
-            foreach (var p in props) this[p].CopyProp(copy[p]);
+            foreach (var p in props) {
+                this[p].CopyProp(copy[p]);
+            }
         }
         public void CopyProp (EditorProp copy) {
             if (!CheckEditorPropType(EditorPropType.Property)) return;
@@ -247,8 +253,6 @@ namespace AssetObjectsPacks {
                 Debug.LogError("Incompatible types (" + property.displayName + "," + c.displayName + ") (" + property.propertyType + ", " + c.propertyType + ")");
                 return;
             }
-
-            //_wasChanged = true; 
             switch (property.propertyType){
                 case SerializedPropertyType.Integer	            :   property.intValue              =    c.intValue              ;break;
                 case SerializedPropertyType.Boolean	            :   property.boolValue             =    c.boolValue             ;break;

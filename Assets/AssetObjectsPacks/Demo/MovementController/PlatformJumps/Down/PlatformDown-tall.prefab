@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 1706648872403659979}
   - component: {fileID: 114442411507341536}
   m_Layer: 0
-  m_Name: PlatformDown-tall_cueBase
+  m_Name: PlatformDown-tall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -44,17 +44,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gizmoColor: {r: 0, g: 1, b: 0, a: 1}
+  behavior: {fileID: 11400000, guid: d50bbd5da47794b219ea48eaec040535, type: 2}
   useRandomPlaylist: 0
-  events:
-  - {fileID: 11400000, guid: fc8c19eadbe3d4493bf78f29e5290d36, type: 2}
-  overrideDuration: -1
   repeats: 1
-  playImmediate: 1
-  snapPlayerStyle: 2
-  smoothPositionTime: 0.1
-  smoothRotationTime: 0.1
-  messageBlocks:
-  - OverrideMovement_Cue(true);
-  - 
-  - OverrideMovement_Cue(false);
-  - 

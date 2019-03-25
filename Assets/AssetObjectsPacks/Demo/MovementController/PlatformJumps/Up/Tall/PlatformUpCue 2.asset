@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ac55a32d0a714329bfbc7e4cc4b655b, type: 3}
+  m_Name: PlatformUpCue 2
+  m_EditorClassIdentifier: 
+  events:
+  - {fileID: 11400000, guid: 57ae5af1d5b914ad3a093d91b4258d00, type: 2}
+  overrideDuration: -1
+  playImmediate: 1
+  snapPlayerStyle: 2
+  smoothPositionTime: 0.1
+  smoothRotationTime: 0.1
+  positionOffset: {x: 0, y: 0.25, z: -0.4}
+  rotationOffset: {x: 0, y: 0, z: 0}
+  messageBlocks:
+  - 
+  - 
+  - 
+  - 

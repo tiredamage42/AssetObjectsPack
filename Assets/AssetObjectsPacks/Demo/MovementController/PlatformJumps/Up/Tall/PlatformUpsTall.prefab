@@ -47,6 +47,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gizmoColor: {r: 0, g: 1, b: 0, a: 1}
+  behavior: {fileID: 11400000, guid: a4870b91b800f4dfdac3f8fbf37bfa7a, type: 2}
   useRandomPlaylist: 1
   events: []
   overrideDuration: -1
@@ -137,6 +138,17 @@ PrefabInstance:
       propertyPath: m_LocalRotation.w
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 5474646145398269862, guid: b26888143c3f64ed48915836c36ab4f7,
+        type: 3}
+      propertyPath: behavior
+      value: 
+      objectReference: {fileID: 11400000, guid: fdbbba637755f421c908451288c20c67,
+        type: 2}
+    - target: {fileID: 5307589615318625398, guid: b26888143c3f64ed48915836c36ab4f7,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b26888143c3f64ed48915836c36ab4f7, type: 3}
 --- !u!4 &2470947198621602969 stripped
@@ -222,6 +234,17 @@ PrefabInstance:
       propertyPath: m_LocalRotation.w
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 5474646145398269862, guid: 57940add553594a7698b50b2317e853b,
+        type: 3}
+      propertyPath: behavior
+      value: 
+      objectReference: {fileID: 11400000, guid: 3f51e89842b3347d7b217129878ad9be,
+        type: 2}
+    - target: {fileID: 5307589615318625398, guid: 57940add553594a7698b50b2317e853b,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 57940add553594a7698b50b2317e853b, type: 3}
 --- !u!4 &2220480230646264953 stripped
@@ -295,6 +318,17 @@ PrefabInstance:
     - target: {fileID: 2980111595083333081, guid: 564ee96ebfdc74ed29c01005f4353128,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5474646145398269862, guid: 564ee96ebfdc74ed29c01005f4353128,
+        type: 3}
+      propertyPath: behavior
+      value: 
+      objectReference: {fileID: 11400000, guid: 760aa8ab02e4a426cba7781446687ca3,
+        type: 2}
+    - target: {fileID: 5307589615318625398, guid: 564ee96ebfdc74ed29c01005f4353128,
+        type: 3}
+      propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []

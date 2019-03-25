@@ -139,7 +139,12 @@ namespace AssetObjectsPacks.Animations {
             bool mirror = (mirrorMode == 2) ? Random.value < .5f : mirrorMode == 1;          
             float timeOffset = assetObject["TimeOffset"].GetValue<float>();
             if (timeOffset != 0) {
+                //Debug.Log("timeoffset " + timeOffset);
+            
                 timeOffset = timeOffset * ((AnimationClip)assetObject.objRef).length;
+
+
+
             } 
 
             Play(
@@ -159,7 +164,7 @@ namespace AssetObjectsPacks.Animations {
             else {
 
                 lastPlayed = assetObject.objRef.name;
-                Debug.Log("playing: " + assetObject.objRef.name);
+                //Debug.Log("playing: " + assetObject.objRef.name);
 
             }
         }
@@ -167,13 +172,13 @@ namespace AssetObjectsPacks.Animations {
 
         // let the player know the event is done
         void BroadcastEndUse () {
-                            Debug.Log("stopped anim " + lastPlayed);
+                  //          Debug.Log("stopped anim " + lastPlayed);
                             
             if (endUseCallbacks != null) {
                             
 
                 if (endUseCallbacks.Count != 0) {
-                    Debug.Log("call callbacks");
+                    //Debug.Log("call callbacks");
                 }
                 foreach (var endUse in endUseCallbacks) {
                     endUse();    
@@ -239,6 +244,10 @@ namespace AssetObjectsPacks.Animations {
             //set mirror ansd speed parameters
             anim.SetBool(pMirror, mirror);
             anim.SetFloat(pSpeed, speed);
+
+            if (timeOffset != 0) {
+                Debug.Log("timeoffset " + timeOffset);
+            }
             
             //non looped states are named as their ids
             anim.CrossFadeInFixedTime(id.ToString(), transition, layer, timeOffset);

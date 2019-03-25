@@ -1789,8 +1789,13 @@ GameObject:
   - component: {fileID: 1550164993}
   - component: {fileID: 1550164991}
   - component: {fileID: 1550164992}
-  - component: {fileID: 1550164989}
   - component: {fileID: 1550164990}
+  - component: {fileID: 3511011943317885975}
+  - component: {fileID: 6836753804535245282}
+  - component: {fileID: 1550164995}
+  - component: {fileID: 3219073922659788355}
+  - component: {fileID: 3985992172413188466}
+  - component: {fileID: 1550164989}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -1858,7 +1863,113 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 454298816c10148b5ac260d72fe247d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  overrideMovement: 0
+  cueMoving: 0
+--- !u!114 &1550164990
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1550164988}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be95eb3a41f8b40d2bdd46a42795c490, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  behavior: {fileID: 11400000, guid: b40f7161fdd2e4c47a9f09350e4bb268, type: 2}
+  direction: 0
+  speed: 0
+  stance: 0
+  eventLayer: 0
+  overrideMove: 0
+--- !u!114 &3511011943317885975
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1550164988}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33c697bd1f32545ff8a034854b418aaa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  updateMode: 2
+  eventLayer: 0
+  doAutoPlatform: 0
+  layerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+--- !u!114 &6836753804535245282
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1550164988}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84eef87c0a39b4aa98fd291443660bc8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  updateMode: 2
+  eventLayer: 0
+--- !u!143 &1550164995
+CharacterController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1550164988}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Height: 2
+  m_Radius: 0.2
+  m_SlopeLimit: 90
+  m_StepOffset: 0.3
+  m_SkinWidth: 0.01
+  m_MinMoveDistance: 0.001
+  m_Center: {x: 0, y: 1, z: 0}
+--- !u!114 &3219073922659788355
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1550164988}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5976ca6a124284eef982ee8850b6253b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  updateMode: 2
+  eventLayer: 0
+  doAutoTurn: 0
+  autoTurnAnimate: 0
+  isTurning: 0
+  inTurnAnimation: 0
+  initializedTurnCue: 0
+--- !u!114 &3985992172413188466
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1550164988}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7682d31e460254169b30026632d0e3ca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  updateMode: 2
+  eventLayer: 0
+  usingRootMotion: 1
+  calculateMoveSloped: 1
+  useGravity: 1
+  usePhysicsController: 1
+  grounded: 0
 --- !u!114 &1550164989
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1872,42 +1983,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   timeDilation: 1
---- !u!114 &1550164990
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1550164988}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: be95eb3a41f8b40d2bdd46a42795c490, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  behavior: {fileID: 0}
-  direction: 0
-  speed: 0
-  stance: 0
-  rootMotion:
-    usingRootMotion: 1
-    calculateMoveSloped: 1
-    useGravity: 1
-    usePhysicsController: 1
-  mover:
-    allowStrafe: 0
-  turner:
-    doAutoTurn: 0
-    isTurning: 0
-    inTurnAnimation: 0
-  jumper:
-    isJumping: 0
-  platformer:
-    doAutoPlatform: 0
-    isPlatforming: 0
-  eventPlayer: {fileID: 0}
-  grounded: 0
-  groundNormal: {x: 0, y: 1, z: 0}
-  floorY: 0
 --- !u!1 &1552109866
 GameObject:
   m_ObjectHideFlags: 0

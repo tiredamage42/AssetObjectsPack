@@ -15,7 +15,7 @@ MonoBehaviour:
   packs:
   - dir: Assets/AssetObjectsPacks/Packs/Animations/AssetObjects/
     extensions: .fbx
-    assetType: UnityEngine.AnimationClip
+    assetType: AnimationClip
     defaultParameters:
     - name: Duration
       pType: 1
@@ -63,7 +63,7 @@ MonoBehaviour:
     id: 0
   - dir: 
     extensions: 
-    assetType: 
+    assetType: AudioClip
     defaultParameters:
     - name: Duration
       pType: 1
@@ -71,5 +71,11 @@ MonoBehaviour:
       FloatValue: -1
       IntValue: 0
       StringValue: 
-    name: New Pack 0
+    - name: Duration
+      pType: 1
+      BoolValue: 0
+      FloatValue: -1
+      IntValue: 0
+      StringValue: 
+    name: Audio
     id: 1

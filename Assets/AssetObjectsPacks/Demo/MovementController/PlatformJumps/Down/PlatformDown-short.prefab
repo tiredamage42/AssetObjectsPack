@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 1706648872403659979}
   - component: {fileID: 114442411507341536}
   m_Layer: 0
-  m_Name: PlatformDown-short_cueBase
+  m_Name: PlatformDown-short
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -44,6 +44,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gizmoColor: {r: 0, g: 1, b: 0, a: 1}
+  behavior: {fileID: 11400000, guid: 5741c555d620f4a6f8c64b467c300f54, type: 2}
   useRandomPlaylist: 0
   events:
   - {fileID: 11400000, guid: deb7ff41638e847e6a6fa770bd6e36b4, type: 2}
@@ -51,8 +52,8 @@ MonoBehaviour:
   repeats: 1
   playImmediate: 1
   snapPlayerStyle: 2
-  smoothPositionTime: 0.1
-  smoothRotationTime: 0.1
+  smoothPositionTime: 0.2
+  smoothRotationTime: 0.2
   messageBlocks:
   - OverrideMovement_Cue(true);
   - 

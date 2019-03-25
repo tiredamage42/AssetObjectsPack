@@ -11,7 +11,7 @@
             }
             else hi = lo = (singleElement && i == lo) ? -1 : i;
         }
-        public bool HandlDirectionalSelection (bool up, bool down, bool multiple, int lastIndex) {
+        public bool HandleDirectionalSelection (bool up, bool down, bool multiple, int lastIndex) {
 
             if (lastIndex < 0) return false;
             

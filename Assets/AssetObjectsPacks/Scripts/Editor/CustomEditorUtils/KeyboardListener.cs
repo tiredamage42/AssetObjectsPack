@@ -8,7 +8,11 @@ namespace AssetObjectsPacks {
                 if (!listenCodes.TryGetValue(c, out r)) {
                     UnityEngine.Event e = UnityEngine.Event.current;
                     if (e.type != EventType.KeyDown) return false;
-                    if (GUIUtils.KeyboardOverriden()) return false;
+                    if (GUIUtils.KeyboardOverriden()) {
+                        Debug.Log("override key" );
+                        return false;
+                    }
+
                     r = e.keyCode == c;
                     if (r) e.Use();
                     listenCodes[c] = r;

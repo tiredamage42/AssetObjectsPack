@@ -12,8 +12,41 @@ namespace AssetObjectsPacks {
 
     */
     public class ElementSelectionSystem  {
-        public bool singleSelection { get { return selectionSystem.singleElement; } }
+        //public bool singleSelection { get { return selectionSystem.singleElement; } }
         public bool hasSelection { get { return selectionSystem.hasElements; } }
+        /*
+
+        public bool selectionIsOnlyFiles { 
+            get { 
+                if (!hasSelection) return false;
+                foreach (var i in GetSelectionEnumerable()) {
+                    SelectionElement e = elements[1][i];
+                    if (elements[1][i].id == -1) {
+                        return false;
+                    }
+                }
+                return true;
+            } 
+        }
+        public bool selectionIsSingleFile { get { 
+            return singleSelection && selectionIsOnlyFiles;
+        } }
+            
+        public bool selectionIsSingleCollection { get { 
+            if (!hasSelection) return false;
+
+            int collection = elements[1][GetSelectionEnumerable().First()].collectionID;
+            foreach (var i in GetSelectionEnumerable()) {
+                SelectionElement e = elements[1][i];
+                if (elements[1][i].collectionID != collection) {
+                    return false;
+                }
+            }
+            return true;
+        
+        } }
+        public int selectionCollection { get { return elements[1][GetSelectionEnumerable().First()].collectionID; } }
+        
         public SelectionElement selectedElement {
             get {
                 int index;
@@ -22,6 +55,7 @@ namespace AssetObjectsPacks {
                 return elements[1][index];
             }
         }
+         */
         SelectionSystem selectionSystem = new SelectionSystem();
         Pagination pagination= new Pagination();
         DragAndDrop dragDrop = new DragAndDrop();
@@ -30,31 +64,39 @@ namespace AssetObjectsPacks {
         public string curPath = "";
         Action onSelectionChange, onChangeDisplayPath;
         Action<IEnumerable<int>, string, string> onDirDragDrop;
-        Action<KeyboardListener> toolbarButtons;
+        Action toolbarButtons;
         bool shouldRebuild, shouldResetPage;
         Func<string, IEnumerable<SelectionElement>> getPoolElements;
-        Action<string, bool, HashSet<int>> getIDsInDirectory;
-        SelectionElement[][] elements = new SelectionElement[][] {
+        //Action<string, bool, HashSet<int>> getIDsInDirectory;
+        public SelectionElement[][] elements = new SelectionElement[][] {
             null, null
         };
         public string parentPath { get { return CalcLastFolder(curPath); } }
+        Action<string, bool, HashSet<Vector2Int>> getElementsInDirectory;
         
-        public void OnEnable (Func<string, IEnumerable<SelectionElement>> getPoolElements, Action<string, bool, HashSet<int>> getIDsInDirectory, Action onSelectionChange, Action<IEnumerable<int>, string, string> onDirDragDrop, Action<KeyboardListener> toolbarButtons, Action onChangeDisplayPath) {
+        public void OnEnable (
+            Func<string, IEnumerable<SelectionElement>> getPoolElements, 
+            Action<string, bool, HashSet<Vector2Int>> getElementsInDirectory, 
+            Action onSelectionChange, Action<IEnumerable<int>, string, string> onDirDragDrop, 
+            Action toolbarButtons, Action onChangeDisplayPath) {
+        
             this.onChangeDisplayPath = onChangeDisplayPath;
-            this.getIDsInDirectory = getIDsInDirectory;
+            this.getElementsInDirectory = getElementsInDirectory;
             this.toolbarButtons = toolbarButtons;
             this.onDirDragDrop = onDirDragDrop;
             this.onSelectionChange = onSelectionChange;
             this.getPoolElements = getPoolElements;
+
+            DoReset(true, true);
         }
 
-        public void DrawElements (){
+        public void DrawElements (Action<KeyboardListener> checkHotkeys){
             KeyboardListener keyboardListener = new KeyboardListener();
             dragDrop.InputListen ();
 
             bool searchChanged;
             int pageOffset, clickedElementIndex, clickedElementCollection;
-            ESS_GUI.DrawElementsView (elements, curPath, keyboardListener, toolbarButtons, pagination.pagesGUI, ref searchFilter, out searchChanged, out pageOffset, out clickedElementIndex, out clickedElementCollection);
+            ESS_GUI.DrawElementsView (GUIStyles.toolbarButton, UnityEngine.Event.current.mousePosition, elements, curPath, toolbarButtons, pagination.pagesGUI, ref searchFilter, out searchChanged, out pageOffset, out clickedElementIndex, out clickedElementCollection);
             
             dragDrop.DrawDraggedGUIs();
             
@@ -65,7 +107,7 @@ namespace AssetObjectsPacks {
             IEnumerable<int> droppedIndicies;
             bool droppedOnReceiver = dragDrop.DrawAndUpdate(selectionSystem, out receiverIndex, out receiverCollection, out droppedCollection, out droppedIndicies);
             if (droppedOnReceiver) {
-                onDirDragDrop(droppedIndicies, curPath, elements[receiverCollection][receiverIndex].filePath);
+                onDirDragDrop(droppedIndicies, curPath, elements[receiverCollection][receiverIndex].displayPath);
             }
 
             //check clicked element
@@ -75,12 +117,14 @@ namespace AssetObjectsPacks {
             
             bool movedFolder = (folderBack && MoveFolder()) || (forwardDir != null && MoveFolder(forwardDir));
             
-            selectionChanged = selectionSystem.HandlDirectionalSelection(keyboardListener[KeyCode.UpArrow], keyboardListener[KeyCode.DownArrow], keyboardListener.shift, elements[1].Length - 1) || selectionChanged;
+            selectionChanged = selectionSystem.HandleDirectionalSelection(keyboardListener[KeyCode.UpArrow], keyboardListener[KeyCode.DownArrow], keyboardListener.shift, elements[1].Length - 1) || selectionChanged;
 
             shouldRebuild = droppedOnReceiver || movedFolder || searchChanged|| paginationSuccess;            
             shouldResetPage = movedFolder;
 
             if (!shouldRebuild && selectionChanged) onSelectionChange();
+
+            checkHotkeys(keyboardListener);
         }
 
 
@@ -109,15 +153,15 @@ namespace AssetObjectsPacks {
                 folderBack = true;
             }
             else if (element.isDirectory) {
-                string path = element.filePath;
                 //if not already there
-                if (path != curPath) forwardDir = path;
+                if (element.displayPath != curPath) forwardDir = element.displayPath;
             }
             else {//element select
                 selectionSystem.OnObjectSelection(clickedIndex, k.shift);
                 selectionChanged = true;
             }
         }
+
         public void ForceBackFolder () {
             MoveFolder();
             DoReset(false, true);
@@ -147,49 +191,47 @@ namespace AssetObjectsPacks {
             return true;
         }
         
-        public IEnumerable<int> GetPoolIndiciesInSelection (bool deep) {
-            return selectionSystem.GetTrackedEnumerable().Generate( i => elements[1][i].id == -1 && !deep ? -1 : elements[1][i].poolIndex );
+        public IEnumerable<int> GetPoolIndiciesInSelection (bool deep, int collectionFilter) {
+            return selectionSystem.GetTrackedEnumerable().Generate( i => (elements[1][i].id == -1 && !deep) || (elements[1][i].collectionID != collectionFilter && collectionFilter != -1) ? -1 : elements[1][i].poolIndex );
         }
-        public IEnumerable<int> GetPoolIndiciesInShown (bool deep) {
-            return elements[1].Generate( e => e.id == -1 && !deep ? -1 : e.poolIndex );
+        public IEnumerable<int> GetPoolIndiciesInShown (bool deep, int collectionFilter) {
+            return elements[1].Generate( e => (e.id == -1 && !deep) || (e.collectionID != collectionFilter && collectionFilter != -1) ? -1 : e.poolIndex );
         }
-        public IEnumerable<int> GetPoolIndiciesInSelectionOrAllShown () {
-            return (hasSelection ? GetPoolIndiciesInSelection(false) : GetPoolIndiciesInShown(false)).Where( i => i != -1 );
+        public IEnumerable<int> GetPoolIndiciesInSelectionOrAllShown (int collectionFilter) {
+            return (hasSelection ? GetPoolIndiciesInSelection(false, collectionFilter) : GetPoolIndiciesInShown(false, collectionFilter)).Where( i => i != -1 );
         }
 
-        IEnumerable<int> _GetIDsInIndicies(bool useRepeats, IEnumerable<int> indicies, bool includeDirs, string dirCheckTitle, string dirCheckMsg) {
+        IEnumerable<Vector2Int> _GetElementsInIndicies(bool useRepeats, IEnumerable<int> indicies, bool includeDirs, string dirCheckTitle, string dirCheckMsg) {
             if (indicies == null) return null;
-            HashSet<int> ids = new HashSet<int>();
+            HashSet<Vector2Int> r = new HashSet<Vector2Int>();
             bool checkedDirs = false;
             foreach (var i in indicies) {
-                int id = elements[1][i].id;
+                SelectionElement e = elements[1][i];
+                int id = e.id;
                 if (id == -1) {
                     if (!includeDirs) continue;
                     if (!checkedDirs) {
                         if (!EditorUtility.DisplayDialog(dirCheckTitle, dirCheckMsg, "Ok", "Cancel")) return null;
                         checkedDirs = true;
                     }
-                    getIDsInDirectory(elements[1][i].filePath, useRepeats, ids);
+                    getElementsInDirectory(elements[1][i].displayPath, useRepeats, r);
                 }
-                else ids.Add(id);
+                else r.Add(new Vector2Int(e.id, e.collectionID));
             }
-            return ids;
+            return r;
         }
         
-        public IEnumerable<int> GetIDsInSelectionDeep (string dirCheckTitle, string dirCheckMessage) {
-            return _GetIDsInIndicies(false, GetSelectionEnumerable(), true, dirCheckTitle, dirCheckMessage);
+        public IEnumerable<Vector2Int> GetElementsInSelection () {
+            return _GetElementsInIndicies(false, GetSelectionEnumerable(), false, null, null);
         }
-        public IEnumerable<int> GetIDsInSelection () {
-            return _GetIDsInIndicies(false, GetSelectionEnumerable(), false, null, null);
+        public IEnumerable<Vector2Int> GetElementsInSelectionDeep (string dirCheckTitle, string dirCheckMessage) {
+            return _GetElementsInIndicies(false, GetSelectionEnumerable(), true, dirCheckTitle, dirCheckMessage);
         }
         public IEnumerable<int> GetSelectionEnumerable () {
             return selectionSystem.GetTrackedEnumerable();
         }
         
-        public void Initialize () {
-            DoReset(true, true);
-        }
-
+        
 
         void DoReset (bool resetPath, bool resetPage) {
             if (resetPath) {
@@ -232,35 +274,35 @@ namespace AssetObjectsPacks {
             List<SelectionElement> newElements = new List<SelectionElement>();
 
             IEnumerable<SelectionElement> poolElements = getPoolElements(dir);
+
             if (showFiles && !searchFilter.IsEmpty()) {
                 string lowerSearch = searchFilter.ToLower();
-                poolElements = poolElements.Where(e => e.filePath.ToLower().Contains(lowerSearch));
+                poolElements = poolElements.Where(e => e.displayPath.ToLower().Contains(lowerSearch));
             }
-
+            
             int folderOffset = dir.IsEmpty() ? 0 : (!dir.IsEmpty() && !dir.Contains("/") ? 1 : dir.Split('/').Length);
             string dirPrefix = dir + (dir.IsEmpty() ? "" : "/");
                     
             foreach (var e in poolElements) {
                 
                 bool isFile = true;
-                string name = e.filePath;
-                if (name.Contains("/")) {
-                    string[] sp = name.Split('/');
+                string displayPath = e.displayPath;
+                if (displayPath.Contains("/")) {
+                    string[] sp = displayPath.Split('/');
                     isFile = folderOffset == sp.Length - 1;
-                    name = sp[folderOffset];
+                    displayPath = sp[folderOffset];
                 }
-
                 if (isFile) {
                     if (showFiles) {
-                        e.SetGUI(new GUIContent( name ));
+                        e.SetGUI(new GUIContent( displayPath ));
                         newElements.Add(e);
                     }
                 }   
                 //foldered directory
                 else {
-                    if (used.Contains(name)) continue;
-                    used.Add(name);                
-                    newElements.Insert(dirIndex++, new SelectionElement(e, dirPrefix + name, new GUIContent(name)));
+                    if (used.Contains(displayPath)) continue;
+                    used.Add(displayPath);                
+                    newElements.Insert(dirIndex++, new SelectionElement(e, dirPrefix + displayPath, new GUIContent(displayPath)));
                 }
             }
             return newElements;

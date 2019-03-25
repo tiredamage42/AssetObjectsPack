@@ -44,6 +44,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gizmoColor: {r: 0, g: 1, b: 0, a: 1}
+  behavior: {fileID: 11400000, guid: 352580cc798334d0fbd0879de0861764, type: 2}
   useRandomPlaylist: 0
   events: []
   overrideDuration: -1
@@ -53,7 +54,7 @@ MonoBehaviour:
   smoothPositionTime: 1
   smoothRotationTime: 1
   messageBlocks:
-  - GoTo_Cue(cueposition);
+  - NavigateTo(cueposition);
   - 
   - 
   - 

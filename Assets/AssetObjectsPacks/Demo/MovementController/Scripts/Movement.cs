@@ -1,6 +1,4 @@
-﻿//using System.Collections;
-//using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 
 /*
@@ -24,14 +22,20 @@ public static class Movement
         return transform.forward;
     }
 
-    public static Vector3 CalculateTargetFaceDirection(Direction direction, Vector3 origin, Vector3 destination) {
+    public static Vector3 CalculateTargetFaceDirection(Direction direction, Vector3 origin, Vector3 destination, bool flat2d) {
         Vector3 targetDir = destination - origin;
-        targetDir.y = 0;
+        Vector3 flatTarget = new Vector3(targetDir.x, 0, targetDir.z);
+        
+
         switch (direction) {
-            case Direction.Forward: return targetDir;
-            case Direction.Backwards: return -targetDir;
-            case Direction.Left: return -Vector3.Cross(targetDir.normalized, Vector3.up);
-            case Direction.Right: return Vector3.Cross(targetDir.normalized, Vector3.up);        
+            case Direction.Forward: 
+                return flat2d ? flatTarget : targetDir;
+            case Direction.Backwards: 
+                return -(flat2d ? flatTarget : targetDir);
+            case Direction.Left: 
+                return -Vector3.Cross(flatTarget.normalized, Vector3.up);
+            case Direction.Right: 
+                return Vector3.Cross(flatTarget.normalized, Vector3.up);        
         }
         return targetDir;
     }
@@ -39,7 +43,7 @@ public static class Movement
 
 
     public static class AI {
-        public static Direction CalculateMoveDirection (Vector3 origin, Vector3 destination, Vector3 interestPoint, float minDistanceThreshold) {
+        public static Direction CalculateMoveDirection (Vector3 origin, Vector3 destination, Vector3 interestPoint, float minDistanceThreshold, Direction currentDirection) {
 
             Vector3 a = origin;
             Vector3 b = destination;
@@ -49,8 +53,14 @@ public static class Movement
             
             //maybe return current direction (for no sudden changes)
             float threshold = minDistanceThreshold * minDistanceThreshold;
-            if (a2b.sqrMagnitude < threshold) {
-                return Direction.Forward;
+
+            
+            //if the destination is close enough use 2d distance
+            float y = a2b.y < Platformer.tallPlatformSize ? 0 : a2b.y;
+            Vector3 chckDistVector = new Vector3(a2b.x, y, a2b.z);
+
+            if (chckDistVector.sqrMagnitude < threshold) {
+                return currentDirection;
             }
             
             a2b.y = 0;
@@ -70,8 +80,9 @@ public static class Movement
             //angle is too acute or obtuse between face ("enemy" point) and destination for strafing 
             //(backwards or forwards)
             if (angle <= 45 || angle >= 135) {
-                return angle >= 135 ? Direction.Forward : Direction.Backwards;
+                return angle >= 135 ? Direction.Backwards : Direction.Forward;
             }
+            
             /*
                       C
                        \

@@ -1,43 +1,60 @@
 ﻿using UnityEngine;
 using AssetObjectsPacks;
 using System;
+
+[RequireComponent(typeof(CharacterMovement))]
 public class Platformer : MovementControllerComponent
 {
 
-    //checked in editor
-
-    public const float tallPlatformStartDistance = 1;
+    //checked values in editor
+    public const float tallPlatformStartDistance = 1; //platform ups are 1 unit away
+    public const float shortPlatformStartDistance = .35f; //platform ups are .35 units away
     public const float tallPlatformSize = 2.25f;
     public const float smallPlatformSize = 1.0f;
-    const float distanceAheadCheckUp = tallPlatformStartDistance + .1f; //platform ups are 1 unit away
-    const float distanceAheadCheckDown = .35f + .1f; //platform ups are .35 units away
 
+    const float spaceBuffer = .1f;
+    public float distanceAheadCheckUp = tallPlatformStartDistance + spaceBuffer; 
+    public float distanceAheadCheckDown = shortPlatformStartDistance + spaceBuffer; 
     const float faceAngleThreshold = 45; //max face angle with platform up candidate
     const float steepnessRange = .1f; //dot steepness threshold (from 0) for up platforms
     const float dropHeightRange = .1f; //range buffer for checking if a drop is short or tall
     const float sphereCheckRadius = .05f;
-    const float spaceBuffer = .1f;
 
     public bool doAutoPlatform;
     public LayerMask layerMask;
+    public Cue platformUpCueShort, platformDownCueShort;
+    public Cue platformUpCueTall, platformDownCueTall;
 
 
-    bool overrideMovement { get { return !controller.grounded || controller.overrideMovement; } }
-    delegate bool CheckForPlatform (out bool isShort, out Vector3 atPos, out Quaternion atRot);
+    bool overrideMovement { get { return !characterMovement.grounded || controller.overrideMovement; } }
+    
+    Action onPlatformEnd;
 
+    CharacterMovement characterMovement;
 
-
-    Action<bool> onPlatformEnd;
-    public void SetCallback (Action<bool> onPlatformEnd) {
+    protected override void Awake () {
+        base.Awake();
+        characterMovement = GetComponent<CharacterMovement>();
+    }
+    public void SetCallback (Action onPlatformEnd) {
         this.onPlatformEnd = onPlatformEnd;
     }
-    
-
-    void FixedUpdate () {
-        if (doAutoPlatform){// && controller.speed > 0 && turner.FacingTarget()) {
+    public override void UpdateLoop (float deltaTime) {
+        if (doAutoPlatform) {
             AutoPlatformUpdate();
         }
     }
+
+    public bool PlatformDownUpdate (bool triggerPlatform) {
+        return PlatformUpdate (triggerPlatform, CheckForPlatformDown, platformDownCueShort, platformDownCueTall, true);
+    }
+    public bool PlatformUpUpdate (bool triggerPlatform) {
+        return PlatformUpdate (triggerPlatform, CheckForPlatformUp, platformUpCueShort, platformUpCueTall, false);
+    }
+    public static bool SamePlatformLevels (Vector3 origin, Vector3 platformPos) {
+        return Mathf.Abs(platformPos.y - origin.y) < (smallPlatformSize - .1f);
+    }
+
     void AutoPlatformUpdate () {
         //check up
         if (!PlatformUpUpdate(true)) {
@@ -51,7 +68,7 @@ public class Platformer : MovementControllerComponent
         return value >= originalValue - buffer && value <= originalValue + buffer;
     }
 
-    
+    delegate bool CheckForPlatform (out bool isShort, out Vector3 atPos, out Quaternion atRot);
     bool PlatformUpdate (bool triggered, CheckForPlatform checkFN, Cue shortCue, Cue tallCue, bool isDown) {
         if (overrideMovement) return false;
         
@@ -60,7 +77,7 @@ public class Platformer : MovementControllerComponent
         Quaternion atRot;
         bool foundPlatform = checkFN(out isShort, out atPos, out atRot);
         if (foundPlatform && triggered) {
-            Debug.Log("platform!!!");
+            //Debug.Log("platform!!!");
             Playlist.InitializePerformance(
                 "platform", 
                 isShort ? shortCue : tallCue, 
@@ -70,24 +87,14 @@ public class Platformer : MovementControllerComponent
                 atPos, 
                 atRot, 
                 true, 
-                () => {
-                    if (onPlatformEnd != null) {
-                        onPlatformEnd(isDown); 
-                    }
-                }
+                onPlatformEnd
             );
         }    
         return foundPlatform;    
     }
 
-    public bool PlatformDownUpdate (bool triggerPlatform) {
-        return PlatformUpdate (triggerPlatform, CheckForPlatformDown, behavior.platformDownCueShort, behavior.platformDownCueTall, true);
-    }
 
-    public bool PlatformUpUpdate (bool triggerPlatform) {
-        return PlatformUpdate (triggerPlatform, CheckForPlatformUp, behavior.platformUpCueShort, behavior.platformUpCueTall, false);
-    }
-
+    
     bool CheckForPlatformUp (out bool isShort, out Vector3 spawnCuePosition, out Quaternion spawnCueRotation) {
         
         bool foundPlatform = false;
@@ -110,6 +117,8 @@ public class Platformer : MovementControllerComponent
         Vector3 myPos = transform.position;
 
         Ray checkAheadRay = new Ray(myPos + Vector3.up * buffer, rayDirection);
+        
+        Debug.DrawRay(checkAheadRay.origin, checkAheadRay.direction * distanceAheadCheckUp, Color.red);
         RaycastHit wallHit;
         if (Physics.SphereCast(checkAheadRay, sphereCheckRadius, out wallHit, distanceAheadCheckUp, layerMask)) {
             
@@ -166,10 +175,12 @@ public class Platformer : MovementControllerComponent
         isShort = false;
 
         Vector3 myPos = transform.position;
+        Vector3 rayDirection = controller.moveDireciton;
+
 
         //spawn at controller position and rotation
         spawnCuePosition = myPos;
-        spawnCueRotation = transform.rotation;
+        spawnCueRotation = Quaternion.LookRotation(rayDirection);
 
         /*
             check if theres an obstacle in front
@@ -183,7 +194,10 @@ public class Platformer : MovementControllerComponent
 
         float buffer = spaceBuffer + sphereCheckRadius;
 
-        Ray checkAheadRay = new Ray(myPos + Vector3.up * buffer, controller.moveDireciton);
+        Ray checkAheadRay = new Ray(myPos + Vector3.up * buffer, rayDirection);
+
+        Debug.DrawRay(checkAheadRay.origin, checkAheadRay.direction * distanceAheadCheckDown, Color.red);
+        
         if (!Physics.SphereCast(checkAheadRay, sphereCheckRadius, distanceAheadCheckDown, layerMask)) {
             //no obstacle
 

@@ -23,7 +23,6 @@ public class PlayerController : MonoBehaviour
         platformer = GetComponent<Platformer>();
 
         turner.doAutoTurn = true;
-        turner.checkDirectionChange = true;
         cam = Camera.main;
 
         InitializeTimeSlow();
@@ -52,7 +51,6 @@ public class PlayerController : MonoBehaviour
         faceDir.Normalize();
 
         turner.doAutoTurn = true;
-        turner.checkDirectionChange = true;
         
         turner.SetTurnTarget(transform.position + faceDir * 500);       
 
@@ -94,9 +92,6 @@ public class PlayerController : MonoBehaviour
     Jumper jumper;
     Platformer platformer;
 
-
-
-
     float initialTimeScale, initialFixedDeltaTime, initialMaxDelta;
     void InitializeTimeSlow () {
         initialTimeScale = Time.timeScale;
@@ -105,18 +100,13 @@ public class PlayerController : MonoBehaviour
     }
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Equals)) {
+        if (Input.GetKeyDown(KeyCode.Equals))
             timeDilation += .1f;
-            if (timeDilation > 1) {
-                timeDilation = 1;
-            }
-        }
-        if (Input.GetKeyDown(KeyCode.Minus)) {
+        if (Input.GetKeyDown(KeyCode.Minus))
             timeDilation -= .1f;
-            if (timeDilation < .1f) {
-                timeDilation = .1f;
-            }
-        }
+        
+        timeDilation = Mathf.Clamp(timeDilation, .1f, 1);
+
         Time.timeScale = initialTimeScale * timeDilation;
         Time.fixedDeltaTime = initialFixedDeltaTime * timeDilation;
         Time.maximumDeltaTime = initialMaxDelta * timeDilation;

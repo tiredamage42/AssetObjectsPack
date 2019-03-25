@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da8d2dcf5a52d408dbc68589518dae25, type: 3}
   m_Name: AIBehavior
   m_EditorClassIdentifier: 
-  minStrafeDistance: 1
   navigateToCue: {fileID: 8160287640862645209, guid: bc96d448050bc4b799fe87cd085339c5,
     type: 3}
+  minStrafeDistance: 2
   platformEndWaypointTriggerRadius: 2

@@ -19,33 +19,56 @@ namespace AssetObjectsPacks {
         }
 
         public static string[] GetFilePathsInDirectory (string dir, bool includeDir, string extensions, string validCheck, bool shouldContain, SearchOption search = SearchOption.AllDirectories) {
-            string dPath = Application.dataPath.Substring(0, Application.dataPath.Length - 6);
+            string dPath = Application.dataPath;
+
+            dPath = dPath.Substring(0, dPath.Length - 6);
+            
             int cutoff = dPath.Length + 1 + (includeDir ? 0 : dir.Length);//Assets ...;  
+            
             string checkDir = dPath + "/" + dir;
+            
             List<string> results = new List<string>();
             string[] ext = extensions.Split(',');
-            for (int i = 0; i < ext.Length; i++) results.AddRange(Directory.GetFiles(checkDir, "*" + ext[i], search).Where(s => s.Contains(validCheck) == shouldContain).Select(s => s.Substring(cutoff)));
+            for (int i = 0; i < ext.Length; i++) {
+                if (ext[i].IsEmpty()) continue;
+                results.AddRange(
+                    Directory.GetFiles(checkDir, "*" + ext[i], search)
+                        .Where(s => s.Contains(validCheck) == shouldContain)
+                        .Select(s => s.Substring(cutoff))
+                );
+            }
             return results.ToArray();
         }
+        /*
+        public static int GetCountInDirectory (string dir, string extensions, string validCheck, bool shouldContain, SearchOption search = SearchOption.AllDirectories) {
+            string dPath = Application.dataPath;
+            dPath = dPath.Substring(0, dPath.Length - 6);
+            string checkDir = dPath + "/" + dir;
 
+            string[] ext = extensions.Split(',');
+            int c = 0;
+            for (int i = 0; i < ext.Length; i++) {
+                if (ext[i].IsEmpty()) continue;
+                c += Directory.GetFiles(checkDir, "*" + ext[i], search).Where(s => s.Contains(validCheck) == shouldContain).Count();
+            }
+            return c;
+        }
+
+         */
         
         // fbx files have extra "preview" clip that was getting in the awy (mixamo)
         public static T GetAssetAtPath<T> (string path) where T : Object {
-            Object[] data = AssetDatabase.LoadAllAssetsAtPath(path);
-            for (int i = 0; i < data.Length; ++i) {
-                Object d = data[i];
-                if (d.name.Contains("__preview__")) continue;
-                if (d.GetType() != typeof(T)) continue; 
-                return (T)d;
-            }
-            return null;
+            return (T)GetAssetAtPath(path, typeof(T));
         }
-        public static Object GetAssetAtPath (string path, string type_name) {
+        public static Object GetAssetAtPath (string path, string typeName) {
+            return GetAssetAtPath(path, typeName.ToType());
+        }
+        public static Object GetAssetAtPath (string path, System.Type type) {
             Object[] data = AssetDatabase.LoadAllAssetsAtPath(path);
             for (int i = 0; i < data.Length; ++i) {
                 Object d = data[i];
+                if (d.GetType() != type) continue;
                 if (d.name.Contains("__preview__")) continue;
-                if (d.GetType().ToString() != type_name) continue;
                 return d;
             }
             return null;

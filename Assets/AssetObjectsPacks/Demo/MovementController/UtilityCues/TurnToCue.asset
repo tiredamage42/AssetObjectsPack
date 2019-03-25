@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ac55a32d0a714329bfbc7e4cc4b655b, type: 3}
+  m_Name: TurnToCue
+  m_EditorClassIdentifier: 
+  events:
+  - {fileID: 11400000, guid: ad1620ac5095f458c99d9d33a8d63ed7, type: 2}
+  overrideDuration: -1
+  playImmediate: 0
+  snapPlayerStyle: 0
+  smoothPositionTime: 1
+  smoothRotationTime: 1
+  positionOffset: {x: 0, y: 0, z: 0}
+  rotationOffset: {x: 0, y: 0, z: 0}
+  messageBlocks:
+  - TurnTo(position);
+  - 
+  - 
+  - 

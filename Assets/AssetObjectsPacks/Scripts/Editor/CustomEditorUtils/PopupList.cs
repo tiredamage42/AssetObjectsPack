@@ -3,12 +3,9 @@ using UnityEngine;
 using UnityEditor;
 namespace AssetObjectsPacks {
     public class PopupList : PopupWindowContent {
-        public struct ListElement {
+        public class ListElement {
             public GUIContent m_Content;
             public bool selected;
-            public void SetSelected(bool selected) {
-                this.selected = selected;
-            }
             public ListElement(string text, bool selected) {
                 m_Content = new GUIContent(text);
                 this.selected = selected;
@@ -19,7 +16,10 @@ namespace AssetObjectsPacks {
             public System.Action<ListElement> m_OnSelectCallback;
             public void NewOrMatchingElement(string label, bool selected) {
                 foreach (var element in m_ListElements) {
-                    if (element.m_Content.text == label) element.SetSelected(selected);
+                    if (element.m_Content.text == label) {
+                        element.selected = selected;
+                        return;
+                    }
                 }
                 m_ListElements.Add(new ListElement(label, selected));
             }
