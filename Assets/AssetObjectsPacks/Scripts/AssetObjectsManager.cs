@@ -4,6 +4,10 @@ using UnityEngine;
 namespace AssetObjectsPacks {
     public class AssetObjectsManager : MonoBehaviour
     {
+        void OnDrawGizmos () {
+
+    
+        }
         public PacksManager packs;
 
         static AssetObjectsManager _instance;
@@ -31,7 +35,7 @@ namespace AssetObjectsPacks {
         }
             
         void Awake () {
-            AddUpdateCallback( Playlist.UpdatePerformances );
+            AddUpdateCallback( Playlists.Performance.UpdatePerformances );
         }
         event System.Action updateCallbacks;
         

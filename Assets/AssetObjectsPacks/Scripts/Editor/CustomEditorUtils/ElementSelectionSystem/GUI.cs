@@ -184,7 +184,8 @@ namespace AssetObjectsPacks {
                 if(elements[i].Draw(mousePos, s)) clickedElementIndex = i;    
             }
             
-            if (l == 0) EditorGUILayout.HelpBox("No Elements!", MessageType.Info);   
+            if (l == 0) 
+                GUIUtils.HelpBox("No Elements!", MessageType.Info);   
         
             if (clickedElementIndex != -1 && wasntClicked) clickedElementCollection = 1;
             EditorGUILayout.EndVertical();
@@ -218,8 +219,13 @@ namespace AssetObjectsPacks {
 
 
         public static void DrawElementsView (GUIStyle s, Vector2 mousePos, SelectionElement[][] elements, string dirViewPath, Action toolbarButtons, GUIContent pagesGUI, ref string searchFilter, out bool searchChanged, out int pageOffset, out int clickedElementIndex, out int clickedElementCollection) {
+            
             GUIUtils.StartBox(0);
+
+            //if (UnityEngine.Event.current.type == EventType.Repaint) {
+
             EditorGUILayout.BeginHorizontal();
+            //}
 
             clickedElementCollection = -1; 
             clickedElementIndex = -1;
@@ -227,7 +233,11 @@ namespace AssetObjectsPacks {
             DrawPreviousDirectoryList (s, mousePos, elements[0], ref clickedElementIndex, ref clickedElementCollection);
             DrawMainElementsList(s, mousePos, elements[1], dirViewPath, ref clickedElementIndex, ref clickedElementCollection, toolbarButtons, ref searchFilter, out searchChanged);
             
-            EditorGUILayout.EndHorizontal();
+            //if (UnityEngine.Event.current.type == EventType.Repaint) {
+
+                EditorGUILayout.EndHorizontal();
+            //}
+            
             GUIUtils.EndBox();
 
             //pagination gui

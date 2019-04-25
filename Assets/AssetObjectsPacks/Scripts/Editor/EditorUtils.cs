@@ -19,8 +19,10 @@ namespace AssetObjectsPacks {
         }
 
         public static string[] GetFilePathsInDirectory (string dir, bool includeDir, string extensions, string validCheck, bool shouldContain, SearchOption search = SearchOption.AllDirectories) {
+            if (extensions == ".prefab") {
+                Debug.Log("getting rpefab stuf");
+            }
             string dPath = Application.dataPath;
-
             dPath = dPath.Substring(0, dPath.Length - 6);
             
             int cutoff = dPath.Length + 1 + (includeDir ? 0 : dir.Length);//Assets ...;  
@@ -31,7 +33,8 @@ namespace AssetObjectsPacks {
             string[] ext = extensions.Split(',');
             for (int i = 0; i < ext.Length; i++) {
                 if (ext[i].IsEmpty()) continue;
-                results.AddRange(
+
+                results.AddRange (
                     Directory.GetFiles(checkDir, "*" + ext[i], search)
                         .Where(s => s.Contains(validCheck) == shouldContain)
                         .Select(s => s.Substring(cutoff))

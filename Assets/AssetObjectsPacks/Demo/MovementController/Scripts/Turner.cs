@@ -2,6 +2,8 @@
 using AssetObjectsPacks;
 using System;
 
+namespace Movement
+{
 /*
     incorporate turning
 
@@ -11,14 +13,14 @@ using System;
 */
 public class Turner : MovementControllerComponent
 {
+    public float turnAttemptRetryTime = 1.0f;
     public bool doAutoTurn, autoTurnAnimate;
     public bool use2d = true;
-    public bool disableAnim;
-
-
+    
     public bool isTurning, inTurnAnimation, initializedTurnCue;
     EventPlayer.EventPlayEnder endEventPlayerPlay;
-    Vector3 attemptTurnDir, turnTarget;    
+    Vector3 attemptTurnDir;//, turnTarget;    
+    float lastAttemptTurn;
     const string turnAngleName = "TurnAngle", turnRightName = "ToRight";
 
     void OnDrawGizmos()
@@ -31,8 +33,33 @@ public class Turner : MovementControllerComponent
     }
 
     public void SetTurnTarget (Vector3 target) {
-        turnTarget = target;
+        _turnTarget = target;
     }
+
+        Vector3 _turnTarget;
+        System.Func<Vector3> getTurnTarget;
+
+        public Vector3 turnTarget {
+            get {
+                if (getTurnTarget != null) {
+                    return getTurnTarget();
+                }
+                return _turnTarget;
+            }
+        }
+
+        public void SetTurnTargetCallback (System.Func<Vector3> getTurnTarget) {
+            this.getTurnTarget = getTurnTarget;
+        }
+    
+
+
+
+
+
+
+
+
 
     protected override void Awake() {
         base.Awake();
@@ -64,7 +91,9 @@ public class Turner : MovementControllerComponent
         if (autoTurnAnimate) {
             //if we're auto turning, we only call events when needing animations
             //so use anim turn threshold
-            TurnTo(turnTarget, behavior.animTurnAngleThreshold, null);
+            if (TurnTo(turnTarget, behavior.animTurnAngleThreshold, null)) {
+                // Debug.Log("auto turned");
+            }
         }
     }
 
@@ -87,7 +116,9 @@ public class Turner : MovementControllerComponent
             
             if (doingManualTurn) {
                 if (CheckForEndTurn(targetDir)) {
+                    //Debug.Log("end turn");
                     OnEndTurn();
+                    return;
                 }
             }
         
@@ -104,9 +135,13 @@ public class Turner : MovementControllerComponent
         
         //if direction has changed too much from last attempt
         //end the turn (retries if above threshold and auto turning)
-        float angleFromLastAttempt = Vector3.Angle(targetDir, attemptTurnDir);
-        if (angleFromLastAttempt > behavior.dirTurnChangeThreshold) {  
-            return true;
+
+        float timeSinceLastAttempt = Time.time - lastAttemptTurn;
+        if (timeSinceLastAttempt >= turnAttemptRetryTime) {
+            float angleFromLastAttempt = Vector3.Angle(targetDir, attemptTurnDir);
+            if (angleFromLastAttempt > behavior.dirTurnChangeThreshold) {  
+                return true;
+            }
         }
         
         //if we're done animating
@@ -127,18 +162,17 @@ public class Turner : MovementControllerComponent
         callback called by cue message
 
         parameters:
-            layer (internally set), cue, vector3 target
+            layer (internally set), vector3 target
             
         makes the controller turn, so the forward (or move direction) faces the cue's runtime interest position
 
         the cue ends when this transform's forward (or move direction) is within the turn help angle 
         (relative to the direction towards the movement target)
     */
-    void TurnTo_Cue (object[] parameters) {
+    void TurnTo (object[] parameters) {
         
         int layer = (int)parameters[0];
-        Cue cue = (Cue)parameters[1];
-        turnTarget = (Vector3)parameters[2];
+        _turnTarget = (Vector3)parameters[1];
 
 
         Vector3 targetDir = Movement.CalculateTargetFaceDirection(controller.direction, transform.position, turnTarget, use2d);
@@ -153,10 +187,14 @@ public class Turner : MovementControllerComponent
         
         //if its below the animation threshold but above the help threshold
         isTurning = inTurnAnimation || angleWMoveDir > behavior.turnAngleHelpThreshold;
+        
+        // Debug.Log("turn cue");
 
         if (isTurning) {
+            lastAttemptTurn = Time.time;
             attemptTurnDir = targetDir;
             initializedTurnCue = true;
+            // Debug.Log("woot turn");
         }
         
         if (inTurnAnimation) {
@@ -185,7 +223,7 @@ public class Turner : MovementControllerComponent
     public void TurnTo (Vector3 target, Action onTurnSuccess = null) {
         TurnTo(target, behavior.turnAngleHelpThreshold, onTurnSuccess);
     }
-    void TurnTo (Vector3 target, float threshold, Action onTurnSuccess = null) {
+    bool TurnTo (Vector3 target, float threshold, Action onTurnSuccess = null) {
 
         if (!overrideMovement){
                 
@@ -200,10 +238,11 @@ public class Turner : MovementControllerComponent
 
                 isTurning = true;                
                 initializedTurnCue = false;
-
-                Playlist.InitializePerformance("turning", behavior.turnCue, eventPlayer, false, eventLayer, target, Quaternion.identity, false, onTurnSuccess);
+                Playlist.InitializePerformance("turning", behavior.turnCue, eventPlayer, false, eventLayer, new MiniTransform(target, Quaternion.identity), false, onTurnSuccess);
+                return true;
             }
         }
+        return false;
     }
 
     /*
@@ -215,4 +254,5 @@ public class Turner : MovementControllerComponent
     void OnEndPlayAttempt (bool success) {
         inTurnAnimation = false;
     }
+}
 }

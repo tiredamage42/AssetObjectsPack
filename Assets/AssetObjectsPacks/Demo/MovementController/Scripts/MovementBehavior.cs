@@ -1,9 +1,11 @@
 ﻿using UnityEngine;
 
+namespace Movement {
+
 [CreateAssetMenu(fileName = "New Movement Behavior", menuName = "Movement/Behavior", order = 2)]
 public class MovementBehavior : ScriptableObject
 {
-    public AssetObjectsPacks.Cue turnCue, wayPointCue, moveCue, stillCue;
+    public AssetObjectsPacks.CueBehavior turnCue, wayPointCue, moveCue, stillCue;
 
     public float groundDistanceCheckAir = .01f;
     public float groundDistanceCheckGrounded = .25f;
@@ -29,3 +31,5 @@ public class MovementBehavior : ScriptableObject
     public float turnAngleHelpThreshold = 5.0f;
     
 }
+}
+

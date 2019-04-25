@@ -65,7 +65,7 @@ namespace AssetObjectsPacks {
                         if (ao.solo) {
                             eventResponse.objectsPerPack[k].Clear();
 
-                            if (CustomScripting.StatementValue(ao.conditionBlock, parameters, eventResponse.logErrors, eventResponse.logWarnings)) {
+                            if (CustomScripting.StatementValue(ao.conditionBlock, parameters, ref eventResponse.logErrors, ref eventResponse.logWarnings)) {
             
                                 eventResponse.objectsPerPack[k].Add(assetObjects[i]);
                             }
@@ -74,7 +74,7 @@ namespace AssetObjectsPacks {
                             break;
                         }
                         if (!ao.mute) {
-                            if (CustomScripting.StatementValue(ao.conditionBlock, parameters, eventResponse.logErrors, eventResponse.logWarnings)) {
+                            if (CustomScripting.StatementValue(ao.conditionBlock, parameters, ref eventResponse.logErrors, ref eventResponse.logWarnings)) {
             
                                 eventResponse.objectsPerPack[k].Add(assetObjects[i]);
                             }
@@ -117,7 +117,7 @@ namespace AssetObjectsPacks {
 
         void GetFilteredStates (EventState eventState, Dictionary<string, CustomParameter> parameters, EventResponse eventResponse){
             
-            if (CustomScripting.StatementValue(eventState.conditionBlock, parameters, eventResponse.logErrors, eventResponse.logWarnings)) {
+            if (CustomScripting.StatementValue(eventState.conditionBlock, parameters, ref eventResponse.logErrors, ref eventResponse.logWarnings)) {
                 
                 eventState.GetAssetObjects(eventResponse, parameters);
                 int l = eventState.subStatesIDs.Length;

@@ -38,6 +38,40 @@ namespace AssetObjectsPacks {
         public T this[int key] { get { return pool[key]; } }
     }
 
+    public struct MiniTransform {
+
+        public Transform targetParent;
+        public Vector3 pos;
+        public Quaternion rot;
+        public MiniTransform (Vector3 pos, Quaternion rot) 
+        => (this.pos, this.rot, this.targetParent) = (pos, rot, null);
+        public MiniTransform(Transform t, bool useAsTargetParent) {
+            if (useAsTargetParent) {
+                targetParent = t;
+            }
+            else {
+                targetParent = null;
+            }
+            (this.pos, this.rot) = (t.position, t.rotation);
+        }
+    }
+
+
+    public class SmoothValue {
+        public enum SmoothType { Lerp = 0, MoveTowards = 1, SmoothDamp = 2 }
+        float v;
+        public float Smooth (float orig, float target, float speed, float deltaTime, SmoothType smoothType) {
+            switch(smoothType) {
+                case SmoothType.Lerp:
+                    return Mathf.Lerp(orig, target, speed * deltaTime);
+                case SmoothType.MoveTowards:
+                    return Mathf.MoveTowards(orig, target, speed * deltaTime);
+                case SmoothType.SmoothDamp:
+                    return Mathf.SmoothDamp(orig, target, ref v, speed);
+            }
+            return 0;
+        }
+    }
 }
 
 

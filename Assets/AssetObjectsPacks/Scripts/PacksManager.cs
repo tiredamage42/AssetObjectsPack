@@ -6,6 +6,7 @@ namespace AssetObjectsPacks {
         #if UNITY_EDITOR
         public string dir, extensions, assetType;
         public CustomParameter[] defaultParameters;
+        public bool isCustom;
         #endif
 
         public string name;
@@ -45,8 +46,6 @@ namespace AssetObjectsPacks {
             if (debug) Debug.LogError("pack manager does not contain pack id: " + id);
             return null;
         }
-
-
         static void InitializeDictionaries () {
             if (id2name == null) {
                 PacksManager inst = instance;

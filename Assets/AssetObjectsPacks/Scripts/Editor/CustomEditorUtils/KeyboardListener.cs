@@ -9,7 +9,7 @@ namespace AssetObjectsPacks {
                     UnityEngine.Event e = UnityEngine.Event.current;
                     if (e.type != EventType.KeyDown) return false;
                     if (GUIUtils.KeyboardOverriden()) {
-                        Debug.Log("override key" );
+                        //Debug.Log("override key" );
                         return false;
                     }
 

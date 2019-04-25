@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7406673412871882167}
   - component: {fileID: 3942039490034758760}
+  - component: {fileID: 7893137973464254151}
   m_Layer: 0
   m_Name: PlatformUpLinkShort
   m_TagString: Untagged
@@ -45,10 +46,22 @@ OffMeshLink:
   m_AgentTypeID: 0
   m_Start: {fileID: 7406673412871882167}
   m_End: {fileID: 781097412902813939}
-  m_CostOverride: -1
+  m_CostOverride: 0
   m_BiDirectional: 0
   m_Activated: 1
   m_AutoUpdatePositions: 0
+--- !u!114 &7893137973464254151
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 137180523751179114}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e3d1f258efb743c3a7f24d847ac2f32, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &7973040994410228820
 GameObject:
   m_ObjectHideFlags: 0

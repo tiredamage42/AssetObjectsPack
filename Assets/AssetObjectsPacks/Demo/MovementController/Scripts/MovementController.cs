@@ -2,8 +2,8 @@
 using UnityEngine;
 using AssetObjectsPacks;
 
+namespace Movement {
 
-//[RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(EventPlayer))]
 public class MovementController : MonoBehaviour {
     
@@ -20,8 +20,8 @@ public class MovementController : MonoBehaviour {
 
     public Vector3 moveDireciton { get { return Movement.GetRelativeTransformDirection(direction, transform); } } 
             
-    int lastSpeed = -1;
-    Movement.Direction lastDirection = Movement.Direction.Backwards;
+    //int lastSpeed = -1, lastStance = -1;
+    //Movement.Direction lastDirection = Movement.Direction.Backwards;
     const string speedName = "Speed", directionName = "Direction", stanceName = "Stance";
 
 
@@ -42,7 +42,7 @@ public class MovementController : MonoBehaviour {
     
 
     public bool overrideMovement { get { return overrideMove || eventPlayer.cueMoving; } }
-    public bool overrideMove;
+    bool overrideMove;
     /*
         parameters:
             layer (internally set), override move
@@ -51,6 +51,8 @@ public class MovementController : MonoBehaviour {
     */
     void OverrideMovement (object[] parameters) {
         overrideMove = (bool)parameters[1];    
+        Debug.Log("override movment: " + overrideMove);
+        
     }    
 
     /*
@@ -64,8 +66,14 @@ public class MovementController : MonoBehaviour {
     */
     void StopMovement (object[] parameters) {
         //force change so change doesnt register and override cue animation
-        SetDirection(Movement.Direction.Forward, true);
-        SetSpeed(0, true);
+        
+        //SetDirection(Movement.Direction.Forward);
+        //SetSpeed(0);
+
+        speed = 0;
+        speedTracker.SetLastValue(speed);
+        direction = Movement.Direction.Forward;
+        directionTracker.SetLastValue(direction);
     }
 
     /*
@@ -79,13 +87,19 @@ public class MovementController : MonoBehaviour {
     void StartMovement(object[] parameters) {
         int l = parameters.Length;
         //unpack parameters
-        int layer = (int)parameters[0];
         int newSpeed = (l > 1) ? (int)parameters[1] : -1;
-        Movement.Direction newDirection = (Movement.Direction)((l > 2) ? ((int)parameters[2]) : (int)direction);
+        //Movement.Direction newDirection = (Movement.Direction)((l > 2) ? ((int)parameters[2]) : (int)direction);
+        
         //force change so change doesnt register and override cue animation
-        SetSpeed(newSpeed <= 0 ? CalculateSpeed(newSpeed) : newSpeed, true);
-        SetDirection(newDirection, true);
+        speed = newSpeed <= 0 ? CalculateSpeed(newSpeed) : newSpeed;
+        speedTracker.SetLastValue(speed);
+        
+        //SetSpeed(newSpeed <= 0 ? CalculateSpeed(newSpeed) : newSpeed);
+
+        //SetDirection(newDirection);
     }
+
+        
     
     public int CalculateSpeed (int newSpeed) {
         if (newSpeed <= 0) {
@@ -95,44 +109,55 @@ public class MovementController : MonoBehaviour {
         return newSpeed;
     }
 
-    void CheckSpeedDirectionChanges() {
-        bool changedSpeed = SetSpeed(speed, true);
-        bool changedDirection = SetDirection(speed == 0 ? Movement.Direction.Forward : direction, true);
-        bool changed = changedSpeed || changedDirection;
+    public void UpdateLoopState () {
 
+
+        //immediately play the loop unless we're jumping or overriding movement
+        bool asInterruptor = !overrideMovement;
+        Debug.Log("upading loops // " + asInterruptor);
+
+        Playlist.InitializePerformance("update Loop state", speed == 0 ? behavior.stillCue : behavior.moveCue, eventPlayer, false, eventLayer, new MiniTransform( Vector3.zero, Quaternion.identity), asInterruptor);
+    }
+
+    
+
+    ValueTracker<int> stanceTracker = new ValueTracker<int>(-1), speedTracker = new ValueTracker<int>(-1);
+    ValueTracker<Movement.Direction> directionTracker = new ValueTracker<Movement.Direction>(Movement.Direction.Forward);
+
+    void CheckSpeedDirectionChanges() {
+        if (speed == 0) {
+            direction = Movement.Direction.Forward;
+        }
+        
+        bool changedSpeed = speedTracker.CheckValueChange(speed);
+        bool changedDirection = directionTracker.CheckValueChange(direction);
+        bool changedStance = stanceTracker.CheckValueChange(stance);
+        bool changed = changedSpeed || changedDirection || changedStance;
         if (changed) {
-            //immediately play the loop unless we're jumping or overriding movement
-            bool asInterruptor = !overrideMovement;
-            //Debug.Log("playign speed or direction change");
-            Playlist.InitializePerformance("move controlelr speed change", speed == 0 ? behavior.stillCue : behavior.moveCue, eventPlayer, false, eventLayer, Vector3.zero, Quaternion.identity, asInterruptor);
+            UpdateLoopState();
         }
     }
-    public bool SetDirection(Movement.Direction direction, bool forceChange=false) {
+    /*
+
+    bool SetDirection(Movement.Direction direction) {
         bool changed = direction != lastDirection;
         this.direction = direction;
-        if (forceChange) {
-            lastDirection = direction;
-        }
+        lastDirection = direction;
         return changed;
     }
-    public bool SetSpeed(int speed, bool forceChange=false) {
+    bool SetSpeed(int speed) {
         bool changed = speed != lastSpeed;
         this.speed = speed;
-        if (forceChange) {
-            lastSpeed = speed;
-        }
+        lastSpeed = speed;
         return changed;
     }
+    bool SetStance(int stance) {
+        bool changed = stance != lastStance;
+        this.stance = stance;
+        lastStance = stance;
+        return changed;
+    }
+     */
 
-
-
-
-
-
-
-
-
-
-
-
+}
 }

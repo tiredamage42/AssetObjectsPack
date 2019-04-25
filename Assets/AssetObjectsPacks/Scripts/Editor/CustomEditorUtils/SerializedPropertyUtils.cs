@@ -87,7 +87,7 @@ namespace AssetObjectsPacks {
         
                     if (!CheckForArray(false)) return null;
                     if (index < 0 || index >= arraySize) {
-                        Debug.LogError("Array index out of range on " + displayName);
+                        Debug.LogError("Array index out of range on " + displayName + " tried: " + index + " count: "+arraySize);
                         return null;
                     }
                     return arrayElements[index];

@@ -72,11 +72,11 @@ namespace AssetObjectsPacks {
             null, null
         };
         public string parentPath { get { return CalcLastFolder(curPath); } }
-        Action<string, bool, HashSet<Vector2Int>> getElementsInDirectory;
+        Action<string, HashSet<Vector2Int>> getElementsInDirectory;
         
         public void OnEnable (
             Func<string, IEnumerable<SelectionElement>> getPoolElements, 
-            Action<string, bool, HashSet<Vector2Int>> getElementsInDirectory, 
+            Action<string, HashSet<Vector2Int>> getElementsInDirectory, 
             Action onSelectionChange, Action<IEnumerable<int>, string, string> onDirDragDrop, 
             Action toolbarButtons, Action onChangeDisplayPath) {
         
@@ -201,7 +201,7 @@ namespace AssetObjectsPacks {
             return (hasSelection ? GetPoolIndiciesInSelection(false, collectionFilter) : GetPoolIndiciesInShown(false, collectionFilter)).Where( i => i != -1 );
         }
 
-        IEnumerable<Vector2Int> _GetElementsInIndicies(bool useRepeats, IEnumerable<int> indicies, bool includeDirs, string dirCheckTitle, string dirCheckMsg) {
+        IEnumerable<Vector2Int> _GetElementsInIndicies(IEnumerable<int> indicies, bool includeDirs, string dirCheckTitle, string dirCheckMsg) {
             if (indicies == null) return null;
             HashSet<Vector2Int> r = new HashSet<Vector2Int>();
             bool checkedDirs = false;
@@ -214,7 +214,7 @@ namespace AssetObjectsPacks {
                         if (!EditorUtility.DisplayDialog(dirCheckTitle, dirCheckMsg, "Ok", "Cancel")) return null;
                         checkedDirs = true;
                     }
-                    getElementsInDirectory(elements[1][i].displayPath, useRepeats, r);
+                    getElementsInDirectory(elements[1][i].displayPath, r);
                 }
                 else r.Add(new Vector2Int(e.id, e.collectionID));
             }
@@ -222,11 +222,13 @@ namespace AssetObjectsPacks {
         }
         
         public IEnumerable<Vector2Int> GetElementsInSelection () {
-            return _GetElementsInIndicies(false, GetSelectionEnumerable(), false, null, null);
+            return _GetElementsInIndicies(GetSelectionEnumerable(), false, null, null);
         }
         public IEnumerable<Vector2Int> GetElementsInSelectionDeep (string dirCheckTitle, string dirCheckMessage) {
-            return _GetElementsInIndicies(false, GetSelectionEnumerable(), true, dirCheckTitle, dirCheckMessage);
+            return _GetElementsInIndicies(GetSelectionEnumerable(), true, dirCheckTitle, dirCheckMessage);
         }
+
+
         public IEnumerable<int> GetSelectionEnumerable () {
             return selectionSystem.GetTrackedEnumerable();
         }

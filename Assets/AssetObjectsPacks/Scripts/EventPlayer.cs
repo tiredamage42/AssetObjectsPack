@@ -23,8 +23,6 @@ namespace AssetObjectsPacks {
             }
         }
 
-
-
         [HideInInspector] public bool cueMoving;
         
         Dictionary<string, CustomParameter> paramDict = new Dictionary<string, CustomParameter>();
@@ -46,26 +44,23 @@ namespace AssetObjectsPacks {
             }
         }
 
-        public List<Playlist.Performance> current_playlists = new List<Playlist.Performance>();
+        public HashSet<Playlists.Performance> currentPlaylists = new HashSet<Playlists.Performance>();
         
-        public delegate void PlayerMessage (AssetObject chosenObject, bool interrupter, HashSet<Action> onEendUseCallbacks);
+        public delegate void PlayerMessage (AssetObject chosenObject, bool interrupter, MiniTransform transforms, HashSet<Action> onEendUseCallbacks);
         Dictionary<int, PlayerMessage> pack2playEvents = new Dictionary<int, PlayerMessage>();
                 
         public void LinkAsPlayer(string packName, PlayerMessage onPlayEvent) {
             int packID = PacksManager.Name2ID(packName);
             pack2playEvents[packID] = onPlayEvent;
         }
-
-
         public void SubscribeToPlayEnd(int layer, Action<bool> onPlayEnd) {
             GetUpdateLayer(layer).SubscribeToPlayEnd(onPlayEnd);
         }
-        public bool AttemptedEnd(int layer) {
-            return GetUpdateLayer(layer).attemptedEnd;
-        }
-        
+        //public bool AttemptedEnd(int layer) {
+        //    return GetUpdateLayer(layer).attemptedEnd;
+        //}
         Dictionary<int, UpdateLayer> updateLayers = new Dictionary<int, UpdateLayer>();
-
+        
         UpdateLayer GetUpdateLayer(int layer) {
             UpdateLayer updateLayer;
             if (!updateLayers.TryGetValue(layer, out updateLayer)) {
@@ -78,24 +73,13 @@ namespace AssetObjectsPacks {
         class UpdateLayer {
             float duration_timer, current_duration = -1;
             bool endPlayOverriden;
-            public bool attemptedEnd;
-
             Action<bool> endPlayAttemptCallback;
             HashSet<Action<bool>> endPlayCallbacks = new HashSet<Action<bool>>();
-            //HashSet<Event> additionalEvents = new HashSet<Event>();
             HashSet<int> skipPlays = new HashSet<int>();
             
-            
             public void SkipPlay (string packName) {
-                int packID = PacksManager.Name2ID(packName);
-            
-                skipPlays.Add(packID);
+                skipPlays.Add(PacksManager.Name2ID(packName));
             }
-            
-            //public void OverrideEventToPlay(Event overrideEvent) {
-                //additionalEvents.Add(overrideEvent);
-            //}
-
             public void SubscribeToPlayEnd(Action<bool> onPlayEnd) {
                 endPlayCallbacks.Add(onPlayEnd);
             }
@@ -105,17 +89,17 @@ namespace AssetObjectsPacks {
                     return;
                 duration_timer += Time.deltaTime;
                 if (duration_timer >= current_duration) {
-                    //Debug.Log("end event timer");
+                    Debug.Log("end event timer :: " + current_duration);
                     EndPlayAttempt(true);
                 }
             }
 
             public void Interrupt (int layer, string reason) {
-                if (playing) {
+                // if (playing) {
 
 
+                // }
                 Debug.Log("interrupting layer: " + layer + " : " + reason);
-                }
             
                 //returns false if end play overriden
                 if (!EndPlayAttempt(true)) {
@@ -128,10 +112,9 @@ namespace AssetObjectsPacks {
             bool playing;
             void EndPlay (bool success) {
 
-                attemptedEnd = false;
                 playing = false;
                 
-//                Debug.Log("endevent");
+                Debug.Log("endevent in player");
                 foreach (var cb in endPlayCallbacks) {
                     cb(success);
                 }
@@ -146,8 +129,7 @@ namespace AssetObjectsPacks {
 
 
             bool EndPlayAttempt (bool success) {
-                attemptedEnd = true;
-
+                
                 if (!endPlayOverriden) {
                     EndPlay(success);
                     return true;
@@ -164,7 +146,6 @@ namespace AssetObjectsPacks {
             
                 
             EventPlayEnder lastPlayEnder;
-
             string endPlayOverrideReason;
             public EventPlayEnder OverrideEndPlay (Action<bool> onEndAttempt, string endPlayOverrideReason) {
                 if (endPlayOverriden) {
@@ -176,27 +157,29 @@ namespace AssetObjectsPacks {
                 this.endPlayOverrideReason = endPlayOverrideReason;
                 endPlayAttemptCallback = onEndAttempt;
 
-                lastPlayEnder = new EventPlayEnder(
-                    () => EndPlay(true)
-                );
+                lastPlayEnder = new EventPlayEnder( () => EndPlay(true) );
 
                 return lastPlayEnder;
-                //return () => EndPlay(true);
             }
 
-            public void PlayEvents (int myLayer, EventPlayer myPlayer,
+            public void PlayEvents (
+                MiniTransform transforms, int myLayer, EventPlayer myPlayer,
                 Dictionary<int, PlayerMessage> pack2playEvents,
                 Dictionary<string, CustomParameter> paramDict, 
-                Event[] events, float overrideDuration, bool asInterrupter){
+                Event[] events, float overrideDuration, bool asInterrupter
+            ){
+
+                bool wasPlaying = playing;
 
 
-                    playing = true;
-
-                    attemptedEnd = false;
-            
+                playing = true;
+                   
                 //Debug.Log("playing cue");
                 duration_timer = 0;
                 current_duration = overrideDuration;
+                if (current_duration >= 0) {
+                    Debug.Log("set current duration to :: " + current_duration);
+                }
 
 
                 bool endPlayAttemptHandled = current_duration >= 0;
@@ -205,16 +188,14 @@ namespace AssetObjectsPacks {
                 if (events != null) {
                     l = events.Length;
                 }
-                //additionalEvents.AddRange(events);
 
-                //int l = additionalEvents.Count;
                 bool successPlay = true;
                 
                 if (events != null) {
 
                     int i = 0;
                     foreach (var e in events) {                    
-                        bool success = PlayEvent( myLayer, myPlayer, pack2playEvents, paramDict, e, i == 0, asInterrupter, endPlayAttemptHandled);
+                        bool success = PlayEvent(transforms, myLayer, myPlayer, pack2playEvents, paramDict, e, i == 0, asInterrupter, endPlayAttemptHandled);
                         if (!success) {
                             successPlay = false;
                         }
@@ -224,91 +205,21 @@ namespace AssetObjectsPacks {
                 //additionalEvents.Clear();
                 skipPlays.Clear();
                 
-
                 if (!successPlay) {
                     if (current_duration < 0) {
-                        //Debug.Log("not succes end");
-                        
+                        Debug.Log("not succes end");        
                         EndPlayAttempt(false);
                     }
                 }
                 else {
                     if (l == 0 && !endPlayAttemptHandled) {
-                        //if (endPlayOverriden) {
-                        //    Debug.Log("reason " + endPlayOverrideReason);
-                        //}
-                        
-                        //Debug.Log("zero events not event handled early out");
+                        //if (endPlayOverriden) Debug.Log("reason " + endPlayOverrideReason);
+                        Debug.Log("zero events not event handled early out");
                         EndPlayAttempt(true);
                     }
                 }
-        }
-/*
-        
-        bool PlayEvent ( 
-            Dictionary<string, PlayerMessage> pack2playEvents,
-            Dictionary<string, CustomParameter> paramDict, 
-            Event e, bool isMain, bool asInterrupter, bool endPlayAttemptHandled) {
-
-                //foreach event layer (pack)
-        
-            //string packName = AssetObjectsManager.instance.packs.FindPackByID( e.assetObjectPackID, out _).name;
-
-            bool skipPlay = skipPlays.Contains(packName);
-            if (skipPlay) {
-                //skipPlays.Remove(packName);
-                //Debug.Log("skipping play");
-                return true;   
             }
 
-            //per layer pack
-
-            EventResponse eventResponse = new EventResponse(skipPlays);
-
-            List<AssetObject> filteredList = e.GetParamFilteredObjects(paramDict);
-
-
-            /
-            
-            //if (objectsPerPack[mainPackID].Count == 0) {
-            //    Debug.LogWarning("Couldnt find any assets on: " + event.name);
-            //}
-            
-            
-            
-            
-             /
-
-            if (filteredList.Count == 0) {
-                //Debug.Log("none found");
-                return false;// !isMain;
-            }
-            
-            AssetObject o = filteredList.RandomChoice();
-
-            if (isMain && !endPlayAttemptHandled) {
-                current_duration = o["Duration"].GetValue<float>();
-            }
-
-            HashSet<Action> endUseSuccessCBs = new HashSet<Action>();
-            
-            if (!endPlayAttemptHandled) {
-                //give control to object when it's the main event
-                //and when the duration is < 0 and not overriden
-                
-                if (current_duration < 0 && isMain) {
-                    endUseSuccessCBs.Add( () => { EndPlayAttempt(true); } );
-                }
-            }
-                
-            pack2playEvents[packName](o, asInterrupter, endUseSuccessCBs);
-            
-            return true;   
-        }
-
-
-
- */
 
 
 
@@ -317,40 +228,14 @@ namespace AssetObjectsPacks {
 
 
 
-
-
-
-
-
-
-
-
-
-
-        bool PlayEvent (int myLayer, EventPlayer myPlayer,
+        bool PlayEvent (MiniTransform transforms, int myLayer, EventPlayer myPlayer,
             Dictionary<int, PlayerMessage> pack2playEvents,
             Dictionary<string, CustomParameter> paramDict, 
             Event e, bool isMainEvent, bool asInterrupter, bool endPlayAttemptHandled) {
 
-                //foreach event layer (pack)
-        
-            //string packName = AssetObjectsManager.instance.packs.FindPackByID( e.assetObjectPackID, out _).name;
-
-            //bool skipPlay = skipPlays.Contains(packName);
-            //if (skipPlay) {
-                //skipPlays.Remove(packName);
-                //Debug.Log("skipping play");
-             //   return true;   
-            //}
-
-            //per layer pack
 
             EventResponse eventResponse = new EventResponse(skipPlays);
 
-
-
-
-            //List<AssetObject> filteredList = 
             e.GetParamFilteredObjects(paramDict, eventResponse);
 
             eventResponse.LogErrors();
@@ -361,7 +246,7 @@ namespace AssetObjectsPacks {
             foreach (var k in eventResponse.objectsPerPack.Keys) {
 
                 bool isMainPack = k == e.mainPackID;
-
+                
                 if (eventResponse.objectsPerPack[k].Count > 0) {
                     AssetObject o = eventResponse.objectsPerPack[k].RandomChoice();
 
@@ -369,10 +254,9 @@ namespace AssetObjectsPacks {
 
                         if (isMainPack && isMainEvent) {
                             current_duration = o["Duration"].GetValue<float>();
+                            // Debug.Log("in PLAYEVENT set current duration to :: " + current_duration);
                         }
                     }
-
-
 
                     HashSet<Action> endUseSuccessCBs = new HashSet<Action>();
             
@@ -380,7 +264,6 @@ namespace AssetObjectsPacks {
                         //give control to object when it's the main event
                         //and when the duration is < 0 and not overriden
                         
-                        //if (current_duration < 0 && isMainEvent && isMainPack) {
                         if (isMainEvent && isMainPack) {
                         
                             endUseSuccessCBs.Add( () => { EndPlayAttempt(true); } );
@@ -389,118 +272,28 @@ namespace AssetObjectsPacks {
 
                     string stepBlock = o.messageBlock;
                     string logErrors = "";
-                    CustomScripting.ExecuteMessageBlock (myLayer, myPlayer, stepBlock, Vector3.zero, logErrors);
+                    CustomScripting.ExecuteMessageBlock (myLayer, myPlayer, stepBlock, Vector3.zero, ref logErrors);
                     
                     if (!logErrors.IsEmpty()) {
                         logErrors = "broadcast message from asset object: " + o.objRef.name + logErrors;
                         Debug.LogError(logErrors);
                     }
 
+                    if (!pack2playEvents.ContainsKey(k)) {
+                        Debug.LogError("skipping " + PacksManager.ID2Name(k) + " not connected to player");
+                        continue;
+                    }
 
-
-                
-                    pack2playEvents[k](o, asInterrupter, endUseSuccessCBs);
+    
+                    pack2playEvents[k](o, asInterrupter, transforms, endUseSuccessCBs);
             
-
-
-
-
-
-
                 }
 
-
-
-
-
-
-
-
-
-
-
             }
-
-
-            /*
-            
-            //if (objectsPerPack[mainPackID].Count == 0) {
-            //    Debug.LogWarning("Couldnt find any assets on: " + event.name);
-            //}
-            
-            
-            
-            
-             */
-
-            //if (filteredList.Count == 0) {
-                //Debug.Log("none found");
-            //    return false;// !isMain;
-            //}
-            
-            //AssetObject o = filteredList.RandomChoice();
-
-            //if (isMain && !endPlayAttemptHandled) {
-            //    current_duration = o["Duration"].GetValue<float>();
-            //}
-/*
-            HashSet<Action> endUseSuccessCBs = new HashSet<Action>();
-            
-            if (!endPlayAttemptHandled) {
-                //give control to object when it's the main event
-                //and when the duration is < 0 and not overriden
-                
-                if (current_duration < 0 && isMain) {
-                    endUseSuccessCBs.Add( () => { EndPlayAttempt(true); } );
-                }
-            }
-                
-            pack2playEvents[packName](o, asInterrupter, endUseSuccessCBs);
- */
             
             return mainFound;   
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                
-        
         
         }
 
@@ -527,22 +320,11 @@ namespace AssetObjectsPacks {
             GetUpdateLayer(layer).SkipPlay(packName);
         }
 
-        //public const int interruptableLayer = -999;
         public void InterruptLayer (int layer, string reason) {
             GetUpdateLayer(layer).Interrupt(layer, reason);
-            //GetUpdateLayer(interruptableLayer).Interrupt();
         }
 
 
-        //public void InterruptLayers () {
-        //    foreach (var key in updateLayers.Keys) {
-        //        updateLayers[key].Interrupt();
-        //    }
-        //}
-
-        //public void OverrideEventToPlay(int layer, Event overrideEvent) {
-        //    GetUpdateLayer(layer).OverrideEventToPlay(overrideEvent);
-        //}
 
         bool ChcekLinkedPlayers() {
             if (pack2playEvents.Count == 0) {
@@ -552,19 +334,17 @@ namespace AssetObjectsPacks {
             return true;
         }
 
-        public void PlayEvents (Event[] events, int layer, float overrideDuration, bool asInterrupter){
+        public void PlayEvents (MiniTransform transforms, Event[] events, int layer, float overrideDuration, bool asInterrupter){
             if (!ChcekLinkedPlayers()) return;
             
-            GetUpdateLayer(layer).PlayEvents(layer, this, pack2playEvents, paramDict, events, overrideDuration, asInterrupter);
+            GetUpdateLayer(layer).PlayEvents(transforms, layer, this, pack2playEvents, paramDict, events, overrideDuration, asInterrupter);
         }
 
-/*
- */
         public void InterruptPerformances () {
-            foreach (var p in current_playlists) {
+            foreach (var p in currentPlaylists) {
                 p.InterruptPerformance();
             }
-            current_playlists.Clear();
+            currentPlaylists.Clear();
         }
 
 

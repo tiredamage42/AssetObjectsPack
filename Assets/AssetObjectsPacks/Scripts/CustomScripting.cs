@@ -5,7 +5,7 @@ using System.Linq;
 namespace AssetObjectsPacks {
     public static class CustomScripting
     {
-        static List<Vector2Int> ParsePairs(string text, string pairChars, string logErrors) {
+        static List<Vector2Int> ParsePairs(string text, string pairChars, ref string logErrors) {
             
             List<Vector2Int> r = new List<Vector2Int>();
             
@@ -51,7 +51,7 @@ namespace AssetObjectsPacks {
         }
 
         #region MESSAGE_SEND
-        public static void ExecuteMessageBlock (int playerLayer, EventPlayer receiver, string messageBlock, Vector3 runtimePosition, string logErrors) {
+        public static void ExecuteMessageBlock (int playerLayer, EventPlayer receiver, string messageBlock, Vector3 runtimePosition, ref string logErrors) {
             messageBlock = StripAllSpace(messageBlock);
             if (messageBlock == null || messageBlock.IsEmpty()) {
                 return;
@@ -67,11 +67,11 @@ namespace AssetObjectsPacks {
             //skip last empty
             int l = individualMessages.Length - 1;
             for (int i = 0; i < l; i++) {
-                BroadcastMessage(playerLayer, receiver, individualMessages[i], runtimePosition, logErrors);
+                BroadcastMessage(playerLayer, receiver, individualMessages[i], runtimePosition, ref logErrors);
             }
         }
 
-        static void BroadcastMessage (int playerLayer, EventPlayer receiver, string message, Vector3 runtimePosition, string logErrors) {
+        static void BroadcastMessage (int playerLayer, EventPlayer receiver, string message, Vector3 runtimePosition, ref string logErrors) {
             
             string[] split = message.Split('(');
             string msgName = split[0];
@@ -93,7 +93,7 @@ namespace AssetObjectsPacks {
             object[] parameters = new object[parameterStrings.Length + 1];
             parameters[0] = playerLayer;
             for (int i = 1; i < parameters.Length; i++) {
-                parameters[i] = ParamFromString(parameterStrings[i - 1], runtimePosition, logErrors);
+                parameters[i] = ParamFromString(parameterStrings[i - 1], runtimePosition, ref logErrors);
             }
             receiver.SendMessage(msgName, parameters, SendMessageOptions.RequireReceiver);
         } 
@@ -102,7 +102,7 @@ namespace AssetObjectsPacks {
         const string nullParamString = "null";
         const string sFalse = "false", sTrue = "true";
    
-        static object ParamFromString(string paramString, Vector3 runtimePosition, string logErrors) {
+        static object ParamFromString(string paramString, Vector3 runtimePosition, ref string logErrors) {
             string lower = paramString.ToLower();
 
             //check for position
@@ -116,7 +116,7 @@ namespace AssetObjectsPacks {
             
             //check if string
             else if (lower.Contains("'")) {
-                var pairs = ParsePairs(lower, "''", logErrors);
+                var pairs = ParsePairs(lower, "''", ref logErrors);
                 if (pairs == null) return null;
                 var p = pairs[0];
                 return lower.Substring(p.x + 1, (p.y - 1) - p.x);
@@ -141,12 +141,12 @@ namespace AssetObjectsPacks {
 
         #region CHECK_STATEMENT_VALUE
 
-        public static bool StatementValue(string statement, Dictionary<string, CustomParameter> paramsCheck, string logErrors, string logWarnings) {
+        public static bool StatementValue(string statement, Dictionary<string, CustomParameter> paramsCheck, ref string logErrors, ref string logWarnings) {
             if (statement.IsEmpty()) return true;
             string input = StripAllSpace(statement);
             if (input.IsEmpty()) return true;
 
-            bool statementTrue = BlockMet(input, paramsCheck, logErrors, logWarnings);
+            bool statementTrue = BlockMet(input, paramsCheck, ref logErrors, ref logWarnings);
             
             #if UNITY_EDITOR
             if (!logErrors.IsEmpty()) logErrors = (" :: Start: " + input + "\n\n") + logErrors; 
@@ -156,11 +156,11 @@ namespace AssetObjectsPacks {
             return statementTrue;
             
         }
-        static bool BlockMet (string input, Dictionary<string, CustomParameter> paramsCheck, string logErrors, string logWarnings) {
+        static bool BlockMet (string input, Dictionary<string, CustomParameter> paramsCheck, ref string logErrors, ref string logWarnings) {
         
             List<MiniStatementBlock> parenthesisSeperated = new List<MiniStatementBlock>();
             
-            List<Vector2Int> pairs = ParsePairs(input, "()", logErrors);
+            List<Vector2Int> pairs = ParsePairs(input, "()", ref logErrors);
             if (pairs == null) return false;
             
             if (pairs.Count == 0) {
@@ -249,21 +249,21 @@ namespace AssetObjectsPacks {
                 }
             }
 
-            bool statementTrue = CheckPossibleParam(checkParams[0], paramsCheck, logErrors, logWarnings);
+            bool statementTrue = CheckPossibleParam(checkParams[0], paramsCheck, ref logErrors, ref logWarnings);
 
             bool lastCheckWasAND = checkModeAnd.Count > 0 ? checkModeAnd[0] : true;
                 
             for (int i = 1; i < checkParams.Count; i+=1) {
             
-                if ((lastCheckWasAND && statementTrue) || (!lastCheckWasAND && !statementTrue)) statementTrue = CheckPossibleParam(checkParams[i], paramsCheck, logErrors, logWarnings);
+                if ((lastCheckWasAND && statementTrue) || (!lastCheckWasAND && !statementTrue)) statementTrue = CheckPossibleParam(checkParams[i], paramsCheck, ref logErrors, ref logWarnings);
                 if (i < checkParams.Count -1) lastCheckWasAND = checkModeAnd[i];
             }
 
             return statementTrue;
         }
-        static bool CheckPossibleParam(MiniStatementBlock statement, Dictionary<string, CustomParameter> paramChecks, string logErrors, string logWarnings) {
+        static bool CheckPossibleParam(MiniStatementBlock statement, Dictionary<string, CustomParameter> paramChecks, ref string logErrors, ref string logWarnings) {
             if (statement.isParenthesisBlock) {
-                bool statementValue = BlockMet(statement.block, paramChecks, logErrors, logWarnings);
+                bool statementValue = BlockMet(statement.block, paramChecks, ref logErrors, ref logWarnings);
                 return statement.negated ? !statementValue : statementValue;
             }
             else {

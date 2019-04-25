@@ -9,12 +9,13 @@ namespace AssetObjectsPacks {
     [CustomEditor(typeof(PacksManager))]
     public class PacksManagerEditor : Editor {
         public const string packsField = "packs";
-        public const string nameField = "name";
         public const string idField = "id";
-        public const string defaultParametersField = "defaultParameters";
-        public const string dirField = "dir";
-        public const string assetTypeField = "assetType";
-        public const string extensionsField = "extensions";
+        const string nameField = "name";
+        const string defaultParametersField = "defaultParameters";
+        const string dirField = "dir";
+        const string assetTypeField = "assetType";
+        const string extensionsField = "extensions";
+        const string isCustomField = "isCustom";
 
         string errors;
         int displayPackIndex;
@@ -23,24 +24,27 @@ namespace AssetObjectsPacks {
         PacksManager packsManager;
         EditorProp packs { get { return so[packsField]; } }
 
-
         void OnEnable () {
             so = new EditorProp( serializedObject );
             packsManager = target as PacksManager;
-            errors = CheckPacksErrors(packsManager, packs);
+            errors = GetPacksErrors(packsManager, packs);
         }
+
         bool DrawTopPackSelectionTabs (int packsSize) {
             GUIUtils.StartBox(1);
+        
             EditorGUILayout.BeginHorizontal();
             if (packsSize != 0) {    
                 GUIContent[] tabGUIs = packsSize.Generate( i => new GUIContent(packs[i][nameField].stringValue) ).ToArray();    
                 GUIUtils.Tabs(tabGUIs, ref displayPackIndex);
             }
             bool addedPack = false;
+        
             if (GUIUtils.Button(new GUIContent("Add New Pack"), GUIStyles.toolbarButton, Colors.green, Colors.black)) {
                 AddNewPackToPacksList( packs );
                 addedPack = true;
             }
+        
             EditorGUILayout.EndHorizontal();
             GUIUtils.EndBox(1);
             return addedPack;
@@ -55,7 +59,7 @@ namespace AssetObjectsPacks {
             bool addedPack = DrawTopPackSelectionTabs(l);
             bool changedVars = DrawCurrentPack(l);
             GUIUtils.EndCustomEditor(so);
-            if (addedPack || changedVars) errors = CheckPacksErrors(packsManager, packs);
+            if (addedPack || changedVars) errors = GetPacksErrors(packsManager, packs);
         }
 
         string InvalidAssetTypeError () {
@@ -85,20 +89,26 @@ namespace AssetObjectsPacks {
             //name
             changedVar = GUIUtils.DrawTextProp(pack[nameField], new GUIContent("Pack Name"), GUIUtils.TextFieldType.Normal, false, "name", w) || changedVar;
             
+            GUIUtils.DrawToggleProp(pack[isCustomField], new GUIContent("Custom Objects", "Does the pack consist of custom objects that arent represented by assets in the project?"), w);
+
             GUIUtils.Space();
-            
-            //asset type
-            changedVar = CheckedVariable (pack[assetTypeField], new GUIContent("Asset Type", "The asset type or component the pack targets.\nMust inherit from UnityEngine.Object"), w) || changedVar;
-            DrawHelpBox(pack[assetTypeField], IsValidTypeString, InvalidAssetTypeError);
 
-            //directory            
-            changedVar = GUIUtils.DrawDirectoryField(pack[dirField], new GUIContent("Objects Directory", "The directory where the assets are held"), true, w) || changedVar;
-            DrawHelpBox(pack[dirField], IsValidDirectory, InvalidDirectoryError);
-
-            //file extensions
-            changedVar = CheckedVariable (pack[extensionsField], new GUIContent("File Extensions", "The file extensions to look for in the directory, seperated by commas.\nExample: '.fbx, .wav, .mp3'"), w) || changedVar;
-            DrawHelpBox(pack[extensionsField], FileExtensionValid, InvalidFileExtensionsError);
-            
+            bool isCustom = pack[isCustomField].boolValue;
+            if (!isCustom) {
+                //asset type
+                changedVar = CheckedVariable (pack[assetTypeField], new GUIContent("Asset Type", "The asset type or component the pack targets.\nMust inherit from UnityEngine.Object"), w) || changedVar;
+                DrawHelpBox(pack[assetTypeField], IsValidTypeString, InvalidAssetTypeError);
+                //directory            
+                changedVar = GUIUtils.DrawDirectoryField(pack[dirField], new GUIContent("Objects Directory", "The directory where the assets are held"), true, w) || changedVar;
+                DrawHelpBox(pack[dirField], IsValidDirectory, InvalidDirectoryError);
+                //file extensions
+                changedVar = CheckedVariable (pack[extensionsField], new GUIContent("File Extensions", "The file extensions to look for in the directory, seperated by commas.\nExample: '.fbx, .wav, .mp3'"), w) || changedVar;
+                DrawHelpBox(pack[extensionsField], FileExtensionValid, InvalidFileExtensionsError);    
+            }
+            else {
+                changedVar = CheckedVariable (pack[assetTypeField], new GUIContent("Icon Asset Type", "The asset type or component to use for the icon.\nMust inherit from UnityEngine.Object"), w) || changedVar;
+                DrawHelpBox(pack[assetTypeField], IsValidTypeString, InvalidAssetTypeError);
+            }
             GUIUtils.EndBox(1);
             return changedVar;
         }
@@ -116,13 +126,61 @@ namespace AssetObjectsPacks {
             return delete;
         }
         void DrawUpdateIDsButton () {
-            GUIUtils.StartBox();
-            DrawGenIDsForPack(packsManager.packs[displayPackIndex]);
-            GUIUtils.EndBox();
+            AssetObjectPack displayPack = packsManager.packs[displayPackIndex];
+
+            if (!displayPack.isCustom) {
+                GUIUtils.StartBox();
+                DrawGenIDsForPack(displayPack);
+                GUIUtils.EndBox();
+            }
+        }
+        void DrawGenIDsForPack (AssetObjectPack pack) {
+            if (GUIUtils.Button(new GUIContent("Update IDs in Directory"), GUIStyles.button, Colors.selected, Colors.black)) {
+                string msg = "Generating IDs will rename assets without IDs, are you sure?";
+                if (EditorUtility.DisplayDialog("Generate IDs", msg, "Generate IDs", "Cancel")) {
+                    UpdateIDsForPack(pack);
+                }
+            }
+        }
+        void UpdateIDsForPack (AssetObjectPack pack) {
+            string[] pathsWithoutIDs = EditorUtils.GetFilePathsInDirectory(pack.dir, true, pack.extensions, AssetObjectsEditor.sIDKey, false);
+            if (pathsWithoutIDs.Length == 0) {
+                Debug.Log("All assets in " + pack.name + " objects directory have IDs");
+                return;
+            }
+            GenerateNewIDs(AssetObjectsEditor.GetAllAssetObjectPaths(pack.dir, pack.extensions, false), pathsWithoutIDs);
+        }
+        
+        void GenerateNewIDs (string[] validPaths, string[] noIDs) {
+            int l = noIDs.Length;
+            int[] newIDs = GenerateNewIDList(l, validPaths.Length.Generate(i => AssetObjectsEditor.GetObjectIDFromPath(validPaths[i])).ToHashSet() );
+            for (int i = 0; i < l; i++) {
+                string path = noIDs[i];
+                if (path.Contains(AssetObjectsEditor.sIDKey)) {
+                    Debug.LogWarning("asset was already assigned an id: " + path);
+                    continue;
+                }
+                AssetDatabase.RenameAsset(path, AssetObjectsEditor.sIDKey + newIDs[i] + "-" + EditorUtils.RemoveDirectory(path));
+            }
+            Debug.Log("Assets are now ready with unique IDs");
+        }
+        int[] GenerateNewIDList (int count, HashSet<int> used_ids) {
+            int[] result = new int[count];
+            int generated = 0;
+            int trying_id = 0;
+            while (generated < count) {
+                if (!used_ids.Contains(trying_id)) {
+                    result[generated] = trying_id;
+                    generated++;
+                }
+                trying_id++;
+            }
+            return result;
         }
 
-        bool DrawCurrentPack(int packSize){
-            if (packSize == 0 || displayPackIndex < 0) return false;
+
+        bool DrawCurrentPack(int packsSize){
+            if (packsSize == 0 || displayPackIndex < 0) return false;
             EditorProp pack = packs[displayPackIndex]; 
             bool changedFields = DrawPackFields(pack);
             bool parametersChanged = DrawPackParameters(pack[defaultParametersField]);
@@ -171,7 +229,7 @@ namespace AssetObjectsPacks {
             //name
             bool nameChanged = GUIUtils.DrawTextProp(parameter[nameField], GUIUtils.TextFieldType.Normal, false, "param name", GUILayout.MinWidth(32));
             //type
-            GUILayoutOption pFieldWidth = GUILayout.Width(75);
+            GUILayoutOption pFieldWidth = GUILayout.Width(100);
             GUIUtils.DrawEnumProp(
                 parameter[CustomParameterEditor.typeField], 
                 (int i) => (CustomParameter.ParamType)i, 
@@ -179,11 +237,9 @@ namespace AssetObjectsPacks {
                 pFieldWidth
             );
             //value
-            GUIUtils.DrawProp(CustomParameterEditor.GetParamValueProperty( parameter ), pFieldWidth);
+            GUIUtils.DrawProp(CustomParameterEditor.GetParamValueProperty( parameter ), GUILayout.Width(128));
             return nameChanged;
         }    
-
-
 
         public static void DrawPacksErrors (string errors) {
             if (errors.IsEmpty()) return;
@@ -192,33 +248,26 @@ namespace AssetObjectsPacks {
             GUIUtils.EndBox();
         }  
 
-        public static bool DrawGenIDsForPack (AssetObjectPack pack) {
-            if (GUIUtils.Button(new GUIContent("Update IDs in Directory"), GUIStyles.button, Colors.selected, Colors.black)) {
-                string msg = "Generating IDs will rename assets without IDs, are you sure?";
-                if (EditorUtility.DisplayDialog("Generate IDs", msg, "Generate IDs", "Cancel")) {
-                    AssetObjectsEditor.UpdateIDsForPack(pack);
-                    return true;
-                }
-            }
-            return false;
-        }
-
+        
         public static bool PackHasErrors (AssetObjectPack pack, EditorProp packProp) {
             //duplicate param names
             if (packProp[defaultParametersField].ContainsDuplicateNames(out _))
                 return true;
             
-            //check variables
-            Func<string, bool>[] validChecks = new Func<string, bool>[] { IsValidTypeString, IsValidDirectory, FileExtensionValid };
-            string[] fieldChecks = new string[] { pack.assetType, pack.dir, pack.extensions };                
-            for (int x = 0; x < 3; x++)
-                if (!validChecks[x](fieldChecks[x])) 
-                    return true;    
+
+            if (!pack.isCustom) {
+                //check variables
+                Func<string, bool>[] validChecks = new Func<string, bool>[] { IsValidTypeString, IsValidDirectory, FileExtensionValid };
+                string[] fieldChecks = new string[] { pack.assetType, pack.dir, pack.extensions };                
+                for (int x = 0; x < 3; x++)
+                    if (!validChecks[x](fieldChecks[x])) 
+                        return true;    
+            }
             
             return false;
         }
 
-        public static string CheckPacksErrors (PacksManager packsManager, EditorProp packsProp) {
+        public static string GetPacksErrors (PacksManager packsManager, EditorProp packsProp) {
             if (packsManager == null) 
                 return "\nPacks Manager Object could not be found!" + 
                     "\n\nIf it was deleted, create a new one." + 
@@ -245,15 +294,17 @@ namespace AssetObjectsPacks {
             return null;
         }
 
-        static void AddNewPackToPacksList (EditorProp packs) {
+        void AddNewPackToPacksList (EditorProp packs) {
             //generate new id for the new pack
-            int newID = AssetObjectsEditor.GenerateNewIDList(1, packs.arraySize.Generate( i => packs[i][idField].intValue ).ToHashSet())[0];
+            int newID = GenerateNewIDList(1, packs.arraySize.Generate( i => packs[i][idField].intValue ).ToHashSet())[0];
             
             var newPack = packs.AddNew("New Pack");
             newPack[idField].SetValue( newID );            
             newPack[dirField].SetValue( string.Empty );
             newPack[assetTypeField].SetValue( string.Empty );
             newPack[extensionsField].SetValue( string.Empty );
+            newPack[isCustomField].SetValue( false );
+            
             
             //add default params
             var defParams = newPack[defaultParametersField];
@@ -267,18 +318,18 @@ namespace AssetObjectsPacks {
             parameter[CustomParameter.ParamType.FloatValue.ToString()].SetValue( -1.0f );
         }
 
-        public static bool IsValidTypeString(string s) {
+        static bool IsValidTypeString(string s) {
             if (s.IsEmpty()) return false;
             Type t = s.ToType();
             if (t == null) return false;
             return t.IsSubclassOf(typeof (UnityEngine.Object));
         }
-        public static bool IsValidDirectory(string s) {
+        static bool IsValidDirectory(string s) {
             if (s.IsEmpty()) return false;
             if (!s.EndsWith("/")) return false;
             return Directory.Exists(s);
         }
-        public static bool FileExtensionValid(string s) {
+        static bool FileExtensionValid(string s) {
             if (s.IsEmpty()) return false;
             if (s.Contains(",")) {
                 string[] split = s.Split(',');
@@ -349,15 +400,28 @@ namespace AssetObjectsPacks {
                 Debug.Log("moving param: " + GetParamName(parameter));
                     
                 EditorProp trueParam = null;
-                for (int p = d + 1; p < c_p; p++) {
+                //for (int p = d + 1; p < c_p; p++) {
+                for (int p = 0; p < c_p; p++) {
+                
                     trueParam = parameters[p];
                     if (GetParamName(trueParam) == defParamName) break;
                 }
+
+                if (trueParam == null) {
+                    Debug.LogError("couldnt find: " + defParamName);
+                }
                 //put the current one in temp
+
+                Debug.Log("put in temp");
                 CustomParameterEditor.CopyParameter(temp, parameter);
                 //place the real param in the current
+                Debug.Log("put in current");
                 CustomParameterEditor.CopyParameter(parameter, trueParam);
+
+
                 //place temp in old param that was moved
+                Debug.Log("put in temp 2");
+                
                 CustomParameterEditor.CopyParameter(trueParam, temp);
             }
             //delete temp parameter

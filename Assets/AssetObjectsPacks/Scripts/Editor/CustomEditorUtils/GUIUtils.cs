@@ -103,10 +103,11 @@ namespace AssetObjectsPacks {
 
         public static bool DrawToggle (bool value, GUIContent gui, params GUILayoutOption[] options) {
             EditorGUILayout.BeginHorizontal();
-            Label(gui, GUILayout.MaxWidth(EditorGUIUtility.labelWidth + EditorGUIUtility.fieldWidth));// GUILayout.Width(EditorGUIUtility.labelWidth * 2));// options);
-            for (int i = 0; i < EditorGUI.indentLevel + 1; i++) {
-                SmallButtonClear();
-            }
+            Label(gui, options);//GUILayout.MaxWidth(EditorGUIUtility.labelWidth + EditorGUIUtility.fieldWidth));// GUILayout.Width(EditorGUIUtility.labelWidth * 2));// options);
+            
+            //for (int i = 0; i < EditorGUI.indentLevel + 1; i++) {
+            //    SmallButtonClear();
+            //}
             bool val = DrawToggle(value);
             EditorGUILayout.EndHorizontal();
             return val;    

@@ -49,7 +49,7 @@ namespace AssetObjectsPacks {
             }
         }
 
-        PopupList.InputData packsPopup;    
+        PopupList.InputData packsPopup, customPacksPopup;    
         GUILayoutOption iconWidth = GUILayout.Width(20);
         bool removeOrAdd, duplicated;
         int projectPackIndex, projectPackID;
@@ -89,7 +89,7 @@ namespace AssetObjectsPacks {
 
 
         public override bool HasPreviewGUI() { 
-            return previewHandler.previewToggler.previewOpen;
+            return previewHandler.previewOpen;
         }
         public override void OnInteractivePreviewGUI(Rect r, GUIStyle background) { 
             previewHandler.OnInteractivePreviewGUI(r, background);
@@ -107,7 +107,7 @@ namespace AssetObjectsPacks {
             }
             packsManager = PacksManager.instance;
             packsProp = new EditorProp (new SerializedObject ( packsManager ) )[ PacksManagerEditor.packsField ];
-            errors = PacksManagerEditor.CheckPacksErrors(packsManager, packsProp);
+            errors = PacksManagerEditor.GetPacksErrors(packsManager, packsProp);
             
             packInfos = GetPacksInfos();
             
@@ -116,10 +116,16 @@ namespace AssetObjectsPacks {
             previewHandler.OnEnable(packInfos, selectionSystem);
                 
             packsPopup = new PopupList.InputData { m_OnSelectCallback = OnSwitchPackCallback };
+            customPacksPopup = new PopupList.InputData { m_OnSelectCallback = OnAddCustomAOCallback };
+            
             
             foreach (var p in packInfos.Keys) {
                 packsPopup.NewOrMatchingElement(packInfos[p].pack.name, p == mainPackID);
+                // if (packInfos[p].pack.isCustom) {
+                // }
+                customPacksPopup.NewOrMatchingElement(packInfos[p].pack.name, false);
             }
+            
             multiAO[packIDField].SetValue(-1);   
             
             UpdatEventStatesAgainstDefaults(packInfos);
@@ -139,24 +145,47 @@ namespace AssetObjectsPacks {
             state[stateIDField].SetValue(0);      
             so.SaveObject();      
         }
+        bool handleRepaintErrors;
         
         public override void OnInspectorGUI() {
             //base.OnInspectorGUI();
+
+            if(UnityEngine.Event.current.type == EventType.Repaint && handleRepaintErrors)
+            {
+                handleRepaintErrors = false;
+                return;
+            }
+
+            if (true){//UnityEngine.Event.current.type != EventType.Layout) {
+
             GUIUtils.StartCustomEditor();
             
-            FixErrorsAutomatic();
+            //FixErrorsAutomatic();
             
             PacksManagerEditor.DrawPacksErrors(errors);
             
             bool forceRebuild, forceReset;
             
-            DrawEvent(out forceRebuild, out forceReset);          
-            
+            DrawEvent(out forceRebuild, out forceReset);  
+
+            if (forceRebuild) {
+                Debug.Log("force rebuild");
+                so.SaveObject();    
+
+                //if (addedCustomAO) {
+                //    addedCustomAO = false;
+                //    GUIUtility.ExitGUI();
+                //}  
+
+            }        
             selectionSystem.CheckRebuild (forceRebuild, forceReset);
             
+            
             GUIUtils.EndCustomEditor(so);
+            }
+            
         }
-
+/*
         void FixErrorsAutomatic () {
             if (didAOCheck) return;
             didAOCheck = true;
@@ -166,11 +195,11 @@ namespace AssetObjectsPacks {
             //so.SaveObject();
         }
 
+ */
         void CopyAssetObject(EditorProp ao, EditorProp toCopy) {    
-            ao.CopySubProps ( toCopy, new string[] { idField, objRefField, packIDField } );
+            ao.CopySubProps ( toCopy, new string[] { idField, objRefField, packIDField, messageBlocksField, conditionsBlockField, isNewField, nameField } );
             CustomParameterEditor.CopyParameterList(ao[paramsField], toCopy[paramsField]);
         }
-
 
         //TODO: handle gen ids
 
@@ -209,10 +238,19 @@ namespace AssetObjectsPacks {
                     removeOrAdd = AddElementsToState (baseState, selectionSystem.GetElementsInSelectionDeep("Add Objects", "Selection contains directories, Add all sub-objects?"));               
                 }
             }
+            
+            AddNewCustomAO();
 
-
-            forceRebuild = forceRebuild || namedNewDir || changedTabView || removeOrAdd || duplicated || createdDirectory || hiddenToggleSuccess;
+            forceRebuild = forceRebuild || addedCustomAO || namedNewDir || changedTabView || removeOrAdd || duplicated || createdDirectory || hiddenToggleSuccess;
             forceReset = forceRebuild && changedTabView;
+            if (addedCustomAO) {
+                handleRepaintErrors = true;
+            }
+
+            //if (addedCustomAO) {
+
+                addedCustomAO = false;
+            //}
 
             duplicated = false;
             removeOrAdd = false;
@@ -220,6 +258,7 @@ namespace AssetObjectsPacks {
             hiddenToggleSuccess = false;
             namedNewDir = false;
         }
+        bool addedCustomAO;
 
         bool DrawMainPackTypeAndHelp () {
 
@@ -244,7 +283,7 @@ namespace AssetObjectsPacks {
         }
             
 
-        bool ContainsID(int id) {
+        bool ContainsStateID(int id) {
             for (int i = 0; i < so[allStatesField].arraySize; i++) {
                 if (so[allStatesField][i][stateIDField].intValue == id) {
                     return true;
@@ -252,9 +291,9 @@ namespace AssetObjectsPacks {
             }
             return false;
         }
-        int CreateNewID () {
+        int CreateNewStateID () {
             int id = 0;
-            while (ContainsID(id)) {
+            while (ContainsStateID(id)) {
                 id++;
             }
             return id;
@@ -262,14 +301,14 @@ namespace AssetObjectsPacks {
 
         void OnDirectoryCreate () {
             if (viewTab == 0) {
-                NewEventState(curState, CreateNewID());
+                NewEventState(curState, CreateNewStateID());
             }
         }
         
-        void OnNameNewDirectory(int poolIndex, string newName) {
+        void OnNameNewElement(int poolIndex, string newName) {
             if (viewTab == 0) {
-                
-                QuickRenameNewEventState(curState, poolIndex, newName);
+    
+                QuickRenameNewElement(curState, poolIndex, newName);
                 so.SaveObject();
                 namedNewDir = true;
                 
@@ -279,7 +318,7 @@ namespace AssetObjectsPacks {
         void OnCurrentPathChange () {
             if (viewTab == 0) {
                 curState = GetEventStateByPath(selectionSystem.curPath);
-                curParentState = (curState != baseState) ? GetEventStateByPath(selectionSystem.parentPath) : null;
+                curParentState = FindParentState(curState);// (curState != baseState) ? GetEventStateByPath(selectionSystem.parentPath) : null;
             }
         }
 
@@ -299,20 +338,23 @@ namespace AssetObjectsPacks {
             }
         }
         
-        void GetAllEventElements_ (EditorProp state, bool useRepeats, HashSet<Vector2Int> ret) {
+    
+        void GetAllEventElements_ (EditorProp state, HashSet<Vector2Int> ret) {
             for (int x = 0; x < state[assetObjectsField].arraySize; x++) {
                 Vector2Int el = new Vector2Int(state[assetObjectsField][x][idField].intValue, state[assetObjectsField][x][packIDField].intValue);
-                if (!useRepeats && ret.Contains(el)) continue;
+                if (ret.Contains(el)) continue;
                 ret.Add(el);
             }
             for (int i = 0; i < state[subStateIDsField].arraySize; i++) {
-                GetAllEventElements_(GetEventByID(state[subStateIDsField][i].intValue), useRepeats, ret);
+                GetAllEventElements_(GetEventByID(state[subStateIDsField][i].intValue), ret);
             }
         }
         
-        void GetElementsInDirectory (string directory, bool useRepeats, HashSet<Vector2Int> r) {
+        //used for hide toggle and add
+        void GetElementsInDirectory (string directory, HashSet<Vector2Int> r) {
             if (viewTab == 0) {
-                GetAllEventElements_(GetEventStateByPath(directory), useRepeats, r);            
+                Debug.LogError("getting all elements in directory view tab 0");
+                GetAllEventElements_(GetEventStateByPath(directory), r);            
             }
             else {
                 HashSet<int> ignoreIDs = new HashSet<int>();
@@ -351,7 +393,7 @@ namespace AssetObjectsPacks {
             for (int i = 0; i < c; i++) {
                 int id;
                 string displayPath = "";
-                bool isNewDir = false, isCopy = false;
+                bool isNew = false, isCopy = false;
                 string renameName = "";
                 Action<int> elementPrefix = null;
                 Action<int, string> onRename = null;
@@ -366,7 +408,7 @@ namespace AssetObjectsPacks {
                     if (isSubstate) {
                         id = -1;
                         EditorProp subState = GetEventByID( displayedEvent[subStateIDsField][i].intValue);
-                        isNewDir = subState[isNewField].boolValue;
+                        isNew = subState[isNewField].boolValue;
                         elName = subState[nameField].stringValue;
                     }
                     else {
@@ -374,6 +416,8 @@ namespace AssetObjectsPacks {
                         id = ao[idField].intValue;
                         packID =  ao[packIDField].intValue;
                         isCopy = ao[isCopyField].boolValue;
+                        isNew = ao[isNewField].boolValue;
+                        elName = ao[nameField].stringValue;
                     }            
 
                     renameName = elName;                    
@@ -383,15 +427,18 @@ namespace AssetObjectsPacks {
                         displayPath = displayPath + elName + "/";
                     }
                     else {
-                        string originalPath = AssetObjectsEditor.RemoveIDFromPath(packInfos[packID].GetOriginalPath(id));
-                        //string[] dirName = EditorUtils.DirectoryNameSplit(originalPath);
-
-                        displayPath = displayPath + originalPath.Replace("/", "-");
+                        if (packInfos[packID].pack.isCustom) {
+                            displayPath = displayPath + elName;
+                        }
+                        else {
+                            string originalPath = AssetObjectsEditor.RemoveIDFromPath(packInfos[packID].GetOriginalPath(id));
+                            displayPath = displayPath + originalPath.Replace("/", "-");
+                        }
                     }
                     
 
                     elementPrefix = ExtraElementPrefix;
-                    onRename = OnNameNewDirectory;
+                    onRename = OnNameNewElement;
                 }
                 else {
                     packID = projectPackID;
@@ -403,7 +450,7 @@ namespace AssetObjectsPacks {
                     
                     displayPath = AssetObjectsEditor.RemoveIDFromPath(packInfos[packID].allPaths[i]);   
                 }
-                yield return new SelectionElement(id, displayPath, i, isNewDir, isCopy, elementPrefix, onRename, renameName, packID, packID == -1 ? null : packInfos[packID].icon);
+                yield return new SelectionElement(id, displayPath, i, isNew, isCopy, elementPrefix, onRename, renameName, packID, packID == -1 ? null : packInfos[packID].icon);
             }
         }
 
@@ -427,14 +474,20 @@ namespace AssetObjectsPacks {
                     OnDirectoryCreate();
                     createdDirectory = true;
                 }
+                
                 GUI.enabled = selectionSystem.hasSelection;
                 OpenImportSettingsButton();
+                
                 AddOrRemoveButtons( viewTab );
+                
                 GUI.enabled = true;
                 if (viewTab == 0) DuplicateButton();
             }
             if (viewTab != 0) {
                 ToggleHiddenButtonGUI();    
+            }
+            else {
+                AddCustomObjectButton();
             }
             CheckPreviewToggle();
         }
@@ -452,7 +505,6 @@ namespace AssetObjectsPacks {
             if (!duplicated) {
                 duplicated = selectionSystem.hasSelection && (k[KeyCode.D] && (k.command || k.ctrl));
                 if (duplicated) DuplicateIndiciesInState(curState, selectionSystem.GetSelectionEnumerable().ToHashSet());
-       
             }  
 
             if (!toggleHiddenAttempt) {
@@ -498,15 +550,19 @@ namespace AssetObjectsPacks {
             GUI.enabled = selectionSystem.hasSelection;
             toggleHiddenAttempt = GUIUtils.Button(toolbarGUIs[5], GUIStyles.toolbarButton, iconWidth);
             GUI.enabled = true;
-            
         }
         bool togglePreview;
         void CheckPreviewToggle () {
             togglePreview = GUIUtils.Button(toolbarGUIs[6], GUIStyles.toolbarButton, iconWidth);
         }
+        void AddCustomObjectButton () {
+            if (GUIUtils.Button(new GUIContent("CO"), GUIStyles.toolbarButton, iconWidth))
+                GUIUtils.ShowPopUpAtMouse(customPacksPopup);
+            
+            //Debug.LogError("sfksdkfjhs");
+        }
 
         PreviewHandler previewHandler = new PreviewHandler();
-
 
         void OnDirDragDrop(IEnumerable<int> dragIndicies, string origDir, string targetDir) {
             if (viewTab == 0) {
@@ -516,17 +572,52 @@ namespace AssetObjectsPacks {
         
         public void OnSwitchPackCallback(PopupList.ListElement element) {
             int newMainPackID = PacksManager.Name2ID(element.m_Content.text);
+            mainPackName = packInfos[newMainPackID].pack.name;
+            
             so[mainPackIDField].SetValue(newMainPackID);
+            
             foreach (var p in packInfos.Keys) packsPopup.NewOrMatchingElement(packInfos[p].pack.name, p == newMainPackID);
+            
             so.SaveObject();
         }
+
+        int newCustomAOPackID = -1;
+        void AddNewCustomAO () {
+            if (newCustomAOPackID != -1) {
+                int id = int.MaxValue;
+                ResetNewRecursive();
+                Debug.Log("adding new custom ao");
+                InitializeNewAssetObject(curState[assetObjectsField].AddNew("New " + packInfos[newCustomAOPackID].pack.name), id, null, true, packInfos[newCustomAOPackID].packProp, true);
+                so.SaveObject();
+                
+                addedCustomAO = true;
+
+
+                newCustomAOPackID = -1;
+            }
+
+        }
+
+        public void OnAddCustomAOCallback(PopupList.ListElement element) {
+            newCustomAOPackID = PacksManager.Name2ID(element.m_Content.text);
+            /*
+            int id = 0;
+            ResetNewRecursive();
+            Debug.Log("adding new custom ao");
+            InitializeNewAssetObject(curState[assetObjectsField].AddNew("New " + packInfos[customPackID].pack.name), id, null, true, packInfos[customPackID].packProp, true);
+            so.SaveObject();
+            
+            addedCustomAO = true;
+             */
+        }
+
         
         GUIContent selectEditGUI = new GUIContent("Multi-Edit <b>Selected</b> Objects");
         
         bool DrawEditToolbar (){
             string newStateName=null;
             bool deletedState=false, changedStateName=false, shouldRebuild = false;
-            bool drawingBase = StateIsBase(curState);
+            bool drawingBase = curState[stateIDField].intValue == 0;
 
             if (!drawingBase) {
                 GUIUtils.StartBox(1);
@@ -553,7 +644,6 @@ namespace AssetObjectsPacks {
 
                 IEnumerable<int> selected = selectionSystem.GetSelectionEnumerable();
 
-                //int selectionCollection = -1;
                 SelectionElement firstSelected = null;
                 foreach (var i in selected) {
                     SelectionElement e = selectionSystem.elements[1][i];
@@ -571,9 +661,7 @@ namespace AssetObjectsPacks {
                 }
                 int c = selected.Count();
 
-                //if (selectionSystem.selectionIsOnlyFiles) {
-                    //if (selectionSystem.selectionIsSingleCollection) {
-
+                
                         bool singleFile = c == 1;// selectionSystem.selectionIsSingleFile;
                         GUIContent gui = selectEditGUI;
                         EditorProp ao = multiAO;
@@ -588,7 +676,10 @@ namespace AssetObjectsPacks {
                         else {
                             if (ao[packIDField].intValue != packID) {
                                 ao[packIDField].SetValue(packID);
+
+                                Debug.Log("editign multi ao");
                                 PacksManagerEditor.AdjustAOParametersToPack(multiAO, packInfo.packProp, true);
+                                so.SaveObject();
                             }
                         }
                         
@@ -596,57 +687,36 @@ namespace AssetObjectsPacks {
                         int setParam = -1;
                         GUIUtils.StartBox();
                         GUIUtils.Label(gui);
-                        GUIUtils.BeginIndent();
-                        DrawAOParamLabels(packInfo, singleFile, out setParam);
-                        DrawAOParamFields(packInfo, ao);
-                        /*
-                        */
-
+                        //GUIUtils.BeginIndent();
+                        DrawAOParamLabels(packInfo, singleFile, ao, out setParam);
+                        //DrawAOParamFields(packInfo, ao);
+                        
                         EditorGUILayout.BeginHorizontal();
 
 
                         EditorGUILayout.BeginVertical();
                         EditorGUILayout.BeginHorizontal();
-                        GUIUtils.Label(new GUIContent ("Send Messages On Play"));
                         bool setMessages = !singleFile && GUIUtils.SmallButton(new GUIContent("", "Set Values"));
+                        GUIUtils.Label(new GUIContent ("Send Messages On Play"));
                         EditorGUILayout.EndHorizontal();
 
-                        GUIUtils.DrawMultiLineExpandableString(ao[messageBlocksField], true, "mesage block", 50);
+                        GUIUtils.DrawMultiLineExpandableString(ao[messageBlocksField], true, "mesage block", 25);
                         //GUIUtils.EndBox(1);
                         EditorGUILayout.EndVertical();
 
                         EditorGUILayout.BeginVertical();
                         EditorGUILayout.BeginHorizontal();
-                        GUIUtils.Label(new GUIContent ("Conditions"));
                         bool setConditions = !singleFile && GUIUtils.SmallButton(new GUIContent("", "Set Values"));
+                        GUIUtils.Label(new GUIContent ("Conditions"));
                         EditorGUILayout.EndHorizontal();
                         
-                        GUIUtils.DrawMultiLineExpandableString(ao[conditionsBlockField], true, "conditions block", 50);
+                        GUIUtils.DrawMultiLineExpandableString(ao[conditionsBlockField], true, "conditions block", 25);
                         //GUIUtils.EndBox(1);
                         EditorGUILayout.EndVertical();
 
-
-
                         EditorGUILayout.EndHorizontal();
                         
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        GUIUtils.EndIndent();
+                        //GUIUtils.EndIndent();
                         GUIUtils.EndBox(1);
                         
                         if (setParam != -1) {
@@ -654,13 +724,10 @@ namespace AssetObjectsPacks {
                         }
                         if (setConditions) {
                             CopyConditions(selectionSystem.GetPoolIndiciesInSelectionOrAllShown(multiAO[packIDField].intValue).Generate(i=>GetAOatPoolID(curState, i)), multiAO);
-
                         }
                         if (setMessages) {
                             CopyMessages(selectionSystem.GetPoolIndiciesInSelectionOrAllShown(multiAO[packIDField].intValue).Generate(i=>GetAOatPoolID(curState, i)), multiAO);
                         }
-                    //}
-                //}
             }
         }
         
@@ -680,30 +747,43 @@ namespace AssetObjectsPacks {
             }
         }    
         
-        void DrawAOParamLabels (EventStatePackInfo packInfo, bool drawingSingle, out int setParam) {
+        void DrawAOParamLabels (EventStatePackInfo packInfo, bool drawingSingle, EditorProp ao, out int setParam) {
             setParam = -1;
-            EditorGUILayout.BeginHorizontal();
+
+            GUILayoutOption w = GUILayout.Width(150);
+
+            //EditorGUILayout.BeginHorizontal();
             for (int i = 0; i < packInfo.paramlabels.Length; i++) {
-                GUIUtils.Label(packInfo.paramlabels[i], packInfo.paramWidths[i]);
+                if (i % 2 == 0) {
+                    if (i != 0) {
+                    }
+                }
+                    EditorGUILayout.BeginHorizontal();
                 //multi set button
                 GUI.enabled = !drawingSingle;
                 if (GUIUtils.SmallButton(new GUIContent("", "Set Values"))) setParam = i;
                 GUI.enabled = true;
+                GUIUtils.Label(packInfo.paramlabels[i], w);//packInfo.paramWidths[i]);
+                GUIUtils.DrawProp( CustomParameterEditor.GetParamValueProperty( ao[paramsField][i] ));//, w);//packInfo.paramWidths[i]);
+                        EditorGUILayout.EndHorizontal();
             }
-            EditorGUILayout.EndHorizontal();
+            //EditorGUILayout.EndHorizontal();
         }
         void DrawAOParamFields (EventStatePackInfo packInfo, EditorProp ao) {
             EditorGUILayout.BeginHorizontal();
             int pc = ao[paramsField].arraySize;
             int pl = packInfo.paramlabels.Length;
-            /*
             if (pc != pl) {
-                Debug.Log(pc + " ao params");
-                if (ao == multiAO) {
-                    Debug.Log("draw multi");
+                Debug.LogError("mismathc");
+
+                for (int i = 0; i < pc; i++) {
+                    Debug.LogError( ao[paramsField][i][nameField].stringValue );
+                }
+                for (int i = 0; i < pl; i++) {
+                    Debug.LogError( packInfo.paramlabels[i].text );
+    
                 }
             }
-             */
 
             for (int i = 0; i < pl; i++) {
                 GUIUtils.DrawProp( CustomParameterEditor.GetParamValueProperty( ao[paramsField][i] ), packInfo.paramWidths[i]);
@@ -718,10 +798,9 @@ namespace AssetObjectsPacks {
         public const string subStateIDsField = "subStatesIDs";
         public const string stateIDField = "stateID";
         public const string allStatesField = "allStates";
+        public const string isNewField = "isNew";
 
         
-        
-
         EditorProp GetEventByID (int id) {
             for (int i = 0; i < allStates.arraySize; i++) {
                 if (allStates[i][stateIDField].intValue == id) {
@@ -731,7 +810,6 @@ namespace AssetObjectsPacks {
             return null;
         }
 
-        public const string isNewField = "isNew";
 
 
         EditorProp GetEventStateByPath(string path) {
@@ -759,6 +837,9 @@ namespace AssetObjectsPacks {
         void ResetNewRecursive (){
             for (int i = 0; i < so[allStatesField].arraySize; i++) {
                 so[allStatesField][i][isNewField].SetValue(false);
+                for (int x = 0; x < so[allStatesField][i][assetObjectsField].arraySize; x++) {
+                    so[allStatesField][i][assetObjectsField][x][isNewField].SetValue(false);
+                }
             }
         }
 
@@ -790,21 +871,16 @@ namespace AssetObjectsPacks {
                 }
                 else {
                     EditorProp stateToDuplicate = GetEventByID( parentState[subStateIDsField][adjustedIndex].intValue);
-Debug.Log("0");
                     
                     EditorProp newEventState = allStates.AddNew(stateToDuplicate[nameField].stringValue + " Copy");
                     
-                    int newID = CreateNewID();
+                    int newID = CreateNewStateID();
 
 
-                    Debug.Log("1");
                     parentState[subStateIDsField].InsertAtIndex(adjustedIndex+1).SetValue(newID);
-                    Debug.Log("2");
                     
                     CopyEventState(newEventState, stateToDuplicate, false, false, newID );    
-            Debug.Log("3");
-                    
-
+            
                     
                 }
                 offset++;
@@ -834,7 +910,7 @@ Debug.Log("0");
 
             for (int i = 0; i < toCopy[subStateIDsField].arraySize; i++) {
 
-                int newSubID = CreateNewID();
+                int newSubID = CreateNewStateID();
 
                 es[subStateIDsField].AddNew().SetValue(newSubID);
 
@@ -859,7 +935,6 @@ Debug.Log("0");
                     PacksManagerEditor.AdjustAOParametersToPack(aos[x], packInfos[aos[x][packIDField].intValue].packProp, false);
                 }
             }
-            
         }
 
         int GetEventTotalCount (EditorProp state) {
@@ -888,8 +963,15 @@ Debug.Log("0");
             int deleteOption = -1;
             for (int i = GetEventTotalCount(state) - 1; i >= 0; i--) {
                 if (deleteIndicies.Contains(i)) {
-                    if (i >= state[subStateIDsField].arraySize) state[assetObjectsField].DeleteAt(i - state[subStateIDsField].arraySize);
-                    else DeleteState(state, GetEventByID( state[subStateIDsField][i].intValue), ref deleteOption);
+                    if (i >= state[subStateIDsField].arraySize) {
+                        int aoIndex = i - state[subStateIDsField].arraySize;
+                        state[assetObjectsField].DeleteAt(aoIndex);
+                        Debug.Log(state[nameField].stringValue + " deleted at " + aoIndex);
+
+                    }
+                    else {
+                        DeleteState(state, GetEventByID( state[subStateIDsField][i].intValue), ref deleteOption);
+                    }
                 }
             }
             return true;
@@ -925,8 +1007,6 @@ Debug.Log("0");
                 }
             }
             allStates.DeleteAt(indexInAll);
-
-
         }
 
 
@@ -958,22 +1038,36 @@ Debug.Log("0");
             //delete id from parents list
             parentState[subStateIDsField].DeleteAt(indexInParent);
             
-
-
             DeleteSubStatesRecursive(stateToDelete);
             return true;
         }
 
-        void QuickRenameNewEventState (EditorProp parentState, int index, string newName) {
-            EditorProp renamedState = GetEventByID( parentState[subStateIDsField][index].intValue );
+        void QuickRenameNewElement (EditorProp parentState, int index, string newName) {
+            
+            EditorProp renamed = null;
+            if (index >= parentState[subStateIDsField].arraySize) {
+                int aoIndex = index-parentState[subStateIDsField].arraySize;
+                renamed = parentState[assetObjectsField][aoIndex];
 
-            renamedState[isNewField].SetValue(false);
-            if (newName.Contains("*")) {
-                string[] split = newName.Split('*');
-                renamedState[nameField].SetValue(split[0]);
-                renamedState[conditionsBlockField].SetValue(split[1]);
+                renamed[nameField].SetValue(newName);
+                        
+
             }
-            else renamedState[nameField].SetValue(newName);
+            else {
+                renamed = GetEventByID( parentState[subStateIDsField][index].intValue );
+
+                if (newName.Contains("*")) {
+                    string[] split = newName.Split('*');
+                    renamed[nameField].SetValue(split[0]);
+                    renamed[conditionsBlockField].SetValue(split[1]);
+                }
+                else renamed[nameField].SetValue(newName);
+
+            }
+            
+            //EditorProp renamedState = GetEventByID( parentState[subStateIDsField][index].intValue );
+            renamed[isNewField].SetValue(false);
+
         }
         
         void MoveAOsToEventState(EditorProp baseState, IEnumerable<int> indicies, string origDir, string targetDir)
@@ -1018,9 +1112,6 @@ Debug.Log("0");
         EditorProp allStates { get { return so[allStatesField]; } }
 
 
-        bool StateIsBase (EditorProp state) {
-            return state[stateIDField].intValue == 0;
-        }
         EditorProp FindParentState (EditorProp state) {
             int stateID = state[stateIDField].intValue;
             if (stateID == 0) return null;
@@ -1037,7 +1128,6 @@ Debug.Log("0");
         
         void DrawEventState(EditorProp state, bool drawingBase, out bool deletedState, out bool changedName, out string changeName) {
             
-            
             EditorGUILayout.BeginHorizontal();
             changedName = DrawStateName (state, drawingBase, out changeName);
             deletedState = GUIUtils.SmallDeleteButton("Delete State");
@@ -1052,11 +1142,8 @@ Debug.Log("0");
                 int deleteOption = -1;
                 deletedState = DeleteState(FindParentState(state), state, ref deleteOption);
             }
-            
         }
         
-
-
         Dictionary<int, EventStatePackInfo> GetPacksInfos () {
             if (packsManager == null) return null;
             int l = packsManager.packs.Length;
@@ -1072,22 +1159,23 @@ Debug.Log("0");
             bool reset_i = true;        
             foreach (var e in elements) {
                 UnityEngine.Object objRef = packInfos[e.y].GetObjectRefForID(e.x);
-                Debug.Log(objRef.name);
-                InitializeNewAssetObject(
-                    state[assetObjectsField].AddNew(), e.x, objRef, reset_i, packInfos[e.y].packProp);    
+                InitializeNewAssetObject(state[assetObjectsField].AddNew(), e.x, objRef, reset_i, packInfos[e.y].packProp, false);    
                 reset_i = false;
             }
             return true;
         }
 
-        void InitializeNewAssetObject (EditorProp ao, int id, UnityEngine.Object obj, bool makeDefault, EditorProp packProp) {
+        void InitializeNewAssetObject (EditorProp ao, int id, UnityEngine.Object obj, bool makeDefault, EditorProp packProp, bool setIsNew) {
             ao[idField].SetValue ( id );
             ao[objRefField].SetValue ( obj );
             ao[packIDField].SetValue ( packProp[PacksManagerEditor.idField].intValue );
+            ao[isNewField].SetValue ( setIsNew );
             
             //only need to default first one added, the rest will copy the last one 'inserted' into the
             //serialized property array
             if (!makeDefault) return;
+            ao[messageBlocksField].SetValue(string.Empty);
+            ao[conditionsBlockField].SetValue(string.Empty);
             PacksManagerEditor.AdjustAOParametersToPack(ao, packProp, true);
         }
 
@@ -1103,14 +1191,24 @@ Debug.Log("0");
         
         void CheckForNullObjectRefs(EditorProp ao, Dictionary<int, EventStatePackInfo> packInfos) {
             if (ao[objRefField].objRefValue == null) {
-                UnityEngine.Object o = packInfos[ao[packIDField].intValue].GetObjectRefForID(ao[idField].intValue);
-                Debug.Log("Getting new obj: " + o.name);
-                ao[objRefField].SetValue( o );
+                if (!packInfos[ao[packIDField].intValue].pack.isCustom) {
+                    UnityEngine.Object o = packInfos[ao[packIDField].intValue].GetObjectRefForID(ao[idField].intValue);
+                    if (o != null) {
+                        Debug.Log("Getting new obj: " + o.name);
+                    }
+                    else {
+                        
+                    }
+                    ao[objRefField].SetValue( o );
+                }
             }
         }
 
         void OpenImportSettings (IEnumerable<Vector2Int> elementsInSelection) {
             int packID = elementsInSelection.First().y;
+            if (packInfos[packID].pack.isCustom) {
+                return;
+            }
             //check if all same pack
             foreach (var i in elementsInSelection) {
                 if (packID != i.y) return;
@@ -1149,28 +1247,40 @@ Debug.Log("0");
             
             hasErrors = PacksManagerEditor.PackHasErrors(pack, packProp);
             if (hasErrors) return;
-
-            icon = EditorGUIUtility.ObjectContent(null, pack.assetType.ToType()).image;
             
+            icon = EditorGUIUtility.ObjectContent(null, pack.assetType.ToType()).image;
             InitializeAllFilePaths();
             
             paramlabels = pack.defaultParameters.Length.Generate( i => new GUIContent(pack.defaultParameters[i].name) ).ToArray(); 
         }
 
         public string GetOriginalPath (int id) {
-            return allPaths[id2PathIndex[id]];
+            if (pack.isCustom) return pack.name + "/";
+            if (id2PathIndex.ContainsKey(id)) {
+                return allPaths[id2PathIndex[id]];
+            }
+            return pack.name + "/";
         }
         string FullOriginalPath (int id) {
             return pack.dir + GetOriginalPath(id);
         }
         public UnityEngine.Object GetObjectRefForID(int id) {
+            if (pack.isCustom) return null;
+
             return EditorUtils.GetAssetAtPath(FullOriginalPath(id), pack.assetType);  
         }
         public UnityEngine.Object GetRootAssetForID(int id) {
+            if (pack.isCustom) return null;
             return AssetDatabase.LoadAssetAtPath(FullOriginalPath(id), typeof(UnityEngine.Object));  
         }
         public void InitializeAllFilePaths () {
             if (hasErrors) return;
+            if (pack.isCustom) return;
+
+            if (pack.extensions == ".prefab") {
+                Debug.Log("gettting prefab");
+            }
+
             allPaths = AssetObjectsEditor.GetAllAssetObjectPaths (pack.dir, pack.extensions, false, out id2PathIndex);
         }
     }

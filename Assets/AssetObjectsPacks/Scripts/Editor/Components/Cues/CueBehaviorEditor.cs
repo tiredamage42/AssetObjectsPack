@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using System.Linq;
-//using System.Collections.Generic;
 namespace AssetObjectsPacks {
     [CustomEditor(typeof(CueBehavior))]
     public class CueBehaviorEditor : Editor {
@@ -51,9 +50,6 @@ namespace AssetObjectsPacks {
             GUIUtils.EndBox(1);
             
 
-
-            
-
             GUIUtils.StartBox(1);
             EditorGUI.indentLevel++;
             GUIUtils.DrawEnumProp(
@@ -76,7 +72,7 @@ namespace AssetObjectsPacks {
 
             GUIUtils.Space();
             EditorGUI.indentLevel--;
-            GUIUtils.Label(new GUIContent("<b>The following wont be used if the cue has sub cues:</b>"));
+            GUIUtils.Label(new GUIContent("<b>The following variables wont be used if the cue has sub-cues:</b>"));
             EditorGUI.indentLevel++;
                             
             GUIUtils.StartBox(1);

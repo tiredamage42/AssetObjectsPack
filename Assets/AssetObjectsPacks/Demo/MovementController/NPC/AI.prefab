@@ -1121,9 +1121,9 @@ GameObject:
   - component: {fileID: 2511859608284325720}
   - component: {fileID: 22595441}
   - component: {fileID: 22595442}
-  - component: {fileID: 22595440}
   - component: {fileID: 1138660218}
   - component: {fileID: 22595443}
+  - component: {fileID: 698522050}
   m_Layer: 0
   m_Name: AI
   m_TagString: Untagged
@@ -1207,7 +1207,7 @@ MonoBehaviour:
   behavior: {fileID: 11400000, guid: b40f7161fdd2e4c47a9f09350e4bb268, type: 2}
   direction: 0
   speed: 2
-  stance: 1
+  stance: 0
   eventLayer: 0
   overrideMove: 0
 --- !u!143 &22595446
@@ -1242,10 +1242,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   updateMode: 2
   eventLayer: 0
-  usingRootMotion: 1
+  characterRadius: 0.1
+  characterHeight: 2
   calculateMoveSloped: 1
   useGravity: 1
   usePhysicsController: 1
+  transformGroundFix: 1
   grounded: 0
 --- !u!114 &22595441
 MonoBehaviour:
@@ -1259,12 +1261,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33c697bd1f32545ff8a034854b418aaa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  updateMode: 2
+  updateMode: 1
   eventLayer: 0
-  doAutoPlatform: 1
+  distanceAheadCheckUp: 1.1
+  distanceAheadCheckDown: 0.35
+  doAutoPlatform: 0
   layerMask:
     serializedVersion: 2
     m_Bits: 1
+  platformUpCueShort: {fileID: 3176877163273610085, guid: 818651ae2b2e4418c89e990769423deb,
+    type: 3}
+  platformDownCueShort: {fileID: 114442411507341536, guid: e9abe1ff4a76a4a9788f449110485656,
+    type: 3}
+  platformUpCueTall: {fileID: 3176877163273610085, guid: 06c8c47b9fd9545b4a7868136a069f8b,
+    type: 3}
+  platformDownCueTall: {fileID: 114442411507341536, guid: c2d1dd821286c4cd2ba191386795c69a,
+    type: 3}
 --- !u!114 &22595442
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1281,24 +1293,10 @@ MonoBehaviour:
   eventLayer: 0
   doAutoTurn: 0
   autoTurnAnimate: 0
+  use2d: 1
   isTurning: 0
   inTurnAnimation: 0
   initializedTurnCue: 0
---- !u!114 &22595440
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1138660213}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d6dcf84a43ab14499ba21e383a5d6e85, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  updateMode: 2
-  eventLayer: 1
-  hasDestination: 0
 --- !u!114 &1138660218
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1313,10 +1311,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   updateMode: 2
   eventLayer: 2
-  debugTransformLook: {fileID: 0}
+  aimDebug: {fileID: 0}
+  debugPhaseTime: 5
   agitated: 1
   demoScene: {fileID: 0}
+  agentRadius: 0.1
+  agentHeight: 2
   aiBehavior: {fileID: 11400000, guid: 7fb546a94542c46258a183aec3739f2f, type: 2}
+  pathStatus: 2
 --- !u!195 &22595443
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -1339,6 +1341,24 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!114 &698522050
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1138660213}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 243ee2a83b19a49f58a8f9e8e149b325, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  minimumY: -5
+  layerMask:
+    serializedVersion: 2
+    m_Bits: 1
+  maxY: 500
+  buffer: 0.1
 --- !u!1 &1149496821
 GameObject:
   m_ObjectHideFlags: 0

@@ -12,12 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4830b1877ceb4e8b9cb312deb502619, type: 3}
   m_Name: MoveBehavior
   m_EditorClassIdentifier: 
-  turnCue: {fileID: 8160287640862645209, guid: 16eda1f2c5c914c08a7b8e4035fb4836, type: 3}
-  wayPointCue: {fileID: 8160287640862645209, guid: 330edfcc3d046490e93fca3dc76f4e7c,
-    type: 3}
-  moveCue: {fileID: 8160287640862645209, guid: 5dce4a7af633f4028b9b0d44294f998f, type: 3}
-  stillCue: {fileID: 8160287640862645209, guid: 940077bfb60914e0a95e75c217953317,
-    type: 3}
+  turnCue: {fileID: 11400000, guid: c60a3d1873b6741e99ec3862fc9c5f52, type: 2}
+  wayPointCue: {fileID: 11400000, guid: a4f1d66e2802f442f849e2171b62da8d, type: 2}
+  moveCue: {fileID: 11400000, guid: b5c2fefa16e8944b4b36e5a2824ffe07, type: 2}
+  stillCue: {fileID: 11400000, guid: 15bb8027de7544b7f867ef26ee15fb5e, type: 2}
   groundDistanceCheckAir: 0.01
   groundDistanceCheckGrounded: 0.1
   groundRadiusCheck: 0.05
@@ -44,7 +42,7 @@ MonoBehaviour:
   turnHelpSpeeds:
   - 1
   - 3
-  - 7.5
+  - 5
   dirTurnChangeThreshold: 30
   animTurnAngleThreshold: 22.5
   turnAngleHelpThreshold: 5

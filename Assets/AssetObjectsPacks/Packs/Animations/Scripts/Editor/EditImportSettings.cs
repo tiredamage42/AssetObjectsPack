@@ -16,8 +16,7 @@ namespace AssetObjectsPacks.Animations {
 
         [MenuItem("Animations Pack/Adjust Animation Import Settings")]
         public static void CreateWizard() {
-            EditImportSettings w = ScriptableWizard.DisplayWizard<EditImportSettings>("Adjust Import Settings", "Adjust");
-            w.objects = Selection.objects;
+            CreateWizard(Selection.objects);
         }
         public static void CreateWizard(Object[] objects) {
             EditImportSettings w = ScriptableWizard.DisplayWizard<EditImportSettings>("Adjust Import Settings", "Adjust");

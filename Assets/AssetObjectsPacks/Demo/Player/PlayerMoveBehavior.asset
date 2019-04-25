@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4830b1877ceb4e8b9cb312deb502619, type: 3}
+  m_Name: PlayerMoveBehavior
+  m_EditorClassIdentifier: 
+  turnCue: {fileID: 11400000, guid: 63feea6627ea5450fa30a6c3a7dcd42d, type: 2}
+  wayPointCue: {fileID: 11400000, guid: a4f1d66e2802f442f849e2171b62da8d, type: 2}
+  moveCue: {fileID: 11400000, guid: dd7cfedbfba594c8985b7408f847995a, type: 2}
+  stillCue: {fileID: 11400000, guid: fc7e13cd992e44782bab57fc1c8ee6eb, type: 2}
+  groundDistanceCheckAir: 0.01
+  groundDistanceCheckGrounded: 0.1
+  groundRadiusCheck: 0.05
+  groundLayerMask:
+    serializedVersion: 2
+    m_Bits: 1
+  maxGroundAngle: 45
+  minYVelocity: -0.1
+  arriveThresholds:
+  - 0.1
+  - 0.25
+  - 0.5
+  arriveHelpThresholds:
+  - 9999999
+  - 0.5
+  - 1
+  moveHelpSpeeds:
+  - 5
+  - 0
+  - 0
+  maxMoveHelpSpeed: 3
+  waypointTurnHelpMinDistance: 0.25
+  waypointTurnAnimMinDistance: 2
+  turnHelpSpeeds:
+  - 3
+  - 5
+  - 10
+  dirTurnChangeThreshold: 30
+  animTurnAngleThreshold: 22.5
+  turnAngleHelpThreshold: 5

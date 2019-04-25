@@ -4,6 +4,24 @@ using UnityEditor;
 using System.Linq;
 using System.Collections.Generic;
 
+
+/*
+
+
+
+if layer > 0:
+
+    if animclip == null:
+
+        layer loopset = 2
+
+
+
+
+
+
+*/
+
 namespace AssetObjectsPacks.Animations {
     struct ClipIDPair {
         public AnimationClip clip;
@@ -15,7 +33,7 @@ namespace AssetObjectsPacks.Animations {
     }
     public class AnimatorControllerBuilder : ScriptableWizard
     {
-        [MenuItem("Animations Pack/Generate Anim Controller")]
+        [MenuItem("Animations/Generate Anim Controller")]
         static void CreateWizard() {
             ScriptableWizard.DisplayWizard<AnimatorControllerBuilder>("Generate Anim Controller", "Generate");
         }
@@ -82,16 +100,54 @@ namespace AssetObjectsPacks.Animations {
             return results;
         }
         void AddParameters (AnimatorController controller) {
-            controller.AddParameter(CustomAnimator.sMirror, AnimatorControllerParameterType.Bool);
-            controller.AddParameter(CustomAnimator.sSpeed, AnimatorControllerParameterType.Float);
 
-            for (int i = 0; i < CustomAnimator.sLoopIndicies.Length; i++) {
-                controller.AddParameter(CustomAnimator.sLoopIndicies[i], AnimatorControllerParameterType.Float);
-                controller.AddParameter(CustomAnimator.sLoopMirrors[i], AnimatorControllerParameterType.Bool);
-                controller.AddParameter(CustomAnimator.sLoopSpeeds[i], AnimatorControllerParameterType.Float);
+            for (int i = 0; i < CustomAnimator.mirrorParamStrings.Length; i++) {
+                controller.AddParameter(CustomAnimator.mirrorParamStrings[i], AnimatorControllerParameterType.Bool);
             }
-            controller.AddParameter(CustomAnimator.sActiveLoop, AnimatorControllerParameterType.Int);
+            for (int i = 0; i < CustomAnimator.speedParamStrings.Length; i++) {
+                controller.AddParameter(CustomAnimator.speedParamStrings[i], AnimatorControllerParameterType.Float);
+            }
+
+
+            // controller.AddParameter(CustomAnimator.sMirror, AnimatorControllerParameterType.Bool);
+            // controller.AddParameter(CustomAnimator.sSpeed, AnimatorControllerParameterType.Float);
+
+            // for (int i = 0; i < CustomAnimator.sLoopIndicies.Length; i++) {
+            //     controller.AddParameter(CustomAnimator.sLoopIndicies[i], AnimatorControllerParameterType.Float);
+            //     controller.AddParameter(CustomAnimator.sLoopMirrors[i], AnimatorControllerParameterType.Bool);
+            //     controller.AddParameter(CustomAnimator.sLoopSpeeds[i], AnimatorControllerParameterType.Float);
+            // }
+
+            for (int i = 0; i < CustomAnimator.loopIndexStrings.Length; i++) {
+                controller.AddParameter(CustomAnimator.loopIndexStrings[i], AnimatorControllerParameterType.Float);
+            }
+            for (int i = 0; i < CustomAnimator.loopMirrorStrings.Length; i++) {
+                controller.AddParameter(CustomAnimator.loopMirrorStrings[i], AnimatorControllerParameterType.Bool);
+            }
+            for (int i = 0; i < CustomAnimator.loopSpeedStrings.Length; i++) {
+                controller.AddParameter(CustomAnimator.loopSpeedStrings[i], AnimatorControllerParameterType.Float);
+            }
+
+
+
+
+
+
+
+
+
+
+
+
+            for (int i = 0; i < CustomAnimator.activeLoopParamStrings.Length; i++) {
+                controller.AddParameter(CustomAnimator.activeLoopParamStrings[i], AnimatorControllerParameterType.Int);
+            }
+
+
+            // controller.AddParameter(CustomAnimator.sActiveLoop, AnimatorControllerParameterType.Int);
         }
+
+
         void ControllerBuild (ClipIDPair[] clips, int c) {
             if (clips == null) return;
             // Create the animator in the project
@@ -100,10 +156,57 @@ namespace AssetObjectsPacks.Animations {
             //add parameters
             AddParameters(controller);
 
-            //make blend trees for looped animations (2 to smoothly transition between loops)
-            AnimatorState[] blendTrees = new AnimatorState[2];
-            for (int i =0 ; i < 2; i++) blendTrees[i] = AddBlendTree(controller, 0, clips, CustomAnimator.sLoopNames[i], CustomAnimator.sLoopMirrors[i], CustomAnimator.sLoopSpeeds[i], c, CustomAnimator.sLoopIndicies[i]);            
-            for (int i = 0; i < c; i++) AddState(controller, 0, clips[i], blendTrees);
+            {
+
+                //make blend trees for looped animations (2 to smoothly transition between loops)
+                AnimatorState[] blendTrees = new AnimatorState[2];
+                for (int i =0 ; i < 2; i++) 
+                    blendTrees[i] = AddBlendTree(controller, 0, clips, CustomAnimator.loopNamesStrings[i], CustomAnimator.loopMirrorStrings[i], CustomAnimator.loopSpeedStrings[i], c, CustomAnimator.loopIndexStrings[i]);            
+                    // blendTrees[i] = AddBlendTree(controller, 0, clips, CustomAnimator.sLoopNames[i], CustomAnimator.sLoopMirrors[i], CustomAnimator.sLoopSpeeds[i], c, CustomAnimator.sLoopIndicies[i]);            
+                for (int i = 0; i < c; i++) 
+                    AddState(controller, 0, clips[i], blendTrees);
+            }
+
+
+            for (int l = 1; l < CustomAnimator.MAX_ANIM_LAYERS; l++) {
+                controller.AddLayer("Layer"+l);
+                AnimatorState[] blendTrees = new AnimatorState[3];
+
+                // make the empty default state
+                AnimatorStateMachine sm = controller.layers[l].stateMachine;
+                AnimatorState state = sm.AddState(CustomAnimator.loopNamesStrings[l*3 + 0]);
+                state.motion = null;
+                blendTrees[0] = state;
+                
+
+                for (int i =0 ; i < 2; i++) 
+                    blendTrees[i+1] = AddBlendTree(
+                        controller, l, 
+                        clips, 
+
+
+                        CustomAnimator.loopNamesStrings[l*3 + (i+1)],
+                        // CustomAnimator.sLoopNames[i], 
+
+
+                        // CustomAnimator.sLoopMirrors[i], 
+                        // CustomAnimator.sLoopSpeeds[i], 
+                        // c, 
+                        // CustomAnimator.sLoopIndicies[i]
+
+
+                        CustomAnimator.loopMirrorStrings[l*2 + i], 
+                        CustomAnimator.loopSpeedStrings[l*2 + i], 
+                        c, 
+                        CustomAnimator.loopIndexStrings[l*2 + i]
+                    );            
+                
+                
+                for (int i = 0; i < c; i++) 
+                    AddState(controller, l, clips[i], blendTrees);
+            }
+
+    
         }
 
 
@@ -117,10 +220,13 @@ namespace AssetObjectsPacks.Animations {
             AnimatorState state = sm.AddState(id.ToString());//, new Vector3(300, 0, 0));
             
             state.mirrorParameterActive = true;
-            state.mirrorParameter = CustomAnimator.sMirror;
-
             state.speedParameterActive = true;
-            state.speedParameter = CustomAnimator.sSpeed;
+
+            state.mirrorParameter = CustomAnimator.mirrorParamStrings[layer];
+            state.speedParameter = CustomAnimator.speedParamStrings[layer];
+            // state.mirrorParameter = CustomAnimator.sMirror;
+            // state.speedParameter = CustomAnimator.sSpeed;
+            
                 
             state.tag = CustomAnimator.sShots;
             state.motion = clip;
@@ -130,7 +236,9 @@ namespace AssetObjectsPacks.Animations {
             int c = blendTrees.Length;
             for (int i = 0; i < c; i++) {
                 AnimatorStateTransition exit = state.AddTransition(blendTrees[i]);
-                exit.AddCondition(AnimatorConditionMode.Equals, i, CustomAnimator.sActiveLoop);
+                //exit.AddCondition(AnimatorConditionMode.Equals, i, CustomAnimator.sActiveLoop);
+                exit.AddCondition(AnimatorConditionMode.Equals, i, CustomAnimator.activeLoopParamStrings[layer]);
+                
                 exit.canTransitionToSelf = false;
                 exit.hasExitTime = true;
                 exit.exitTime = exit_time;
