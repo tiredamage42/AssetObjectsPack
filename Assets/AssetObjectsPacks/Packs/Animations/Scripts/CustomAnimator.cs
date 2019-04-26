@@ -80,7 +80,7 @@ namespace AssetObjectsPacks.Animations {
             if (looped) {
                 if (assetObject.objRef != null) {
 
-                    Debug.Log("playing loop: " + assetObject.objRef.name);
+                    // Debug.Log("playing loop: " + assetObject.objRef.name);
                 }
 
                 //BroadcastEndUse(); //dont leave loops hanging
@@ -88,7 +88,7 @@ namespace AssetObjectsPacks.Animations {
             else {
 
                 lastPlayed = assetObject.objRef.name;
-                Debug.Log("playing: " + assetObject.objRef.name);
+                // Debug.Log("playing: " + assetObject.objRef.name);
 
             }
         }
@@ -133,17 +133,24 @@ namespace AssetObjectsPacks.Animations {
             }
             return r;
         }
+
+        public const int BLEND_TREES_PER_LAYER = 2;
         static string[] BuildLayerParametersLoops (string baseParameter) {
             // each layer has 3 possible loops, except base layer which has just two
             // 0, 1, 2(empty on layers above 0)
-            int amount = (MAX_ANIM_LAYERS * 3);
+            int amount = (MAX_ANIM_LAYERS * BLEND_TREES_PER_LAYER);
 
             string[] r = new string[amount];
             int layer = 0;
-            for (int i = 0; i < amount; i+=3) {
-                r[i+0] = baseParameter + "0_" + layer.ToString();
-                r[i+1] = baseParameter + "1_" + layer.ToString();
-                r[i+2] = baseParameter + "2_" + layer.ToString();
+            for (int i = 0; i < amount; i+=BLEND_TREES_PER_LAYER) {
+
+                for (int k = 0; k < BLEND_TREES_PER_LAYER; k++) {
+                    r[i+k] = baseParameter + k.ToString() + "_" + layer.ToString();
+                }
+                    
+                // r[i+0] = baseParameter + "0_" + layer.ToString();
+                // r[i+1] = baseParameter + "1_" + layer.ToString();
+                // r[i+2] = baseParameter + "2_" + layer.ToString();
                 layer++;
             }
             return r;
@@ -154,13 +161,19 @@ namespace AssetObjectsPacks.Animations {
             // 0, 1, 2(empty on layers above 0)
 
             // speed, mirror and index params only need to be created for the first two though
-            int amount = (MAX_ANIM_LAYERS * 2);
+            int amount = (MAX_ANIM_LAYERS * BLEND_TREES_PER_LAYER);//2);
 
             string[] r = new string[amount];
             int layer = 0;
-            for (int i = 0; i < amount; i+=2) {
-                r[i+0] = baseParameter + "0_" + layer.ToString();
-                r[i+1] = baseParameter + "1_" + layer.ToString();
+            for (int i = 0; i < amount; i+=BLEND_TREES_PER_LAYER) {
+
+                for (int k = 0; k < BLEND_TREES_PER_LAYER; k++) {
+                    r[i+k] = baseParameter + k.ToString() + "_" + layer.ToString();
+                }
+                
+                // r[i+0] = baseParameter + "0_" + layer.ToString();
+                // r[i+1] = baseParameter + "1_" + layer.ToString();
+                // r[i+2] = baseParameter + "2_" + layer.ToString();
                 layer++;
             }
             return r;
@@ -229,27 +242,74 @@ namespace AssetObjectsPacks.Animations {
         }
         void LateUpdate () {
             CheckOneShotEndings();
+
+            CheckForEndTransitionLoops();
         }
 
         void Play (AnimationClip clip, int id, bool interrupt, bool mirror, bool loop, float transition, float speed, int layer, float timeOffset) {
             if (loop || (clip == null && layer > 0)) PlayLoop(clip, id, interrupt, mirror, transition, speed, layer, timeOffset);
             else PlayOneShot(id, mirror, transition, speed, layer, timeOffset);
         }
+
+
+        System.Action[] playLoopsAfterTransitions = new System.Action[MAX_ANIM_LAYERS];
+
+
+        void CheckForEndTransitionLoops () {
+            for (int i = 0; i < MAX_ANIM_LAYERS; i++) {
+                if (playLoopsAfterTransitions[i] != null) {
+
+                    if (!anim.IsInTransition(i)) {
+                        playLoopsAfterTransitions[i] ();
+                        playLoopsAfterTransitions[i] = null;
+                        
+                    }
+                }
+            }
+        }
         void PlayLoop (AnimationClip clip, int id, bool interrupt, bool mirror, float transition, float speed, int layer, float timeOffset) {
+            
+            System.Action pL = () => {
+
+            
             bool goToBlankState = clip == null && layer > 0;
 
             if (goToBlankState){
-                Debug.Log("playing blank state layre" + layer);
+                //Debug.Log("playing blank state layre" + layer);
             }
 
             
-            bool doTransition = (playingOneShots[layer] && interrupt) || !playingOneShots[layer];
+            //bool doTransition = (playingOneShots[layer] && interrupt) || !playingOneShots[layer];
+
+
+            bool isInTransitionToLoop = (anim.IsInTransition(layer) && !anim.GetNextAnimatorStateInfo(layer).IsTag(sShots));
+
+            
+            bool doTransition = (!playingOneShots[layer] || interrupt);// || isInTransitionToLoop;// !anim.IsInTransition(layer);
+            
             // bool doTransition = (playingOneShot && interrupt) || !playingOneShot;
             
             if (goToBlankState) {
 
-                doTransition = activeLayerLoops[layer] != 0;
-                activeLayerLoops[layer] = 0;
+                // doTransition = activeLayerLoops[layer] != 0 || interrupt || isInTransitionToLoop;
+                // activeLayerLoops[layer] = 0;
+
+                // if (doTransition || anim.GetInteger(pLActiveLoopSet[layer]) != -1) {
+                if ( anim.GetInteger(pLActiveLoopSet[layer]) != -1 && doTransition) {
+
+                    string loopName = "Blank";// loopNamesStrings[3*layer + activeLoop];
+                //     // anim.CrossFadeInFixedTime(sLoopNames[activeLoops], transition, layer, timeOffset);
+                    anim.CrossFadeInFixedTime(loopName, transition, layer, timeOffset);
+                }
+                // else {
+                //     Debug.LogError("no transition to BLANK");
+                // }
+
+
+                //set active loopset
+                anim.SetInteger(pLActiveLoopSet[layer], -1);//activeLayerLoops[layer]);
+                return;
+
 
             }
             else {
@@ -258,10 +318,12 @@ namespace AssetObjectsPacks.Animations {
                     if (!goToBlankState) {
 
                         if (layer > 0) {
-                            activeLayerLoops[layer] = activeLayerLoops[layer] == 1 ? 2 : 1;
+                            // activeLayerLoops[layer] = activeLayerLoops[layer] == 1 ? 2 : 1;
+
+                            activeLayerLoops[layer] = (activeLayerLoops[layer] + 1) % BLEND_TREES_PER_LAYER;// == 1 ? 0 : 1;
                         }
                         else {
-                            activeLayerLoops[layer] = activeLayerLoops[layer] == 1 ? 0 : 1;
+                            activeLayerLoops[layer] = (activeLayerLoops[layer] + 1) % BLEND_TREES_PER_LAYER;// == 1 ? 0 : 1;
                         }
                     }
                 }
@@ -283,14 +345,14 @@ namespace AssetObjectsPacks.Animations {
             if (!goToBlankState) {
 
                 int activeSet = activeLoop;
-                if (layer > 0) {
-                    activeSet -= 1;
-                }
+                // if (layer > 0) {
+                //     activeSet -= 1;
+                // }
                 //anim.SetFloat(pLoopIndicies[activeLoops], id);
-                anim.SetFloat(pLLoopIndicies[2*layer + activeSet], id);
+                anim.SetFloat(pLLoopIndicies[BLEND_TREES_PER_LAYER*layer + activeSet], id);
                 
-                anim.SetFloat(pLLoopSpeeds[2*layer + activeSet], speed);
-                anim.SetBool(pLLoopMirrors[2*layer + activeSet], mirror);
+                anim.SetFloat(pLLoopSpeeds[BLEND_TREES_PER_LAYER*layer + activeSet], speed);
+                anim.SetBool(pLLoopMirrors[BLEND_TREES_PER_LAYER*layer + activeSet], mirror);
 
                 // anim.SetFloat(pLoopSpeeds[activeLoops], speed);
                 // anim.SetBool(pLoopMirrors[activeLoops], mirror);
@@ -299,21 +361,43 @@ namespace AssetObjectsPacks.Animations {
             //if transitioning, crossfade to the new active loopset
             if (doTransition) {
 
-                Debug.LogError("playing loop transition on layer " + layer);
-                string loopName = loopNamesStrings[3*layer + activeLoop];
+                //Debug.LogError("playing loop transition on layer " + layer + " / " + transition);
+                string loopName = loopNamesStrings[BLEND_TREES_PER_LAYER*layer + activeLoop];
                 // anim.CrossFadeInFixedTime(sLoopNames[activeLoops], transition, layer, timeOffset);
                 anim.CrossFadeInFixedTime(loopName, transition, layer, timeOffset);
-            }
-            //set active loopset
-            anim.SetInteger(pLActiveLoopSet[layer], activeLayerLoops[layer]);
 
+                //set active loopset
+                anim.SetInteger(pLActiveLoopSet[layer], activeLayerLoops[layer]);
+
+            }
+            else {
+
+                Debug.LogError("playing loop NO transition on layer " + layer + " / " + transition);
+            }
+
+            };
+
+            if (anim.IsInTransition(layer)) {
+
+                if (layer > 0) {
+                    Debug.Log("skipping till after transition");
+                }
+                playLoopsAfterTransitions[layer] = pL;
+            }
+            else {
+                pL();
+            }
+            
+                
+
+            
 
 
         }
             
         void PlayOneShot(int id, bool mirror, float transition, float speed, int layer, float timeOffset) {
             
-            Debug.Log("playing one shot layer: " + layer + " trans:: " + transition);
+            // Debug.Log("playing one shot layer: " + layer + " trans:: " + transition);
             
             //set mirror ansd speed parameters
             anim.SetBool(pLMirror[layer], mirror);

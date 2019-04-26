@@ -6,18 +6,19 @@ using Movement;
 
 namespace Combat {
 
+
+
     public class CharacterCombat : MovementControllerComponent
     {
-
         public Gun currentGun;
+        public Smoother aimSmoother;
 
         public delegate void OnGunChange(Gun newGun);
         public event OnGunChange onGunChange;
-        
         public bool isAiming;
-        public float aimSpeed = 3;
+        // public float aimSpeed = 3;
         // [HideInInspector] public Vector3 aimTarget; 
-        [HideInInspector] public float aimLerp;
+        public float aimPercent;
         ValueTracker<bool> aimChangeTracker = new ValueTracker<bool>(false);
         ValueTracker<Gun> gunChangeTracker = new ValueTracker<Gun>(null);
         
@@ -33,7 +34,7 @@ namespace Combat {
         public override void UpdateLoop (float deltaTime) {
             
             if (aimChangeTracker.CheckValueChange(isAiming)) {
-                Debug.Log("changin loop state because aim is " + isAiming);
+                // Debug.Log("changin loop state because aim is " + isAiming);
                 controller.UpdateLoopState();
             }
             if (gunChangeTracker.CheckValueChange(currentGun)) {
@@ -43,18 +44,20 @@ namespace Combat {
             UpdateAimLerp(deltaTime);        
         }
 
-        const float aimEndThreshold = .01f;
+        const float aimEndThreshold = .001f;
         void UpdateAimLerp (float deltaTime) {
             float target = isAiming ? 1.0f : 0.0f;
-            if (aimLerp != target) {
+            if (aimPercent != target) {
+
+                aimPercent = aimSmoother.Smooth(aimPercent, target, deltaTime);
                 
-                aimLerp = Mathf.Lerp(aimLerp, target, aimSpeed * deltaTime);
+                // aimLerp = Mathf.Lerp(aimLerp, target, aimSpeed * deltaTime);
                 
-                if (isAiming && aimLerp > (1.0f - aimEndThreshold)) {
-                    aimLerp = 1.0f;
+                if (isAiming && aimPercent > (1.0f - aimEndThreshold)) {
+                    aimPercent = 1.0f;
                 }
-                else if (!isAiming && aimLerp < aimEndThreshold) {
-                    aimLerp = 0.0f;
+                else if (!isAiming && aimPercent < aimEndThreshold) {
+                    aimPercent = 0.0f;
                 }
             }
         }

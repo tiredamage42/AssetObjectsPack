@@ -23,7 +23,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 1
   maxGroundAngle: 45
-  minYVelocity: -0.1
+  minYVelocity: -0.5
   arriveThresholds:
   - 0.1
   - 0.25

@@ -130,7 +130,7 @@ namespace AssetObjectsPacks {
 
 
             void OnEventEnd (bool success) {
-                Debug.Log("on event end");
+                // Debug.Log("on event end");
                 Deactivate();
             }
 

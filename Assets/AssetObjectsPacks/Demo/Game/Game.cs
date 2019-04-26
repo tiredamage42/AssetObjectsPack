@@ -20,6 +20,19 @@ public class Game : MonoBehaviour
 	
 	public bool isPaused;
 	public static bool IsPaused { get { return m_instance.isPaused; } }
+	public static float initialTimeDilation {
+		get {
+			return m_instance.defaultTimescale;
+		}
+	}
+	public static float timeDilation {
+		get {
+			return m_instance.currentTimeDilation;
+		}
+		set {
+			m_instance.currentTimeDilation = value;
+		}
+	}
 	float initialTimeScale, initialFixedDeltaTime, initialMaxDelta;
     
 	

@@ -114,7 +114,7 @@ public class MovementController : MonoBehaviour {
 
         //immediately play the loop unless we're jumping or overriding movement
         bool asInterruptor = !overrideMovement;
-        Debug.Log("upading loops // " + asInterruptor);
+        // Debug.Log("upading loops // " + asInterruptor);
 
         Playlist.InitializePerformance("update Loop state", speed == 0 ? behavior.stillCue : behavior.moveCue, eventPlayer, false, eventLayer, new MiniTransform( Vector3.zero, Quaternion.identity), asInterruptor);
     }

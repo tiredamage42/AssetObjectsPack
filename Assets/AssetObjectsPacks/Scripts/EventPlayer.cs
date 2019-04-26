@@ -89,7 +89,7 @@ namespace AssetObjectsPacks {
                     return;
                 duration_timer += Time.deltaTime;
                 if (duration_timer >= current_duration) {
-                    Debug.Log("end event timer :: " + current_duration);
+                    // Debug.Log("end event timer :: " + current_duration);
                     EndPlayAttempt(true);
                 }
             }
@@ -99,7 +99,7 @@ namespace AssetObjectsPacks {
 
 
                 // }
-                Debug.Log("interrupting layer: " + layer + " : " + reason);
+                // Debug.Log("interrupting layer: " + layer + " : " + reason);
             
                 //returns false if end play overriden
                 if (!EndPlayAttempt(true)) {
@@ -114,7 +114,7 @@ namespace AssetObjectsPacks {
 
                 playing = false;
                 
-                Debug.Log("endevent in player");
+                // Debug.Log("endevent in player");
                 foreach (var cb in endPlayCallbacks) {
                     cb(success);
                 }
@@ -178,7 +178,7 @@ namespace AssetObjectsPacks {
                 duration_timer = 0;
                 current_duration = overrideDuration;
                 if (current_duration >= 0) {
-                    Debug.Log("set current duration to :: " + current_duration);
+                    // Debug.Log("set current duration to :: " + current_duration);
                 }
 
 

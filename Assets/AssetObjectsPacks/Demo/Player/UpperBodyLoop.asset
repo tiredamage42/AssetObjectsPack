@@ -90,7 +90,7 @@ MonoBehaviour:
       - name: Speed
         pType: 1
         BoolValue: 0
-        FloatValue: 1
+        FloatValue: 0.25
         IntValue: 0
         StringValue: 
         ColorValue:

@@ -352,7 +352,7 @@ MonoBehaviour:
     name: Base State
     conditionBlock: 
     assetObjects: []
-    subStatesIDs: 010000000f0000000800000016000000
+    subStatesIDs: 1d0000001e000000
     stateID: 0
   - isNew: 0
     name: Fwd
@@ -8060,7 +8060,7 @@ MonoBehaviour:
       mute: 0
       objRef: {fileID: 7400002, guid: 9929e8dac2533412b9e89b4182d68d7a, type: 3}
       messageBlock: 
-      conditionBlock: 
+      conditionBlock: Aiming
       id: 171
       packID: 0
       parameters:
@@ -8393,7 +8393,7 @@ MonoBehaviour:
       mute: 0
       objRef: {fileID: 7400002, guid: 32a196fb175794080b2f48b15a7efc97, type: 3}
       messageBlock: 
-      conditionBlock: 
+      conditionBlock: Aiming
       id: 170
       packID: 0
       parameters:
@@ -9112,7 +9112,7 @@ MonoBehaviour:
       - name: Speed
         pType: 1
         BoolValue: 0
-        FloatValue: 1
+        FloatValue: 0.75
         IntValue: 0
         StringValue: 
         ColorValue:
@@ -9389,10 +9389,10 @@ MonoBehaviour:
       isNew: 0
       name: 
       solo: 0
-      mute: 1
+      mute: 0
       objRef: {fileID: 7400002, guid: 9ce826367d7a14743ae712ec4b6c37dc, type: 3}
       messageBlock: 
-      conditionBlock: 
+      conditionBlock: '!Aiming'
       id: 297
       packID: 0
       parameters:
@@ -9445,7 +9445,7 @@ MonoBehaviour:
       - name: Speed
         pType: 1
         BoolValue: 0
-        FloatValue: 1
+        FloatValue: 0.75
         IntValue: 0
         StringValue: 
         ColorValue:
@@ -34488,4 +34488,349 @@ MonoBehaviour:
         Vector3Value: {x: 0, y: 0, z: 0}
     subStatesIDs: 
     stateID: 28
+  - isNew: 0
+    name: Air
+    conditionBlock: '!Grounded'
+    assetObjects:
+    - isCopy: 0
+      isNew: 0
+      name: 
+      solo: 0
+      mute: 0
+      objRef: {fileID: 7400000, guid: bc091c7abfd134216916b478e77cbe8e, type: 3}
+      messageBlock: 
+      conditionBlock: 
+      id: 723
+      packID: 0
+      parameters:
+      - name: Duration
+        pType: 1
+        BoolValue: 0
+        FloatValue: -1
+        IntValue: 0
+        StringValue: 
+        ColorValue:
+          serializedVersion: 2
+          rgba: 0
+        GradientValue:
+          serializedVersion: 2
+          key0: {r: 0, g: 0, b: 0, a: 0}
+          key1: {r: 0, g: 0, b: 0, a: 0}
+          key2: {r: 0, g: 0, b: 0, a: 0}
+          key3: {r: 0, g: 0, b: 0, a: 0}
+          key4: {r: 0, g: 0, b: 0, a: 0}
+          key5: {r: 0, g: 0, b: 0, a: 0}
+          key6: {r: 0, g: 0, b: 0, a: 0}
+          key7: {r: 0, g: 0, b: 0, a: 0}
+          ctime0: 0
+          ctime1: 65535
+          ctime2: 0
+          ctime3: 0
+          ctime4: 0
+          ctime5: 0
+          ctime6: 0
+          ctime7: 0
+          atime0: 0
+          atime1: 65535
+          atime2: 0
+          atime3: 0
+          atime4: 0
+          atime5: 0
+          atime6: 0
+          atime7: 0
+          m_Mode: 0
+          m_NumColorKeys: 2
+          m_NumAlphaKeys: 2
+        AnimationCurveValue:
+          serializedVersion: 2
+          m_Curve: []
+          m_PreInfinity: 0
+          m_PostInfinity: 0
+          m_RotationOrder: 0
+        Vector2Value: {x: 0, y: 0}
+        Vector3Value: {x: 0, y: 0, z: 0}
+      - name: Speed
+        pType: 1
+        BoolValue: 0
+        FloatValue: 1
+        IntValue: 0
+        StringValue: 
+        ColorValue:
+          serializedVersion: 2
+          rgba: 0
+        GradientValue:
+          serializedVersion: 2
+          key0: {r: 0, g: 0, b: 0, a: 0}
+          key1: {r: 0, g: 0, b: 0, a: 0}
+          key2: {r: 0, g: 0, b: 0, a: 0}
+          key3: {r: 0, g: 0, b: 0, a: 0}
+          key4: {r: 0, g: 0, b: 0, a: 0}
+          key5: {r: 0, g: 0, b: 0, a: 0}
+          key6: {r: 0, g: 0, b: 0, a: 0}
+          key7: {r: 0, g: 0, b: 0, a: 0}
+          ctime0: 0
+          ctime1: 65535
+          ctime2: 0
+          ctime3: 0
+          ctime4: 0
+          ctime5: 0
+          ctime6: 0
+          ctime7: 0
+          atime0: 0
+          atime1: 65535
+          atime2: 0
+          atime3: 0
+          atime4: 0
+          atime5: 0
+          atime6: 0
+          atime7: 0
+          m_Mode: 0
+          m_NumColorKeys: 2
+          m_NumAlphaKeys: 2
+        AnimationCurveValue:
+          serializedVersion: 2
+          m_Curve: []
+          m_PreInfinity: 0
+          m_PostInfinity: 0
+          m_RotationOrder: 0
+        Vector2Value: {x: 0, y: 0}
+        Vector3Value: {x: 0, y: 0, z: 0}
+      - name: Mirror
+        pType: 2
+        BoolValue: 0
+        FloatValue: 1
+        IntValue: 0
+        StringValue: 
+        ColorValue:
+          serializedVersion: 2
+          rgba: 0
+        GradientValue:
+          serializedVersion: 2
+          key0: {r: 0, g: 0, b: 0, a: 0}
+          key1: {r: 0, g: 0, b: 0, a: 0}
+          key2: {r: 0, g: 0, b: 0, a: 0}
+          key3: {r: 0, g: 0, b: 0, a: 0}
+          key4: {r: 0, g: 0, b: 0, a: 0}
+          key5: {r: 0, g: 0, b: 0, a: 0}
+          key6: {r: 0, g: 0, b: 0, a: 0}
+          key7: {r: 0, g: 0, b: 0, a: 0}
+          ctime0: 0
+          ctime1: 65535
+          ctime2: 0
+          ctime3: 0
+          ctime4: 0
+          ctime5: 0
+          ctime6: 0
+          ctime7: 0
+          atime0: 0
+          atime1: 65535
+          atime2: 0
+          atime3: 0
+          atime4: 0
+          atime5: 0
+          atime6: 0
+          atime7: 0
+          m_Mode: 0
+          m_NumColorKeys: 2
+          m_NumAlphaKeys: 2
+        AnimationCurveValue:
+          serializedVersion: 2
+          m_Curve: []
+          m_PreInfinity: 0
+          m_PostInfinity: 0
+          m_RotationOrder: 0
+        Vector2Value: {x: 0, y: 0}
+        Vector3Value: {x: 0, y: 0, z: 0}
+      - name: Looped
+        pType: 0
+        BoolValue: 1
+        FloatValue: 1
+        IntValue: 0
+        StringValue: 
+        ColorValue:
+          serializedVersion: 2
+          rgba: 0
+        GradientValue:
+          serializedVersion: 2
+          key0: {r: 0, g: 0, b: 0, a: 0}
+          key1: {r: 0, g: 0, b: 0, a: 0}
+          key2: {r: 0, g: 0, b: 0, a: 0}
+          key3: {r: 0, g: 0, b: 0, a: 0}
+          key4: {r: 0, g: 0, b: 0, a: 0}
+          key5: {r: 0, g: 0, b: 0, a: 0}
+          key6: {r: 0, g: 0, b: 0, a: 0}
+          key7: {r: 0, g: 0, b: 0, a: 0}
+          ctime0: 0
+          ctime1: 65535
+          ctime2: 0
+          ctime3: 0
+          ctime4: 0
+          ctime5: 0
+          ctime6: 0
+          ctime7: 0
+          atime0: 0
+          atime1: 65535
+          atime2: 0
+          atime3: 0
+          atime4: 0
+          atime5: 0
+          atime6: 0
+          atime7: 0
+          m_Mode: 0
+          m_NumColorKeys: 2
+          m_NumAlphaKeys: 2
+        AnimationCurveValue:
+          serializedVersion: 2
+          m_Curve: []
+          m_PreInfinity: 0
+          m_PostInfinity: 0
+          m_RotationOrder: 0
+        Vector2Value: {x: 0, y: 0}
+        Vector3Value: {x: 0, y: 0, z: 0}
+      - name: Transition
+        pType: 1
+        BoolValue: 0
+        FloatValue: 0.25
+        IntValue: 0
+        StringValue: 
+        ColorValue:
+          serializedVersion: 2
+          rgba: 0
+        GradientValue:
+          serializedVersion: 2
+          key0: {r: 0, g: 0, b: 0, a: 0}
+          key1: {r: 0, g: 0, b: 0, a: 0}
+          key2: {r: 0, g: 0, b: 0, a: 0}
+          key3: {r: 0, g: 0, b: 0, a: 0}
+          key4: {r: 0, g: 0, b: 0, a: 0}
+          key5: {r: 0, g: 0, b: 0, a: 0}
+          key6: {r: 0, g: 0, b: 0, a: 0}
+          key7: {r: 0, g: 0, b: 0, a: 0}
+          ctime0: 0
+          ctime1: 65535
+          ctime2: 0
+          ctime3: 0
+          ctime4: 0
+          ctime5: 0
+          ctime6: 0
+          ctime7: 0
+          atime0: 0
+          atime1: 65535
+          atime2: 0
+          atime3: 0
+          atime4: 0
+          atime5: 0
+          atime6: 0
+          atime7: 0
+          m_Mode: 0
+          m_NumColorKeys: 2
+          m_NumAlphaKeys: 2
+        AnimationCurveValue:
+          serializedVersion: 2
+          m_Curve: []
+          m_PreInfinity: 0
+          m_PostInfinity: 0
+          m_RotationOrder: 0
+        Vector2Value: {x: 0, y: 0}
+        Vector3Value: {x: 0, y: 0, z: 0}
+      - name: Layer
+        pType: 2
+        BoolValue: 0
+        FloatValue: 0.25
+        IntValue: 0
+        StringValue: 
+        ColorValue:
+          serializedVersion: 2
+          rgba: 0
+        GradientValue:
+          serializedVersion: 2
+          key0: {r: 0, g: 0, b: 0, a: 0}
+          key1: {r: 0, g: 0, b: 0, a: 0}
+          key2: {r: 0, g: 0, b: 0, a: 0}
+          key3: {r: 0, g: 0, b: 0, a: 0}
+          key4: {r: 0, g: 0, b: 0, a: 0}
+          key5: {r: 0, g: 0, b: 0, a: 0}
+          key6: {r: 0, g: 0, b: 0, a: 0}
+          key7: {r: 0, g: 0, b: 0, a: 0}
+          ctime0: 0
+          ctime1: 65535
+          ctime2: 0
+          ctime3: 0
+          ctime4: 0
+          ctime5: 0
+          ctime6: 0
+          ctime7: 0
+          atime0: 0
+          atime1: 65535
+          atime2: 0
+          atime3: 0
+          atime4: 0
+          atime5: 0
+          atime6: 0
+          atime7: 0
+          m_Mode: 0
+          m_NumColorKeys: 2
+          m_NumAlphaKeys: 2
+        AnimationCurveValue:
+          serializedVersion: 2
+          m_Curve: []
+          m_PreInfinity: 0
+          m_PostInfinity: 0
+          m_RotationOrder: 0
+        Vector2Value: {x: 0, y: 0}
+        Vector3Value: {x: 0, y: 0, z: 0}
+      - name: TimeOffset
+        pType: 1
+        BoolValue: 0
+        FloatValue: 0
+        IntValue: 0
+        StringValue: 
+        ColorValue:
+          serializedVersion: 2
+          rgba: 0
+        GradientValue:
+          serializedVersion: 2
+          key0: {r: 0, g: 0, b: 0, a: 0}
+          key1: {r: 0, g: 0, b: 0, a: 0}
+          key2: {r: 0, g: 0, b: 0, a: 0}
+          key3: {r: 0, g: 0, b: 0, a: 0}
+          key4: {r: 0, g: 0, b: 0, a: 0}
+          key5: {r: 0, g: 0, b: 0, a: 0}
+          key6: {r: 0, g: 0, b: 0, a: 0}
+          key7: {r: 0, g: 0, b: 0, a: 0}
+          ctime0: 0
+          ctime1: 65535
+          ctime2: 0
+          ctime3: 0
+          ctime4: 0
+          ctime5: 0
+          ctime6: 0
+          ctime7: 0
+          atime0: 0
+          atime1: 65535
+          atime2: 0
+          atime3: 0
+          atime4: 0
+          atime5: 0
+          atime6: 0
+          atime7: 0
+          m_Mode: 0
+          m_NumColorKeys: 2
+          m_NumAlphaKeys: 2
+        AnimationCurveValue:
+          serializedVersion: 2
+          m_Curve: []
+          m_PreInfinity: 0
+          m_PostInfinity: 0
+          m_RotationOrder: 0
+        Vector2Value: {x: 0, y: 0}
+        Vector3Value: {x: 0, y: 0, z: 0}
+    subStatesIDs: 
+    stateID: 29
+  - isNew: 0
+    name: Grounded
+    conditionBlock: Grounded
+    assetObjects: []
+    subStatesIDs: 16000000080000000f00000001000000
+    stateID: 30
   mainPackID: 0

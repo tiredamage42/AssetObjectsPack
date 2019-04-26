@@ -10,10 +10,15 @@ namespace Movement {
         Animator anim;
         Vector3 moveDelta, eulerDelta;
         
-        public void SetMoveAndRotationDelta (Vector3 moveDelta, Vector3 eulerDelta) {
-            this.moveDelta = moveDelta;
+        public void SetRotationDelta (Vector3 eulerDelta) {
             this.eulerDelta = eulerDelta;
         }
+        public void SetMoveDelta (Vector3 moveDelta) {
+            this.moveDelta = moveDelta;
+        }
+
+
+        [Range(0,5)] public float gravityModifier = 1.0f;
         
         public float characterRadius = .1f;
         public float characterHeight = 2f;
@@ -25,6 +30,15 @@ namespace Movement {
 
         public bool transformGroundFix = true;
         
+
+        float jumpSpeed;
+        public void JumpRaw (float speed) {
+            if (grounded) {
+                jumpSpeed = speed * Time.timeScale;// * Time.deltaTime;
+            }
+
+            // currentGravity = speed;
+        }
         
         CharacterController cc;
         public bool grounded;    
@@ -32,6 +46,9 @@ namespace Movement {
         float floorY, currentGravity;
         const float groundCheckBuffer = .1f;
 
+
+        ValueTracker<bool> groundChangeTracker = new ValueTracker<bool>(true);
+        
 
 
         void OnDrawGizmos()
@@ -57,10 +74,12 @@ namespace Movement {
         protected override void Awake () {     
             base.Awake();
             cc = GetComponent<CharacterController>();
+            eventPlayer.AddParameter( new CustomParameter ( "Grounded", () => grounded ) );
+
         }
         protected override void FixedUpdate() {
             base.FixedUpdate();
-            CheckGrounded();
+            //CheckGrounded();
         }
         public override void UpdateLoop (float deltaTime) {
 
@@ -68,7 +87,14 @@ namespace Movement {
             
             if (!eventPlayer.cueMoving){
                 
+                
                 CheckGrounded();
+
+                if (groundChangeTracker.CheckValueChange(grounded)) {
+                    // Debug.Log("changin loop state because aim is " + isAiming);
+                    controller.UpdateLoopState();
+                }
+            
                 
                 //handle rotation
                 transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles + eulerDelta);
@@ -82,10 +108,15 @@ namespace Movement {
         void RootMovementLoop (float deltaTime) {
 
             Vector3 rootMotion = CalculateRootMotion();
+
+
+            // rootMotion.y += jumpSpeed;
             
             //add gravity
             if (useGravity) {
                 rootMotion.y = CalculateGravity(rootMotion.y, deltaTime);        
+                
+                // rootMotion.y += jumpSpeed;
             }
             
             //use physics controller
@@ -167,13 +198,26 @@ namespace Movement {
 
             //if falling add to downward velocity
             if (!grounded) {
-                currentGravity += Physics.gravity.y * deltaTime * deltaTime;
+
+                if (jumpSpeed != 0) {
+                    currentGravity = jumpSpeed;// * deltaTime;
+                    jumpSpeed = 0;
+                }
+
+                currentGravity += Physics.gravity.y * gravityModifier * deltaTime * deltaTime;
+                
 
                 //cap downward velocity
                 if (currentGravity < behavior.minYVelocity) {
                     currentGravity = behavior.minYVelocity;
                 }    
+
             }
+
+            // jumpSpeed += currentGravity;
+            // if (jumpSpeed < 0) {
+            //     jumpSpeed = 0;
+            // }
             
             //if grounded stick to floor, else use calculated gravity    
             return currentGravity;//grounded ? behavior.minYVelocity : currentGravity;
@@ -192,12 +236,16 @@ namespace Movement {
             grounded = false;
             groundNormal = Vector3.up;
             floorY = -999;
-            RaycastHit hit;
-            if (Physics.SphereCast(ray, behavior.groundRadiusCheck, out hit, distanceCheck, behavior.groundLayerMask)) {
-                groundNormal = hit.normal;
-                floorY = hit.point.y;
-                if (Vector3.Angle(groundNormal, Vector3.up) <= behavior.maxGroundAngle) {
-                    grounded = true;
+            
+            if (jumpSpeed <= 0) {
+
+                RaycastHit hit;
+                if (Physics.SphereCast(ray, behavior.groundRadiusCheck, out hit, distanceCheck, behavior.groundLayerMask)) {
+                    groundNormal = hit.normal;
+                    floorY = hit.point.y;
+                    if (Vector3.Angle(groundNormal, Vector3.up) <= behavior.maxGroundAngle) {
+                        grounded = true;
+                    }
                 }
             }
         }   

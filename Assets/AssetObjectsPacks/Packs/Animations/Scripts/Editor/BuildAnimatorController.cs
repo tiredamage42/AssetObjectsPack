@@ -8,27 +8,24 @@ using System.Collections.Generic;
 /*
 
 
+REBUILD ANIMATOR AFTER ANY CHANGES TO 
+    
+    LOOP, LAYER
 
-if layer > 0:
-
-    if animclip == null:
-
-        layer loopset = 2
-
-
-
-
-
+PARAMETER CHANGES
 
 */
 
 namespace AssetObjectsPacks.Animations {
     struct ClipIDPair {
         public AnimationClip clip;
-        public int id;
-        public ClipIDPair (AnimationClip clip, int id) {
+        public int id, layer;
+        public bool looped;
+        public ClipIDPair (AnimationClip clip, int id, int layer, bool looped) {
             this.clip = clip;
             this.id = id;
+            this.layer = layer;
+            this.looped = looped;
         }
     }
     public class AnimatorControllerBuilder : ScriptableWizard
@@ -59,43 +56,130 @@ namespace AssetObjectsPacks.Animations {
             }
         }
 
-        [Header("HIGHLY RECOMMENDED")]
-        [Tooltip("Use only the animations specified in cue lists in the project, setting to false can cause performance issues")]
-        public bool usedOnly = true;
+        // [Tooltip("Use the Asset Object's 'Layer' to place it on a controller layer.\n(use if you're not planning on changing the ao's layers)")]
+        // public bool staticLayers = true;
+
+        // public bool upperLayersOnlyLoops = true;
+
+
         public float exitTransitionDuration = .25f;
         public string animationsPackName = "Animations";
         public string saveDirectory = "Assets/";
             
         //only add used animations to controller, to avoid adding thousands of states
+
+
+        HashSet<int>[] usedLoopIDsPerLayer = new HashSet<int>[CustomAnimator.MAX_ANIM_LAYERS];
+        HashSet<int>[] usedShotIDsPerLayer = new HashSet<int>[CustomAnimator.MAX_ANIM_LAYERS];
+
+        int maxLayer = 0;
+
+        void InitializeUsedLists () {
+            for (int i = 0; i < CustomAnimator.MAX_ANIM_LAYERS; i++) {
+                usedLoopIDsPerLayer[i] = new HashSet<int>();
+                usedShotIDsPerLayer[i] = new HashSet<int>();   
+            }
+        }
+        
+        void GetAOs(EventState state, List<AssetObject> aos, int packID) {
+            for (int i = 0; i < state.assetObjects.Length; i++) {
+                AssetObject ao = state.assetObjects[i];
+
+                if (ao.packID != packID)  continue;
+                bool isLooped = ao["Looped"].GetValue<bool>();
+                int layer = ao["Layer"].GetValue<int>();
+
+                if (layer > maxLayer) {
+                    maxLayer = layer;
+                }
+
+                if (isLooped) {
+                    if (!usedLoopIDsPerLayer[layer].Contains(ao.id)) {
+                        usedLoopIDsPerLayer[layer].Add(ao.id);
+                        aos.Add(ao);
+                    }
+                }
+                else {
+                    if (!usedShotIDsPerLayer[layer].Contains(ao.id)) {
+                        usedShotIDsPerLayer[layer].Add(ao.id);
+                        aos.Add(ao);
+                    }
+                }
+            }
+        }
+
+        IEnumerable<AssetObject> GetAllUsedAssetObjects (int packID) {
+            List<AssetObject> used = new List<AssetObject>();
+            
+            IEnumerable<Event> allEvents = EditorUtils.GetAllAssetsOfType<Event>();
+            
+            foreach (var e in allEvents) {
+                for (int i = 0; i < e.allStates.Length; i++) {
+                    GetAOs(e.allStates[i], used, packID);
+                }
+            }
+            if (used.Count == 0) {
+                Debug.LogWarning("no IDs used for " + PacksManager.ID2Name(packID) + " pack!");
+            }
+            return used;
+        }
         
 
         void BuildAnimatorController (AssetObjectPack animationPack) {
-            string[] allPaths = AssetObjectsEditor.GetAllAssetObjectPaths(animationPack.dir, animationPack.extensions, true);
 
-            //filter out unused file paths
-            if (usedOnly) {
-                IEnumerable<int> used_ids = AssetObjectsEditor.GetAllUsedIDs(PacksManager.Name2ID(animationsPackName));
-                if (used_ids.Count() == 0) return;
-                allPaths = allPaths.Where(f => used_ids.Contains(AssetObjectsEditor.GetObjectIDFromPath(f))).ToArray();
-            } 
+            InitializeUsedLists();
+
+
+
+            float t = Time.realtimeSinceStartup;
+
+            // Dictionary<int, string> id2File;
+            // string[] allPaths = AssetObjectsEditor.GetAllAssetObjectPaths(animationPack.dir, animationPack.extensions, true, out id2File);
             
-            int c = allPaths.Length;
-            ControllerBuild(BuildClipIDPairs(allPaths, c), c);   
+            //filter out unused file paths
+            // IEnumerable<int> used_ids;
+            IEnumerable<AssetObject> usedAOs = GetAllUsedAssetObjects(PacksManager.Name2ID(animationsPackName));//, out used_ids);
+            // if (used_ids.Count() == 0) return;
+            // allPaths = allPaths.Where(f => used_ids.Contains(AssetObjectsEditor.GetObjectIDFromPath(f))).ToArray();
+
+            
+
+            Debug.Log("Time getting paths: "+(Time.realtimeSinceStartup - t));
+            //t = Time.realtimeSinceStartup;
+
+
+            HashSet<ClipIDPair> clipIDPairs = BuildClipIDPairs(usedAOs);//, id2File);
+            
+            
+            // int c = allPaths.Length;
+            ControllerBuild(clipIDPairs);//, c);   
 
             Debug.Log("Controller built at: " + saveDirectory + "AnimationsController.controller");         
         }
 
-        ClipIDPair[] BuildClipIDPairs (string[] allPaths, int c) {
-            ClipIDPair[] results = new ClipIDPair[c];
-            for (int i = 0; i < c; i++) {
-                string f = allPaths[i];
+        HashSet<ClipIDPair> BuildClipIDPairs (IEnumerable<AssetObject> usedAOs)///, Dictionary<int, string> id2File){//string[] allPaths, int c) {
+        {
+            // int c = usedAOs.Count();
+
+            // ClipIDPair[] results = new ClipIDPair[c];
+
+            HashSet<ClipIDPair> results = new HashSet<ClipIDPair>();
+            
+            foreach (var usedAO in usedAOs) 
+            // for (int i = 0; i < c; i++)
+            {
+                // string f = allPaths[i];
+
+                // int id = usedAO.id;
                 
-                AnimationClip clip = EditorUtils.GetAssetAtPath<AnimationClip>(f);
+                AnimationClip clip = usedAO.objRef as AnimationClip;// EditorUtils.GetAssetAtPath<AnimationClip>(f);
                 if (clip == null) {
-                    Debug.LogError("Clip is null: " + f);
-                    return null;
+                    continue;
+                    // Debug.LogError("Clip is null: " + f);
+                    // return null;
                 }
-                results[i] = new ClipIDPair(clip, AssetObjectsEditor.GetObjectIDFromPath(f));
+                results.Add(new ClipIDPair(clip, usedAO.id, usedAO["Layer"].GetValue<int>(), usedAO["Looped"].GetValue<bool>()));
+                // results[i] = new ClipIDPair(clip, AssetObjectsEditor.GetObjectIDFromPath(f));
             }
             return results;
         }
@@ -130,15 +214,6 @@ namespace AssetObjectsPacks.Animations {
 
 
 
-
-
-
-
-
-
-
-
-
             for (int i = 0; i < CustomAnimator.activeLoopParamStrings.Length; i++) {
                 controller.AddParameter(CustomAnimator.activeLoopParamStrings[i], AnimatorControllerParameterType.Int);
             }
@@ -148,74 +223,172 @@ namespace AssetObjectsPacks.Animations {
         }
 
 
-        void ControllerBuild (ClipIDPair[] clips, int c) {
-            if (clips == null) return;
+        void ControllerBuild (HashSet<ClipIDPair> clips)//, int c) {
+        {
+            //if (clips == null) return;
             // Create the animator in the project
             AnimatorController controller = AnimatorController.CreateAnimatorControllerAtPath(saveDirectory + "AnimationsController.controller");
             
             //add parameters
             AddParameters(controller);
 
+            float t = Time.realtimeSinceStartup;
+
             {
+                AnimatorControllerLayer[] layers = controller.layers;
+                
+                AnimatorControllerLayer layer = layers[0];
+                layer.iKPass = true;
 
-                //make blend trees for looped animations (2 to smoothly transition between loops)
-                AnimatorState[] blendTrees = new AnimatorState[2];
-                for (int i =0 ; i < 2; i++) 
-                    blendTrees[i] = AddBlendTree(controller, 0, clips, CustomAnimator.loopNamesStrings[i], CustomAnimator.loopMirrorStrings[i], CustomAnimator.loopSpeedStrings[i], c, CustomAnimator.loopIndexStrings[i]);            
-                    // blendTrees[i] = AddBlendTree(controller, 0, clips, CustomAnimator.sLoopNames[i], CustomAnimator.sLoopMirrors[i], CustomAnimator.sLoopSpeeds[i], c, CustomAnimator.sLoopIndicies[i]);            
-                for (int i = 0; i < c; i++) 
-                    AddState(controller, 0, clips[i], blendTrees);
+
+                AnimatorStateMachine sm = layer.stateMachine;
+                
+                AnimatorState[] blendTrees = new AnimatorState[0];
+                if (usedLoopIDsPerLayer[0].Count > 0) {
+
+                    //make blend trees for looped animations (2 to smoothly transition between loops)
+                    blendTrees = new AnimatorState[2];//2];
+                    for (int i =0 ; i < 2; i++) 
+                        blendTrees[i] = AddBlendTree(
+                            controller, sm, 0, clips, 
+                            CustomAnimator.loopNamesStrings[i], 
+                            CustomAnimator.loopMirrorStrings[i], 
+                            CustomAnimator.loopSpeedStrings[i], 
+                            CustomAnimator.loopIndexStrings[i]
+                        );            
+                        // blendTrees[i] = AddBlendTree(controller, 0, clips, CustomAnimator.sLoopNames[i], CustomAnimator.sLoopMirrors[i], CustomAnimator.sLoopSpeeds[i], c, CustomAnimator.sLoopIndicies[i]);            
+                    // ConnectBlendTrees(0, blendTrees, 0);
+                }
+            
+                // for (int i = 0; i < c; i++) 
+                //     AddState(controller, sm, 0, clips[i], blendTrees);
+
+                foreach (var c in clips)
+                    AddState(0, controller, sm, 0, c, blendTrees);
+
+                controller.layers = layers;
             }
 
 
-            for (int l = 1; l < CustomAnimator.MAX_ANIM_LAYERS; l++) {
+
+            Debug.Log("Time building layer 0: "+(Time.realtimeSinceStartup - t));
+            t = Time.realtimeSinceStartup;
+            
+
+            for (int l = 1; l < maxLayer+1; l++) {
                 controller.AddLayer("Layer"+l);
-                AnimatorState[] blendTrees = new AnimatorState[3];
 
+                AnimatorControllerLayer[] layers = controller.layers;
+                
+
+                AnimatorControllerLayer layer = layers[l];
+
+
+
+                layer.iKPass = true;
+                layer.defaultWeight = 1.0f;
+
+                AnimatorStateMachine sm = layer.stateMachine;
+
+                bool anyLoops = usedLoopIDsPerLayer[l].Count > 0;
+
+
+                AnimatorState[] blendTrees = new AnimatorState[anyLoops ? CustomAnimator.BLEND_TREES_PER_LAYER + 1 : 1];
+                
                 // make the empty default state
-                AnimatorStateMachine sm = controller.layers[l].stateMachine;
-                AnimatorState state = sm.AddState(CustomAnimator.loopNamesStrings[l*3 + 0]);
-                state.motion = null;
-                blendTrees[0] = state;
+                // AnimatorState state = sm.AddState(CustomAnimator.loopNamesStrings[l*3 + 0]);
+                blendTrees[0] = sm.AddState("Blank");//CustomAnimator.loopNamesStrings[l*3 + 0]);
+                blendTrees[0].motion = null;
+                
+                if (anyLoops) {
+
+                    for (int i =0 ; i < CustomAnimator.BLEND_TREES_PER_LAYER; i++) 
+                        blendTrees[i+1] = AddBlendTree(
+                            controller, sm, l, clips, 
+                            CustomAnimator.loopNamesStrings[l*CustomAnimator.BLEND_TREES_PER_LAYER + (i)],
+
+
+                            CustomAnimator.loopMirrorStrings[l*CustomAnimator.BLEND_TREES_PER_LAYER + (i)], 
+                            CustomAnimator.loopSpeedStrings[l*CustomAnimator.BLEND_TREES_PER_LAYER + (i)], 
+                            //c, 
+                            CustomAnimator.loopIndexStrings[l*CustomAnimator.BLEND_TREES_PER_LAYER + (i)]
+                        );     
+
+                    // ConnectBlendTrees(-1, blendTrees, l);   
+                }
+
+
+
+                // if (!upperLayersOnlyLoops) {
+
+                // }    
+
+
+                // for (int i = 0; i < c; i++) 
+                //     AddState(controller, sm, l, clips[i], blendTrees);
+
+
+                foreach (var c in clips)
+                    AddState(-1, controller, sm, l, c, blendTrees);
+
+                
                 
 
-                for (int i =0 ; i < 2; i++) 
-                    blendTrees[i+1] = AddBlendTree(
-                        controller, l, 
-                        clips, 
+                controller.layers = layers;
 
-
-                        CustomAnimator.loopNamesStrings[l*3 + (i+1)],
-                        // CustomAnimator.sLoopNames[i], 
-
-
-                        // CustomAnimator.sLoopMirrors[i], 
-                        // CustomAnimator.sLoopSpeeds[i], 
-                        // c, 
-                        // CustomAnimator.sLoopIndicies[i]
-
-
-                        CustomAnimator.loopMirrorStrings[l*2 + i], 
-                        CustomAnimator.loopSpeedStrings[l*2 + i], 
-                        c, 
-                        CustomAnimator.loopIndexStrings[l*2 + i]
-                    );            
-                
-                
-                for (int i = 0; i < c; i++) 
-                    AddState(controller, l, clips[i], blendTrees);
             }
 
-    
+            EditorUtility.SetDirty(controller);
+
+            Debug.Log("Time building other layers: "+(Time.realtimeSinceStartup - t));
+            
+
+
         }
 
 
-        void AddState (AnimatorController controller, int layer, ClipIDPair clipIDPair, AnimatorState[] blendTrees) {
+        void ConnectBlendTrees (int offset, AnimatorState[] blendTrees, int layer) {
+
+            int c = blendTrees.Length;
+            for (int i = 0; i < c; i++) {
+
+                for (int j = 0; j < c; j++) {
+                    if (i == j) {
+                        continue;
+                    }
+                    AnimatorStateTransition exit = blendTrees[i].AddTransition(blendTrees[j]);
+                    //exit.AddCondition(AnimatorConditionMode.Equals, i, CustomAnimator.sActiveLoop);
+                    exit.AddCondition(AnimatorConditionMode.Equals, j + offset, CustomAnimator.activeLoopParamStrings[layer]);
+                    
+                    exit.canTransitionToSelf = false;// false;// true;
+                    exit.interruptionSource = TransitionInterruptionSource.None;// TransitionInterruptionSource.Destination;
+                    exit.hasExitTime = false;
+                    // exit.exitTime = exit_time;
+                    exit.hasFixedDuration = true;
+                    exit.duration = exitTransitionDuration;
+                    
+                }
+            }
+        }
+
+
+
+
+    
+
+
+        void AddState (int indexBlendTreeOffset, AnimatorController controller, AnimatorStateMachine sm, int layer, ClipIDPair clipIDPair, AnimatorState[] blendTrees) {
+            if (clipIDPair.layer != layer) {
+                return;
+            }
+            if (clipIDPair.looped){
+                return;
+            }
+            
+            
             int id = clipIDPair.id;
             AnimationClip clip = clipIDPair.clip;
 
-            AnimatorStateMachine sm = controller.layers[layer].stateMachine;
-            
             // Add the state to the state machine (The Vector3 is for positioning in the editor window)
             AnimatorState state = sm.AddState(id.ToString());//, new Vector3(300, 0, 0));
             
@@ -237,7 +410,7 @@ namespace AssetObjectsPacks.Animations {
             for (int i = 0; i < c; i++) {
                 AnimatorStateTransition exit = state.AddTransition(blendTrees[i]);
                 //exit.AddCondition(AnimatorConditionMode.Equals, i, CustomAnimator.sActiveLoop);
-                exit.AddCondition(AnimatorConditionMode.Equals, i, CustomAnimator.activeLoopParamStrings[layer]);
+                exit.AddCondition(AnimatorConditionMode.Equals, i + indexBlendTreeOffset, CustomAnimator.activeLoopParamStrings[layer]);
                 
                 exit.canTransitionToSelf = false;
                 exit.hasExitTime = true;
@@ -247,8 +420,8 @@ namespace AssetObjectsPacks.Animations {
             }
         }
 
-        AnimatorState AddBlendTree (AnimatorController controller, int layer, ClipIDPair[] clipIDPairs, string name, string mirrorParam, string speedParam, int c, string blendParam) {
-            AnimatorState state = controller.layers[layer].stateMachine.AddState(name);
+        AnimatorState AddBlendTree (AnimatorController controller, AnimatorStateMachine sm, int layer, HashSet<ClipIDPair> clipIDPairs, string name, string mirrorParam, string speedParam, string blendParam) {
+            AnimatorState state = sm.AddState(name);
             BlendTree blendTree = new BlendTree();
             AssetDatabase.AddObjectToAsset(blendTree, controller);
             blendTree.name = name;
@@ -256,8 +429,20 @@ namespace AssetObjectsPacks.Animations {
             blendTree.blendType = BlendTreeType.Simple1D;
             blendTree.blendParameter = blendParam;
             blendTree.useAutomaticThresholds = false;
+
+
+            foreach (var c in clipIDPairs) {
+                if (c.layer != layer) {
+                    continue;
+                }
+                if (!c.looped){
+                    continue;
+                }
+                
+                blendTree.AddChild(c.clip, threshold: c.id);
+            }
             
-            for (int i = 0; i < c; i++) blendTree.AddChild(clipIDPairs[i].clip, threshold: clipIDPairs[i].id);
+            // for (int i = 0; i < c; i++) blendTree.AddChild(clipIDPairs[i].clip, threshold: clipIDPairs[i].id);
 
             state.motion = blendTree;
 

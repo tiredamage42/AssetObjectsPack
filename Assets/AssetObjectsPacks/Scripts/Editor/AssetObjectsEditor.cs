@@ -73,5 +73,34 @@ namespace AssetObjectsPacks {
             }
             return used;
         }
+
+
+        // static void GetAOs(EventState state, List<int> ids, List<AssetObject> aos, int packID) {
+        //     for (int i = 0; i < state.assetObjects.Length; i++) {
+        //         if (state.assetObjects[i].packID != packID)  continue;
+        //         int id = state.assetObjects[i].id;
+        //         if (!ids.Contains(id)) {
+        //             ids.Add(id);
+        //             aos.Add(state.assetObjects[i]);
+        //         }
+        //     }
+        // }
+
+        // public static IEnumerable<AssetObject> GetAllUsedAssetObjects (int packID, out IEnumerable<int> ids) {
+        //     List<AssetObject> used = new List<AssetObject>();
+        //     // ids = new List<int>();
+            
+        //     IEnumerable<Event> allEvents = EditorUtils.GetAllAssetsOfType<Event>();
+            
+        //     foreach (var e in allEvents) {
+        //         for (int i = 0; i < e.allStates.Length; i++) {
+        //             GetAOs(e.allStates[i], ids, used, packID);
+        //         }
+        //     }
+        //     if (used.Count == 0) {
+        //         Debug.LogWarning("no IDs used for " + PacksManager.ID2Name(packID) + " pack!");
+        //     }
+        //     return used;
+        // }
     }
 }

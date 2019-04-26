@@ -12,6 +12,7 @@ namespace Player {
 
 public class PlayerController : MonoBehaviour
 {
+    public float jumpSpeed = 5.0f;
     public float runSpeed = 5.0f;
     public float walkSpeed = 1.0f;
     public float runAxisMinMagnitude = .25f;
@@ -25,9 +26,6 @@ public class PlayerController : MonoBehaviour
 
     CharacterAnimatorMover charAnimationMover;
     CharacterMovement characterMovement;
-
-
-    
 
     void Awake () {
         eventPlayer = GetComponent<EventPlayer>();        
@@ -71,40 +69,18 @@ public class PlayerController : MonoBehaviour
 
 
     
-    void CalculateSpeedAndDirection () {
+    void CalculateSpeedAndDirection (bool jumpAttempt) {
         Movement.Movement.Direction moveDir = Movement.Movement.Direction.Forward;
-        // Vector3 faceDir = Vector3.zero;
-
-        // Vector2 moveVector = Vector2.zero;
-
-
+        
         Vector2 rawMove = new Vector2(CustomInputManager.InputManager.GetAxisRaw("Horizontal"), CustomInputManager.InputManager.GetAxisRaw("Vertical"));
+        Vector2 move = new Vector2(CustomInputManager.InputManager.GetAxis("Horizontal"), CustomInputManager.InputManager.GetAxis("Vertical"));
         lastRawMove = rawMove;
 
-        Vector2 move = new Vector2(CustomInputManager.InputManager.GetAxis("Horizontal"), CustomInputManager.InputManager.GetAxis("Vertical"));
 
-        // float vertAxis = CustomInputManager.InputManager.GetAxis("Vertical");// 0;
-        // moveVector.y = vertAxis;
-        // vertAxis = CustomInputManager.InputManager.GetAxisRaw("Vertical");// 0;
-
-        // faceDir += cam.transform.forward * rawMove.y;
-
-        // float horizontalAxis = CustomInputManager.InputManager.GetAxis("Horizontal");// 0;
-        // moveVector.x = horizontalAxis;
-        // horizontalAxis = CustomInputManager.InputManager.GetAxisRaw("Horizontal");// 0;
-        
-        // faceDir += cam.transform.right * rawMove.x;// horizontalAxis;
-
-        bool noInput = rawMove == Vector2.zero;// horizontalAxis == 0 && vertAxis == 0;
-
-        // if (noInput) faceDir = cam.transform.forward;
-        // faceDir.y = 0;
-        // faceDir.Normalize();
+        bool noInput = rawMove == Vector2.zero;
 
         turner.doAutoTurn = true;
         
-        // turner.SetTurnTarget(transform.position + faceDir * 500);       
-
         if (rawMove.y != 0) {
             moveDir = rawMove.y < 0 ? Movement.Movement.Direction.Backwards : Movement.Movement.Direction.Forward;
         }
@@ -127,9 +103,6 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-
-
-
         movement.speed = speed;
         movement.direction = moveDir;
 
@@ -141,30 +114,14 @@ public class PlayerController : MonoBehaviour
             }
         }
         else {
-
             if (speed == 0 || movement.overrideMovement) {
-
                 SwitchAnimationMovement(true);
-
             }
             else {
-
-                // Debug.Log("why move");
                 move = move.normalized * (speed == 2 ? runSpeed : walkSpeed) * Time.deltaTime;
-                characterMovement.SetMoveAndRotationDelta(transform.TransformDirection( new Vector3(move.x, 0, move.y) ), Vector3.zero);
+                characterMovement.SetMoveDelta(transform.TransformDirection( new Vector3(move.x, 0.0f, move.y) ));
             }
-
         }
-        // // use absolute movement if moving
-        // charAnimationMover.enabled = speed == 0 || movement.overrideMovement;
-        // if (speed == 0 || movement.overrideMovement) {
-
-        // }
-        // else {
-        //     // Debug.Log("why move");
-        //     move = move.normalized * (speed == 2 ? runSpeed : walkSpeed) * Time.deltaTime;
-        //     characterMovement.SetMoveAndRotationDelta(transform.TransformDirection( new Vector3(move.x, 0, move.y) ), Vector3.zero);
-        // }
     }
     bool runModController;
 
@@ -172,18 +129,13 @@ public class PlayerController : MonoBehaviour
         float mag2 = moveVector.sqrMagnitude;
 
         if (mag2 < runAxisMinMagnitude * runAxisMinMagnitude) {
-
             runModController = false;
-
         }
         else {
             if (!runModController) {
                 if (CustomInputManager.InputManager.GetButtonDown("Run")) {
-
                     runModController = true;
-
                 }
-
             }
         }
     }
@@ -191,18 +143,16 @@ public class PlayerController : MonoBehaviour
     bool usingAnimationMovement;
     void SwitchAnimationMovement (bool enabled) {
 
+
         usingAnimationMovement = enabled;
-        charAnimationMover.enabled = enabled;
+        charAnimationMover.setPosition = enabled;
 
 
     }
-
-
     
     void CheckDirectionalMovement () {
 
         if (!movement.overrideMovement) {
-            CalculateSpeedAndDirection();
 
             bool jumpAttempt = CustomInputManager.InputManager.GetButtonDown("Jump");//Input.GetKeyDown(KeyCode.Space);
 
@@ -210,41 +160,42 @@ public class PlayerController : MonoBehaviour
             
             if (hasPlatform) {
                 if (jumpAttempt) {
+                    jumpAttempt = false;
                     combat.isAiming = false;
-
                     SwitchAnimationMovement(true);
                 }
-                //Debug.LogError ("Has PLATFRm");
             }
 
-            if (jumpAttempt && !hasPlatform){// && !aimer.isAiming) {            
-                jumper.Jump();
-                SwitchAnimationMovement(true);
+            if (jumpAttempt && !hasPlatform){      
+
+                characterMovement.JumpRaw(jumpSpeed);
+                //jumper.Jump();
+                //SwitchAnimationMovement(true);
             }
+
+
+            CalculateSpeedAndDirection(jumpAttempt);
         }
     }
 
-
-
     void Update()
     {
+
+        if (CustomInputManager.InputManager.GetButtonDown("UI_Up")) {
+            Game.timeDilation += .1f;
+        }
+        if (CustomInputManager.InputManager.GetButtonDown("UI_Down")) {
+            Game.timeDilation -= .1f;
+        }
+        
         turner.autoTurnAnimate = movement.speed == 0;
 
         combat.isAiming = combat.currentGun && !movement.overrideMovement && CustomInputManager.InputManager.GetButton("Aim");
 
-        // combat.SetAimTarget(cam.transform.position + cam.transform.forward * 500);
-
         if (combat.currentGun) {
-            combat.currentGun.isFiring = combat.isAiming && CustomInputManager.InputManager.GetButton("Fire");
+            combat.currentGun.isFiring = combat.aimPercent >= .9f && CustomInputManager.InputManager.GetButton("Fire");
         }
         
-                    
-        // if (Input.GetKeyDown(KeyCode.Equals))
-        //     timeDilation += .1f;
-        // if (Input.GetKeyDown(KeyCode.Minus))
-        //     timeDilation -= .1f;
-        
-
         CheckDirectionalMovement();
     }
 }
