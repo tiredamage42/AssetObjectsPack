@@ -56,26 +56,21 @@ namespace AssetObjectsPacks {
         public int stateID = -1;
 
         public void GetAssetObjects (EventResponse eventResponse,  Dictionary<string, CustomParameter> parameters) {
-
             int l = assetObjects.Length;
             foreach (var k in eventResponse.objectsPerPack.Keys) {
+
                 for (int i = 0; i < l; i++) {
                     AssetObject ao = assetObjects[i];
                     if (ao.packID == k) {
                         if (ao.solo) {
                             eventResponse.objectsPerPack[k].Clear();
-
                             if (CustomScripting.StatementValue(ao.conditionBlock, parameters, ref eventResponse.logErrors, ref eventResponse.logWarnings)) {
-            
                                 eventResponse.objectsPerPack[k].Add(assetObjects[i]);
                             }
-
-                            //Debug.Log("time offset in event: " + assetObjects[i]["TimeOffset"].GetValue<float>());
                             break;
                         }
                         if (!ao.mute) {
                             if (CustomScripting.StatementValue(ao.conditionBlock, parameters, ref eventResponse.logErrors, ref eventResponse.logWarnings)) {
-            
                                 eventResponse.objectsPerPack[k].Add(assetObjects[i]);
                             }
                         }
@@ -106,7 +101,6 @@ namespace AssetObjectsPacks {
                     for (int i = 0; i < allStates.Length; i++) {
                         _id2State.Add(allStates[i].stateID, i);
                     }
-
                 }
                 return _id2State;
             }
@@ -124,22 +118,11 @@ namespace AssetObjectsPacks {
                 for (int i = 0; i < l; i++) {
                     GetFilteredStates(allStates[id2State[eventState.subStatesIDs[i]]], parameters, eventResponse);
                 }
-        /*
-         */
             }
         }
         
         public void GetParamFilteredObjects(Dictionary<string, CustomParameter> parameters, EventResponse eventResponse) {            
             eventResponse.Respond(mainPackID, this.name);
-
-
-            //UnityEditor.EditorGUIUtility.PingObject(this);
-            //Debug.Break();
-
-            //int l = allStates.Length;
-            //for (int i = 0; i < l; i++) {
-            //    GetFilteredStates(allStates[i], parameters, eventResponse);
-            //}
             GetFilteredStates(allStates[0], parameters, eventResponse);
         }
     }

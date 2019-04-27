@@ -81,8 +81,7 @@ namespace Player
 			if (m_TurnSmoothing > 0)
 			{
 				m_Pivot.localRotation = Quaternion.Slerp(m_Pivot.localRotation, m_PivotTargetRot, m_TurnSmoothing * deltaTime);
-				// transform.localRotation = Quaternion.Slerp(transform.localRotation, m_TransformTargetRot, m_TurnSmoothing * deltaTime);
-                transform.rotation = Quaternion.Slerp(transform.rotation, m_TransformTargetRot, m_TurnSmoothing * deltaTime);
+				transform.rotation = Quaternion.Slerp(transform.rotation, m_TransformTargetRot, m_TurnSmoothing * deltaTime);
 			}
 			else
 			{

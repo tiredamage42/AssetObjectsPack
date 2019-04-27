@@ -11,24 +11,24 @@ public class Recoiler : EventPlayerListener
     }
 
     class RecoilLerpHandler {
-        SmoothValue smoother = new SmoothValue();
+        
         public float curLerp;
+        Smoother smoother = new Smoother();
         Vector2 speeds;
         public bool towardsRecoil, inRecoil;
-        int smoothType;
-
+        
         public void StartRecoil (Vector2 speeds, int smoothType) {
             towardsRecoil = true;
             inRecoil = true;
             this.speeds = speeds;
-            this.smoothType = smoothType;
+            smoother.smoothMethod = (Smoother.SmoothMethod)smoothType;
         }
 
         public void UpdateLerp (System.Action onRecoilEnd, float deltaTime) {
             float targ = towardsRecoil ? 1.0f : 0.0f;
             if (curLerp != targ) {
-                float speed = towardsRecoil ? speeds.x : speeds.y;
-                curLerp = smoother.Smooth(curLerp, targ, speed, deltaTime, (SmoothValue.SmoothType)smoothType );
+                smoother.speed = towardsRecoil ? speeds.x : speeds.y;
+                curLerp = smoother.Smooth(curLerp, targ, deltaTime);
             }
 
             if (towardsRecoil) {
@@ -107,7 +107,6 @@ public class Recoiler : EventPlayerListener
 
         posRecoilHandler.StartRecoil(assetObject["Pos Speeds"].GetValue<Vector2>(), assetObject["Pos Smooth"].GetValue<int>());
         rotRecoilHandler.StartRecoil(assetObject["Rot Speeds"].GetValue<Vector2>(), assetObject["Rot Smooth"].GetValue<int>());
-        
 
         Vector3 positionOffset = assetObject["Pos Offset"].GetValue<Vector3>();
         Vector3 positionOffsetMask = assetObject["Pos Offset Mask"].GetValue<Vector3>();
@@ -127,7 +126,6 @@ public class Recoiler : EventPlayerListener
             GetMaskedRandomValue(rotationOffset.z, rotationOffsetMask.z)    
         );
 
-
         //end use immediately
         if (endUseCallbacks != null) {            
             foreach (var endUse in endUseCallbacks) {
@@ -145,10 +143,7 @@ public class Recoiler : EventPlayerListener
 
     protected override void Awake() {
         base.Awake();
-
         originalLocalPos = recoilTransform.localPosition;
         originalLocalRot = recoilTransform.localRotation;
-
-
     }
 }

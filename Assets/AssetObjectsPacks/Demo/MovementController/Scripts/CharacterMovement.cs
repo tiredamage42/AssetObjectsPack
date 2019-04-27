@@ -7,7 +7,6 @@ namespace Movement {
 
     public class CharacterMovement : MovementControllerComponent
     {
-        // Animator anim;
         Vector3 moveDelta, eulerDelta;
         
         public void SetRotationDelta (Vector3 eulerDelta) {
@@ -31,15 +30,10 @@ namespace Movement {
         public bool transformGroundFix = true;
         
 
-        // float jumpSpeed;
         public void JumpRaw (float speed) {
             if (grounded && !controller.overrideMovement) {
-
                 currentGravity = speed * Time.timeScale;
-                // jumpSpeed = speed * Time.timeScale;// * Time.deltaTime;
             }
-
-            // currentGravity = speed;
         }
         
         CharacterController cc;
@@ -47,10 +41,6 @@ namespace Movement {
         Vector3 groundNormal = Vector3.up;
         float floorY, currentGravity;
         const float groundCheckBuffer = .1f;
-
-
-        // ValueTracker<bool> groundChangeTracker = new ValueTracker<bool>(true);
-        
 
 
         void OnDrawGizmos()
@@ -81,25 +71,15 @@ namespace Movement {
             controller.AddChangeLoopStateValueCheck( () => grounded );
 
         }
-        protected override void FixedUpdate() {
-            base.FixedUpdate();
-            // CheckGrounded();
-        }
+        
         public override void UpdateLoop (float deltaTime) {
 
             CheckCapsuleComponentEnabled();
             
             if (!eventPlayer.cueMoving){
                 
-                
                 CheckGrounded();
 
-                // if (groundChangeTracker.CheckValueChange(grounded)) {
-                //     // Debug.Log("changin loop state because aim is " + isAiming);
-                //     controller.UpdateLoopState();
-                // }
-            
-                
                 //handle rotation
                 transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles + eulerDelta);
                 
@@ -113,14 +93,9 @@ namespace Movement {
 
             Vector3 rootMotion = CalculateRootMotion();
 
-
-            // rootMotion.y += jumpSpeed;
-            
             //add gravity
             if (useGravity) {
-                rootMotion.y = CalculateGravity(rootMotion.y, deltaTime);        
-                
-                // rootMotion.y += jumpSpeed;
+                rootMotion.y = CalculateGravity(rootMotion.y, deltaTime);                        
             }
             
             //use physics controller
@@ -132,18 +107,16 @@ namespace Movement {
                 if (transformGroundFix) {
 
                     //adjust to stay on ground if grounded
+                    
                     //if (useGravity && grounded) {
                     if (grounded) {
                         
-
-
                         float curY = transform.position.y;
                         if (curY + rootMotion.y < floorY) {
                             rootMotion.y = floorY - curY;
                         } 
                     }
                 }
-                
                 transform.position += rootMotion;
             }
         }
@@ -163,12 +136,12 @@ namespace Movement {
                 }
             }
         }
+
         void EnableCapsuleComponent(bool enabled) {
             if (cc.enabled != enabled) {
                 cc.enabled = enabled;
             }
         }
-
         
         Vector3 CalculateRootMotion() {
             
@@ -189,7 +162,6 @@ namespace Movement {
             bool rootMotionUpwards = moveDelta.y > 0;
             
             //bool fallStarted = currentGravity != 0;
-        
             if (grounded) {
                 currentGravity = 0;
             }
@@ -203,14 +175,8 @@ namespace Movement {
             //if falling add to downward velocity
             // if (!grounded) {
 
-                // if (jumpSpeed != 0) {
-                //     currentGravity = jumpSpeed;// * deltaTime;
-                //     jumpSpeed = 0;
-                // }
-
                 currentGravity += Physics.gravity.y * gravityModifier * deltaTime * deltaTime;
                 
-
                 //cap downward velocity
                 if (currentGravity < behavior.minYVelocity) {
                     currentGravity = behavior.minYVelocity;
@@ -218,10 +184,8 @@ namespace Movement {
 
             // }
 
-            
             //if grounded stick to floor, else use calculated gravity    
             return currentGravity;//grounded ? behavior.minYVelocity : currentGravity;
-            // return grounded ? behavior.minYVelocity : currentGravity;
         }
 
 

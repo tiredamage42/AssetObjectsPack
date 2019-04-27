@@ -17,12 +17,9 @@ namespace Combat {
         Quaternion startGunAimRot;
 
 
-
-
         void Awake() {
             anim = GetComponent<Animator>();
             characterCombat = GetComponent<CharacterCombat>();
-
 
             characterCombat.onGunChange += OnGunChange;
 
@@ -45,8 +42,7 @@ namespace Combat {
             Quaternion gunAimRot = Quaternion.LookRotation(aimTarget - gunAimPos);
             
             if (aimLerp != 0.0f) {
-                    
-
+                   
                 // set ik rig to aim target as soon as aim starts (while in transition).
                 // sticking to gun makes left hand go trhough body to reach gun while it's still going up or down from aim.
             
@@ -104,13 +100,11 @@ namespace Combat {
             }
         }
 
-
         // stored to get the values after IK
         void LateUpdate() {
             if (characterCombat.aimPercent != 0.0f) {
                 AlterLookAtHipBones(characterCombat.aimPercent);
             }
-
             if (gunIKHandler != null) {
                 HandlePositioning(characterCombat.aimTarget, characterCombat.aimPercent);
             }
@@ -125,6 +119,7 @@ namespace Combat {
             eulerAngles.z = targetZ;
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(eulerAngles), aimLerp);
         }
+
         void AlterLookAtHipBones (float aimLerp) {
 
             ResetZRotation(anim.GetBoneTransform(HumanBodyBones.Hips), aimLerp);
@@ -132,8 +127,7 @@ namespace Combat {
             // ResetZRotation(anim.GetBoneTransform(HumanBodyBones.Chest));
             // ResetZRotation(anim.GetBoneTransform(HumanBodyBones.UpperChest));
             // ResetZRotation(anim.GetBoneTransform(HumanBodyBones.Neck));
-            // ResetZRotation(anim.GetBoneTransform(HumanBodyBones.Head));
-            
+            // ResetZRotation(anim.GetBoneTransform(HumanBodyBones.Head));   
         }
             
         void OnAnimatorIK (int layerIndex) {

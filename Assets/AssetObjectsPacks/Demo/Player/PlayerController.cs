@@ -142,22 +142,18 @@ public class PlayerController : MonoBehaviour
 
     bool usingAnimationMovement;
     void SwitchAnimationMovement (bool enabled) {
-
-
+        
         usingAnimationMovement = enabled;
         charAnimationMover.setPosition = enabled;
-
-
     }
     
     void CheckDirectionalMovement () {
 
         if (!movement.overrideMovement) {
 
-            bool jumpAttempt = CustomInputManager.InputManager.GetButtonDown("Jump");//Input.GetKeyDown(KeyCode.Space);
+            bool jumpAttempt = CustomInputManager.InputManager.GetButtonDown("Jump");
 
             bool hasPlatform = platformer.PlatformUpUpdate(jumpAttempt);
-            
             if (hasPlatform) {
                 if (jumpAttempt) {
                     jumpAttempt = false;
@@ -190,12 +186,9 @@ public class PlayerController : MonoBehaviour
         
         turner.autoTurnAnimate = movement.speed == 0;
 
-        combat.isAiming = combat.currentGun && !movement.overrideMovement && CustomInputManager.InputManager.GetButton("Aim");
+        combat.SetAiming(CustomInputManager.InputManager.GetButton("Aim"));
+        combat.SetFiring(CustomInputManager.InputManager.GetButton("Fire"));
 
-        if (combat.currentGun) {
-            combat.currentGun.isFiring = combat.aimPercent >= .9f && CustomInputManager.InputManager.GetButton("Fire");
-        }
-        
         CheckDirectionalMovement();
     }
 }

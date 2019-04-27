@@ -46,30 +46,44 @@ namespace AssetObjectsPacks {
         public MiniTransform (Vector3 pos, Quaternion rot) 
         => (this.pos, this.rot, this.targetParent) = (pos, rot, null);
         public MiniTransform(Transform t, bool useAsTargetParent) {
-            if (useAsTargetParent) {
-                targetParent = t;
-            }
-            else {
-                targetParent = null;
-            }
+            targetParent = useAsTargetParent ? t : null;
             (this.pos, this.rot) = (t.position, t.rotation);
         }
     }
 
+    
+    [System.Serializable] public class Smoother {
+        public enum SmoothMethod { SmoothDamp, Lerp, MoveTowards }
+        public SmoothMethod smoothMethod;
+        public float speed = 1.0f;
+        float currentVelocity;
+        Vector2 currentVelocity2;
+        Vector3 currentVelocity3;
+        
 
-    public class SmoothValue {
-        public enum SmoothType { Lerp = 0, MoveTowards = 1, SmoothDamp = 2 }
-        float v;
-        public float Smooth (float orig, float target, float speed, float deltaTime, SmoothType smoothType) {
-            switch(smoothType) {
-                case SmoothType.Lerp:
-                    return Mathf.Lerp(orig, target, speed * deltaTime);
-                case SmoothType.MoveTowards:
-                    return Mathf.MoveTowards(orig, target, speed * deltaTime);
-                case SmoothType.SmoothDamp:
-                    return Mathf.SmoothDamp(orig, target, ref v, speed);
-            }
-            return 0;
+        public float Smooth(float a, float b, float deltaTime) {
+            if (smoothMethod == SmoothMethod.Lerp) 
+                return Mathf.Lerp(a, b, speed * deltaTime);
+            else if (smoothMethod == SmoothMethod.SmoothDamp) 
+                return Mathf.SmoothDamp(a, b, ref currentVelocity, speed);
+            else 
+                return Mathf.MoveTowards(a, b, speed * deltaTime);
+        }
+        public Vector2 Smooth(Vector2 a, Vector2 b, float deltaTime) {
+            if (smoothMethod == SmoothMethod.Lerp) 
+                return Vector2.Lerp(a, b, speed * deltaTime);
+            else if (smoothMethod == SmoothMethod.SmoothDamp)
+                return Vector2.SmoothDamp(a, b, ref currentVelocity2, speed);
+            else
+                return Vector2.MoveTowards(a, b, speed * deltaTime);
+        }
+        public Vector3 Smooth(Vector3 a, Vector3 b, float deltaTime) {
+            if (smoothMethod == SmoothMethod.Lerp)
+                return Vector3.Lerp(a, b, speed * deltaTime);
+            else if (smoothMethod == SmoothMethod.SmoothDamp)
+                return Vector3.SmoothDamp(a, b, ref currentVelocity3, speed);
+            else 
+                return Vector3.MoveTowards(a, b, speed * deltaTime);
         }
     }
 }

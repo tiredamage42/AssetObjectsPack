@@ -2,7 +2,6 @@
 
 namespace Movement {
     /*
-    
         attach to move the character movemnt component with animator's root motion
     */
     [RequireComponent(typeof(Animator))]

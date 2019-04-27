@@ -22,7 +22,6 @@ public class WaypointTracker : MovementControllerComponent
         turner = GetComponent<Turner>();
     }
 
-
     public override void UpdateLoop (float deltaTime) {    
         if (hasDestination) {
             UpdateWaypointTracking(deltaTime);

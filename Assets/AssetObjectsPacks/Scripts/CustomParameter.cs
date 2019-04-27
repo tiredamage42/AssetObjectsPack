@@ -30,7 +30,6 @@ namespace AssetObjectsPacks {
                 (o) => Vector2Value = (Vector2)o,
                 (o) => Vector3Value = (Vector3)o,
             };
-            
         }
 
         Func<object>[] _allValues;
@@ -73,24 +72,12 @@ namespace AssetObjectsPacks {
         
         
         Func<object> valueLink;
+        object GetValue () {
+            return allValues[(int)paramType]();
+        }
 
         public T GetValue<T>() {
             return (T)(valueLink != null ? valueLink() : GetValue());
-        }
-        object GetValue () {
-            return allValues[(int)paramType]();
-            /*
-            switch (paramType) {
-                case ParamType.BoolValue: return BoolValue;
-                case ParamType.FloatValue: return FloatValue;
-                case ParamType.IntValue: return IntValue;
-                case ParamType.StringValue: return StringValue;
-                case ParamType.ColorValue: return ColorValue;   
-                case ParamType.GradientValue: return GradientValue;   
-                case ParamType.AnimationCurveValue: return AnimationCurveValue;
-            }
-            return null;
-             */
         }
         
         bool CheckCompatibleSet (ParamType trying) {
@@ -104,17 +91,6 @@ namespace AssetObjectsPacks {
             ParamType vType = SType2PType(value.GetType());
             if (CheckCompatibleSet(vType)) return;
             allSetVals[(int)vType]( value );
-/*
-            switch ( vType ) {
-                case ParamType.IntValue: this.IntValue = (int)value; break;
-                case ParamType.FloatValue: this.FloatValue = (float)value; break;
-                case ParamType.BoolValue: this.BoolValue = (bool)value; break;
-                case ParamType.StringValue: this.StringValue = (string)value; break;
-                case ParamType.ColorValue: this.ColorValue = (Color32)value; break;
-                case ParamType.GradientValue: this.GradientValue = (Gradient)value; break;
-                case ParamType.AnimationCurveValue: this.AnimationCurveValue = (AnimationCurve)value; break;
-            }
- */
         }
 
         public CustomParameter (string name, object value) {

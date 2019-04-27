@@ -19,7 +19,7 @@ public class Turner : MovementControllerComponent
     
     public bool isTurning, inTurnAnimation, initializedTurnCue;
     EventPlayer.EventPlayEnder endEventPlayerPlay;
-    Vector3 attemptTurnDir;//, turnTarget;    
+    Vector3 attemptTurnDir;
     float lastAttemptTurn;
     const string turnAngleName = "TurnAngle", turnRightName = "ToRight";
 
@@ -129,12 +129,10 @@ public class Turner : MovementControllerComponent
         bool doingManualTurn = isTurning && initializedTurnCue;
 
         if (doingManualTurn || doAutoTurn) {
-            //Vector3 targetDir = Movement.CalculateTargetFaceDirection(controller.direction, transform.position, turnTarget, use2d);
-            _targetTurnDirection = DirToTarget(); //Movement.CalculateTargetFaceDirection(controller.direction, transform.position, turnTarget, use2d);
+            _targetTurnDirection = DirToTarget();
             
             if (doingManualTurn) {
                 if (CheckForEndTurn(_targetTurnDirection)) {
-                    //Debug.Log("end turn");
                     OnEndTurn();
                     return;
                 }
@@ -144,9 +142,7 @@ public class Turner : MovementControllerComponent
             if (!inTurnAnimation) {
                 if (!controller.overrideMovement) {
                     slerpingRotation = true;
-                    // Movement.CalculateTargetFaceDirection(controller.direction, transform.position, turnTarget, use2d)
                     transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(Movement.CalculateTargetFaceDirection(controller.direction, transform.position, turnTarget, use2d)), deltaTime * behavior.turnHelpSpeeds[controller.speed]);
-                    // transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(_targetTurnDirection), deltaTime * behavior.turnHelpSpeeds[controller.speed]);
                 }
             }
         }
@@ -172,12 +168,6 @@ public class Turner : MovementControllerComponent
         //if we're done animating
         if (!inTurnAnimation) {
             //check movement direction (or forward) angle with target direction
-
-
-            Debug.DrawLine(transform.position, transform.position + controller.moveDireciton, Color.magenta);
-            Debug.DrawLine(transform.position, transform.position + targetDir, Color.cyan);
-            
-            //float angleWMoveDir = Vector3.Angle(controller.moveDireciton, targetDir);                
             _angleDifferenceWithTarget = Vector3.Angle(controller.moveDireciton, targetDir);                
 
             //deactivate turning (within threshold)
@@ -220,17 +210,13 @@ public class Turner : MovementControllerComponent
         //if its below the animation threshold but above the help threshold
         isTurning = inTurnAnimation || angleWMoveDir > behavior.turnAngleHelpThreshold;
         
-        // Debug.Log("turn cue");
-
         if (isTurning) {
             lastAttemptTurn = Time.time;
             attemptTurnDir = targetDir;
             initializedTurnCue = true;
-            // Debug.Log("woot turn");
         }
         
         if (inTurnAnimation) {
-
 
             //set the angle parameter
             eventPlayer[turnAngleName].SetValue(angleWMoveDir);

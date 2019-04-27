@@ -30,10 +30,9 @@ namespace Platforms {
         const float dropHeightRange = .1f; //range buffer for checking if a drop is short or tall
         const float sphereCheckRadius = .05f;
 
-
         bool overrideMovement { get { return !characterMovement.grounded || controller.overrideMovement; } }
         
-        Action onPlatformEnd;
+        public event Action onPlatformEnd;
 
         CharacterMovement characterMovement;
 
@@ -42,9 +41,7 @@ namespace Platforms {
             characterMovement = GetComponent<CharacterMovement>();
             cues = new Cue[] { platformUpCueShort, platformUpCueTall, platformDownCueShort, platformDownCueTall };
         }
-        public void SetCallback (Action onPlatformEnd) {
-            this.onPlatformEnd = onPlatformEnd;
-        }
+        
         public override void UpdateLoop (float deltaTime) {
             if (doAutoPlatform) {
                 AutoPlatformUpdate();
@@ -116,16 +113,16 @@ namespace Platforms {
         }
 
 
-        bool CheckForPlatformUp (out bool isShort, out Vector3 spawnCuePosition, out Quaternion spawnCueRotation) {
-            return CheckForPlatformUp(transform.position, controller.moveDireciton, distanceAheadCheckUp, layerMask, out isShort, out spawnCuePosition, out spawnCueRotation);
+        bool CheckForPlatformUp (out bool isShort, out Vector3 position, out Quaternion rotation) {
+            return CheckForPlatformUp(transform.position, controller.moveDireciton, distanceAheadCheckUp, layerMask, out isShort, out position, out rotation);
         }
         
-        public static bool CheckForPlatformUp (Vector3 origin, Vector3 rayDirection, float checkDist, LayerMask layerMask, out bool isShort, out Vector3 spawnCuePosition, out Quaternion spawnCueRotation) {
+        public static bool CheckForPlatformUp (Vector3 origin, Vector3 rayDirection, float checkDist, LayerMask layerMask, out bool isShort, out Vector3 position, out Quaternion rotation) {
             
             bool foundPlatform = false;
             isShort = false;
-            spawnCuePosition = Vector3.zero;
-            spawnCueRotation = Quaternion.identity;
+            position = Vector3.zero;
+            rotation = Quaternion.identity;
 
             float buffer = spaceBuffer + sphereCheckRadius;
 
@@ -186,15 +183,15 @@ namespace Platforms {
                 norm2D.y = 0;
                 norm2D.Normalize();
 
-                spawnCuePosition = wallHit.point + norm2D;
-                spawnCuePosition.y = origin.y;
+                position = wallHit.point + norm2D;
+                position.y = origin.y;
                 
-                spawnCueRotation = Quaternion.LookRotation(-norm2D);
+                rotation = Quaternion.LookRotation(-norm2D);
             }
             return foundPlatform;
         }
 
-        bool CheckForPlatformDown (out bool isShort, out Vector3 spawnCuePosition, out Quaternion spawnCueRotation) {
+        bool CheckForPlatformDown (out bool isShort, out Vector3 position, out Quaternion rotation) {
             isShort = false;
 
             Vector3 myPos = transform.position;
@@ -202,8 +199,8 @@ namespace Platforms {
 
 
             //spawn at controller position and rotation
-            spawnCuePosition = myPos;
-            spawnCueRotation = Quaternion.LookRotation(rayDirection);
+            position = myPos;
+            rotation = Quaternion.LookRotation(rayDirection);
 
             /*
                 check if theres an obstacle in front

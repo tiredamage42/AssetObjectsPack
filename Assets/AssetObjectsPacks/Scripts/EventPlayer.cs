@@ -95,11 +95,9 @@ namespace AssetObjectsPacks {
             }
 
             public void Interrupt (int layer, string reason) {
-                // if (playing) {
-
-
-                // }
-                // Debug.Log("interrupting layer: " + layer + " : " + reason);
+                if (playing) {
+                    Debug.Log("interrupting layer: " + layer + " : " + reason);
+                }
             
                 //returns false if end play overriden
                 if (!EndPlayAttempt(true)) {
@@ -107,7 +105,6 @@ namespace AssetObjectsPacks {
                     lastPlayEnder.LoseControl();
                     EndPlay(true);
                 }
-                
             }
             bool playing;
             void EndPlay (bool success) {
@@ -179,6 +176,8 @@ namespace AssetObjectsPacks {
                 //Debug.Log("playing cue");
                 duration_timer = 0;
                 current_duration = overrideDuration;
+
+                
                 if (current_duration >= 0) {
                     // Debug.Log("set current duration to :: " + current_duration);
                 }
@@ -230,7 +229,9 @@ namespace AssetObjectsPacks {
 
 
 
-        bool PlayEvent (MiniTransform transforms, int myLayer, EventPlayer myPlayer,
+        bool PlayEvent (
+            MiniTransform transforms, 
+            int myLayer, EventPlayer myPlayer,
             Dictionary<int, PlayerMessage> pack2playEvents,
             Dictionary<string, CustomParameter> paramDict, 
             Event e, bool isMainEvent, bool asInterrupter, bool endPlayAttemptHandled) {
@@ -253,10 +254,8 @@ namespace AssetObjectsPacks {
                     AssetObject o = eventResponse.objectsPerPack[k].RandomChoice();
 
                     if (!endPlayAttemptHandled) {
-
                         if (isMainPack && isMainEvent) {
                             current_duration = o["Duration"].GetValue<float>();
-                            // Debug.Log("in PLAYEVENT set current duration to :: " + current_duration);
                         }
                     }
 
@@ -272,12 +271,11 @@ namespace AssetObjectsPacks {
                         }
                     }
 
-                    string stepBlock = o.messageBlock;
                     string logErrors = "";
-                    CustomScripting.ExecuteMessageBlock (myLayer, myPlayer, stepBlock, Vector3.zero, ref logErrors);
+                    CustomScripting.ExecuteMessageBlock (myLayer, myPlayer, o.messageBlock, Vector3.zero, ref logErrors);
                     
                     if (!logErrors.IsEmpty()) {
-                        logErrors = "broadcast message from asset object: " + o.objRef.name + logErrors;
+                        logErrors = "broadcast message from asset object: " + o.objRef.name + "\n" + logErrors;
                         Debug.LogError(logErrors);
                     }
 
@@ -285,7 +283,6 @@ namespace AssetObjectsPacks {
                         Debug.LogError("skipping " + PacksManager.ID2Name(k) + " not connected to player");
                         continue;
                     }
-
     
                     pack2playEvents[k](o, asInterrupter, transforms, endUseSuccessCBs);
             
@@ -308,12 +305,9 @@ namespace AssetObjectsPacks {
             }
         }
         
-
         public EventPlayEnder OverrideEndPlay (int layer, Action<bool> onEndAttempt, string endPlayOverrideReason) {
-            return GetUpdateLayer(layer).OverrideEndPlay(onEndAttempt, endPlayOverrideReason);
-            
+            return GetUpdateLayer(layer).OverrideEndPlay(onEndAttempt, endPlayOverrideReason);            
         }
-
 
         /*
             override with null to skip cue playback
@@ -326,18 +320,17 @@ namespace AssetObjectsPacks {
             GetUpdateLayer(layer).Interrupt(layer, reason);
         }
 
-
-
         bool ChcekLinkedPlayers() {
             if (pack2playEvents.Count == 0) {
-                Debug.LogWarning(name + " isnt doing anything, no on play events specified");
+                Debug.LogWarning(name + " isnt doing anything, no listener components on gameObject");
                 return false;
             }
             return true;
         }
 
         public void PlayEvents (MiniTransform transforms, Event[] events, int layer, float overrideDuration, bool asInterrupter){
-            if (!ChcekLinkedPlayers()) return;
+            if (!ChcekLinkedPlayers()) 
+                return;
             
             GetUpdateLayer(layer).PlayEvents(transforms, layer, this, pack2playEvents, paramDict, events, overrideDuration, asInterrupter);
         }
@@ -348,8 +341,5 @@ namespace AssetObjectsPacks {
             }
             currentPlaylists.Clear();
         }
-
-
-
     }
 }

@@ -1,16 +1,5 @@
 ﻿using UnityEngine;
 using Combat;
-// using System.Collections;
-// using System.Collections.Generic;
-// using System.Collections;
-// using System.Collections.Generic;
-// using AssetObjectsPacks;
-// using System;
-// using UnityEngine.AI;
-// using System.Linq;
-// using Movement.Platforms;
-// using Movement;
-
 
 
 namespace Syd.AI {
@@ -24,12 +13,9 @@ namespace Syd.AI {
         public float debugPhaseTime = 5.0f;
         bool debugPhase;
         float debugTimer;
-
-        CharacterCombat characterCombat;
-
         bool attemptAttack;
-        
         AIAgent agent;
+        CharacterCombat characterCombat;
 
         void Update () {
             if (aimDebug) {
@@ -42,19 +28,15 @@ namespace Syd.AI {
                     debugTimer = 0;
                 }   
 
-
-
+                attemptAttack = false;
                 if (debugPhase) {
                     Vector3 dirToTarget = aimDebug.position - transform.position;
                     dirToTarget.y = 0;
                     bool withinAngle = Vector3.Angle(dirToTarget, transform.forward) <= maxAimAngle;
-                    attemptAttack = Vector3.Angle(dirToTarget, transform.forward) < maxAimAngle;
-                }
-                else {
-                    attemptAttack = false;
-                }
-                    
+                    attemptAttack = withinAngle;
+                }   
             }
+
             characterCombat.SetAiming(attemptAttack);
             characterCombat.SetFiring(attemptAttack);
         }

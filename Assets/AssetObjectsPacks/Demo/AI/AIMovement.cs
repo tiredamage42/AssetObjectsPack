@@ -95,8 +95,8 @@ namespace Syd.AI {
             waypointTracker = GetComponent<WaypointTracker>();
             
             platformer = GetComponent<Platformer>();
-            platformer.SetCallback (OnPlatformEnd);
-
+            platformer.onPlatformEnd += OnPlatformEnd;
+            
             agent = GetComponentInChildren<NavMeshAgent>();
             agent.updateRotation = false;
             agent.updatePosition = false;

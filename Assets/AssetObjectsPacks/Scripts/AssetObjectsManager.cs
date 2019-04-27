@@ -4,10 +4,6 @@ using UnityEngine;
 namespace AssetObjectsPacks {
     public class AssetObjectsManager : MonoBehaviour
     {
-        void OnDrawGizmos () {
-
-    
-        }
         public PacksManager packs;
 
         static AssetObjectsManager _instance;
@@ -33,36 +29,15 @@ namespace AssetObjectsPacks {
             foreach(System.Delegate d in updateCallbacks.GetInvocationList())
                 updateCallbacks -= (System.Action)d;
         }
+        event System.Action updateCallbacks;
             
         void Awake () {
-            AddUpdateCallback( Playlists.Performance.UpdatePerformances );
+            
         }
-        event System.Action updateCallbacks;
         
 
         void Update () {
             updateCallbacks();
-            //UpdateManager();
         }
-/*
-        static List<int> active_performances = new List<int>();
-        static Pool<Playlist.Performance> performance_pool = new Pool<Playlist.Performance>();
-        public static Playlist.Performance GetNewPerformance () {
-            int new_performance_key = performance_pool.GetNewObject();
-            active_performances.Add(new_performance_key);
-            Playlist.Performance p = performance_pool[new_performance_key];
-            p.SetPerformanceKey(new_performance_key);
-            return p;
-        }
-        public static void UpdateManager () {
-            for (int i = 0; i < active_performances.Count; i++) {
-                performance_pool[active_performances[i]].UpdatePerformance();
-            }
-        }
-        public static void ReturnPerformanceToPool(int key) {
-            performance_pool.ReturnToPool(key);
-            active_performances.Remove(key);
-        }
- */
     }
 }

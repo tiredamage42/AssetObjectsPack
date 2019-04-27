@@ -25,8 +25,6 @@ namespace Combat {
         }
 
         public float aimPercent;
-        // ValueTracker<bool> aimChangeTracker = new ValueTracker<bool>(false);
-        //ValueTracker<Gun> gunChangeTracker = new ValueTracker<Gun>(null);
         ValueTracker gunChangeTracker;
         
         
@@ -47,11 +45,6 @@ namespace Combat {
         }
         
         public override void UpdateLoop (float deltaTime) {
-            
-            // if (aimChangeTracker.CheckValueChange(isAiming)) {
-            //     controller.UpdateLoopState();
-            // }
-            //if (gunChangeTracker.CheckValueChange(currentGun)) {
             
             if (gunChangeTracker.CheckValueChange()) {
                 BroadcastGunChange();

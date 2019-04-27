@@ -21,8 +21,6 @@ public class MovementController : MonoBehaviour {
 
     public Vector3 moveDireciton { get { return Movement.GetRelativeTransformDirection(direction, transform); } } 
             
-    //int lastSpeed = -1, lastStance = -1;
-    //Movement.Direction lastDirection = Movement.Direction.Backwards;
     const string speedName = "Speed", directionName = "Direction", stanceName = "Stance";
 
 
@@ -57,8 +55,6 @@ public class MovementController : MonoBehaviour {
     */
     void OverrideMovement (object[] parameters) {
         overrideMove = (bool)parameters[1];    
-        Debug.Log("override movment: " + overrideMove);
-        
     }    
 
     /*
@@ -72,17 +68,11 @@ public class MovementController : MonoBehaviour {
     */
     void StopMovement (object[] parameters) {
         
-        //SetDirection(Movement.Direction.Forward);
-        //SetSpeed(0);
-
         speed = 0;
         direction = Movement.Direction.Forward;
 
         //force change so change doesnt register and override cue animation
         ForceNonChangeForValueChecks();
-    
-        // speedTracker.SetLastValue(speed);
-        // directionTracker.SetLastValue(direction);
     }
 
     /*
@@ -103,12 +93,7 @@ public class MovementController : MonoBehaviour {
         speed = newSpeed <= 0 ? CalculateSpeed(newSpeed) : newSpeed;
         direction = newDirection;
 
-        // speedTracker.SetLastValue(speed);
         ForceNonChangeForValueChecks();
-        
-        //SetSpeed(newSpeed <= 0 ? CalculateSpeed(newSpeed) : newSpeed);
-
-        //SetDirection(newDirection);
     }
 
         
@@ -121,12 +106,8 @@ public class MovementController : MonoBehaviour {
     }
 
     void UpdateLoopState () {
-
-
         //immediately play the loop unless we're jumping or overriding movement
         bool asInterruptor = !overrideMovement;
-        // Debug.Log("upading loops // " + asInterruptor);
-
         Playlist.InitializePerformance("update Loop state", speed == 0 ? behavior.stillCue : behavior.moveCue, eventPlayer, false, eventLayer, new MiniTransform( Vector3.zero, Quaternion.identity), asInterruptor);
     }
 
@@ -167,11 +148,6 @@ public class MovementController : MonoBehaviour {
         return shouldChange;
     }
 
-    
-
-    // ValueTracker<int> stanceTracker = new ValueTracker<int>(-1), speedTracker = new ValueTracker<int>(-1);
-    // ValueTracker<Movement.Direction> directionTracker = new ValueTracker<Movement.Direction>(Movement.Direction.Forward);
-
     void CheckSpeedDirectionChanges() {
         if (speed == 0) {
             direction = Movement.Direction.Forward;
@@ -180,36 +156,6 @@ public class MovementController : MonoBehaviour {
         if (ShouldUpdateLoops()) {
             UpdateLoopState();
         }
-        
-        // bool changedSpeed = speedTracker.CheckValueChange(speed);
-        // bool changedDirection = directionTracker.CheckValueChange(direction);
-        // bool changedStance = stanceTracker.CheckValueChange(stance);
-        // bool changed = changedSpeed || changedDirection || changedStance;
-        // if (changed) {
-        //     UpdateLoopState();
-        // }
     }
-    /*
-
-    bool SetDirection(Movement.Direction direction) {
-        bool changed = direction != lastDirection;
-        this.direction = direction;
-        lastDirection = direction;
-        return changed;
-    }
-    bool SetSpeed(int speed) {
-        bool changed = speed != lastSpeed;
-        this.speed = speed;
-        lastSpeed = speed;
-        return changed;
-    }
-    bool SetStance(int stance) {
-        bool changed = stance != lastStance;
-        this.stance = stance;
-        lastStance = stance;
-        return changed;
-    }
-     */
-
 }
 }
