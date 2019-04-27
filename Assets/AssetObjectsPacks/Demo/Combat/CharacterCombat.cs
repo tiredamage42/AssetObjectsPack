@@ -14,9 +14,21 @@ namespace Combat {
         public delegate void OnGunChange(Gun newGun);
         public event OnGunChange onGunChange;
         public bool isAiming;
+
+        public void SetAiming (bool aiming) {
+            isAiming = aiming && currentGun && !controller.overrideMovement;
+        }
+        public void SetFiring(bool firing) {
+            if (currentGun) {
+                currentGun.isFiring = aimPercent >= .9f && firing;   
+            }
+        }
+
         public float aimPercent;
-        ValueTracker<bool> aimChangeTracker = new ValueTracker<bool>(false);
-        ValueTracker<Gun> gunChangeTracker = new ValueTracker<Gun>(null);
+        // ValueTracker<bool> aimChangeTracker = new ValueTracker<bool>(false);
+        //ValueTracker<Gun> gunChangeTracker = new ValueTracker<Gun>(null);
+        ValueTracker gunChangeTracker;
+        
         
         void BroadcastGunChange () {
             if (onGunChange != null) {
@@ -27,14 +39,21 @@ namespace Combat {
         protected override void Awake() {
             base.Awake();
             eventPlayer.AddParameter( new CustomParameter ( "Aiming", () => isAiming ) );
+
+            // change animation states when aiming changes
+            controller.AddChangeLoopStateValueCheck( () => isAiming );
+
+            gunChangeTracker = new ValueTracker( () => currentGun, null );
         }
         
         public override void UpdateLoop (float deltaTime) {
             
-            if (aimChangeTracker.CheckValueChange(isAiming)) {
-                controller.UpdateLoopState();
-            }
-            if (gunChangeTracker.CheckValueChange(currentGun)) {
+            // if (aimChangeTracker.CheckValueChange(isAiming)) {
+            //     controller.UpdateLoopState();
+            // }
+            //if (gunChangeTracker.CheckValueChange(currentGun)) {
+            
+            if (gunChangeTracker.CheckValueChange()) {
                 BroadcastGunChange();
             }
 

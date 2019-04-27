@@ -13,7 +13,6 @@ MonoBehaviour:
   m_Name: MoveBehavior
   m_EditorClassIdentifier: 
   turnCue: {fileID: 11400000, guid: c60a3d1873b6741e99ec3862fc9c5f52, type: 2}
-  wayPointCue: {fileID: 11400000, guid: a4f1d66e2802f442f849e2171b62da8d, type: 2}
   moveCue: {fileID: 11400000, guid: b5c2fefa16e8944b4b36e5a2824ffe07, type: 2}
   stillCue: {fileID: 11400000, guid: 15bb8027de7544b7f867ef26ee15fb5e, type: 2}
   groundDistanceCheckAir: 0.01
@@ -41,7 +40,7 @@ MonoBehaviour:
   waypointTurnAnimMinDistance: 2
   turnHelpSpeeds:
   - 1
-  - 3
+  - 2
   - 5
   dirTurnChangeThreshold: 30
   animTurnAngleThreshold: 22.5

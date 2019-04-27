@@ -307,7 +307,7 @@ namespace AssetObjectsPacks {
                     interestTransform.localRotation = lRot;
                     interestTransform.localPosition = lPos;
 
-                    DebugTransform.instance.transform.position = interestTransform.position;
+                    //DebugTransform.instance.transform.position = interestTransform.position;
                     // Debug.Break();
                     suppliedTransform = new MiniTransform(interestTransform, false);
                     

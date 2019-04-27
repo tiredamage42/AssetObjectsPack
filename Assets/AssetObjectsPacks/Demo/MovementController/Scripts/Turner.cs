@@ -106,16 +106,34 @@ public class Turner : MovementControllerComponent
         endEventPlayerPlay = null;    
     }
 
+
+    public bool isSlerpingTransformRotation { get { return slerpingRotation; } }
+    public bool slerpingRotation;
+    public Vector3 targetTurnDirection { get { return _targetTurnDirection; } }
+    Vector3 _targetTurnDirection;
+    public float angleDifferenceWithTarget { get { return _angleDifferenceWithTarget; } }
+    public float _angleDifferenceWithTarget;
     
+
+
+
+    Vector3 DirToTarget () {
+        Vector3 targetDir = turnTarget - transform.position;
+        Vector3 flatTarget = new Vector3(targetDir.x, 0, targetDir.z);
+        return use2d ? flatTarget : targetDir;
+    }
+
     void FinalizeTurnHelper (float deltaTime) {
 
+        slerpingRotation = false;
         bool doingManualTurn = isTurning && initializedTurnCue;
 
         if (doingManualTurn || doAutoTurn) {
-            Vector3 targetDir = Movement.CalculateTargetFaceDirection(controller.direction, transform.position, turnTarget, use2d);
+            //Vector3 targetDir = Movement.CalculateTargetFaceDirection(controller.direction, transform.position, turnTarget, use2d);
+            _targetTurnDirection = DirToTarget(); //Movement.CalculateTargetFaceDirection(controller.direction, transform.position, turnTarget, use2d);
             
             if (doingManualTurn) {
-                if (CheckForEndTurn(targetDir)) {
+                if (CheckForEndTurn(_targetTurnDirection)) {
                     //Debug.Log("end turn");
                     OnEndTurn();
                     return;
@@ -125,11 +143,18 @@ public class Turner : MovementControllerComponent
             //if we're turning and animation is done, slerp to reach face target
             if (!inTurnAnimation) {
                 if (!controller.overrideMovement) {
-                    transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(targetDir), deltaTime * behavior.turnHelpSpeeds[controller.speed]);
+                    slerpingRotation = true;
+                    // Movement.CalculateTargetFaceDirection(controller.direction, transform.position, turnTarget, use2d)
+                    transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(Movement.CalculateTargetFaceDirection(controller.direction, transform.position, turnTarget, use2d)), deltaTime * behavior.turnHelpSpeeds[controller.speed]);
+                    // transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(_targetTurnDirection), deltaTime * behavior.turnHelpSpeeds[controller.speed]);
                 }
             }
         }
     }
+
+
+
+
 
     bool CheckForEndTurn (Vector3 targetDir) {
         
@@ -147,10 +172,16 @@ public class Turner : MovementControllerComponent
         //if we're done animating
         if (!inTurnAnimation) {
             //check movement direction (or forward) angle with target direction
-            float angleWMoveDir = Vector3.Angle(controller.moveDireciton, targetDir);                
+
+
+            Debug.DrawLine(transform.position, transform.position + controller.moveDireciton, Color.magenta);
+            Debug.DrawLine(transform.position, transform.position + targetDir, Color.cyan);
+            
+            //float angleWMoveDir = Vector3.Angle(controller.moveDireciton, targetDir);                
+            _angleDifferenceWithTarget = Vector3.Angle(controller.moveDireciton, targetDir);                
 
             //deactivate turning (within threshold)
-            if (angleWMoveDir < behavior.turnAngleHelpThreshold){
+            if (_angleDifferenceWithTarget < behavior.turnAngleHelpThreshold){
                 return true;
             }   
         }
@@ -175,8 +206,9 @@ public class Turner : MovementControllerComponent
         _turnTarget = (Vector3)parameters[1];
 
 
-        Vector3 targetDir = Movement.CalculateTargetFaceDirection(controller.direction, transform.position, turnTarget, use2d);
-        
+        // Vector3 targetDir = Movement.CalculateTargetFaceDirection(controller.direction, transform.position, turnTarget, use2d);
+        Vector3 targetDir = DirToTarget();
+            
         //check movement direction (or forward) angle with target direction
         float angleWMoveDir = Vector3.Angle(controller.moveDireciton, targetDir);                
 
@@ -228,8 +260,9 @@ public class Turner : MovementControllerComponent
         if (!overrideMovement){
                 
             //calculate the target direction
-            Vector3 targetDir = Movement.CalculateTargetFaceDirection(controller.direction, transform.position, target, use2d);
-
+            // Vector3 targetDir = Movement.CalculateTargetFaceDirection(controller.direction, transform.position, target, use2d);
+            Vector3 targetDir = DirToTarget();
+        
             //check movement direction (or forward) angle with target direction
             float angleWMoveDir = Vector3.Angle(controller.moveDireciton, targetDir);
             

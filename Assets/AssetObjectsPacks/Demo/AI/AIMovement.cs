@@ -16,71 +16,13 @@ namespace Syd.AI {
 
     [RequireComponent(typeof(NavMeshAgent))]
     public class AIMovement : MovementControllerComponent{
-        [Header("Debug")]
-        public Transform aimDebug;
-        CharacterCombat characterCombat;
-
-
+        
+        public bool allowBackwardsMovement;
         Turner turner;
-        int debugPhase;
-        float debugTimer;
-        public float debugPhaseTime = 5.0f;
+        
 
-
-
-
-        bool attemptAim;
-        bool attemptFiring;
-
-
-
-
-        //char specific
-
-        void EndDebugPhase () {
-            debugPhase++;
-            debugTimer = 0;
-        }
         void DebugLoop (float deltaTime) {
-            if (aimDebug) {
-                SetInterestPoint(aimDebug.position);
-                characterCombat.SetAimTarget(aimDebug.position);
-
-                if (controller.speed == 0) {
-                    turner.SetTurnTarget(aimDebug.position);
-                    turner.doAutoTurn = true;
-                }
-
-
-
-                characterCombat.isAiming = characterCombat.currentGun && !controller.overrideMovement && attemptAim;
-                if (characterCombat.currentGun) {
-                    characterCombat.currentGun.isFiring = characterCombat.aimPercent >= .9f && attemptFiring;
-                }
-
-                // debugTimer += deltaTime;
-                // if (debugTimer > debugPhaseTime) {
-                //     if (debugPhase == 0) {
-                //         attemptAim = true;
-                //         debugPhase++;
-                //     }
-                //     else if (debugPhase == 1) {
-                //         attemptFiring = true;
-                //         debugPhase++;
-                //     }
-                //     else {
-                //         attemptFiring = attemptAim = false;
-                //         debugPhase = 0;
-                //     }
-                //     debugTimer = 0;
-                // }
-            }
-            else {
-                // characterCombat.isAiming = false;
-                // characterCombat.currentGun.isFiring = false;
-            }
-
-
+           
             if (pathStatus != NavMeshPathStatus.PathInvalid) {
                 //if (path != null) {
                     Color c = pathStatus == NavMeshPathStatus.PathPartial ? Color.yellow : Color.green;
@@ -95,10 +37,6 @@ namespace Syd.AI {
         }
         
 
-        public bool agitated;
-
-        
-        public Cue demoScene;
         Vector3 destination;
         EventPlayer.EventPlayEnder endEventPlayerPlay;
         WaypointTracker waypointTracker;
@@ -112,31 +50,48 @@ namespace Syd.AI {
 
         NavMeshAgent agent;
         Platformer platformer;
-        Vector3 facePosition;
-        public AIBehavior aiBehavior;    
         Vector3[] path;
         public NavMeshPathStatus pathStatus = NavMeshPathStatus.PathInvalid;
         int currentPathCorner;
         bool trackingValidPath { get { return pathStatus != NavMeshPathStatus.PathInvalid && path != null && currentPathCorner < path.Length; } }
         
+        CharacterAnimatorMover animationMover;
 
-        ValueTracker<bool> agitatedTracker = new ValueTracker<bool>(false);
-        void CheckForLoopStateChange () {
-            if (agitatedTracker.CheckValueChange(agitated)) {
-                controller.UpdateLoopState();
+        AIAgent aiAgent;
+        
+        
+
+        /*
+            if we have a long way to turn to face our target direction, just use our target direction as movement
+            
+            (keeps us from doing large curves while turning, preventing falling off cliffs and whatnot)
+        */
+    
+        Vector3 ModifyCharacterMovement(Vector3 originalMovement) {
+            
+            if (controller.speed == 0 || !turner.isSlerpingTransformRotation) {
+                return originalMovement;
             }
+            if (turner.angleDifferenceWithTarget < 45){
+                return originalMovement;
+            }
+            Debug.LogWarning("modifying move until turned");
+
+            Vector3 newMove = turner.targetTurnDirection.normalized * originalMovement.magnitude;
+            Debug.DrawLine(transform.position + Vector3.up * .25f, (transform.position + Vector3.up * .25f) + newMove.normalized * 10, Color.yellow);
+            // Debug.Break();
+            
+            return newMove;
         }
+
+
 
 
         protected override void Awake () {
             base.Awake();
-            eventPlayer.AddParameters ( 
-                new CustomParameter[] {
-                    //linked with agitated
-                    new CustomParameter( "Agitated", () => agitated ), 
-                } 
-            );
             
+            aiAgent = GetComponent<AIAgent>();
+
             waypointTracker = GetComponent<WaypointTracker>();
             
             platformer = GetComponent<Platformer>();
@@ -146,17 +101,14 @@ namespace Syd.AI {
             agent.updateRotation = false;
             agent.updatePosition = false;
 
-
-            characterCombat = GetComponent<CharacterCombat>();
             turner = GetComponent<Turner>();
-        
-        }
-        
-        void Start () {
-            //start demo playlist
-            Playlist.InitializePerformance("ai demo scene", demoScene, eventPlayer, true, -1, new MiniTransform(demoScene.transform.position, demoScene.transform.rotation));
+
+            animationMover = GetComponent<CharacterAnimatorMover>();
+            animationMover.SetMoveModifier (ModifyCharacterMovement);
         }
 
+        
+        
         void AdjustNavmeshAgentVariables () {
             agent.radius = agentRadius;
             agent.height = agentHeight;
@@ -165,17 +117,19 @@ namespace Syd.AI {
 
 
         public override void UpdateLoop(float deltaTime) {
-            CheckForLoopStateChange();
             AdjustNavmeshAgentVariables();
+            if (controller.speed == 0) {
+                turner.SetTurnTarget(aiAgent.interestPoint);
+                turner.doAutoTurn = true;
+            }
+
+
             DebugLoop(deltaTime);
         }
 
-        public void SetInterestPoint (Vector3 position) {
-            facePosition = position;
-        }
-
+        
         public void GoTo (Vector3 destination, Action onArrive = null) {
-            Playlist.InitializePerformance("navigation ai", aiBehavior.navigateToCue, eventPlayer, false, eventLayer, new MiniTransform(destination, Quaternion.identity), true, onArrive);
+            Playlist.InitializePerformance("navigation ai", aiAgent.aiBehavior.navigateToCue, eventPlayer, false, eventLayer, new MiniTransform(destination, Quaternion.identity), true, onArrive);
         }    
 
 
@@ -185,7 +139,7 @@ namespace Syd.AI {
         */
         void TriggerEndWaypointAfterPlatformChange (Vector3 myPos) {
             Vector3 nextWaypoint = path[currentPathCorner];
-            float triggerRadius = aiBehavior.platformEndWaypointTriggerRadius * aiBehavior.platformEndWaypointTriggerRadius;
+            float triggerRadius = aiAgent.aiBehavior.platformEndWaypointTriggerRadius * aiAgent.aiBehavior.platformEndWaypointTriggerRadius;
             //if we're within trigger end radius, 
             if (Vector3.SqrMagnitude(nextWaypoint - myPos) < triggerRadius) {
                 //and the next target path corner is on our 'platform level'
@@ -219,7 +173,7 @@ namespace Syd.AI {
                 platformer.TriggerPlatform(lastCorner, nextCorner);
 
                 //calculate direction for movement
-                controller.direction = agitated ? Movement.Movement.AI.CalculateMoveDirection(transform.position, nextCorner, facePosition, aiBehavior.minStrafeDistance, controller.direction) : Movement.Movement.Direction.Forward;
+                controller.direction = aiAgent.agitated ? Movement.Movement.AI.CalculateMoveDirection(transform.position, nextCorner, aiAgent.interestPoint, aiAgent.aiBehavior.minStrafeDistance, controller.direction, allowBackwardsMovement) : Movement.Movement.Direction.Forward;
                 
                 // Debug.Log("waypoint go to");
                 waypointTracker.GoTo(nextCorner, OnWaypointArrive);

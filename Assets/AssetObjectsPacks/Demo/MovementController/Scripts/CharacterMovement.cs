@@ -7,7 +7,7 @@ namespace Movement {
 
     public class CharacterMovement : MovementControllerComponent
     {
-        Animator anim;
+        // Animator anim;
         Vector3 moveDelta, eulerDelta;
         
         public void SetRotationDelta (Vector3 eulerDelta) {
@@ -49,7 +49,7 @@ namespace Movement {
         const float groundCheckBuffer = .1f;
 
 
-        ValueTracker<bool> groundChangeTracker = new ValueTracker<bool>(true);
+        // ValueTracker<bool> groundChangeTracker = new ValueTracker<bool>(true);
         
 
 
@@ -78,6 +78,8 @@ namespace Movement {
             cc = GetComponent<CharacterController>();
             eventPlayer.AddParameter( new CustomParameter ( "Grounded", () => grounded ) );
 
+            controller.AddChangeLoopStateValueCheck( () => grounded );
+
         }
         protected override void FixedUpdate() {
             base.FixedUpdate();
@@ -92,10 +94,10 @@ namespace Movement {
                 
                 CheckGrounded();
 
-                if (groundChangeTracker.CheckValueChange(grounded)) {
-                    // Debug.Log("changin loop state because aim is " + isAiming);
-                    controller.UpdateLoopState();
-                }
+                // if (groundChangeTracker.CheckValueChange(grounded)) {
+                //     // Debug.Log("changin loop state because aim is " + isAiming);
+                //     controller.UpdateLoopState();
+                // }
             
                 
                 //handle rotation

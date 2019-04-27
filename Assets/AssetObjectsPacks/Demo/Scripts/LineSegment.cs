@@ -39,28 +39,55 @@ public struct LineSegment {
     }
 }
 
-public class ValueTracker<T> {
-    T lastValue;
-    public ValueTracker (T initValue) {
+// public class ValueTracker<T> {
+//     T lastValue;
+//     public ValueTracker (T initValue) {
+//         lastValue = initValue;
+//     }
+//     public void SetLastValue(T value) {
+//         lastValue = value;
+//     }
+//     public bool CheckValueChange (T checkValue) {
+//         bool changed = false;
+//         if (lastValue == null) {
+//             changed = checkValue != null;
+//         }
+//         else {
+//             changed = !checkValue.Equals(lastValue);
+//         }
+//         SetLastValue(checkValue);
+//         return changed;
+//     }
+// }
+
+public class ValueTracker {
+    object lastValue;
+    System.Func<object> getValue;
+
+    public ValueTracker (System.Func<object> getValue, object initValue) {
         lastValue = initValue;
+        this.getValue = getValue;
     }
-    public void SetLastValue(T value) {
-        lastValue = value;
+    public ValueTracker (System.Func<object> getValue) {
+        lastValue = getValue();
+        this.getValue = getValue;
     }
-    public bool CheckValueChange (T checkValue) {
+    public void UpdateLastValue () {
+        lastValue = getValue();
+    }
+    public bool CheckValueChange () {
         bool changed = false;
+
+        object v = getValue();
         if (lastValue == null) {
-            changed = checkValue != null;
-            // Debug.LogWarning(changed);
+            changed = v != null;
         }
         else {
-            changed = !checkValue.Equals(lastValue);
+            changed = !v.Equals(lastValue);
         }
-        SetLastValue(checkValue);
-
-        // if (changed) {
-        //     Debug.LogError("changed" + checkValue);
-        // }
+        lastValue = v;
+        // UpdateLastValue();
+        // SetLastValue(checkValue);
         return changed;
     }
 }
@@ -69,43 +96,34 @@ public class ValueTracker<T> {
 [System.Serializable] public class Smoother {
     public enum SmoothMethod { SmoothDamp, Lerp, MoveTowards }
     public SmoothMethod smoothMethod;
+    public float speed = 1.0f;
     float currentVelocity;
     Vector2 currentVelocity2;
     Vector3 currentVelocity3;
-    public float speed = 1.0f;
     
 
     public float Smooth(float a, float b, float deltaTime) {
-        if (smoothMethod == SmoothMethod.Lerp) {
+        if (smoothMethod == SmoothMethod.Lerp) 
             return Mathf.Lerp(a, b, speed * deltaTime);
-        }
-        else if (smoothMethod == SmoothMethod.SmoothDamp) {
+        else if (smoothMethod == SmoothMethod.SmoothDamp) 
             return Mathf.SmoothDamp(a, b, ref currentVelocity, speed);
-        }
-        else {
+        else 
             return Mathf.MoveTowards(a, b, speed * deltaTime);
-        }
     }
     public Vector2 Smooth(Vector2 a, Vector2 b, float deltaTime) {
-        if (smoothMethod == SmoothMethod.Lerp) {
+        if (smoothMethod == SmoothMethod.Lerp) 
             return Vector2.Lerp(a, b, speed * deltaTime);
-        }
-        else if (smoothMethod == SmoothMethod.SmoothDamp) {
+        else if (smoothMethod == SmoothMethod.SmoothDamp)
             return Vector2.SmoothDamp(a, b, ref currentVelocity2, speed);
-        }
-        else {
+        else
             return Vector2.MoveTowards(a, b, speed * deltaTime);
-        }
     }
     public Vector3 Smooth(Vector3 a, Vector3 b, float deltaTime) {
-        if (smoothMethod == SmoothMethod.Lerp) {
+        if (smoothMethod == SmoothMethod.Lerp)
             return Vector3.Lerp(a, b, speed * deltaTime);
-        }
-        else if (smoothMethod == SmoothMethod.SmoothDamp) {
+        else if (smoothMethod == SmoothMethod.SmoothDamp)
             return Vector3.SmoothDamp(a, b, ref currentVelocity3, speed);
-        }
-        else {
+        else 
             return Vector3.MoveTowards(a, b, speed * deltaTime);
-        }
     }
 }

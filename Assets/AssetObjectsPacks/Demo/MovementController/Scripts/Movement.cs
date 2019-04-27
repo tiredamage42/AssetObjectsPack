@@ -28,6 +28,7 @@ namespace Movement {
             Vector3 targetDir = destination - origin;
             Vector3 flatTarget = new Vector3(targetDir.x, 0, targetDir.z);
             
+            
 
             switch (direction) {
                 case Direction.Forward: 
@@ -45,7 +46,7 @@ namespace Movement {
 
 
         public static class AI {
-            public static Direction CalculateMoveDirection (Vector3 origin, Vector3 destination, Vector3 interestPoint, float minDistanceThreshold, Direction currentDirection) {
+            public static Direction CalculateMoveDirection (Vector3 origin, Vector3 destination, Vector3 interestPoint, float minDistanceThreshold, Direction currentDirection, bool allowBackwards) {
 
                 Vector3 a = origin;
                 Vector3 b = destination;
@@ -76,18 +77,23 @@ namespace Movement {
                     ideal angle for look position is 90
                     A -------------- B
                             /
-                        /
-                        C
+                           /
+                          C
                 */
                 //angle is too acute or obtuse between face ("enemy" point) and destination for strafing 
                 //(backwards or forwards)
                 if (angle <= 45 || angle >= 135) {
-                    return angle >= 135 ? Direction.Backwards : Direction.Forward;
+                    if (allowBackwards) {
+                        return angle >= 135 ? Direction.Backwards : Direction.Forward;
+                    }
+                    else {
+                        return Direction.Forward;
+                    }
                 }
                 
                 /*
-                        C
-                        \
+                          C
+                           \
                             \
                     A -------------- B
                             |

@@ -356,7 +356,7 @@ MonoBehaviour:
     stateID: 0
   - isNew: 0
     name: Moving
-    conditionBlock: Speed==1
+    conditionBlock: Speed==1 && Direction == 0
     assetObjects:
     - isCopy: 0
       isNew: 0

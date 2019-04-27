@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using UnityEngine;
 using AssetObjectsPacks;
+using System.Collections.Generic;
 
 namespace Movement {
 
@@ -35,6 +36,11 @@ public class MovementController : MonoBehaviour {
                 new CustomParameter ( stanceName, () => stance ),
             }
         );
+
+        AddChangeLoopStateValueCheck ( () => speed );
+        AddChangeLoopStateValueCheck ( () => direction );
+        AddChangeLoopStateValueCheck ( () => stance );
+
     }
     void Update () {
         CheckSpeedDirectionChanges();
@@ -65,15 +71,18 @@ public class MovementController : MonoBehaviour {
         sets the player to stop the cue immediately after playing that frame
     */
     void StopMovement (object[] parameters) {
-        //force change so change doesnt register and override cue animation
         
         //SetDirection(Movement.Direction.Forward);
         //SetSpeed(0);
 
         speed = 0;
-        speedTracker.SetLastValue(speed);
         direction = Movement.Direction.Forward;
-        directionTracker.SetLastValue(direction);
+
+        //force change so change doesnt register and override cue animation
+        ForceNonChangeForValueChecks();
+    
+        // speedTracker.SetLastValue(speed);
+        // directionTracker.SetLastValue(direction);
     }
 
     /*
@@ -88,11 +97,14 @@ public class MovementController : MonoBehaviour {
         int l = parameters.Length;
         //unpack parameters
         int newSpeed = (l > 1) ? (int)parameters[1] : -1;
-        //Movement.Direction newDirection = (Movement.Direction)((l > 2) ? ((int)parameters[2]) : (int)direction);
+        Movement.Direction newDirection = (Movement.Direction)((l > 2) ? ((int)parameters[2]) : (int)direction);
         
         //force change so change doesnt register and override cue animation
         speed = newSpeed <= 0 ? CalculateSpeed(newSpeed) : newSpeed;
-        speedTracker.SetLastValue(speed);
+        direction = newDirection;
+
+        // speedTracker.SetLastValue(speed);
+        ForceNonChangeForValueChecks();
         
         //SetSpeed(newSpeed <= 0 ? CalculateSpeed(newSpeed) : newSpeed);
 
@@ -100,8 +112,7 @@ public class MovementController : MonoBehaviour {
     }
 
         
-    
-    public int CalculateSpeed (int newSpeed) {
+    int CalculateSpeed (int newSpeed) {
         if (newSpeed <= 0) {
             //use current or walk
             return Mathf.Max(speed, 1);
@@ -109,7 +120,7 @@ public class MovementController : MonoBehaviour {
         return newSpeed;
     }
 
-    public void UpdateLoopState () {
+    void UpdateLoopState () {
 
 
         //immediately play the loop unless we're jumping or overriding movement
@@ -119,23 +130,64 @@ public class MovementController : MonoBehaviour {
         Playlist.InitializePerformance("update Loop state", speed == 0 ? behavior.stillCue : behavior.moveCue, eventPlayer, false, eventLayer, new MiniTransform( Vector3.zero, Quaternion.identity), asInterruptor);
     }
 
+    HashSet<ValueTracker> valuesChangeLoopStates = new HashSet<ValueTracker>();
+
+    /*
+        add a method to get a variable, when the variable changes, the move controller will update its
+        loops
+            e.g. track an aiming variable, or a grounded variable
+
+    */
+    public void AddChangeLoopStateValueCheck (System.Func<object> valueGetter) {
+        valuesChangeLoopStates.Add( new ValueTracker( valueGetter ) );
+    }
+
+    /*
+        override the value checks so they're considered "not changed"
+        used when we dont want any of the changes to switch our loop states
+        
+        e.g. 
+            when a cue decides our loop for us
+    */
+    void ForceNonChangeForValueChecks () {
+        foreach (var vt in valuesChangeLoopStates) {
+            vt.UpdateLastValue();
+        }
+    }
+
+    bool ShouldUpdateLoops () {
+        bool shouldChange = false;
+
+        // loop through all so they update last value
+        foreach (var vt in valuesChangeLoopStates) {
+            if (vt.CheckValueChange()) {
+                shouldChange = true;
+            }
+        }
+        return shouldChange;
+    }
+
     
 
-    ValueTracker<int> stanceTracker = new ValueTracker<int>(-1), speedTracker = new ValueTracker<int>(-1);
-    ValueTracker<Movement.Direction> directionTracker = new ValueTracker<Movement.Direction>(Movement.Direction.Forward);
+    // ValueTracker<int> stanceTracker = new ValueTracker<int>(-1), speedTracker = new ValueTracker<int>(-1);
+    // ValueTracker<Movement.Direction> directionTracker = new ValueTracker<Movement.Direction>(Movement.Direction.Forward);
 
     void CheckSpeedDirectionChanges() {
         if (speed == 0) {
             direction = Movement.Direction.Forward;
         }
-        
-        bool changedSpeed = speedTracker.CheckValueChange(speed);
-        bool changedDirection = directionTracker.CheckValueChange(direction);
-        bool changedStance = stanceTracker.CheckValueChange(stance);
-        bool changed = changedSpeed || changedDirection || changedStance;
-        if (changed) {
+
+        if (ShouldUpdateLoops()) {
             UpdateLoopState();
         }
+        
+        // bool changedSpeed = speedTracker.CheckValueChange(speed);
+        // bool changedDirection = directionTracker.CheckValueChange(direction);
+        // bool changedStance = stanceTracker.CheckValueChange(stance);
+        // bool changed = changedSpeed || changedDirection || changedStance;
+        // if (changed) {
+        //     UpdateLoopState();
+        // }
     }
     /*
 
