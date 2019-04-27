@@ -26,39 +26,58 @@ namespace Syd.AI {
         float debugTimer;
         public float debugPhaseTime = 5.0f;
 
+
+
+
+        bool attemptAim;
+        bool attemptFiring;
+
+
+
+
         //char specific
+
+        void EndDebugPhase () {
+            debugPhase++;
+            debugTimer = 0;
+        }
         void DebugLoop (float deltaTime) {
             if (aimDebug) {
                 SetInterestPoint(aimDebug.position);
                 characterCombat.SetAimTarget(aimDebug.position);
-                turner.SetTurnTarget(aimDebug.position);
-                turner.doAutoTurn = true;
 
-
-                debugTimer += deltaTime;
-
-                if (debugTimer > debugPhaseTime) {
-                    if (debugPhase == 0) {
-                        characterCombat.isAiming = true;
-                        debugPhase++;
-                    }
-                    else if (debugPhase == 1) {
-                        characterCombat.currentGun.isFiring = true;
-                        debugPhase++;
-                    }
-                    else {
-                        characterCombat.isAiming = false;
-                        characterCombat.currentGun.isFiring = false;
-                        debugPhase = 0;
-                    }
-
-                    debugTimer = 0;
+                if (controller.speed == 0) {
+                    turner.SetTurnTarget(aimDebug.position);
+                    turner.doAutoTurn = true;
                 }
+
+
+
+                characterCombat.isAiming = characterCombat.currentGun && !controller.overrideMovement && attemptAim;
+                if (characterCombat.currentGun) {
+                    characterCombat.currentGun.isFiring = characterCombat.aimPercent >= .9f && attemptFiring;
+                }
+
+                // debugTimer += deltaTime;
+                // if (debugTimer > debugPhaseTime) {
+                //     if (debugPhase == 0) {
+                //         attemptAim = true;
+                //         debugPhase++;
+                //     }
+                //     else if (debugPhase == 1) {
+                //         attemptFiring = true;
+                //         debugPhase++;
+                //     }
+                //     else {
+                //         attemptFiring = attemptAim = false;
+                //         debugPhase = 0;
+                //     }
+                //     debugTimer = 0;
+                // }
             }
             else {
-                characterCombat.isAiming = false;
-                characterCombat.currentGun.isFiring = false;
-
+                // characterCombat.isAiming = false;
+                // characterCombat.currentGun.isFiring = false;
             }
 
 
@@ -135,7 +154,7 @@ namespace Syd.AI {
         
         void Start () {
             //start demo playlist
-            //Playlist.InitializePerformance("ai demo scene", demoScene, eventPlayer, true, -1, demoScene.transform.position, demoScene.transform.rotation);
+            Playlist.InitializePerformance("ai demo scene", demoScene, eventPlayer, true, -1, new MiniTransform(demoScene.transform.position, demoScene.transform.rotation));
         }
 
         void AdjustNavmeshAgentVariables () {
@@ -172,6 +191,7 @@ namespace Syd.AI {
                 //and the next target path corner is on our 'platform level'
                 if (Platformer.SamePlatformLevels(myPos, nextWaypoint)){
                     //manually trigger waypoint arrival, 
+                    // Debug.LogError("manually triggered after platform");
                     waypointTracker.ManuallyTriggerWaypointArrival("platform change");
                 }
             }   
@@ -201,9 +221,12 @@ namespace Syd.AI {
                 //calculate direction for movement
                 controller.direction = agitated ? Movement.Movement.AI.CalculateMoveDirection(transform.position, nextCorner, facePosition, aiBehavior.minStrafeDistance, controller.direction) : Movement.Movement.Direction.Forward;
                 
+                // Debug.Log("waypoint go to");
                 waypointTracker.GoTo(nextCorner, OnWaypointArrive);
             }
             else {
+
+                // Debug.Log("destination arrive");
                 OnDestinationArrive();
             }
         }
@@ -221,12 +244,16 @@ namespace Syd.AI {
             while (waitingForPath) {
                 yield return null;
             }
+
+            // Debug.Log("calculated path");
             this.path = agent.path.corners;
             this.pathStatus = agent.pathStatus;
+
 
             //skip the first one, navmesh agent path's first corner
             //is the origin position
             currentPathCorner = 0;
+
             OnWaypointArrive();
         }
 
@@ -237,7 +264,9 @@ namespace Syd.AI {
         */
         
         void NavigateTo(object[] parameters) {
+
             
+            // Debug.Log("navigating to");
             //unpack parameters
             int layer = (int)parameters[0];
             destination = (Vector3)parameters[1];

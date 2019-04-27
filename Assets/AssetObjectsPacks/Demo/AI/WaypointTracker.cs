@@ -11,6 +11,7 @@ namespace Syd.AI {
 [RequireComponent(typeof(Turner))]
 public class WaypointTracker : MovementControllerComponent
 {
+    public Cue waypointCue;
     public bool hasDestination;
     Vector3 destination;
     EventPlayer.EventPlayEnder endEventPlayerPlay;
@@ -87,7 +88,7 @@ public class WaypointTracker : MovementControllerComponent
     }
     
     public void GoTo (Vector3 newDestination, Action onWaypointArrive = null) {
-        Playlist.InitializePerformance("nav ai manual", behavior.wayPointCue, eventPlayer, false, eventLayer, new MiniTransform(newDestination, Quaternion.identity), false, onWaypointArrive);
+        Playlist.InitializePerformance("nav ai manual", waypointCue, eventPlayer, false, eventLayer, new MiniTransform(newDestination, Quaternion.identity), false, onWaypointArrive);
     }
 
 
@@ -108,6 +109,8 @@ public class WaypointTracker : MovementControllerComponent
         so movement should already have been started by the time this method is called
     */
     void GoToWaypoint(object[] parameters) {
+
+        Debug.Log("going to waypoint in tracker");
         int l = parameters.Length;
 
         //unpack parameters
@@ -129,6 +132,10 @@ public class WaypointTracker : MovementControllerComponent
 
             //take control of the player's end play callback, to call it when arriving at waypoint
             endEventPlayerPlay = eventPlayer.OverrideEndPlay(layer, null, "Go to waypoint");
+
+
+            Debug.Log("going to waypoint in tracker 2");
+        
         }
         else {
             //movement within threshold, skip playing any animation and end the cue/event right after

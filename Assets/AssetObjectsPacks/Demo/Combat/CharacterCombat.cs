@@ -6,8 +6,6 @@ using Movement;
 
 namespace Combat {
 
-
-
     public class CharacterCombat : MovementControllerComponent
     {
         public Gun currentGun;
@@ -16,8 +14,6 @@ namespace Combat {
         public delegate void OnGunChange(Gun newGun);
         public event OnGunChange onGunChange;
         public bool isAiming;
-        // public float aimSpeed = 3;
-        // [HideInInspector] public Vector3 aimTarget; 
         public float aimPercent;
         ValueTracker<bool> aimChangeTracker = new ValueTracker<bool>(false);
         ValueTracker<Gun> gunChangeTracker = new ValueTracker<Gun>(null);
@@ -27,14 +23,15 @@ namespace Combat {
                 onGunChange(currentGun);
             }
         }
+
         protected override void Awake() {
             base.Awake();
             eventPlayer.AddParameter( new CustomParameter ( "Aiming", () => isAiming ) );
         }
+        
         public override void UpdateLoop (float deltaTime) {
             
             if (aimChangeTracker.CheckValueChange(isAiming)) {
-                // Debug.Log("changin loop state because aim is " + isAiming);
                 controller.UpdateLoopState();
             }
             if (gunChangeTracker.CheckValueChange(currentGun)) {
@@ -51,8 +48,6 @@ namespace Combat {
 
                 aimPercent = aimSmoother.Smooth(aimPercent, target, deltaTime);
                 
-                // aimLerp = Mathf.Lerp(aimLerp, target, aimSpeed * deltaTime);
-                
                 if (isAiming && aimPercent > (1.0f - aimEndThreshold)) {
                     aimPercent = 1.0f;
                 }
@@ -62,10 +57,7 @@ namespace Combat {
             }
         }
             
-        public void SetAimTarget (Vector3 target) {
-            _aimTarget = target;
-        }
-
+        
         Vector3 _aimTarget;
         System.Func<Vector3> getAimTarget;
 
@@ -78,6 +70,9 @@ namespace Combat {
             }
         }
 
+        public void SetAimTarget (Vector3 target) {
+            _aimTarget = target;
+        }
         public void SetAimTargetCallback (System.Func<Vector3> getAimTarget) {
             this.getAimTarget = getAimTarget;
         }

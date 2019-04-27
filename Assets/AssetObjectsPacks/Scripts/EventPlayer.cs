@@ -136,6 +136,8 @@ namespace AssetObjectsPacks {
                 }
 
                 if (endPlayAttemptCallback != null) {
+
+                    Debug.Log("end play attempt callback");
                     endPlayAttemptCallback(success);
                     endPlayAttemptCallback = null;
                 }
@@ -182,7 +184,7 @@ namespace AssetObjectsPacks {
                 }
 
 
-                bool endPlayAttemptHandled = current_duration >= 0;
+                bool endPlayAttemptHandled = current_duration >= 0;// || endPlayOverriden;
 
                 int l = 0;
                 if (events != null) {

@@ -13,26 +13,15 @@ public class Game : MonoBehaviour
 	static Game m_instance;
 	public float defaultTimescale = 1.0f;
 
-
-
-	float currentTimeDilation = 1.0f;
-
-	
 	public bool isPaused;
 	public static bool IsPaused { get { return m_instance.isPaused; } }
-	public static float initialTimeDilation {
-		get {
-			return m_instance.defaultTimescale;
-		}
-	}
+	public static float initialTimeDilation { get { return m_instance.defaultTimescale; } }
 	public static float timeDilation {
-		get {
-			return m_instance.currentTimeDilation;
-		}
-		set {
-			m_instance.currentTimeDilation = value;
-		}
+		get { return m_instance.currentTimeDilation; }
+		set { m_instance.currentTimeDilation = value; } 
 	}
+	
+	float currentTimeDilation = 1.0f;
 	float initialTimeScale, initialFixedDeltaTime, initialMaxDelta;
     
 	

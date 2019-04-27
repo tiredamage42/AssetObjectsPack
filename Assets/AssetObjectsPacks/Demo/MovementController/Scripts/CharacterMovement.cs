@@ -31,10 +31,12 @@ namespace Movement {
         public bool transformGroundFix = true;
         
 
-        float jumpSpeed;
+        // float jumpSpeed;
         public void JumpRaw (float speed) {
-            if (grounded) {
-                jumpSpeed = speed * Time.timeScale;// * Time.deltaTime;
+            if (grounded && !controller.overrideMovement) {
+
+                currentGravity = speed * Time.timeScale;
+                // jumpSpeed = speed * Time.timeScale;// * Time.deltaTime;
             }
 
             // currentGravity = speed;
@@ -79,7 +81,7 @@ namespace Movement {
         }
         protected override void FixedUpdate() {
             base.FixedUpdate();
-            //CheckGrounded();
+            // CheckGrounded();
         }
         public override void UpdateLoop (float deltaTime) {
 
@@ -197,12 +199,12 @@ namespace Movement {
             }
 
             //if falling add to downward velocity
-            if (!grounded) {
+            // if (!grounded) {
 
-                if (jumpSpeed != 0) {
-                    currentGravity = jumpSpeed;// * deltaTime;
-                    jumpSpeed = 0;
-                }
+                // if (jumpSpeed != 0) {
+                //     currentGravity = jumpSpeed;// * deltaTime;
+                //     jumpSpeed = 0;
+                // }
 
                 currentGravity += Physics.gravity.y * gravityModifier * deltaTime * deltaTime;
                 
@@ -212,15 +214,12 @@ namespace Movement {
                     currentGravity = behavior.minYVelocity;
                 }    
 
-            }
-
-            // jumpSpeed += currentGravity;
-            // if (jumpSpeed < 0) {
-            //     jumpSpeed = 0;
             // }
+
             
             //if grounded stick to floor, else use calculated gravity    
             return currentGravity;//grounded ? behavior.minYVelocity : currentGravity;
+            // return grounded ? behavior.minYVelocity : currentGravity;
         }
 
 
@@ -237,7 +236,7 @@ namespace Movement {
             groundNormal = Vector3.up;
             floorY = -999;
             
-            if (jumpSpeed <= 0) {
+            if (currentGravity <= 0) {
 
                 RaycastHit hit;
                 if (Physics.SphereCast(ray, behavior.groundRadiusCheck, out hit, distanceCheck, behavior.groundLayerMask)) {

@@ -294,19 +294,23 @@ namespace AssetObjectsPacks {
                     Vector3 lPos = Vector3.zero;
                     Quaternion lRot = Quaternion.identity;
                     
-                        if (cueBehavior == null) {
-                            lPos = cue.transform.localPosition;
-                            lRot = cue.transform.localRotation;
-                        }
-                        else {
-                            lPos = cue.transform.localPosition + cueBehavior.positionOffset;
-                            lRot = Quaternion.Euler(cue.transform.localRotation.eulerAngles + cueBehavior.rotationOffset);
-                        }
+                    if (cueBehavior == null) {
+                        lPos = cue.transform.localPosition;
+                        lRot = cue.transform.localRotation;
+                    }
+                    else {
+                        lPos = cue.transform.localPosition + cueBehavior.positionOffset;
+                        lRot = Quaternion.Euler(cue.transform.localRotation.eulerAngles + cueBehavior.rotationOffset);
+                    }
+                    
                     //maybe zero out x and z rotation
                     interestTransform.localRotation = lRot;
                     interestTransform.localPosition = lPos;
-                    
+
+                    DebugTransform.instance.transform.position = interestTransform.position;
+                    // Debug.Break();
                     suppliedTransform = new MiniTransform(interestTransform, false);
+                    
                 }
 
                 this.runtimeTransform = suppliedTransform;

@@ -16,6 +16,11 @@ namespace AssetObjectsPacks {
         //    transformTracker.OnEnable(transform);
         //}
         public Color gizmoColor = Color.green;
+
+        void OnDrawGizmos () {
+            Gizmos.color = gizmoColor;
+            Gizmos.DrawWireSphere(transform.position, .5f);
+        }
         #endif
 
         // public void CalculateLocalPositionAndRotation(out Vector3 localPos, out Quaternion localRot) {

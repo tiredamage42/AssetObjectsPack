@@ -6,6 +6,18 @@ namespace Combat {
     public class HumanoidAim : MonoBehaviour
     {
         [Range(0,1)] public float gunSwitchToHeadPercent = .75f;
+        [Tooltip("0.0 : completely unrestrained in motion\n1.0 : completely clamped (look at becomes impossible)\n0.5 : half the possible range (180 degrees).")] 
+        [Range(0,1)] public float lookAtClampWeight = 0.0f;
+        GunIKHandler gunIKHandler;
+        CharacterCombat characterCombat;
+        
+        Transform headTransform, rightHandTransform;
+        Animator anim;
+        Vector3 startGunAimPos;
+        Quaternion startGunAimRot;
+
+
+
 
         void Awake() {
             anim = GetComponent<Animator>();
@@ -18,28 +30,15 @@ namespace Combat {
             rightHandTransform = anim.GetBoneTransform(HumanBodyBones.RightHand);
         }
         
-        GunIKHandler gunIKHandler;
-        CharacterCombat characterCombat;
-
+        
         void OnGunChange(Gun newGun) {
             gunIKHandler = null;
-            Debug.LogError("changed gun");
             if (newGun != null) {
                 gunIKHandler = newGun.GetComponent<GunIKHandler>();
             }
         }
         
         
-        [Tooltip("0.0 : completely unrestrained in motion\n1.0 : completely clamped (look at becomes impossible)\n0.5 : half the possible range (180 degrees).")] 
-        [Range(0,1)] public float lookAtClampWeight = 0.0f;
-        
-        Transform headTransform, rightHandTransform;
-        Animator anim;
-        
-        Vector3 startGunAimPos;
-        Quaternion startGunAimRot;
-
-
         void HandlePositioning (Vector3 aimTarget, float aimLerp) {
             
             Vector3 gunAimPos = headTransform.position + (headTransform.rotation * gunIKHandler.behavior.localAimHeadPos);
@@ -71,29 +70,37 @@ namespace Combat {
                 
             //lerp the gun position from the local hand position to the desired aim position
             if (aimLerp >= gunSwitchToHeadPercent) {
-                if (gunIKHandler.transform.parent != headTransform) {
-                    gunIKHandler.transform.SetParent(headTransform);
-                    startGunAimPos = gunIKHandler.transform.localPosition;
-                    startGunAimRot = gunIKHandler.transform.localRotation;
-                }
-                if (characterCombat.isAiming) {
-                    float t = (aimLerp - gunSwitchToHeadPercent) / (1.0f - gunSwitchToHeadPercent);
-                    Quaternion aimRotLocal = Quaternion.Inverse(headTransform.rotation) * gunAimRot;
-                    gunIKHandler.transform.localPosition = Vector3.Lerp(startGunAimPos, gunIKHandler.behavior.localAimHeadPos, t);
-                    gunIKHandler.transform.localRotation = Quaternion.Slerp(startGunAimRot, aimRotLocal, t);
-                }                
+                SetTargetParentIfNot(headTransform);
+                SmoothPositioningIf (
+                    characterCombat.isAiming,
+                    gunIKHandler.behavior.localAimHeadPos, 
+                    Quaternion.Inverse(headTransform.rotation) * gunAimRot, 
+                    (aimLerp - gunSwitchToHeadPercent) / (1.0f - gunSwitchToHeadPercent)
+                );                
             }
             else {
-                if (gunIKHandler.transform.parent != rightHandTransform) {
-                    gunIKHandler.transform.SetParent(rightHandTransform);
-                    startGunAimPos = gunIKHandler.transform.localPosition;
-                    startGunAimRot = gunIKHandler.transform.localRotation;
-                }
-                if (!characterCombat.isAiming) {
-                    float t = (gunSwitchToHeadPercent - aimLerp) / gunSwitchToHeadPercent;
-                    gunIKHandler.transform.localPosition = Vector3.Lerp(startGunAimPos, gunIKHandler.behavior.localHipHandPos, t);
-                    gunIKHandler.transform.localRotation = Quaternion.Slerp(startGunAimRot, Quaternion.Euler(gunIKHandler.behavior.localHipHandRot), t);
-                }
+                SetTargetParentIfNot(rightHandTransform);
+                SmoothPositioningIf (
+                    !characterCombat.isAiming,
+                    gunIKHandler.behavior.localHipHandPos, 
+                    Quaternion.Euler(gunIKHandler.behavior.localHipHandRot), 
+                    (gunSwitchToHeadPercent - aimLerp) / gunSwitchToHeadPercent
+                );
+            }
+        }
+
+        void SetTargetParentIfNot (Transform targetParent) {
+            if (gunIKHandler.transform.parent != targetParent) {
+                gunIKHandler.transform.SetParent(targetParent);
+                startGunAimPos = gunIKHandler.transform.localPosition;
+                startGunAimRot = gunIKHandler.transform.localRotation;
+            }
+        }
+
+        void SmoothPositioningIf (bool smooth, Vector3 targetLocalPos, Quaternion targetLocalRot, float t) {
+            if (smooth) {
+                gunIKHandler.transform.localPosition = Vector3.Lerp(startGunAimPos, targetLocalPos, t);
+                gunIKHandler.transform.localRotation = Quaternion.Slerp(startGunAimRot, targetLocalRot, t);
             }
         }
 

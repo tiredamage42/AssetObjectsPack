@@ -12,7 +12,8 @@ namespace Platforms {
 
     public class PlatformNavLinksWizard : ScriptableWizard
     {
-        public float maxEdgeSize = .25f;
+        public float maxEdgeSize = .5f;
+        public float endEdgeDistance = 1.5f;
         public LayerMask layerMask;
         public Collider[] groundCols;
 
@@ -28,12 +29,12 @@ namespace Platforms {
         /*
             build an offmesh link object to connect platforms
         */
-        static GameObject CreatePlatformLink (bool isShort, string name) {
+        GameObject CreatePlatformLink (bool isShort, string name) {
             GameObject link = new GameObject(name);
             GameObject end = new GameObject(name + "-End");
 
             end.transform.SetParent(link.transform);
-            end.transform.localPosition = new Vector3(0, isShort ? Platformer.smallPlatformSize : Platformer.tallPlatformSize, 1.25f);
+            end.transform.localPosition = new Vector3(0, isShort ? Platformer.smallPlatformSize : Platformer.tallPlatformSize, endEdgeDistance);
             
             OffMeshLink linkC = link.AddComponent<OffMeshLink>();
             linkC.activated = true;
@@ -76,7 +77,7 @@ namespace Platforms {
                     OffMeshLink linC = link.GetComponent<OffMeshLink>();
 
                     // if the other end of our generated link isnt on the navmesh, delete it
-                    if (!NavMesh.SamplePosition(linC.endTransform.position, out _, .1f, NavMesh.AllAreas)) {
+                    if (!NavMesh.SamplePosition(linC.endTransform.position, out _, .01f, NavMesh.AllAreas)) {
                         MonoBehaviour.DestroyImmediate(link);
                     }
                     else {
