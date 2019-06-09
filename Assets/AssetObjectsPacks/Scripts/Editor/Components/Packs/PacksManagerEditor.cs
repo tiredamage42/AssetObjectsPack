@@ -267,7 +267,10 @@ namespace AssetObjectsPacks {
             return false;
         }
 
-        public static string GetPacksErrors (PacksManager packsManager, EditorProp packsProp) {
+        public static string GetPacksErrors (PacksManager packsManager=null, EditorProp packsProp=null) {
+            if (packsManager == null) 
+                packsManager = PacksManager.instance;
+                
             if (packsManager == null) 
                 return "\nPacks Manager Object could not be found!" + 
                     "\n\nIf it was deleted, create a new one." + 
@@ -277,6 +280,10 @@ namespace AssetObjectsPacks {
             int l = packsManager.packs.Length;
             if (l == 0) 
                 return "\nPlease create an Asset Object Pack\n";
+
+            if (packsProp == null) {
+                packsProp = new EditorProp (new SerializedObject ( packsManager ) )[ packsField ];
+            }
             
             //check for duplicate pack name
             string dupName;
@@ -343,84 +350,107 @@ namespace AssetObjectsPacks {
             return s.StartsWith(".");
         }
 
-        public static void AdjustAOParametersToPack (EditorProp ao, EditorProp pack, bool reset) {
-            if (reset) CustomParameterEditor.CopyParameterList(ao[EventEditor.paramsField], pack[defaultParametersField]);
-            else UpdateParametersToReflectDefaults(ao[EventEditor.paramsField], pack[defaultParametersField]);
+        public static void UpdateAssetObjectParametersIfDifferentFromDefaults (EditorProp ao, EditorProp pack, bool reset, bool debug) {
+            if (reset) CustomParameterEditor.CopyParameterList(ao[AOStateMachineEditor.paramsField], pack[defaultParametersField]);
+            else UpdateParametersIfDifferentFromDefaults(ao[AOStateMachineEditor.paramsField], pack[defaultParametersField], debug);
         }
 
-        static void UpdateParametersToReflectDefaults (EditorProp parameters, EditorProp defaultParams) {
-            int c_p = parameters.arraySize;
-            int c_d = defaultParams.arraySize;
+        static void UpdateParametersIfDifferentFromDefaults (EditorProp parameters, EditorProp defaultParams, bool debug) {
+            int aoParametersCount = parameters.arraySize;
+            int defParametersCount = defaultParams.arraySize;
 
             Func<EditorProp, string> GetParamName = (EditorProp parameter) => parameter[CustomParameterEditor.nameField].stringValue;
 
             //check for parameters to delete
-            for (int i = c_p - 1; i >= 0; i--) {                    
+            for (int i = aoParametersCount - 1; i >= 0; i--) {                    
                 string name = GetParamName(parameters[i]);
                 bool inDefParams = false;
-                for (int d = 0; d < c_d; d++) {                
+                for (int d = 0; d < defParametersCount; d++) {                
                     if (GetParamName(defaultParams[d]) == name) {
                         inDefParams = true;
                         break;
                     }
                 }
                 if (!inDefParams) {
-                    Debug.Log("Deleting param: " + name);
+                    if (debug) {
+
+                        Debug.Log("Deleting param: " + name);
+                    }
                     parameters.DeleteAt(i);
                 }
             }
+            // Debug.Log("finished deletes");
+
+            aoParametersCount = parameters.arraySize;
+            
+
 
             //check for parameters that need adding
-            for (int i = 0; i < c_d; i++) {
+            for (int i = 0; i < defParametersCount; i++) {
                 var defParam = defaultParams[i];
                 string defParamName = GetParamName(defParam);
+
+
                 bool inParams = false;
-                for (int p = 0; p < c_p; p++) {
+                for (int p = 0; p < aoParametersCount; p++) {
                     if (GetParamName(parameters[p])== defParamName) {
                         inParams = true;
                         break;
                     }
                 }
                 if (!inParams) {
+                    if (debug) {
+
                     Debug.Log("adding param: " + defParamName);
+                    }
                     CustomParameterEditor.CopyParameter(parameters.AddNew(), defParam);
                 }
             }
+
+            aoParametersCount = parameters.arraySize;
+            
+
+            // Debug.Log("finished Adds");
             
             //reorder to same order
 
             //make extra temp parameeter
             var temp = parameters.AddNew();
 
-            for (int d = 0; d < c_d; d++) {
+            for (int d = 0; d < defParametersCount; d++) {
                 string defParamName = GetParamName(defaultParams[d]);
                 var parameter = parameters[d];
                 if (GetParamName(parameter) == defParamName) continue;
 
+if (debug) {
+
                 Debug.Log("moving param: " + GetParamName(parameter));
-                    
+}
                 EditorProp trueParam = null;
                 //for (int p = d + 1; p < c_p; p++) {
-                for (int p = 0; p < c_p; p++) {
+                for (int p = 0; p < aoParametersCount; p++) {
                 
                     trueParam = parameters[p];
                     if (GetParamName(trueParam) == defParamName) break;
                 }
 
                 if (trueParam == null) {
+                    if (debug) {
+
                     Debug.LogError("couldnt find: " + defParamName);
+                    }
                 }
                 //put the current one in temp
 
-                Debug.Log("put in temp");
+                // Debug.Log("put in temp");
                 CustomParameterEditor.CopyParameter(temp, parameter);
                 //place the real param in the current
-                Debug.Log("put in current");
+                // Debug.Log("put in current");
                 CustomParameterEditor.CopyParameter(parameter, trueParam);
 
 
                 //place temp in old param that was moved
-                Debug.Log("put in temp 2");
+                // Debug.Log("put in temp 2");
                 
                 CustomParameterEditor.CopyParameter(trueParam, temp);
             }
@@ -429,9 +459,12 @@ namespace AssetObjectsPacks {
             
             //check type changes
             Func<EditorProp, int> GetParamType = (EditorProp parameter) => parameter[CustomParameterEditor.typeField].intValue;
-            for (int i = 0; i < c_d; i++) {
+            for (int i = 0; i < defParametersCount; i++) {
                 if (GetParamType(parameters[i]) != GetParamType(defaultParams[i])) {
-                    Debug.Log("chaning: " + GetParamName(parameters[i]) + " from " + GetParamType(parameters[i]) + " to " + GetParamType(defaultParams[i]));
+                    if (debug) {
+
+                    Debug.Log("changing: " + GetParamName(parameters[i]) + " from " + GetParamType(parameters[i]) + " to " + GetParamType(defaultParams[i]));
+                    }
                     CustomParameterEditor.CopyParameter(parameters[i], defaultParams[i]);
                 }
             }

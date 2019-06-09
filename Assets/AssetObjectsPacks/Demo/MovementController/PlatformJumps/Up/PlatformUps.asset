@@ -23,9 +23,9 @@ MonoBehaviour:
   messageBlocks:
   - 'EnableAllPhysics(false);
 
-    OverrideMovement(true);'
+    EnableScriptedMovement(true);'
   - 
   - 'EnableAllPhysics(true);
 
-    OverrideMovement(false);'
+    EnableScriptedMovement(false);'
   - 

@@ -1,27 +1,30 @@
-﻿namespace AssetObjectsPacks {
-    public class SelectionSystem : ElementIndexTracker
-    {
-        public void OnObjectSelection (int i, bool multiple) {
+﻿
+namespace AssetObjectsPacks {
+    public class SelectionHandler : ElementIndexTracker
+    { 
+        public void OnObjectSelection (SelectionElement selected, bool multiple) {
+            int i = selected.showIndex;
             if (multiple) {
-                if (hasElements) {
+                if (hasTracked) {
                     if (i < lo) lo = i;
                     else if (i > hi) hi = i;
                 }
-                else hi = lo = i;
+                else SetTracked(i);
             }
-            else hi = lo = (singleElement && i == lo) ? -1 : i;
+            else SetTracked((singleTracked && i == lo) ? NONE : i);
         }
-        public bool HandleDirectionalSelection (bool up, bool down, bool multiple, int lastIndex) {
 
+
+        public bool HandleDirectionalSelection (bool up, bool down, bool multiple, int lastIndex) {
             if (lastIndex < 0) return false;
             
             bool changed = false;
-            if ((down || up) && !hasElements) {
-                hi = lo = down ? 0 : lastIndex;
+            if ((down || up) && !hasTracked) {
+                SetTracked(down ? 0 : lastIndex);
                 changed = true;
             }
-            else if (hasElements) {
-                bool unMulti = elementCount > 1 && !multiple;
+            else if (hasTracked) {
+                bool unMulti = !singleTracked && !multiple;
                 if (down && (hi < lastIndex || unMulti)) {
                     if (hi < lastIndex) hi++;
                     if (unMulti || !multiple) lo = hi;

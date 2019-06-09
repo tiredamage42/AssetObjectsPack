@@ -49,8 +49,6 @@ namespace AssetObjectsPacks {
             }
             return baseStyles[i];
         }
-        public static GUIStyle window { get { return ReturnOrBuild(9, GUI.skin.window); } }
-        public static GUIStyle box { get { return ReturnOrBuild(8, GUI.skin.box); } }
         public static GUIStyle toolbarButton { get { return ReturnOrBuild(0, EditorStyles.toolbarButton); } }
         public static GUIStyle label { get { return ReturnOrBuild(1, EditorStyles.label); } }
         public static GUIStyle helpBox { get { return ReturnOrBuild(2, EditorStyles.helpBox); } }
@@ -59,17 +57,21 @@ namespace AssetObjectsPacks {
         public static GUIStyle miniButtonLeft { get { return ReturnOrBuild(5, EditorStyles.miniButtonLeft); } }
         public static GUIStyle miniButtonRight { get { return ReturnOrBuild(6, EditorStyles.miniButtonRight); } }
         public static GUIStyle miniButtonMid { get { return ReturnOrBuild(7, EditorStyles.miniButtonMid); } }
-        public static GUIStyle popup {
-            get {
-                int i = 10;
-                if (baseStyles[i] == null) {
-                    baseStyles[i] = new GUIStyle(s_DarkSkin.GetStyle("MiniPopup"));
-                    baseStyles[i].richText = true;
-                }
-                return baseStyles[i];
+        public static GUIStyle box { get { return ReturnOrBuild(8, GUI.skin.box); } }
+        public static GUIStyle window { get { return ReturnOrBuild(9, GUI.skin.window); } }
+        public static GUIStyle popup { get { return ReturnOrBuild(10, s_DarkSkin.GetStyle("MiniPopup")); } }
         
-            }
-        }
+        // public static GUIStyle popup {
+        //     get {
+        //         int i = 10;
+        //         if (baseStyles[i] == null) {
+        //             baseStyles[i] = new GUIStyle(s_DarkSkin.GetStyle("MiniPopup"));
+        //             baseStyles[i].richText = true;
+        //         }
+        //         return baseStyles[i];
+        
+        //     }
+        // }
     }
     public static class GUIUtils {      
 
@@ -405,9 +407,9 @@ namespace AssetObjectsPacks {
             EditorGUILayout.BeginVertical(GUIStyles.window, GUILayout.MinHeight(1));
             //);   
         }
-        public static void EndCustomEditor (EditorProp baseObject) {
+        public static void EndCustomEditor (EditorProp baseObject, bool forceSave=false) {
             EditorGUILayout.EndVertical();
-            if (EditorGUI.EndChangeCheck()) {     
+            if (EditorGUI.EndChangeCheck() || forceSave) {     
                 baseObject.SaveObject();
             }
             GUI.backgroundColor = Color.white;

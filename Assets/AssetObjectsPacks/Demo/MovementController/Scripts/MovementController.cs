@@ -5,8 +5,8 @@ using System.Collections.Generic;
 
 namespace Movement {
 
-[RequireComponent(typeof(EventPlayer))]
-public class MovementController : MonoBehaviour {
+    [RequireComponent(typeof(EventPlayer))]
+    public class MovementController : MonoBehaviour {
     
     //change if you've changed the pack name or the animatins pack itself
     public const string animationPackName = "Animations";
@@ -44,18 +44,23 @@ public class MovementController : MonoBehaviour {
         CheckSpeedDirectionChanges();
     }
     
-
-    public bool overrideMovement { get { return overrideMove || eventPlayer.cueMoving; } }
-    bool overrideMove;
+    public bool scriptedMove { get { return _scriptedMove || eventPlayer.cueMoving; } }
+    public bool _scriptedMove;
     /*
         parameters:
             layer (internally set), override move
 
         overrides movement so no other movements can trigger
     */
-    void OverrideMovement (object[] parameters) {
-        overrideMove = (bool)parameters[1];    
+    void EnableScriptedMovement (object[] parameters) {
+        //moveEnabled = (bool)parameters[1];    
+        EnableScriptedMovement((bool)parameters[1]);
     }    
+
+
+    public void EnableScriptedMovement(bool enabled) {
+        _scriptedMove = enabled;
+    }
 
     /*
         parameters:
@@ -107,7 +112,10 @@ public class MovementController : MonoBehaviour {
 
     void UpdateLoopState () {
         //immediately play the loop unless we're jumping or overriding movement
-        bool asInterruptor = !overrideMovement;
+        bool asInterruptor = !scriptedMove;
+        // if (asInterruptor) {
+        //     Debug.LogError("uhhh");
+        // }
         Playlist.InitializePerformance("update Loop state", speed == 0 ? behavior.stillCue : behavior.moveCue, eventPlayer, false, eventLayer, new MiniTransform( Vector3.zero, Quaternion.identity), asInterruptor);
     }
 

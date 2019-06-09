@@ -372,7 +372,7 @@ namespace AssetObjectsPacks.Animations {
             }
             else {
 
-                Debug.LogError("playing loop NO transition on layer " + layer + " / " + transition);
+                // Debug.LogError("playing loop NO transition on layer " + layer + " / " + transition);
             }
 
             };

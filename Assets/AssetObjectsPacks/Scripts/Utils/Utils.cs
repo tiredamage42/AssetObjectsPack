@@ -85,6 +85,39 @@ namespace AssetObjectsPacks {
             else 
                 return Vector3.MoveTowards(a, b, speed * deltaTime);
         }
+
+        public Quaternion Smooth (Quaternion a, Quaternion b, float deltaTime) {
+            if (smoothMethod == SmoothMethod.Lerp)
+                return Quaternion.Slerp(a, b, speed * deltaTime);
+            else if (smoothMethod == SmoothMethod.SmoothDamp) {
+
+                Vector3 eulerAngles = a.eulerAngles;
+                Vector3 targetRotation = b.eulerAngles;
+                
+                eulerAngles.x = Mathf.SmoothDampAngle(eulerAngles.x, targetRotation.x, ref currentVelocity3.x, speed);
+                eulerAngles.y = Mathf.SmoothDampAngle(eulerAngles.y, targetRotation.y, ref currentVelocity3.y, speed);
+                eulerAngles.z = Mathf.SmoothDampAngle(eulerAngles.z, targetRotation.z, ref currentVelocity3.z, speed);
+                
+                return Quaternion.Euler (eulerAngles);
+            }
+
+            else {
+
+                Vector3 eulerAngles = a.eulerAngles;
+                Vector3 targetRotation = b.eulerAngles;
+                
+                eulerAngles.x = Mathf.MoveTowardsAngle(eulerAngles.x, targetRotation.x, speed * deltaTime);
+                eulerAngles.y = Mathf.MoveTowardsAngle(eulerAngles.y, targetRotation.y, speed * deltaTime);
+                eulerAngles.z = Mathf.MoveTowardsAngle(eulerAngles.z, targetRotation.z, speed * deltaTime);
+                
+                return Quaternion.Euler (eulerAngles);
+            }
+
+
+
+
+
+        }
     }
 }
 

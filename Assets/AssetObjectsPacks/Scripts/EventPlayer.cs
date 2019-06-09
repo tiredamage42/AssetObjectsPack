@@ -134,7 +134,7 @@ namespace AssetObjectsPacks {
 
                 if (endPlayAttemptCallback != null) {
 
-                    Debug.Log("end play attempt callback");
+                    // Debug.Log("end play attempt callback");
                     endPlayAttemptCallback(success);
                     endPlayAttemptCallback = null;
                 }
@@ -160,6 +160,10 @@ namespace AssetObjectsPacks {
 
                 return lastPlayEnder;
             }
+
+
+
+            
 
             public void PlayEvents (
                 MiniTransform transforms, int myLayer, EventPlayer myPlayer,
@@ -237,24 +241,40 @@ namespace AssetObjectsPacks {
             Event e, bool isMainEvent, bool asInterrupter, bool endPlayAttemptHandled) {
 
 
-            EventResponse eventResponse = new EventResponse(skipPlays);
+            int packID = e.mainPackID;
+            //maybe check against skip plays
+
+            if (skipPlays.Contains(packID)) {
+                return false;
+            }
+                
+
+            EventResponse eventResponse = new EventResponse();//skipPlays);
 
             e.GetParamFilteredObjects(paramDict, eventResponse);
 
             eventResponse.LogErrors();
             eventResponse.LogWarnings();
 
-            bool mainFound = !eventResponse.noMainFound;
+            // bool mainFound = !eventResponse.noMainFound;
 
-            foreach (var k in eventResponse.objectsPerPack.Keys) {
+            // foreach (var k in eventResponse.objectsPerPack.Keys) {
 
-                bool isMainPack = k == e.mainPackID;
+                // bool isMainPack = k == e.mainPackID;
+
+
+                // List<AssetObject> list = eventResponse.objectsPerPack[k];
+                List<AssetObject> list = eventResponse.chosenObjects;
                 
-                if (eventResponse.objectsPerPack[k].Count > 0) {
-                    AssetObject o = eventResponse.objectsPerPack[k].RandomChoice();
+                
+                if (list.Count > 0) {
+                
+                    AssetObject o = list.RandomChoice();
 
                     if (!endPlayAttemptHandled) {
-                        if (isMainPack && isMainEvent) {
+                        // if (isMainPack && isMainEvent) {
+                        if (isMainEvent) {
+                        
                             current_duration = o["Duration"].GetValue<float>();
                         }
                     }
@@ -265,7 +285,8 @@ namespace AssetObjectsPacks {
                         //give control to object when it's the main event
                         //and when the duration is < 0 and not overriden
                         
-                        if (isMainEvent && isMainPack) {
+                        // if (isMainEvent && isMainPack) {
+                        if (isMainEvent) {
                         
                             endUseSuccessCBs.Add( () => { EndPlayAttempt(true); } );
                         }
@@ -279,18 +300,21 @@ namespace AssetObjectsPacks {
                         Debug.LogError(logErrors);
                     }
 
+                    int k = packID;
+
                     if (!pack2playEvents.ContainsKey(k)) {
                         Debug.LogError("skipping " + PacksManager.ID2Name(k) + " not connected to player");
-                        continue;
+                        return false;
+                        // continue;
                     }
     
                     pack2playEvents[k](o, asInterrupter, transforms, endUseSuccessCBs);
             
                 }
 
-            }
+            // }
             
-            return mainFound;   
+            return list.Count > 0;// mainFound;   
         }
 
         

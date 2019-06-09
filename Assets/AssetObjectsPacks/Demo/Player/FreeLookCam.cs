@@ -13,9 +13,12 @@ namespace Player
     [RequireComponent(typeof(FollowTarget))]    
     public class FreeLookCam : VariableUpdateScript
     {
+
+        public Vector3 cameraPosition = new Vector3 (1, 1, -3);
         
         public override void UpdateLoop (float deltaTime) {
             HandleRotationMovement(deltaTime);
+            HandleCameraPosition();
         }
 
         protected Transform m_Cam; // the transform of the camera
@@ -47,6 +50,10 @@ namespace Player
 		private Quaternion m_PivotTargetRot;
 		private Quaternion m_TransformTargetRot;
 
+        void HandleCameraPosition () {
+            m_Pivot.localPosition = new Vector3(cameraPosition.x, cameraPosition.y, 0);
+            m_Cam.localPosition = new Vector3(0, 0, cameraPosition.z);
+        }
         
         private void HandleRotationMovement(float deltaTime)
         {

@@ -6,9 +6,19 @@ using System;
 namespace AssetObjectsPacks {
     public static class Extensions  {
 
+        public static bool Contains(this Vector2Int v, int i) {
+            return i >= v.x && i <= v.y;
+        }
+
         public static IEnumerable<T> Generate<T> (this int c, Func<int, T> g) {
             for (int i = 0; i < c; i++) yield return g(i);
         }
+        
+        public static IEnumerable<T> Generate<T> (this Vector2Int c, Func<int, T> g) {
+            for (int i = c.x; i <= c.y; i++) yield return g(i);
+        }
+        
+        
         public static IEnumerable<T> Generate<T, O> (this IEnumerable<O> c, Func<O, T> g) {
             foreach (var o in c) yield return g(o);
         }
@@ -23,13 +33,20 @@ namespace AssetObjectsPacks {
             r.AddRange(a);
             return r;
         }
+        public static HashSet<T> DeepCopy<T>(this HashSet<T> a) {
+            return a.ToHashSet();
+        }
         public static HashSet<T> ToHashSet<T>(this IEnumerable<T> a) {
             HashSet<T> r = new HashSet<T>();
-            r.AddRange(a);
+            r.AddRange(a, true);
             return r;        
         }
-        public static void AddRange<T> (this HashSet<T> e, IEnumerable<T> r) {
-            foreach (var i in r) e.Add(i);
+        public static void AddRange<T> (this HashSet<T> e, IEnumerable<T> r, bool allowCopies) {
+            foreach (var i in r) {
+                if (allowCopies || !e.Contains(i)) {
+                    e.Add(i);
+                }
+            }
         }
         public static T Last<T> (this IList<T> a) {
             return a[a.Count - 1];

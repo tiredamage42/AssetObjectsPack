@@ -16,8 +16,9 @@ namespace Combat {
         public bool isAiming;
 
         public void SetAiming (bool aiming) {
-            isAiming = aiming && currentGun && !controller.overrideMovement;
+            isAiming = aiming && currentGun && !controller.scriptedMove;
         }
+
         public void SetFiring(bool firing) {
             if (currentGun) {
                 currentGun.isFiring = aimPercent >= .9f && firing;   

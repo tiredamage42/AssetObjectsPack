@@ -51,9 +51,9 @@ namespace AssetObjectsPacks {
         }
 
 
-        static void GetAOIDs(EventState state, List<int> ids, int packID) {
+        static void GetAOIDs(EventState state, List<int> ids){//, int packID) {
             for (int i = 0; i < state.assetObjects.Length; i++) {
-                if (state.assetObjects[i].packID != packID)  continue;
+                // if (state.assetObjects[i].packID != packID)  continue;
                 int id = state.assetObjects[i].id;
                 if (!ids.Contains(id)) ids.Add(id);
             }
@@ -64,8 +64,11 @@ namespace AssetObjectsPacks {
             IEnumerable<Event> allEvents = EditorUtils.GetAllAssetsOfType<Event>();
             
             foreach (var e in allEvents) {
-                for (int i = 0; i < e.allStates.Length; i++) {
-                    GetAOIDs(e.allStates[i], used, packID);
+                if (e.mainPackID == packID) {
+
+                    for (int i = 0; i < e.allStates.Length; i++) {
+                        GetAOIDs(e.allStates[i], used);//, packID);
+                    }
                 }
             }
             if (used.Count == 0) {

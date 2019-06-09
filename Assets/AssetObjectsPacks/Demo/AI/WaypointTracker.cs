@@ -81,7 +81,7 @@ public class WaypointTracker : MovementControllerComponent
         if (CheckForArrival(sqrDist)) {
             return;
         }
-        if (!controller.overrideMovement) {
+        if (!controller.scriptedMove) {
             HandleArrivalHelp(sqrDist, myPos, deltaTime);
         }
     }

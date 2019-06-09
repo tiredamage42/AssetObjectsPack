@@ -140,7 +140,7 @@ public class Turner : MovementControllerComponent
         
             //if we're turning and animation is done, slerp to reach face target
             if (!inTurnAnimation) {
-                if (!controller.overrideMovement) {
+                if (!controller.scriptedMove) {
                     slerpingRotation = true;
                     transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(Movement.CalculateTargetFaceDirection(controller.direction, transform.position, turnTarget, use2d)), deltaTime * behavior.turnHelpSpeeds[controller.speed]);
                 }
@@ -237,13 +237,12 @@ public class Turner : MovementControllerComponent
                 
     }
 
-    bool overrideMovement { get { return isTurning || controller.overrideMovement; } }
     public void TurnTo (Vector3 target, Action onTurnSuccess = null) {
         TurnTo(target, behavior.turnAngleHelpThreshold, onTurnSuccess);
     }
     bool TurnTo (Vector3 target, float threshold, Action onTurnSuccess = null) {
 
-        if (!overrideMovement){
+        if (!isTurning && !controller.scriptedMove){
                 
             //calculate the target direction
             // Vector3 targetDir = Movement.CalculateTargetFaceDirection(controller.direction, transform.position, target, use2d);

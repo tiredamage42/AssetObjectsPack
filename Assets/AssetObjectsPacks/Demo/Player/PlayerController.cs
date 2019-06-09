@@ -7,6 +7,8 @@ using Movement;
 using Movement.Platforms;
 using Combat;
 
+using DynamicRagdoll;
+
 
 namespace Player {
 
@@ -21,11 +23,12 @@ public class PlayerController : MonoBehaviour
     CharacterCombat combat;
     Camera cam;
     Turner turner;
-    Jumper jumper;
+    //Jumper jumper;
     Platformer platformer;
 
     CharacterAnimatorMover charAnimationMover;
     CharacterMovement characterMovement;
+    RagdollController ragdollController;
 
     void Awake () {
         eventPlayer = GetComponent<EventPlayer>();        
@@ -33,9 +36,13 @@ public class PlayerController : MonoBehaviour
             new CustomParameter("Agitated", false),
         } );
 
+        ragdollController = GetComponent<RagdollController>();
+
+        
+
         movement = GetComponent<MovementController>();
         turner = GetComponent<Turner>();
-        jumper = GetComponent<Jumper>();
+        //jumper = GetComponent<Jumper>();
         platformer = GetComponent<Platformer>();
         combat = GetComponent<CharacterCombat>();
 
@@ -69,7 +76,7 @@ public class PlayerController : MonoBehaviour
 
 
     
-    void CalculateSpeedAndDirection (bool jumpAttempt) {
+    void CalculateSpeedAndDirection () {
         Movement.Movement.Direction moveDir = Movement.Movement.Direction.Forward;
         
         Vector2 rawMove = new Vector2(CustomInputManager.InputManager.GetAxisRaw("Horizontal"), CustomInputManager.InputManager.GetAxisRaw("Vertical"));
@@ -109,12 +116,12 @@ public class PlayerController : MonoBehaviour
         turner.autoTurnAnimate = speed == 0;
 
         if (usingAnimationMovement) {
-            if (speed > 0 && !movement.overrideMovement) {
+            if (speed > 0 && !movement.scriptedMove) {
                 SwitchAnimationMovement(false);
             }
         }
         else {
-            if (speed == 0 || movement.overrideMovement) {
+            if (speed == 0 || movement.scriptedMove) {
                 SwitchAnimationMovement(true);
             }
             else {
@@ -149,33 +156,39 @@ public class PlayerController : MonoBehaviour
     
     void CheckDirectionalMovement () {
 
-        if (!movement.overrideMovement) {
+        if (!movement.scriptedMove) {
 
             bool jumpAttempt = CustomInputManager.InputManager.GetButtonDown("Jump");
 
-            bool hasPlatform = platformer.PlatformUpUpdate(jumpAttempt);
-            if (hasPlatform) {
-                if (jumpAttempt) {
-                    jumpAttempt = false;
+            if (jumpAttempt) {
+
+                bool hasPlatform = platformer.PlatformUpUpdate(jumpAttempt);
+                if (hasPlatform) {
                     combat.isAiming = false;
                     SwitchAnimationMovement(true);
                 }
+                else {
+                    characterMovement.JumpRaw(jumpSpeed);
+                    //jumper.Jump();
+                    //SwitchAnimationMovement(true);
+                }
             }
 
-            if (jumpAttempt && !hasPlatform){      
-
-                characterMovement.JumpRaw(jumpSpeed);
-                //jumper.Jump();
-                //SwitchAnimationMovement(true);
-            }
-
-
-            CalculateSpeedAndDirection(jumpAttempt);
+            CalculateSpeedAndDirection();
         }
+        // else {
+        //     Debug.LogError("overridden");
+        // }
     }
 
     void Update()
     {
+        if (CustomInputManager.InputManager.GetKeyDown(KeyCode.R)) {
+
+                    ragdollController.GoRagdoll("manual");
+
+
+        }
 
         if (CustomInputManager.InputManager.GetButtonDown("UI_Up")) {
             Game.timeDilation += .1f;
@@ -191,6 +204,23 @@ public class PlayerController : MonoBehaviour
 
         CheckDirectionalMovement();
     }
+    public Texture crosshairTexture;
+        
+
+
+      /*
+			GUI STUFF
+		*/
+		void OnGUI () {
+			DrawCrosshair();
+		}
+
+		void DrawCrosshair () {
+			float crossHairSize = 40;
+			float halfSize = crossHairSize / 2;
+			Rect crosshairRect = new Rect(0 - halfSize, Screen.height - 0 - halfSize, crossHairSize, crossHairSize);
+			GUI.DrawTexture(crosshairRect, crosshairTexture, ScaleMode.ScaleToFit, true);
+		}
 }
 
 }

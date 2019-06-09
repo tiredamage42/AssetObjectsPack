@@ -1,27 +1,28 @@
-﻿namespace AssetObjectsPacks {
+﻿using UnityEngine;
+namespace AssetObjectsPacks {
     public abstract class ElementIndexTracker {
-        public int lo = -1, hi = -1;
-        public bool hasElements { get { return hi != -1 && lo != -1; } }
-        public bool singleElement { get { return lo == hi && lo != -1; }}
-        public int elementCount { get { return hasElements ? (hi - lo) + 1 : 0; } }
 
-        public bool HasSingleElement (out int index) {
-            index = lo;
-            return singleElement;
+        protected const int NONE = -1;
+        public int lo = NONE, hi = NONE;
+        public Vector2Int trackedRange { get { return new Vector2Int(lo, hi); } } 
+        public bool hasTracked { get { return lo != NONE; } }
+        public bool singleTracked { get { return hasTracked && lo == hi; } }
+        
+        public void Clear () {
+            SetTracked(NONE);
         }
-        public void ClearTracker () {
-            lo = hi = -1;
+        public void SetTracked(Vector2Int newRange) {
+            lo = newRange.x;
+            hi = newRange.y;
         }
-        public bool IsTracked (int i) {
-            return hasElements && i >= lo && i <= hi;
+        public void SetTracked(int singleTrackedIndex) {
+            lo = hi = singleTrackedIndex;
         }
-        protected void Copy(ElementIndexTracker other) {
-            lo = other.lo;
-            hi = other.hi;
-        }
-        public System.Collections.Generic.IEnumerable<int> GetTrackedEnumerable () {
-            if (!hasElements) return null;
-            return new UnityEngine.Vector2Int(lo, hi).Generate();
-        }        
+        public bool IsTracked(SelectionElement element) {
+            return IsTracked(element.showIndex);
+        }     
+        public bool IsTracked(int showIndex) {
+            return hasTracked && showIndex >= lo && showIndex <= hi;
+        }     
     }
 }

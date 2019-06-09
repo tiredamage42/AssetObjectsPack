@@ -87,7 +87,7 @@ namespace AssetObjectsPacks {
         
                     if (!CheckForArray(false)) return null;
                     if (index < 0 || index >= arraySize) {
-                        Debug.LogError("Array index out of range on " + displayName + " tried: " + index + " count: "+arraySize);
+                        Debug.LogError("Array index out of range on " + displayName + " tried: " + index + " count: "+ arraySize);
                         return null;
                     }
                     return arrayElements[index];
@@ -121,7 +121,9 @@ namespace AssetObjectsPacks {
             public void Clear () {
                 
                 if (!CheckForArray(true)) return;
+
                 property.ClearArray();
+                
                 arrayElements.Clear();
             }
             bool NameUnique(string name, string nameField) {
@@ -155,11 +157,16 @@ namespace AssetObjectsPacks {
                 
                 if (!CheckForArray(true)) return null;
                 string new_name = UniqueName(uniqueNamePrefix, nameField);            
+                
                 int l = arraySize;
                 property.InsertArrayElementAtIndex(l);
+                
                 EditorProp newElement = new EditorProp( property.GetArrayElementAtIndex(l), baseObject );
+                
                 arrayElements.Add( newElement );
+                
                 if (new_name != null) newElement[nameField].SetValue(new_name);
+                
                 return newElement;
             }
             public void DeleteAt (int index) {
@@ -170,6 +177,8 @@ namespace AssetObjectsPacks {
                 }
                 property.DeleteArrayElementAtIndex(index);
                 RebuildArray(); 
+
+                Debug.Log("deleted and rebuilt");
             }
         #endregion
 

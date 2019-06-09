@@ -12,19 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1284b611740a6448d90c4ebacf05b26a, type: 3}
   m_Name: ShootSecondaryEvent
   m_EditorClassIdentifier: 
-  multi_edit_instance:
-    isCopy: 0
-    isNew: 0
-    name: 
-    solo: 0
-    mute: 0
-    objRef: {fileID: 0}
-    messageBlock: 
-    conditionBlock: 
-    id: 0
-    packID: -1
-    parameters: []
-  hiddenIDs: []
+  hiddenIDs: 
   allStates:
   - isNew: 0
     name: Base State
@@ -40,7 +28,6 @@ MonoBehaviour:
       messageBlock: 
       conditionBlock: 
       id: 2
-      packID: 3
       parameters:
       - name: Duration
         pType: 1

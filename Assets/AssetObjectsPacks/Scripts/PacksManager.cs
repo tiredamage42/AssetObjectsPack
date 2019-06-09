@@ -18,6 +18,9 @@ namespace AssetObjectsPacks {
     {
         public static PacksManager instance { get { return AssetObjectsManager.instance.packs; } }
 
+
+
+
         public static int Name2ID (string name, bool debug=true) {
             if (!Application.isPlaying) {
                 PacksManager pm = instance;
@@ -46,6 +49,25 @@ namespace AssetObjectsPacks {
             if (debug) Debug.LogError("pack manager does not contain pack id: " + id);
             return null;
         }
+        public static AssetObjectPack ID2Pack(int id, out int index, bool debug=true) {
+            index = -1;
+            // if (!Application.isPlaying) {
+                PacksManager pm = instance;
+                for (int i = 0; i < pm.packs.Length; i++) {
+                    if (pm.packs[i].id == id) {
+                        index = i;
+                        return pm.packs[i];
+                    }
+                }   
+            // }
+            // else {
+            //     InitializeDictionaries();
+            //     if (id2name.ContainsKey(id)) return id2name[id];    
+            // }
+            if (debug) Debug.LogError("pack manager does not contain pack id: " + id);
+            return null;
+
+        }
         static void InitializeDictionaries () {
             if (id2name == null) {
                 PacksManager inst = instance;
@@ -58,6 +80,7 @@ namespace AssetObjectsPacks {
                 }
             }
         }
+        
         static Dictionary<int, string> id2name = null;
         static Dictionary<string, int> name2ID = null;
         public AssetObjectPack[] packs;   

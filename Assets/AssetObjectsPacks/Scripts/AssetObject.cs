@@ -9,7 +9,7 @@ namespace AssetObjectsPacks {
         public bool solo, mute;
         public Object objRef;
         public string messageBlock, conditionBlock;
-        public int id, packID;
+        public int id;//, packID;
         public CustomParameter[] parameters;
         Dictionary<string, int> paramDict = new Dictionary<string, int>();
         public CustomParameter this [string paramName] {

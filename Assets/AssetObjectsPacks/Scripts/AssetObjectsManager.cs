@@ -26,8 +26,10 @@ namespace AssetObjectsPacks {
             updateCallbacks += update;
         }
         void OnDisable () {
-            foreach(System.Delegate d in updateCallbacks.GetInvocationList())
-                updateCallbacks -= (System.Action)d;
+            if (updateCallbacks != null) {
+                foreach(System.Delegate d in updateCallbacks.GetInvocationList())
+                    updateCallbacks -= (System.Action)d;
+            }
         }
         event System.Action updateCallbacks;
             
@@ -37,7 +39,9 @@ namespace AssetObjectsPacks {
         
 
         void Update () {
-            updateCallbacks();
+            if (updateCallbacks != null) {
+                updateCallbacks();
+            }
         }
     }
 }

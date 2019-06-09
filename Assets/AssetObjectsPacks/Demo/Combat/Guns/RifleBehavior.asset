@@ -12,10 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c7b0369c99aa644de89dfc33448a2aef, type: 3}
   m_Name: RifleBehavior
   m_EditorClassIdentifier: 
+  force: 10
+  damage: 10
   fireRate: 1
   hitMask:
     serializedVersion: 2
-    m_Bits: 1
+    m_Bits: 513
   maxDistance: 50
   shootEvent: {fileID: 11400000, guid: ef1fe949aa9de472d8b5a25764af69e0, type: 2}
   secondaryEvent: {fileID: 11400000, guid: fa9753bc0c75f43878dbc75a58004f0d, type: 2}

@@ -81,11 +81,11 @@ namespace AssetObjectsPacks.Animations {
             }
         }
         
-        void GetAOs(EventState state, List<AssetObject> aos, int packID) {
+        void GetAOs(EventState state, List<AssetObject> aos){//, int packID) {
             for (int i = 0; i < state.assetObjects.Length; i++) {
                 AssetObject ao = state.assetObjects[i];
 
-                if (ao.packID != packID)  continue;
+                // if (ao.packID != packID)  continue;
                 bool isLooped = ao["Looped"].GetValue<bool>();
                 int layer = ao["Layer"].GetValue<int>();
 
@@ -114,8 +114,11 @@ namespace AssetObjectsPacks.Animations {
             IEnumerable<Event> allEvents = EditorUtils.GetAllAssetsOfType<Event>();
             
             foreach (var e in allEvents) {
-                for (int i = 0; i < e.allStates.Length; i++) {
-                    GetAOs(e.allStates[i], used, packID);
+                if (e.mainPackID == packID) {
+
+                    for (int i = 0; i < e.allStates.Length; i++) {
+                        GetAOs(e.allStates[i], used);//, packID);
+                    }
                 }
             }
             if (used.Count == 0) {

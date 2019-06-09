@@ -30,7 +30,7 @@ namespace Platforms {
         const float dropHeightRange = .1f; //range buffer for checking if a drop is short or tall
         const float sphereCheckRadius = .05f;
 
-        bool overrideMovement { get { return !characterMovement.grounded || controller.overrideMovement; } }
+        //bool overrideMovement { get { return !characterMovement.grounded || !controller.movementEnabled; } }
         
         public event Action onPlatformEnd;
 
@@ -101,7 +101,9 @@ namespace Platforms {
 
         delegate bool CheckForPlatform (out bool isShort, out Vector3 atPos, out Quaternion atRot);
         bool PlatformUpdate (bool triggered, CheckForPlatform checkFN, Cue shortCue, Cue tallCue, bool isDown) {
-            if (overrideMovement) return false;
+            if (!characterMovement.grounded || controller.scriptedMove) 
+                return false;
+            
             bool isShort;
             Vector3 atPos;
             Quaternion atRot;

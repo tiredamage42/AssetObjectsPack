@@ -20,7 +20,7 @@ namespace AssetObjectsPacks {
                 }
                 else if (text[i] == pairChars[1]) {
                     if (lastStartPos == -1) {
-
+                        
                         #if UNITY_EDITOR
                         logErrors += (":: mismatched " + pairChars[1] + " at index " + i + "\n\n");
                         #endif

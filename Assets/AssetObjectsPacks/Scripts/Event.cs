@@ -5,23 +5,29 @@ namespace AssetObjectsPacks {
 
 
     public class EventResponse {
-        public Dictionary<int, List<AssetObject>> objectsPerPack;
-        public bool noMainFound { get { return objectsPerPack.ContainsKey(mainPackID) && objectsPerPack[mainPackID].Count == 0; } }
+        // public Dictionary<int, List<AssetObject>> objectsPerPack;
+        // public bool noMainFound { get { return objectsPerPack.ContainsKey(mainPackID) && objectsPerPack[mainPackID].Count == 0; } }
+        public bool noMainFound { get { return chosenObjects.Count == 0; } }
         
-        int mainPackID;
-        public EventResponse (HashSet<int> skipPlays) {
-            PacksManager pm = AssetObjectsManager.instance.packs;
-            int l = pm.packs.Length;
-            objectsPerPack = new Dictionary<int, List<AssetObject>>(l);
-            for (int i = 0; i < l; i++) {
-                if (!skipPlays.Contains( pm.packs[i].id )) {
-                    objectsPerPack.Add(pm.packs[i].id, new List<AssetObject>());
-                }
-            }
+        // int mainPackID;
+        public EventResponse (
+            // HashSet<int> skipPlays
+            ) {
+            // PacksManager pm = AssetObjectsManager.instance.packs;
+            // int l = pm.packs.Length;
+            // objectsPerPack = new Dictionary<int, List<AssetObject>>(l);
+            // for (int i = 0; i < l; i++) {
+            //     if (!skipPlays.Contains( pm.packs[i].id )) {
+            //         objectsPerPack.Add(pm.packs[i].id, new List<AssetObject>());
+            //     }
+            // }
         }
+        public List<AssetObject> chosenObjects = new List<AssetObject>();
 
-        public void Respond (int mainPackID, string eventName) {
-            this.mainPackID = mainPackID;
+        public void Respond (
+            // int mainPackID, 
+            string eventName) {
+            // this.mainPackID = mainPackID;
             this.eventName = eventName;
         }
 
@@ -47,6 +53,9 @@ namespace AssetObjectsPacks {
         //for editor adding
         public bool isNew;
         public string name;
+
+        // public int parentID = -1;
+        // public string fullPath;
         #endif
     
         public string conditionBlock;
@@ -57,26 +66,39 @@ namespace AssetObjectsPacks {
 
         public void GetAssetObjects (EventResponse eventResponse,  Dictionary<string, CustomParameter> parameters) {
             int l = assetObjects.Length;
-            foreach (var k in eventResponse.objectsPerPack.Keys) {
+
+
+            // foreach (var k in eventResponse.objectsPerPack.Keys) {
 
                 for (int i = 0; i < l; i++) {
                     AssetObject ao = assetObjects[i];
-                    if (ao.packID == k) {
+                    // if (ao.packID == k) {
                         if (ao.solo) {
-                            eventResponse.objectsPerPack[k].Clear();
+
+                            eventResponse.chosenObjects.Clear();
+                            // eventResponse.objectsPerPack[k].Clear();
+                            
                             if (CustomScripting.StatementValue(ao.conditionBlock, parameters, ref eventResponse.logErrors, ref eventResponse.logWarnings)) {
-                                eventResponse.objectsPerPack[k].Add(assetObjects[i]);
+                            
+                                eventResponse.chosenObjects.Add(assetObjects[i]);
+                                // eventResponse.objectsPerPack[k].Add(assetObjects[i]);
+                            
                             }
+                            
                             break;
                         }
                         if (!ao.mute) {
+                            
                             if (CustomScripting.StatementValue(ao.conditionBlock, parameters, ref eventResponse.logErrors, ref eventResponse.logWarnings)) {
-                                eventResponse.objectsPerPack[k].Add(assetObjects[i]);
+                            
+                                eventResponse.chosenObjects.Add(assetObjects[i]);
+                                // eventResponse.objectsPerPack[k].Add(assetObjects[i]);
+                            
                             }
                         }
-                    }
+                    // }
                 }
-            }
+            // }
         }
     }
 
@@ -84,10 +106,10 @@ namespace AssetObjectsPacks {
     [CreateAssetMenu(fileName = "New Asset Object Event", menuName = "Asset Objects Packs/Event", order = 2)]
     [System.Serializable] public class Event : ScriptableObject {
 
+        
+
         #if UNITY_EDITOR
-        //used for multi anim editing and defaults in editor explorer
-        public AssetObject multi_edit_instance;  
-        public Vector2Int[] hiddenIDs;
+        public int[] hiddenIDs;
         #endif
 
         public EventState[] allStates;
@@ -122,7 +144,9 @@ namespace AssetObjectsPacks {
         }
         
         public void GetParamFilteredObjects(Dictionary<string, CustomParameter> parameters, EventResponse eventResponse) {            
-            eventResponse.Respond(mainPackID, this.name);
+            eventResponse.Respond(
+                // mainPackID, 
+                this.name);
             GetFilteredStates(allStates[0], parameters, eventResponse);
         }
     }
