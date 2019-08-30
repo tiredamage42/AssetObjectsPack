@@ -2,7 +2,7 @@
 // using System.Collections.Generic;
 using UnityEngine;
 using AssetObjectsPacks;
-namespace Combat {
+namespace Game.Combat {
     /*
         tracking only works right side up or upside down, not sideways
     */

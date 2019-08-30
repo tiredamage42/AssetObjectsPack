@@ -12,8 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ac55a32d0a714329bfbc7e4cc4b655b, type: 3}
   m_Name: StandStillCue
   m_EditorClassIdentifier: 
-  events:
-  - {fileID: 11400000, guid: 24ec89b7388e1481682c3b2af2e69b01, type: 2}
+  events: []
   overrideDuration: 0
   playImmediate: 0
   snapPlayerStyle: 0
@@ -22,7 +21,7 @@ MonoBehaviour:
   positionOffset: {x: 0, y: 0, z: 0}
   rotationOffset: {x: 0, y: 0, z: 0}
   messageBlocks:
-  - StopMovement();
+  - StopMovement(false);
   - 
   - 
   - 

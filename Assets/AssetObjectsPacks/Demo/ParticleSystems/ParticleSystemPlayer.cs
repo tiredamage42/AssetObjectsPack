@@ -43,29 +43,29 @@ public class ParticleSystemPlayer : EventPlayerListener
         protected override void UseAssetObject(AssetObject assetObject, bool asInterrupter, MiniTransform transforms, HashSet<System.Action> endUseCallbacks) {
             //speed, start width, end width, color, length, light color, light intensity, light range
 
-            float speed = assetObject["Speed"].GetValue<float>();
-            float scale = assetObject["Scale"].GetValue<float>();
+            // float speed = assetObject["Speed"].GetValue<float>();
+            // float scale = assetObject["Scale"].GetValue<float>();
 
-            ParticleSystem ps = GetParticleSystem(assetObject.objRef);
-            ps.transform.position = transforms.pos;
-            ps.transform.rotation = transforms.rot;
-            if (transforms.targetParent != null) {
-                ps.transform.SetParent(transforms.targetParent);
-            }
+            // ParticleSystem ps = GetParticleSystem(assetObject.objRef);
+            // ps.transform.position = transforms.pos;
+            // ps.transform.rotation = transforms.rot;
+            // if (transforms.targetParent != null) {
+            //     ps.transform.SetParent(transforms.targetParent);
+            // }
 
-            ps.transform.localScale = Vector3.one * scale;
-            ParticleSystem.MainModule m = ps.main;
-            m.simulationSpeed = speed;
-            //ps.main = m;
+            // ps.transform.localScale = Vector3.one * scale;
+            // ParticleSystem.MainModule m = ps.main;
+            // m.simulationSpeed = speed;
+            // //ps.main = m;
 
-            ps.Play();
+            // ps.Play();
 
             
-            //end use immediately
-            if (endUseCallbacks != null) {            
-                foreach (var endUse in endUseCallbacks) {
-                    endUse();    
-                }
-            }
+            // //end use immediately
+            // if (endUseCallbacks != null) {            
+            //     foreach (var endUse in endUseCallbacks) {
+            //         endUse();    
+            //     }
+            // }
         }
 }

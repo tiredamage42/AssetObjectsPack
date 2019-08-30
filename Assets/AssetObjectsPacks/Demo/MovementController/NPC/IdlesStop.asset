@@ -12,341 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1284b611740a6448d90c4ebacf05b26a, type: 3}
   m_Name: IdlesStop
   m_EditorClassIdentifier: 
-  multi_edit_instance:
-    isCopy: 0
-    isNew: 0
-    name: 0
-    solo: 0
-    mute: 0
-    objRef: {fileID: 0}
-    messageBlock: 
-    conditionBlock: 
-    id: 0
-    packID: -1
-    parameters:
-    - name: Duration
-      pType: 1
-      BoolValue: 0
-      FloatValue: -1
-      IntValue: 0
-      StringValue: 
-      ColorValue:
-        serializedVersion: 2
-        rgba: 0
-      GradientValue:
-        serializedVersion: 2
-        key0: {r: 1, g: 1, b: 1, a: 1}
-        key1: {r: 1, g: 1, b: 1, a: 1}
-        key2: {r: 0, g: 0, b: 0, a: 0}
-        key3: {r: 0, g: 0, b: 0, a: 0}
-        key4: {r: 0, g: 0, b: 0, a: 0}
-        key5: {r: 0, g: 0, b: 0, a: 0}
-        key6: {r: 0, g: 0, b: 0, a: 0}
-        key7: {r: 0, g: 0, b: 0, a: 0}
-        ctime0: 0
-        ctime1: 65535
-        ctime2: 0
-        ctime3: 0
-        ctime4: 0
-        ctime5: 0
-        ctime6: 0
-        ctime7: 0
-        atime0: 0
-        atime1: 65535
-        atime2: 0
-        atime3: 0
-        atime4: 0
-        atime5: 0
-        atime6: 0
-        atime7: 0
-        m_Mode: 0
-        m_NumColorKeys: 2
-        m_NumAlphaKeys: 2
-      AnimationCurveValue:
-        serializedVersion: 2
-        m_Curve: []
-        m_PreInfinity: 2
-        m_PostInfinity: 2
-        m_RotationOrder: 4
-      Vector2Value: {x: 0, y: 0}
-      Vector3Value: {x: 0, y: 0, z: 0}
-    - name: Speed
-      pType: 1
-      BoolValue: 0
-      FloatValue: 1
-      IntValue: 0
-      StringValue: 
-      ColorValue:
-        serializedVersion: 2
-        rgba: 0
-      GradientValue:
-        serializedVersion: 2
-        key0: {r: 1, g: 1, b: 1, a: 1}
-        key1: {r: 1, g: 1, b: 1, a: 1}
-        key2: {r: 0, g: 0, b: 0, a: 0}
-        key3: {r: 0, g: 0, b: 0, a: 0}
-        key4: {r: 0, g: 0, b: 0, a: 0}
-        key5: {r: 0, g: 0, b: 0, a: 0}
-        key6: {r: 0, g: 0, b: 0, a: 0}
-        key7: {r: 0, g: 0, b: 0, a: 0}
-        ctime0: 0
-        ctime1: 65535
-        ctime2: 0
-        ctime3: 0
-        ctime4: 0
-        ctime5: 0
-        ctime6: 0
-        ctime7: 0
-        atime0: 0
-        atime1: 65535
-        atime2: 0
-        atime3: 0
-        atime4: 0
-        atime5: 0
-        atime6: 0
-        atime7: 0
-        m_Mode: 0
-        m_NumColorKeys: 2
-        m_NumAlphaKeys: 2
-      AnimationCurveValue:
-        serializedVersion: 2
-        m_Curve: []
-        m_PreInfinity: 2
-        m_PostInfinity: 2
-        m_RotationOrder: 4
-      Vector2Value: {x: 0, y: 0}
-      Vector3Value: {x: 0, y: 0, z: 0}
-    - name: Mirror
-      pType: 2
-      BoolValue: 0
-      FloatValue: 1
-      IntValue: 0
-      StringValue: 
-      ColorValue:
-        serializedVersion: 2
-        rgba: 0
-      GradientValue:
-        serializedVersion: 2
-        key0: {r: 1, g: 1, b: 1, a: 1}
-        key1: {r: 1, g: 1, b: 1, a: 1}
-        key2: {r: 0, g: 0, b: 0, a: 0}
-        key3: {r: 0, g: 0, b: 0, a: 0}
-        key4: {r: 0, g: 0, b: 0, a: 0}
-        key5: {r: 0, g: 0, b: 0, a: 0}
-        key6: {r: 0, g: 0, b: 0, a: 0}
-        key7: {r: 0, g: 0, b: 0, a: 0}
-        ctime0: 0
-        ctime1: 65535
-        ctime2: 0
-        ctime3: 0
-        ctime4: 0
-        ctime5: 0
-        ctime6: 0
-        ctime7: 0
-        atime0: 0
-        atime1: 65535
-        atime2: 0
-        atime3: 0
-        atime4: 0
-        atime5: 0
-        atime6: 0
-        atime7: 0
-        m_Mode: 0
-        m_NumColorKeys: 2
-        m_NumAlphaKeys: 2
-      AnimationCurveValue:
-        serializedVersion: 2
-        m_Curve: []
-        m_PreInfinity: 2
-        m_PostInfinity: 2
-        m_RotationOrder: 4
-      Vector2Value: {x: 0, y: 0}
-      Vector3Value: {x: 0, y: 0, z: 0}
-    - name: Looped
-      pType: 0
-      BoolValue: 1
-      FloatValue: 1
-      IntValue: 0
-      StringValue: 
-      ColorValue:
-        serializedVersion: 2
-        rgba: 0
-      GradientValue:
-        serializedVersion: 2
-        key0: {r: 1, g: 1, b: 1, a: 1}
-        key1: {r: 1, g: 1, b: 1, a: 1}
-        key2: {r: 0, g: 0, b: 0, a: 0}
-        key3: {r: 0, g: 0, b: 0, a: 0}
-        key4: {r: 0, g: 0, b: 0, a: 0}
-        key5: {r: 0, g: 0, b: 0, a: 0}
-        key6: {r: 0, g: 0, b: 0, a: 0}
-        key7: {r: 0, g: 0, b: 0, a: 0}
-        ctime0: 0
-        ctime1: 65535
-        ctime2: 0
-        ctime3: 0
-        ctime4: 0
-        ctime5: 0
-        ctime6: 0
-        ctime7: 0
-        atime0: 0
-        atime1: 65535
-        atime2: 0
-        atime3: 0
-        atime4: 0
-        atime5: 0
-        atime6: 0
-        atime7: 0
-        m_Mode: 0
-        m_NumColorKeys: 2
-        m_NumAlphaKeys: 2
-      AnimationCurveValue:
-        serializedVersion: 2
-        m_Curve: []
-        m_PreInfinity: 2
-        m_PostInfinity: 2
-        m_RotationOrder: 4
-      Vector2Value: {x: 0, y: 0}
-      Vector3Value: {x: 0, y: 0, z: 0}
-    - name: Transition
-      pType: 1
-      BoolValue: 0
-      FloatValue: 0.25
-      IntValue: 0
-      StringValue: 
-      ColorValue:
-        serializedVersion: 2
-        rgba: 0
-      GradientValue:
-        serializedVersion: 2
-        key0: {r: 1, g: 1, b: 1, a: 1}
-        key1: {r: 1, g: 1, b: 1, a: 1}
-        key2: {r: 0, g: 0, b: 0, a: 0}
-        key3: {r: 0, g: 0, b: 0, a: 0}
-        key4: {r: 0, g: 0, b: 0, a: 0}
-        key5: {r: 0, g: 0, b: 0, a: 0}
-        key6: {r: 0, g: 0, b: 0, a: 0}
-        key7: {r: 0, g: 0, b: 0, a: 0}
-        ctime0: 0
-        ctime1: 65535
-        ctime2: 0
-        ctime3: 0
-        ctime4: 0
-        ctime5: 0
-        ctime6: 0
-        ctime7: 0
-        atime0: 0
-        atime1: 65535
-        atime2: 0
-        atime3: 0
-        atime4: 0
-        atime5: 0
-        atime6: 0
-        atime7: 0
-        m_Mode: 0
-        m_NumColorKeys: 2
-        m_NumAlphaKeys: 2
-      AnimationCurveValue:
-        serializedVersion: 2
-        m_Curve: []
-        m_PreInfinity: 2
-        m_PostInfinity: 2
-        m_RotationOrder: 4
-      Vector2Value: {x: 0, y: 0}
-      Vector3Value: {x: 0, y: 0, z: 0}
-    - name: Layer
-      pType: 2
-      BoolValue: 0
-      FloatValue: 0.25
-      IntValue: 0
-      StringValue: 
-      ColorValue:
-        serializedVersion: 2
-        rgba: 0
-      GradientValue:
-        serializedVersion: 2
-        key0: {r: 1, g: 1, b: 1, a: 1}
-        key1: {r: 1, g: 1, b: 1, a: 1}
-        key2: {r: 0, g: 0, b: 0, a: 0}
-        key3: {r: 0, g: 0, b: 0, a: 0}
-        key4: {r: 0, g: 0, b: 0, a: 0}
-        key5: {r: 0, g: 0, b: 0, a: 0}
-        key6: {r: 0, g: 0, b: 0, a: 0}
-        key7: {r: 0, g: 0, b: 0, a: 0}
-        ctime0: 0
-        ctime1: 65535
-        ctime2: 0
-        ctime3: 0
-        ctime4: 0
-        ctime5: 0
-        ctime6: 0
-        ctime7: 0
-        atime0: 0
-        atime1: 65535
-        atime2: 0
-        atime3: 0
-        atime4: 0
-        atime5: 0
-        atime6: 0
-        atime7: 0
-        m_Mode: 0
-        m_NumColorKeys: 2
-        m_NumAlphaKeys: 2
-      AnimationCurveValue:
-        serializedVersion: 2
-        m_Curve: []
-        m_PreInfinity: 2
-        m_PostInfinity: 2
-        m_RotationOrder: 4
-      Vector2Value: {x: 0, y: 0}
-      Vector3Value: {x: 0, y: 0, z: 0}
-    - name: TimeOffset
-      pType: 1
-      BoolValue: 0
-      FloatValue: 0
-      IntValue: 0
-      StringValue: 
-      ColorValue:
-        serializedVersion: 2
-        rgba: 0
-      GradientValue:
-        serializedVersion: 2
-        key0: {r: 1, g: 1, b: 1, a: 1}
-        key1: {r: 1, g: 1, b: 1, a: 1}
-        key2: {r: 0, g: 0, b: 0, a: 0}
-        key3: {r: 0, g: 0, b: 0, a: 0}
-        key4: {r: 0, g: 0, b: 0, a: 0}
-        key5: {r: 0, g: 0, b: 0, a: 0}
-        key6: {r: 0, g: 0, b: 0, a: 0}
-        key7: {r: 0, g: 0, b: 0, a: 0}
-        ctime0: 0
-        ctime1: 65535
-        ctime2: 0
-        ctime3: 0
-        ctime4: 0
-        ctime5: 0
-        ctime6: 0
-        ctime7: 0
-        atime0: 0
-        atime1: 65535
-        atime2: 0
-        atime3: 0
-        atime4: 0
-        atime5: 0
-        atime6: 0
-        atime7: 0
-        m_Mode: 0
-        m_NumColorKeys: 2
-        m_NumAlphaKeys: 2
-      AnimationCurveValue:
-        serializedVersion: 2
-        m_Curve: []
-        m_PreInfinity: 2
-        m_PostInfinity: 2
-        m_RotationOrder: 4
-      Vector2Value: {x: 0, y: 0}
-      Vector3Value: {x: 0, y: 0, z: 0}
-  hiddenIDs: []
+  hiddenIDs: 
   allStates:
   - isNew: 0
     name: Base State
@@ -367,7 +33,6 @@ MonoBehaviour:
       messageBlock: 
       conditionBlock: 
       id: 4759
-      packID: 0
       parameters:
       - name: Duration
         pType: 1
@@ -700,7 +365,6 @@ MonoBehaviour:
       messageBlock: 
       conditionBlock: 
       id: 4758
-      packID: 0
       parameters:
       - name: Duration
         pType: 1
@@ -1033,7 +697,6 @@ MonoBehaviour:
       messageBlock: 
       conditionBlock: 
       id: 4757
-      packID: 0
       parameters:
       - name: Duration
         pType: 1
@@ -1366,7 +1029,6 @@ MonoBehaviour:
       messageBlock: 
       conditionBlock: 
       id: 4756
-      packID: 0
       parameters:
       - name: Duration
         pType: 1
@@ -1699,7 +1361,6 @@ MonoBehaviour:
       messageBlock: 
       conditionBlock: 
       id: 4755
-      packID: 0
       parameters:
       - name: Duration
         pType: 1
@@ -2032,7 +1693,6 @@ MonoBehaviour:
       messageBlock: 
       conditionBlock: 
       id: 4754
-      packID: 0
       parameters:
       - name: Duration
         pType: 1
@@ -2365,7 +2025,6 @@ MonoBehaviour:
       messageBlock: 
       conditionBlock: 
       id: 4753
-      packID: 0
       parameters:
       - name: Duration
         pType: 1
@@ -2698,7 +2357,6 @@ MonoBehaviour:
       messageBlock: 
       conditionBlock: 
       id: 4752
-      packID: 0
       parameters:
       - name: Duration
         pType: 1
@@ -3031,7 +2689,6 @@ MonoBehaviour:
       messageBlock: 
       conditionBlock: 
       id: 4751
-      packID: 0
       parameters:
       - name: Duration
         pType: 1
@@ -3364,7 +3021,6 @@ MonoBehaviour:
       messageBlock: 
       conditionBlock: 
       id: 3528
-      packID: 0
       parameters:
       - name: Duration
         pType: 1
@@ -3697,7 +3353,6 @@ MonoBehaviour:
       messageBlock: 
       conditionBlock: 
       id: 730
-      packID: 0
       parameters:
       - name: Duration
         pType: 1
@@ -4030,7 +3685,6 @@ MonoBehaviour:
       messageBlock: 
       conditionBlock: 
       id: 300
-      packID: 0
       parameters:
       - name: Duration
         pType: 1
@@ -4375,7 +4029,6 @@ MonoBehaviour:
       messageBlock: 
       conditionBlock: 
       id: 185
-      packID: 0
       parameters:
       - name: Duration
         pType: 1
@@ -4708,7 +4361,6 @@ MonoBehaviour:
       messageBlock: 
       conditionBlock: 
       id: 194
-      packID: 0
       parameters:
       - name: Duration
         pType: 1
@@ -5041,7 +4693,6 @@ MonoBehaviour:
       messageBlock: 
       conditionBlock: 
       id: 203
-      packID: 0
       parameters:
       - name: Duration
         pType: 1
@@ -5374,7 +5025,6 @@ MonoBehaviour:
       messageBlock: 
       conditionBlock: '!Aiming'
       id: 6249
-      packID: 0
       parameters:
       - name: Duration
         pType: 1
@@ -5845,7 +5495,6 @@ MonoBehaviour:
       messageBlock: 
       conditionBlock: 
       id: 308
-      packID: 0
       parameters:
       - name: Duration
         pType: 1
@@ -6178,7 +5827,6 @@ MonoBehaviour:
       messageBlock: 
       conditionBlock: 
       id: 298
-      packID: 0
       parameters:
       - name: Duration
         pType: 1
@@ -6517,7 +6165,6 @@ MonoBehaviour:
       messageBlock: 
       conditionBlock: 
       id: 6247
-      packID: 0
       parameters:
       - name: Duration
         pType: 1
@@ -6850,7 +6497,6 @@ MonoBehaviour:
       messageBlock: 
       conditionBlock: 
       id: 6248
-      packID: 0
       parameters:
       - name: Duration
         pType: 1

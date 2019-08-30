@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-namespace Combat {
+namespace Game.Combat {
 
     public class HitTargetDebugger : MonoBehaviour
     {
@@ -86,7 +86,7 @@ namespace Combat {
 
 
         void Awake () {
-            BuildTurrets();
+            // BuildTurrets();
         }
 
 

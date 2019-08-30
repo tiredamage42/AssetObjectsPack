@@ -2,6 +2,7 @@
 using UnityEditor;
 namespace AssetObjectsPacks {
     [CustomEditor(typeof(Cue))]
+    [CanEditMultipleObjects]
     public class CueEditor : Editor {
         EditorProp so;
         void OnEnable () {

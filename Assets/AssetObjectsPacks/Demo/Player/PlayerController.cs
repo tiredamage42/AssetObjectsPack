@@ -5,7 +5,7 @@ using AssetObjectsPacks;
 
 using Movement;
 using Movement.Platforms;
-using Combat;
+using Game.Combat;
 
 using DynamicRagdoll;
 
@@ -113,7 +113,7 @@ public class PlayerController : MonoBehaviour
         movement.speed = speed;
         movement.direction = moveDir;
 
-        turner.autoTurnAnimate = speed == 0;
+        turner.GetComponent<Turner_Animated>().autoTurnAnimate = speed == 0;
 
         if (usingAnimationMovement) {
             if (speed > 0 && !movement.scriptedMove) {
@@ -191,13 +191,13 @@ public class PlayerController : MonoBehaviour
         }
 
         if (CustomInputManager.InputManager.GetButtonDown("UI_Up")) {
-            Game.timeDilation += .1f;
+            GameManager.timeDilation += .1f;
         }
         if (CustomInputManager.InputManager.GetButtonDown("UI_Down")) {
-            Game.timeDilation -= .1f;
+            GameManager.timeDilation -= .1f;
         }
         
-        turner.autoTurnAnimate = movement.speed == 0;
+        turner.GetComponent<Turner_Animated>().autoTurnAnimate = movement.speed == 0;
 
         combat.SetAiming(CustomInputManager.InputManager.GetButton("Aim"));
         combat.SetFiring(CustomInputManager.InputManager.GetButton("Fire"));

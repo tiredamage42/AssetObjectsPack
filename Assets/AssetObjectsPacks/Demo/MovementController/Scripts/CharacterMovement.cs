@@ -104,7 +104,7 @@ namespace Movement {
             cc = GetComponent<CharacterController>();
             eventPlayer.AddParameter( new CustomParameter ( "Grounded", () => grounded ) );
 
-            controller.AddChangeLoopStateValueCheck( () => grounded );
+            controller.AddChangeLoopStateValueCheck( () => grounded, "grounded" );
         }
         
         public override void UpdateLoop (float deltaTime) {

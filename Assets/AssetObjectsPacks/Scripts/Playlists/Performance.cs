@@ -15,14 +15,12 @@ namespace AssetObjectsPacks {
             static PerformanceCoroutineHandler _coroutineHandler;
             static PerformanceCoroutineHandler coroutineHandler {
                 get {
-                    if (_coroutineHandler == null) {
-                        _coroutineHandler = new GameObject("PerformanceCoroutineHandler").AddComponent<PerformanceCoroutineHandler>();
-                    }
+                    if (_coroutineHandler == null) _coroutineHandler = new GameObject("PerformanceCoroutineHandler").AddComponent<PerformanceCoroutineHandler>();
                     return _coroutineHandler;
                 }
             }
 
-            public class PerformancePoolHolder<T> where T : Playlists.Performance, new() {
+            public class PerformancePoolHolder<T> where T : Performance, new() {
                 Pool<T> performance_pool = new Pool<T>();
 
                 public T GetNewPerformance () {
@@ -36,33 +34,27 @@ namespace AssetObjectsPacks {
                 }
             }
 
-            public static PerformancePoolHolder<Playlists.Performance> playlistPerformances = new PerformancePoolHolder<Playlists.Performance>();
+            public static PerformancePoolHolder<Performance> playlistPerformances = new PerformancePoolHolder<Performance>();
 
             public void SetPerformanceKey (int key) {
                 this.performanceKey = key;
             }
 
-            Transform rootTransform;
-            protected List<Transform> interestTransforms = new List<Transform>();
-            System.Action[] onEndPerformance;
-            protected bool forceInterrupt;
             public bool looped;
-            protected EventPlayer[] players;
-            int performanceKey;
-            protected int useLayer;
-            protected string debugReason;
-
+            System.Action[] onEndPerformance;
+            bool forceInterrupt;
+            EventPlayer[] players;
+            int performanceKey, useLayer;
+            string debugReason;
             PerformanceChannel[] channels = new PerformanceChannel[0];
-
-            
-
             Playlist.Channel[] playlistChannels;
-            
             MiniTransform suppliedTransform;
 
             bool isTopLevel;
 
-            void ReturnPerformanceToPool(int key) { playlistPerformances.ReturnPerformanceToPool(key); }
+            void ReturnPerformanceToPool(int key) { 
+                playlistPerformances.ReturnPerformanceToPool(key); 
+            }
             
             public void InterruptPerformance () {
                 for (int i = 0; i < channels.Length; i++) {   
@@ -100,46 +92,28 @@ namespace AssetObjectsPacks {
                     }
                 }
 
-                if (!rootTransform) {
-                    rootTransform = new GameObject("PerformanceRoot").transform;
-                }
-                //maybe parent
-                rootTransform.position = transforms.pos;
-                rootTransform.rotation = transforms.rot;
-                
-                
                 int channelsCount = playlistChannels.Length;
-                if (interestTransforms.Count != channelsCount) {
-                    if (interestTransforms.Count < channelsCount) {
-                        int c = channelsCount - interestTransforms.Count;
-                        for (int i = 0; i < c; i++) {
-                            Transform newChannelTransform = new GameObject("ChannelRuntimeTransform").transform;
-                            newChannelTransform.SetParent(rootTransform);
-                            interestTransforms.Add(newChannelTransform);
-                        }
-                    }
-                }
 
                 for (int i = 0; i < channelsCount; i++) {
                     players[i].currentPlaylists.Add(this);
                 }
                 
-
-                // BaseInitialize(debugReason, playlistChannels.Length, useLayer, players, transforms, looped, forceInterrupt, onEndPerformance);
-
                 if (channels.Length != channelsCount) {
                     channels = channelsCount.Generate(i => new PerformanceChannel()).ToArray();
                 }
 
                 ReInitializeChannels();
+
+                
                 coroutineHandler.StartCoroutine(UpdatePerformance());
-            
             }
+            
+            
                 
             void ReInitializeChannels () {
                 int l = playlistChannels.Length;
                 for (int i = 0; i < l; i++) {
-                    channels[i].InitializeChannel (isTopLevel, useLayer, players[i], playlistChannels[i], suppliedTransform, interestTransforms[i], this);
+                    channels[i].InitializeChannel (isTopLevel, useLayer, players[i], playlistChannels[i], suppliedTransform, this);
                 }
             }
             
@@ -174,7 +148,7 @@ namespace AssetObjectsPacks {
                         if (!channel.head.isPlaying && cuesReadySynced)
                             channel.PlayCue (debugReason, forceInterrupt);
                         if (cuesDoneSynced)
-                            channel.OnCueEnd (isTopLevel, useLayer, this, suppliedTransform, interestTransforms[i]);
+                            channel.OnCueEnd (i, isTopLevel, useLayer, this, suppliedTransform);
                     }
 
                     if (!allDone) {

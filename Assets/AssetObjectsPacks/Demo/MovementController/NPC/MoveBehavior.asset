@@ -12,6 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4830b1877ceb4e8b9cb312deb502619, type: 3}
   m_Name: MoveBehavior
   m_EditorClassIdentifier: 
+  defaultTurnEvents:
+  - {fileID: 11400000, guid: ad1620ac5095f458c99d9d33a8d63ed7, type: 2}
+  stillEvents:
+  - {fileID: 11400000, guid: 24ec89b7388e1481682c3b2af2e69b01, type: 2}
+  moveEvents:
+  - {fileID: 11400000, guid: 1e8278874d17f4217a967c008066069d, type: 2}
   turnCue: {fileID: 11400000, guid: c60a3d1873b6741e99ec3862fc9c5f52, type: 2}
   moveCue: {fileID: 11400000, guid: b5c2fefa16e8944b4b36e5a2824ffe07, type: 2}
   stillCue: {fileID: 11400000, guid: 15bb8027de7544b7f867ef26ee15fb5e, type: 2}

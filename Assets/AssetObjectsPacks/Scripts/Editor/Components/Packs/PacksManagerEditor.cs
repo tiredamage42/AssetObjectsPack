@@ -118,7 +118,7 @@ namespace AssetObjectsPacks {
             GUIUtils.StartBox(0);
             if (GUIUtils.Button(new GUIContent("Delete Pack"), GUIStyles.button, Colors.red, Colors.white )) {
                 if (EditorUtility.DisplayDialog("Delete Pack", "Are you sure you want to delete this pack?", "Delete Pack", "Cancel")) {
-                    packs.DeleteAt(displayPackIndex);
+                    packs.DeleteAt(displayPackIndex, "Deleted pack");
                     delete = true;
                 }
             }
@@ -210,7 +210,7 @@ namespace AssetObjectsPacks {
                 UnityEngine.GUI.enabled = true;
             }
             if (deleteParamIndex >= 0) {
-                parameters.DeleteAt(deleteParamIndex);
+                parameters.DeleteAt(deleteParamIndex, "manual parameter delete");
                 anyChange = true;
             }
             GUIUtils.BeginIndent();                
@@ -376,7 +376,7 @@ namespace AssetObjectsPacks {
 
                         Debug.Log("Deleting param: " + name);
                     }
-                    parameters.DeleteAt(i);
+                    parameters.DeleteAt(i, "deleting different params");
                 }
             }
             // Debug.Log("finished deletes");
@@ -414,33 +414,38 @@ namespace AssetObjectsPacks {
             
             //reorder to same order
 
-            //make extra temp parameeter
-            var temp = parameters.AddNew();
+            
+            EditorProp temp = null;
 
             for (int d = 0; d < defParametersCount; d++) {
                 string defParamName = GetParamName(defaultParams[d]);
                 var parameter = parameters[d];
-                if (GetParamName(parameter) == defParamName) continue;
+                if (GetParamName(parameter) == defParamName) {
+                    continue;
+                }
 
-if (debug) {
+                if (debug) {
+                    Debug.Log("moving param: " + GetParamName(parameter));
+                }
 
-                Debug.Log("moving param: " + GetParamName(parameter));
-}
                 EditorProp trueParam = null;
                 //for (int p = d + 1; p < c_p; p++) {
                 for (int p = 0; p < aoParametersCount; p++) {
-                
                     trueParam = parameters[p];
                     if (GetParamName(trueParam) == defParamName) break;
                 }
 
                 if (trueParam == null) {
                     if (debug) {
-
-                    Debug.LogError("couldnt find: " + defParamName);
+                        Debug.LogError("couldnt find: " + defParamName);
                     }
                 }
                 //put the current one in temp
+
+                if (temp == null) {
+                    //make extra temp parameeter
+                    temp = parameters.AddNew();
+                }
 
                 // Debug.Log("put in temp");
                 CustomParameterEditor.CopyParameter(temp, parameter);
@@ -454,8 +459,11 @@ if (debug) {
                 
                 CustomParameterEditor.CopyParameter(trueParam, temp);
             }
-            //delete temp parameter
-            parameters.DeleteAt(parameters.arraySize-1);
+
+            if (temp != null) {
+                //delete temp parameter
+                parameters.DeleteAt(parameters.arraySize-1, "deleting temp param");
+            }
             
             //check type changes
             Func<EditorProp, int> GetParamType = (EditorProp parameter) => parameter[CustomParameterEditor.typeField].intValue;

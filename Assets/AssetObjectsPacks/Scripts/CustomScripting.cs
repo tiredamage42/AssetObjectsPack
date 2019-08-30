@@ -45,14 +45,16 @@ namespace AssetObjectsPacks {
         }
 
         static string StripAllSpace(string orig) {
-            if (orig == null)
-                return null;
+            if (orig == null || orig.IsEmpty())
+                return orig;
+            
             return System.Text.RegularExpressions.Regex.Replace(orig, @"\s+", string.Empty);
         }
 
         #region MESSAGE_SEND
         public static void ExecuteMessageBlock (int playerLayer, EventPlayer receiver, string messageBlock, Vector3 runtimePosition, ref string logErrors) {
             messageBlock = StripAllSpace(messageBlock);
+
             if (messageBlock == null || messageBlock.IsEmpty()) {
                 return;
             }
@@ -142,9 +144,13 @@ namespace AssetObjectsPacks {
         #region CHECK_STATEMENT_VALUE
 
         public static bool StatementValue(string statement, Dictionary<string, CustomParameter> paramsCheck, ref string logErrors, ref string logWarnings) {
-            if (statement.IsEmpty()) return true;
             string input = StripAllSpace(statement);
-            if (input.IsEmpty()) return true;
+            if (input == null || input.IsEmpty()) {
+                return true;
+            }
+            
+            // if (statement.IsEmpty()) return true;
+            // if (input.IsEmpty()) return true;
 
             bool statementTrue = BlockMet(input, paramsCheck, ref logErrors, ref logWarnings);
             

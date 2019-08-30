@@ -22,7 +22,7 @@ MonoBehaviour:
   positionOffset: {x: 0, y: 0, z: 0}
   rotationOffset: {x: 0, y: 0, z: 0}
   messageBlocks:
-  - TurnTo(position);
+  - TurnTo(position, true);
   - 
   - 
   - 

@@ -1,51 +1,34 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using System.Linq;
 namespace AssetObjectsPacks {
 
-
     public class EventResponse {
-        // public Dictionary<int, List<AssetObject>> objectsPerPack;
-        // public bool noMainFound { get { return objectsPerPack.ContainsKey(mainPackID) && objectsPerPack[mainPackID].Count == 0; } }
-        public bool noMainFound { get { return chosenObjects.Count == 0; } }
-        
-        // int mainPackID;
-        public EventResponse (
-            // HashSet<int> skipPlays
-            ) {
-            // PacksManager pm = AssetObjectsManager.instance.packs;
-            // int l = pm.packs.Length;
-            // objectsPerPack = new Dictionary<int, List<AssetObject>>(l);
-            // for (int i = 0; i < l; i++) {
-            //     if (!skipPlays.Contains( pm.packs[i].id )) {
-            //         objectsPerPack.Add(pm.packs[i].id, new List<AssetObject>());
-            //     }
-            // }
-        }
+        bool noneFound { get { return chosenObjects.Count == 0; } }
         public List<AssetObject> chosenObjects = new List<AssetObject>();
 
-        public void Respond (
-            // int mainPackID, 
-            string eventName) {
-            // this.mainPackID = mainPackID;
+        public void Respond (string eventName) {
             this.eventName = eventName;
         }
 
         public string logErrors, logWarnings, eventName;
 
-        #if UNITY_EDITOR
         public void LogErrors () {
+        #if UNITY_EDITOR
             if (logErrors != null && !logErrors.IsEmpty()) {
                 Debug.LogError(logErrors);
             }
+        #endif
         }
         public void LogWarnings () {
-            if (noMainFound) {
+        #if UNITY_EDITOR
+            if (noneFound) {
                 Debug.LogWarning("Couldnt find any main assets on: " + eventName);
+            }
+            if (logWarnings != null && !logWarnings.IsEmpty()) {
                 Debug.LogWarning(logWarnings);
             }
-        }
         #endif
+        }
     }
 
     [System.Serializable] public class EventState {
@@ -67,38 +50,24 @@ namespace AssetObjectsPacks {
         public void GetAssetObjects (EventResponse eventResponse,  Dictionary<string, CustomParameter> parameters) {
             int l = assetObjects.Length;
 
-
-            // foreach (var k in eventResponse.objectsPerPack.Keys) {
-
-                for (int i = 0; i < l; i++) {
-                    AssetObject ao = assetObjects[i];
-                    // if (ao.packID == k) {
-                        if (ao.solo) {
-
-                            eventResponse.chosenObjects.Clear();
-                            // eventResponse.objectsPerPack[k].Clear();
-                            
-                            if (CustomScripting.StatementValue(ao.conditionBlock, parameters, ref eventResponse.logErrors, ref eventResponse.logWarnings)) {
-                            
-                                eventResponse.chosenObjects.Add(assetObjects[i]);
-                                // eventResponse.objectsPerPack[k].Add(assetObjects[i]);
-                            
-                            }
-                            
-                            break;
-                        }
-                        if (!ao.mute) {
-                            
-                            if (CustomScripting.StatementValue(ao.conditionBlock, parameters, ref eventResponse.logErrors, ref eventResponse.logWarnings)) {
-                            
-                                eventResponse.chosenObjects.Add(assetObjects[i]);
-                                // eventResponse.objectsPerPack[k].Add(assetObjects[i]);
-                            
-                            }
-                        }
-                    // }
+            for (int i = 0; i < l; i++) {
+                AssetObject ao = assetObjects[i];
+                if (ao.solo) {
+                    eventResponse.chosenObjects.Clear();
+                    
+                    if (CustomScripting.StatementValue(ao.conditionBlock, parameters, ref eventResponse.logErrors, ref eventResponse.logWarnings)) {
+                        eventResponse.chosenObjects.Add(assetObjects[i]);
+                    }
+                    
+                    break;
                 }
-            // }
+                if (!ao.mute) {
+                    
+                    if (CustomScripting.StatementValue(ao.conditionBlock, parameters, ref eventResponse.logErrors, ref eventResponse.logWarnings)) {
+                        eventResponse.chosenObjects.Add(assetObjects[i]);
+                    }
+                }
+            }
         }
     }
 
@@ -144,9 +113,7 @@ namespace AssetObjectsPacks {
         }
         
         public void GetParamFilteredObjects(Dictionary<string, CustomParameter> parameters, EventResponse eventResponse) {            
-            eventResponse.Respond(
-                // mainPackID, 
-                this.name);
+            eventResponse.Respond(this.name);
             GetFilteredStates(allStates[0], parameters, eventResponse);
         }
     }

@@ -12,8 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ac55a32d0a714329bfbc7e4cc4b655b, type: 3}
   m_Name: TurnToCue
   m_EditorClassIdentifier: 
-  events:
-  - {fileID: 11400000, guid: ad1620ac5095f458c99d9d33a8d63ed7, type: 2}
+  events: []
   overrideDuration: -1
   playImmediate: 0
   snapPlayerStyle: 0
@@ -22,7 +21,7 @@ MonoBehaviour:
   positionOffset: {x: 0, y: 0, z: 0}
   rotationOffset: {x: 0, y: 0, z: 0}
   messageBlocks:
-  - TurnTo(position);
+  - TurnTo(position, false);
   - 
   - 
   - 

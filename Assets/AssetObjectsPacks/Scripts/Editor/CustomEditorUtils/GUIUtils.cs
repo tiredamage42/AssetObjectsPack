@@ -177,7 +177,7 @@ namespace AssetObjectsPacks {
                 
                 }
                 if (deleteIndex != -1){
-                    array.DeleteAt(deleteIndex);
+                    array.DeleteAt(deleteIndex, "manual array prop delete");
                 }
                 
                 EndBox(newVal == 0 ? 0 : 1);

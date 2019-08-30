@@ -12,9 +12,6 @@ GameObject:
   - component: {fileID: 5589025286955758838}
   - component: {fileID: 363003223972036080}
   - component: {fileID: 420988790552295579}
-  - component: {fileID: 760809227}
-  - component: {fileID: 5879282856976004486}
-  - component: {fileID: 8177204481387790733}
   m_Layer: 0
   m_Name: Rifle
   m_TagString: Untagged
@@ -53,10 +50,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d57df51584bf94a47a6d81b0c15cc8a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  recoiler: {fileID: 0}
   behavior: {fileID: 11400000, guid: 7715f9cd442f44d50bba40928c911420, type: 2}
-  isFiring: 0
   rayOrigin: {fileID: 0}
   muzzleTransform: {fileID: 9156458029242511228}
+  shellEjectTransform: {fileID: 0}
+  isFiring: 0
 --- !u!114 &363003223972036080
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -69,7 +68,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 628df372c3d9344edaba2ffa1b5aec12, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  behavior: {fileID: 0}
+  behavior: {fileID: 11400000, guid: 5bc14677ea96140c394a0d97357e312b, type: 2}
   recoilTransform: {fileID: 5701488653852862049}
 --- !u!114 &420988790552295579
 MonoBehaviour:
@@ -88,45 +87,6 @@ MonoBehaviour:
   rightElbowHint: {fileID: 982827652394055478}
   leftHandHint: {fileID: 4192893761799761822}
   rightHandHint: {fileID: 9109527896903496023}
-  ikRig: {fileID: 0}
---- !u!114 &760809227
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 345784370534095214}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 41ffbef7ad1aa4a8ebadc67ca14c71ee, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  muzzleTransform: {fileID: 9156458029242511228}
---- !u!114 &5879282856976004486
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 345784370534095214}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 454298816c10148b5ac260d72fe247d1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  cueMoving: 0
---- !u!114 &8177204481387790733
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 345784370534095214}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e559e060a9a5e4c9883b8b5b6d23930a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &739087469184008339
 GameObject:
   m_ObjectHideFlags: 0

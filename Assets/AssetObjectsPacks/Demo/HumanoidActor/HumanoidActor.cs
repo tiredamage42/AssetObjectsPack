@@ -55,7 +55,7 @@ public class HumanoidActor : MonoBehaviour
         for (int i = 0; i < bonesCount; i++) {
             Transform boneTransform = animator.GetBoneTransform(humanBones[i]);
             // Combat.EntityElement e_el = boneTransform.gameObject.AddComponent<Combat.EntityElement>();
-            boneTransform.gameObject.AddComponent<Combat.ActorElement>();
+            boneTransform.gameObject.AddComponent<Game.Combat.ActorElement>();
             
             // e_el.SetBaseEntity(entity);
         }
@@ -94,9 +94,9 @@ public class HumanoidActor : MonoBehaviour
 
 
     
-    Combat.Actor entity;
+    Game.Combat.Actor entity;
     void Awake () {
-        entity = GetComponent<Combat.Actor>();
+        entity = GetComponent<Game.Combat.Actor>();
         entity.SetDamageAdjuster(AdjustDamage);
 
         ragdollController = GetComponent<DynamicRagdoll.RagdollController>();

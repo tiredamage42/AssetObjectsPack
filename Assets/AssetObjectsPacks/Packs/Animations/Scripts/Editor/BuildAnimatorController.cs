@@ -61,7 +61,7 @@ namespace AssetObjectsPacks.Animations {
 
         // public bool upperLayersOnlyLoops = true;
 
-
+        // public Event[] useEvents;
         public float exitTransitionDuration = .25f;
         public string animationsPackName = "Animations";
         public string saveDirectory = "Assets/";

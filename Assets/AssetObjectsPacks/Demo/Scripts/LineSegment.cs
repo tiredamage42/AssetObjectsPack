@@ -42,22 +42,28 @@ public struct LineSegment {
 public class ValueTracker {
     object lastValue;
     System.Func<object> getValue;
+    string displayName;
 
-    public ValueTracker (System.Func<object> getValue, object initValue) {
+    public ValueTracker (System.Func<object> getValue, object initValue, string displayName) {
         lastValue = initValue;
         this.getValue = getValue;
+        this.displayName = displayName;
     }
-    public ValueTracker (System.Func<object> getValue) {
-        lastValue = getValue();
-        this.getValue = getValue;
-    }
+    // public ValueTracker (System.Func<object> getValue, string displayName) {
+    //     lastValue = getValue();
+    //     this.getValue = getValue;
+    // }
     public void UpdateLastValue () {
         lastValue = getValue();
     }
-    public bool CheckValueChange () {
+    public bool CheckValueChange (bool debug) {
         object v = getValue();
         bool changed = lastValue == null ? v != null : !v.Equals(lastValue);
         lastValue = v;
+
+        if (debug && changed) {
+            Debug.Log("Changed:: " + displayName);
+        } 
         return changed;
     }
 }

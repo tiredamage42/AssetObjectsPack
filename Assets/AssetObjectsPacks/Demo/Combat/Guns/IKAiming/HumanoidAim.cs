@@ -1,10 +1,14 @@
 ﻿using UnityEngine;
-namespace Combat {
+namespace Game.Combat {
 
     [RequireComponent(typeof(Animator))]
     [RequireComponent(typeof(CharacterCombat))]
     public class HumanoidAim : MonoBehaviour
     {
+        // use positions and rotations for aim and hip from transform behavior
+        // public int hip tranfrom behavior index = 3
+        // public int aim transform behavior index = 4
+
         [Range(0,1)] public float gunSwitchToHeadPercent = .75f;
         [Tooltip("0.0 : completely unrestrained in motion\n1.0 : completely clamped (look at becomes impossible)\n0.5 : half the possible range (180 degrees).")] 
         [Range(0,1)] public float lookAtClampWeight = 0.0f;
@@ -68,13 +72,13 @@ namespace Combat {
                 // set ik rig to aim target as soon as aim starts (while in transition).
                 // sticking to gun makes left hand go trhough body to reach gun while it's still going up or down from aim.
             
-                if (aimLerp != 1.0f && gunIKHandler.ikRig.parent != headTransform) {
-                    gunIKHandler.ikRig.SetParent(headTransform);
-                    gunIKHandler.ikRig.localPosition = gunIKHandler.behavior.localAimHeadPos;
+                if (aimLerp != 1.0f && gunIKHandler.runtimeIKRig.parent != headTransform) {
+                    gunIKHandler.runtimeIKRig.SetParent(headTransform);
+                    gunIKHandler.runtimeIKRig.localPosition = gunIKHandler.behavior.localAimHeadPos;
                 }
 
-                if (gunIKHandler.ikRig.parent == headTransform) {
-                    gunIKHandler.ikRig.rotation = gunAimRot;
+                if (gunIKHandler.runtimeIKRig.parent == headTransform) {
+                    gunIKHandler.runtimeIKRig.rotation = gunAimRot;
                 }
 
                 if (aimLerp == 1.0f) {

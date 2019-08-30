@@ -4,7 +4,7 @@ using UnityEditor;
 using UnityEngine.AI;
 using System.Linq;
 
-using Syd.AI;
+using Game.AI;
 
 namespace Movement {
 

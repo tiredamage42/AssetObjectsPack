@@ -88,7 +88,9 @@ namespace AssetObjectsPacks.Animations {
             else {
 
                 lastPlayed = assetObject.objRef.name;
-                // Debug.Log("playing: " + assetObject.objRef.name);
+                Debug.Log("playing: " + assetObject.objRef.name);
+                // Debug.Break();
+                    
 
             }
         }
@@ -361,7 +363,7 @@ namespace AssetObjectsPacks.Animations {
             //if transitioning, crossfade to the new active loopset
             if (doTransition) {
 
-                //Debug.LogError("playing loop transition on layer " + layer + " / " + transition);
+                Debug.LogError("playing " + clip.name + " loop transition on layer " + layer + " / " + transition);
                 string loopName = loopNamesStrings[BLEND_TREES_PER_LAYER*layer + activeLoop];
                 // anim.CrossFadeInFixedTime(sLoopNames[activeLoops], transition, layer, timeOffset);
                 anim.CrossFadeInFixedTime(loopName, transition, layer, timeOffset);
@@ -377,16 +379,16 @@ namespace AssetObjectsPacks.Animations {
 
             };
 
-            if (anim.IsInTransition(layer)) {
+            // if (anim.IsInTransition(layer)) {
 
-                if (layer > 0) {
-                    Debug.Log("skipping till after transition");
-                }
-                playLoopsAfterTransitions[layer] = pL;
-            }
-            else {
+            //     // if (layer > 0) {
+            //         Debug.Log("skipping till after transition");
+            //     // }
+            //     playLoopsAfterTransitions[layer] = pL;
+            // }
+            // else {
                 pL();
-            }
+            // }
             
                 
 
@@ -430,22 +432,28 @@ namespace AssetObjectsPacks.Animations {
         void CheckOneShotEndings (int layer = 0) {
             if (!playingOneShots[layer]) return;
             //if (!playingOneShot) return;
-        
-            AnimatorStateInfo nextState = anim.GetNextAnimatorStateInfo(layer);
-
-            bool nextIsOneShot = nextState.IsTag(sShots);
 
             bool introTransition = Time.time - lastOneShotPlayTimes[layer] <= lastOneshotTransitionTimes[layer] + .1f;
-            if (introTransition) return;
+            if (introTransition) {
+                // Debug.Log("still in intro transition");
+                // Debug.Break();
+
+                return;
+            }
 
             //if in transition
             if (anim.IsInTransition(layer)){
                 if (!endTransitionStartChecks[layer]){
+
+                    Debug.LogError("stopped anim");
+                    // Debug.Break();
                     OnOneShotExitTransitionStart(layer);
                     endTransitionStartChecks[layer] = true;
                 }
             }
             else {
+                AnimatorStateInfo nextState = anim.GetNextAnimatorStateInfo(layer);
+                bool nextIsOneShot = nextState.IsTag(sShots);
             
                 //not in transition, but was exiting, so transition is done
                 if (endTransitionStartChecks[layer]) {

@@ -9478,8 +9478,9 @@ GameObject:
   - component: {fileID: 7391610669040513993}
   - component: {fileID: 7225353380789959347}
   - component: {fileID: 7224435882393816917}
+  - component: {fileID: 6661903134544702394}
   m_Layer: 0
-  m_Name: FleshHitEffect
+  m_Name: '@ID-0-FleshHitEffect'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10130,7 +10131,7 @@ ParticleSystem:
     serializedVersion: 6
     enabled: 1
     type: 4
-    angle: 25
+    angle: 0
     length: 5
     boxThickness: {x: 0, y: 0, z: 0}
     radiusThickness: 0
@@ -14241,6 +14242,18 @@ ParticleSystemRenderer:
   m_Mesh2: {fileID: 0}
   m_Mesh3: {fileID: 0}
   m_MaskInteraction: 0
+--- !u!114 &6661903134544702394
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7386434615590806047}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 09c286977aec44f759b4740c2f72a6d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &7388078458246190511
 GameObject:
   m_ObjectHideFlags: 0

@@ -16,8 +16,6 @@ namespace DynamicRagdoll.Demo {
 		public float walkFallSpeed = 1;
 		public float runFallSpeed = 1;
 
-
-
         RagdollController ragdollController;
         CharacterMovement characterMovement;
         MovementController movementController;
@@ -36,7 +34,7 @@ namespace DynamicRagdoll.Demo {
             
             movementController = GetComponent<MovementController>();
             
-            humanoidAim = GetComponent<Combat.HumanoidAim>();
+            humanoidAim = GetComponent<Game.Combat.HumanoidAim>();
 
 
 
@@ -102,18 +100,21 @@ namespace DynamicRagdoll.Demo {
         void OnGetUpEnd () {
             if (ragdollController.state == RagdollControllerState.Animated) {
                 // Debug.Log("ended getup");
-                movementController.EnableScriptedMovement(false);
+                // movementController.scriptedMove = false;
+
+                movementController.EnableScriptedMove(GetInstanceID(), false);
+
             }
         }
 
-        Combat.HumanoidAim humanoidAim;
+        Game.Combat.HumanoidAim humanoidAim;
 
         void OnGoRagdoll () {
             humanoidAim.SetRightHandTransform(ragdollRightHand);
 
             // Debug.Log("went ragdoll");
             
-            movementController.EnableScriptedMovement(true);
+            movementController.EnableScriptedMove(GetInstanceID(), true);
 
             // if we're falling, dont let us go "up"
             // ragdoll was falling up stairs...

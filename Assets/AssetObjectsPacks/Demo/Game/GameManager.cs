@@ -6,11 +6,11 @@ using UnityEngine.SceneManagement;
 using Syd.UI;
 using CustomInputManager;
 
-public class Game : MonoBehaviour 
+public class GameManager : MonoBehaviour 
 {
 	public UIMenu pauseMenu;
 
-	static Game m_instance;
+	static GameManager m_instance;
 	public float defaultTimescale = 1.0f;
 
 	public bool isPaused;
@@ -81,6 +81,9 @@ public class Game : MonoBehaviour
 			initialTimeScale = Time.timeScale;
 			initialFixedDeltaTime = Time.fixedDeltaTime;
 			initialMaxDelta = Time.maximumDeltaTime;
+
+
+			// timeDilation = .5f;
 		}
 	}
 

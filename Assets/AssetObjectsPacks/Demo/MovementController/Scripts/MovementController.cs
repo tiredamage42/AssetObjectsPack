@@ -1,12 +1,13 @@
-﻿using System.Collections;
-using UnityEngine;
-using AssetObjectsPacks;
+﻿using UnityEngine;
+// using AssetObjectsPacks;
 using System.Collections.Generic;
 
 namespace Movement {
 
-    [RequireComponent(typeof(EventPlayer))]
+    // [RequireComponent(typeof(EventPlayer))]
     public class MovementController : MonoBehaviour {
+
+        public event System.Action onUpdateMovementState;
     
     //change if you've changed the pack name or the animatins pack itself
     public const string animationPackName = "Animations";
@@ -16,89 +17,64 @@ namespace Movement {
     [Range(0,2)] public int speed;
     [Range(0,1)] public int stance;
 
-    EventPlayer eventPlayer;
-    public int eventLayer = 0;
-
+    // EventPlayer eventPlayer;
+    
     public Vector3 moveDireciton { get { return Movement.GetRelativeTransformDirection(direction, transform); } } 
-            
-    const string speedName = "Speed", directionName = "Direction", stanceName = "Stance";
-
-
+    
     void Awake () {     
-        eventPlayer = GetComponent<EventPlayer>();  
-        eventPlayer.AddParameters(
-            new CustomParameter[] {
-                // paremeters linked with script properties:
-                new CustomParameter ( speedName, () => speed ),
-                new CustomParameter ( directionName, () => (int)direction ),
-                new CustomParameter ( stanceName, () => stance ),
-            }
-        );
-
-        AddChangeLoopStateValueCheck ( () => speed );
-        AddChangeLoopStateValueCheck ( () => direction );
-        AddChangeLoopStateValueCheck ( () => stance );
+        // eventPlayer = GetComponent<EventPlayer>();  
+        
+        AddChangeLoopStateValueCheck ( () => speed, "Speed" );
+        AddChangeLoopStateValueCheck ( () => direction, "direction" );
+        AddChangeLoopStateValueCheck ( () => stance, "Stance" );
 
     }
     void Update () {
         CheckSpeedDirectionChanges();
     }
+
+
+    HashSet<int> scriptedMoveRequests = new HashSet<int>();
+    public void EnableScriptedMove (int id, bool enabled) {
+        if (enabled) {
+            if (!scriptedMoveRequests.Contains(id)) scriptedMoveRequests.Add(id);
+        }
+        else {
+            scriptedMoveRequests.Remove(id);
+        }
+    }
+
     
-    public bool scriptedMove { get { return _scriptedMove || eventPlayer.cueMoving; } }
-    public bool _scriptedMove;
+    public bool scriptedMove { get { return scriptedMoveRequests.Count > 0; } }
+
+    // public bool scriptedMove { get { return _scriptedMove || eventPlayer.cueMoving; } }
+    // public bool _scriptedMove;
     /*
         parameters:
             layer (internally set), override move
 
         overrides movement so no other movements can trigger
     */
-    void EnableScriptedMovement (object[] parameters) {
-        //moveEnabled = (bool)parameters[1];    
-        EnableScriptedMovement((bool)parameters[1]);
-    }    
+    // void EnableScriptedMovement (object[] parameters) {
+    //     //moveEnabled = (bool)parameters[1];    
+    //     EnableScriptedMovement((bool)parameters[1]);
+    // }    
 
 
-    public void EnableScriptedMovement(bool enabled) {
-        _scriptedMove = enabled;
-    }
+    // public void EnableScriptedMovement(bool enabled) {
+    //     _scriptedMove = enabled;
+    // }
 
-    /*
-        parameters:
-            layer (internally set)
-    
-        stops all movement and plays a loop animation for a single frame, 
-        so whatever animaition plays next will exit into a "still" loop
-
-        sets the player to stop the cue immediately after playing that frame
-    */
-    void StopMovement (object[] parameters) {
-        
+    public void StopMovementManual () {
         speed = 0;
         direction = Movement.Direction.Forward;
-
-        //force change so change doesnt register and override cue animation
-        ForceNonChangeForValueChecks();
     }
 
-    /*
-        parameters:
-            layer (internally set), int speed (optional), int direction (optional, current if not there)
-
-        starts playing movement animation loop for single frame
-
-        cue ends right after
-    */
-    void StartMovement(object[] parameters) {
-        int l = parameters.Length;
-        //unpack parameters
-        int newSpeed = (l > 1) ? (int)parameters[1] : -1;
-        Movement.Direction newDirection = (Movement.Direction)((l > 2) ? ((int)parameters[2]) : (int)direction);
         
-        //force change so change doesnt register and override cue animation
-        speed = newSpeed <= 0 ? CalculateSpeed(newSpeed) : newSpeed;
-        direction = newDirection;
 
-        ForceNonChangeForValueChecks();
+    public void StartMovementManual(int speed=-1, int direction=-1) {
+        this.speed = speed <= 0 ? CalculateSpeed(speed) : speed;
+        this.direction = direction < 0 ? this.direction : ((Movement.Direction)direction);
     }
 
         
@@ -110,14 +86,6 @@ namespace Movement {
         return newSpeed;
     }
 
-    void UpdateLoopState () {
-        //immediately play the loop unless we're jumping or overriding movement
-        bool asInterruptor = !scriptedMove;
-        // if (asInterruptor) {
-        //     Debug.LogError("uhhh");
-        // }
-        Playlist.InitializePerformance("update Loop state", speed == 0 ? behavior.stillCue : behavior.moveCue, eventPlayer, false, eventLayer, new MiniTransform( Vector3.zero, Quaternion.identity), asInterruptor);
-    }
 
     HashSet<ValueTracker> valuesChangeLoopStates = new HashSet<ValueTracker>();
 
@@ -125,10 +93,9 @@ namespace Movement {
         add a method to get a variable, when the variable changes, the move controller will update its
         loops
             e.g. track an aiming variable, or a grounded variable
-
     */
-    public void AddChangeLoopStateValueCheck (System.Func<object> valueGetter) {
-        valuesChangeLoopStates.Add( new ValueTracker( valueGetter ) );
+    public void AddChangeLoopStateValueCheck (System.Func<object> valueGetter, string displayName) {
+        valuesChangeLoopStates.Add( new ValueTracker( valueGetter, valueGetter(), displayName ) );
     }
 
     /*
@@ -138,18 +105,21 @@ namespace Movement {
         e.g. 
             when a cue decides our loop for us
     */
-    void ForceNonChangeForValueChecks () {
+    public void ForceNonChangeForValueChecks () {
+
         foreach (var vt in valuesChangeLoopStates) {
             vt.UpdateLastValue();
         }
     }
 
     bool ShouldUpdateLoops () {
+
+        bool debug = true;
         bool shouldChange = false;
 
         // loop through all so they update last value
         foreach (var vt in valuesChangeLoopStates) {
-            if (vt.CheckValueChange()) {
+            if (vt.CheckValueChange(debug)) {
                 shouldChange = true;
             }
         }
@@ -162,8 +132,17 @@ namespace Movement {
         }
 
         if (ShouldUpdateLoops()) {
-            UpdateLoopState();
+            if (onUpdateMovementState != null) {
+                onUpdateMovementState();
+            }
         }
     }
 }
+
+
+
+
+
+
+
 }

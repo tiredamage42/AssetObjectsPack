@@ -1045,7 +1045,7 @@ public bool showAOWindow;
                 if (deleteIndicies.Contains(i)) {
                     if (i >= state[subStateIDsField].arraySize) {
                         int aoIndex = i - state[subStateIDsField].arraySize;
-                        state[assetObjectsField].DeleteAt(aoIndex);
+                        state[assetObjectsField].DeleteAt(aoIndex, "manual delete");
                     }
                     else {
                         DeleteState(state, GetStateByID( state[subStateIDsField][i].intValue), ref deleteOption);
@@ -1087,7 +1087,7 @@ public bool showAOWindow;
                     break;
                 }
             }
-            allStates.DeleteAt(indexInAll);
+            allStates.DeleteAt(indexInAll, "deleted state recursive");
         }
 
 
@@ -1117,7 +1117,7 @@ public bool showAOWindow;
             }
 
             //delete id from parents list
-            parentState[subStateIDsField].DeleteAt(indexInParent);
+            parentState[subStateIDsField].DeleteAt(indexInParent, "deleted state");
             
             DeleteSubStatesRecursive(stateToDelete);
             return true;
@@ -1181,7 +1181,7 @@ public bool showAOWindow;
                     if (i >= startingSubStatesCount) {
                         int aoIndex = i - startingSubStatesCount;
                         CopyAssetObject(targState[assetObjectsField].AddNew(), curState[assetObjectsField][aoIndex]);
-                        curState[assetObjectsField].DeleteAt(aoIndex);
+                        curState[assetObjectsField].DeleteAt(aoIndex, " because of moves (substate)");
                     }
                     
                     else {
@@ -1194,7 +1194,7 @@ public bool showAOWindow;
                         targState[subStateIDsField].AddNew().SetValue(movedStateID);
 
                         //delete movedState from orig state children
-                        curState[subStateIDsField].DeleteAt(stateIndex);
+                        curState[subStateIDsField].DeleteAt(stateIndex, " because of moves");
                     }
                 }
             }

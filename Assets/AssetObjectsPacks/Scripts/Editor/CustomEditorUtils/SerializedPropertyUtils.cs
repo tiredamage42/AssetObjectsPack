@@ -169,7 +169,7 @@ namespace AssetObjectsPacks {
                 
                 return newElement;
             }
-            public void DeleteAt (int index) {
+            public void DeleteAt (int index, string reason) {
                 
                 if (!CheckForArray(true)) return;
                 if (property.propertyType == SerializedPropertyType.ObjectReference && objRefValue != null) {
@@ -178,7 +178,7 @@ namespace AssetObjectsPacks {
                 property.DeleteArrayElementAtIndex(index);
                 RebuildArray(); 
 
-                Debug.Log("deleted and rebuilt");
+                Debug.Log("deleted and rebuilt " + reason);
             }
         #endregion
 

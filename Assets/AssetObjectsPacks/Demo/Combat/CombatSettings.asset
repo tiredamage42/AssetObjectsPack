@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd029f3dcc91548068fcde3ff9e17857, type: 3}
+  m_Name: CombatSettings
+  m_EditorClassIdentifier: 
+  gunFX:
+    muzzleFlashFX: {fileID: 8294122780562009594, guid: 6f6f7ff80ce644046aacf633d41835fa,
+      type: 3}
+    tracerFX: {fileID: 4066561543868584221, guid: c8b2a469825e64417b11dcdc4022b255,
+      type: 3}
+    shellFX: {fileID: 0}
+    impacts:
+      defaultImpact: {fileID: 3296370648351919917, guid: 45945d3c3b99e4deeb71f855717ab7f6,
+        type: 3}
+      taggedImpacts:
+      - tag: Wood
+        particle: {fileID: 8728917219909040751, guid: 0be14547f91ec4ce1b77391aec5b7465,
+          type: 3}
+      - tag: Flesh
+        particle: {fileID: 6661903134544702394, guid: 9346cf13994224ac690a8845d4e6db50,
+          type: 3}
+      - tag: Sand
+        particle: {fileID: 3319902739505891819, guid: 43ee28853d74b42e4a66c4dcf16f59b5,
+          type: 3}
+      - tag: Metal
+        particle: {fileID: 8885455788078243557, guid: 9bfa717f9a16645848788cdfed643463,
+          type: 3}

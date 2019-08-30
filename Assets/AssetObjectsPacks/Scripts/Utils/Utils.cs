@@ -39,10 +39,21 @@ namespace AssetObjectsPacks {
     }
 
     public struct MiniTransform {
-
+        public static readonly MiniTransform zero = new MiniTransform(Vector3.zero, Quaternion.identity);
         public Transform targetParent;
         public Vector3 pos;
         public Quaternion rot;
+
+        public void SetTransform (Transform transform) {
+            transform.position = pos;
+            transform.rotation = rot;
+        }
+        public void CopyTransform (Transform transform) {
+            pos = transform.position;
+            rot = transform.rotation;
+        }
+                            
+                            
         public MiniTransform (Vector3 pos, Quaternion rot) 
         => (this.pos, this.rot, this.targetParent) = (pos, rot, null);
         public MiniTransform(Transform t, bool useAsTargetParent) {

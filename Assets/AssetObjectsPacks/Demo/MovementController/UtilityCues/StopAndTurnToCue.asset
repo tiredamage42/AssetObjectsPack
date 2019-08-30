@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4ac55a32d0a714329bfbc7e4cc4b655b, type: 3}
-  m_Name: Cue Behavior
+  m_Name: StopAndTurnToCue
   m_EditorClassIdentifier: 
   events: []
   overrideDuration: -1
@@ -21,7 +21,9 @@ MonoBehaviour:
   positionOffset: {x: 0, y: 0, z: 0}
   rotationOffset: {x: 0, y: 0, z: 0}
   messageBlocks:
-  - 
+  - 'StopMovement(false);
+
+    TurnTo(position, false);'
   - 
   - 
   - 

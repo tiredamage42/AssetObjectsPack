@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using AssetObjectsPacks;
 
-namespace Combat {
+namespace Game.Combat {
     /*
         use if an entity has various sub objects (like ragdoll bones)
     */

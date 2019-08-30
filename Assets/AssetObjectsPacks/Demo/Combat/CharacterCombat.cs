@@ -4,7 +4,7 @@ using UnityEngine;
 using AssetObjectsPacks;
 using Movement;
 
-namespace Combat {
+namespace Game.Combat {
 
     public class CharacterCombat : MovementControllerComponent
     {
@@ -40,14 +40,14 @@ namespace Combat {
             eventPlayer.AddParameter( new CustomParameter ( "Aiming", () => isAiming ) );
 
             // change animation states when aiming changes
-            controller.AddChangeLoopStateValueCheck( () => isAiming );
+            controller.AddChangeLoopStateValueCheck( () => isAiming, "Aiming" );
 
-            gunChangeTracker = new ValueTracker( () => currentGun, null );
+            gunChangeTracker = new ValueTracker( () => currentGun, null, "CurrentGun" );
         }
         
         public override void UpdateLoop (float deltaTime) {
             
-            if (gunChangeTracker.CheckValueChange()) {
+            if (gunChangeTracker.CheckValueChange(false)) {
                 BroadcastGunChange();
             }
 

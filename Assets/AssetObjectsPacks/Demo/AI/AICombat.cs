@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
-using Combat;
+using Game.Combat;
 
 
-namespace Syd.AI {
+namespace Game.AI {
 
 
     public class AICombat : MonoBehaviour{
@@ -18,7 +18,8 @@ namespace Syd.AI {
         CharacterCombat characterCombat;
 
         void Update () {
-            if (aimDebug) {
+            if (false){
+            // if (aimDebug) {
                 agent.SetInterestPoint(aimDebug.position);
                 characterCombat.SetAimTarget(aimDebug.position);
                 

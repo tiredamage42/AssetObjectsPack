@@ -11,7 +11,7 @@ using Combat;
 
 
 
-namespace Syd.AI {
+namespace Game.AI {
 
 
     [RequireComponent(typeof(NavMeshAgent))]
@@ -38,7 +38,7 @@ namespace Syd.AI {
         
 
         Vector3 destination;
-        EventPlayer.EventPlayEnder endEventPlayerPlay;
+        // EventPlayer.EventPlayEnder endEventPlayerPlay;
         WaypointTracker waypointTracker;
 
         
@@ -75,7 +75,7 @@ namespace Syd.AI {
             if (turner.angleDifferenceWithTarget < 45){
                 return originalMovement;
             }
-            Debug.LogWarning("modifying move until turned");
+            // Debug.LogWarning("modifying move until turned");
 
             Vector3 newMove = turner.targetTurnDirection.normalized * originalMovement.magnitude;
             Debug.DrawLine(transform.position + Vector3.up * .25f, (transform.position + Vector3.up * .25f) + newMove.normalized * 10, Color.yellow);
@@ -118,18 +118,28 @@ namespace Syd.AI {
 
         public override void UpdateLoop(float deltaTime) {
             AdjustNavmeshAgentVariables();
-            if (controller.speed == 0) {
-                turner.SetTurnTarget(aiAgent.interestPoint);
-                turner.doAutoTurn = true;
+            
+            if (!aiAgent.paused) {
+
+                if (controller.speed == 0) {
+                    turner.SetTurnTarget(aiAgent.interestPoint);
+                    turner.doAutoTurn = true;
+                }
+
+
+                DebugLoop(deltaTime);
             }
-
-
-            DebugLoop(deltaTime);
         }
 
         
         public void GoTo (Vector3 destination, Action onArrive = null) {
-            Playlist.InitializePerformance("navigation ai", aiAgent.aiBehavior.navigateToCue, eventPlayer, false, eventLayer, new MiniTransform(destination, Quaternion.identity), true, onArrive);
+            
+            NavigateToManual ( destination, onArrive );
+
+            
+            // Playlist.InitializePerformance("navigation ai", aiAgent.aiBehavior.navigateToCue, eventPlayer, false, eventLayer, new MiniTransform(destination, Quaternion.identity), true, onArrive);
+
+
         }    
 
 
@@ -146,7 +156,7 @@ namespace Syd.AI {
                 if (Platformer.SamePlatformLevels(myPos, nextWaypoint)){
                     //manually trigger waypoint arrival, 
                     // Debug.LogError("manually triggered after platform");
-                    waypointTracker.ManuallyTriggerWaypointArrival("platform change");
+                    waypointTracker.ManuallyTriggerWaypointArrival(false);//"platform change");
                 }
             }   
         }
@@ -163,7 +173,7 @@ namespace Syd.AI {
 
 
         
-        void OnWaypointArrive () {
+        void OnWaypointArrive (bool immediate) {
             Vector3 lastCorner = path[currentPathCorner];
             currentPathCorner++;
             if (currentPathCorner < path.Length) {
@@ -186,8 +196,11 @@ namespace Syd.AI {
         }
 
         void OnDestinationArrive () {
-            endEventPlayerPlay.EndPlay("end nav");
-            endEventPlayerPlay = null;   
+            if (onDestinationArrive != null) {
+                onDestinationArrive();
+            }
+            // endEventPlayerPlay.EndPlay("end nav");
+            // endEventPlayerPlay = null;   
             pathStatus = NavMeshPathStatus.PathInvalid;     
         }
 
@@ -208,7 +221,7 @@ namespace Syd.AI {
             //is the origin position
             currentPathCorner = 0;
 
-            OnWaypointArrive();
+            OnWaypointArrive(false);
         }
 
         
@@ -217,22 +230,45 @@ namespace Syd.AI {
                 layer (internally set), vector3 target
         */
         
-        void NavigateTo(object[] parameters) {
+        // void NavigateTo(object[] parameters) {
 
             
+        //     // Debug.Log("navigating to");
+        //     //unpack parameters
+        //     int layer = (int)parameters[0];
+        //     destination = (Vector3)parameters[1];
+            
+        //     //take control of the player's end play callback, to call it when arriving at destination
+        //     endEventPlayerPlay = eventPlayer.OverrideEndPlay(layer, null, "pathfinder");
+            
+        //     //calculate path
+        //     agent.nextPosition = transform.position;
+        //     agent.SetDestination(destination);
+            
+        //     StartCoroutine(WaitForPathCalculation());
+        // }
+
+        Action onDestinationArrive;
+
+
+        public void NavigateToManual (Vector3 destination, Action onDestinationArrive) {
             // Debug.Log("navigating to");
             //unpack parameters
-            int layer = (int)parameters[0];
-            destination = (Vector3)parameters[1];
+            // int layer = (int)parameters[0];
+            // destination = (Vector3)parameters[1];
+
+            this.destination = destination;
+            this.onDestinationArrive = onDestinationArrive;
             
             //take control of the player's end play callback, to call it when arriving at destination
-            endEventPlayerPlay = eventPlayer.OverrideEndPlay(layer, null, "pathfinder");
+            // endEventPlayerPlay = eventPlayer.OverrideEndPlay(layer, null, "pathfinder");
             
             //calculate path
             agent.nextPosition = transform.position;
             agent.SetDestination(destination);
             
             StartCoroutine(WaitForPathCalculation());
+
         }
 
     }

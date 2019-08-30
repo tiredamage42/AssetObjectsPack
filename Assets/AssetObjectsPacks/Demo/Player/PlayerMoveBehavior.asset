@@ -12,8 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4830b1877ceb4e8b9cb312deb502619, type: 3}
   m_Name: PlayerMoveBehavior
   m_EditorClassIdentifier: 
+  defaultTurnEvents:
+  - {fileID: 11400000, guid: e33dbfe37c80a41c18b3ec8e96c07da2, type: 2}
+  stillEvents:
+  - {fileID: 11400000, guid: eb0141daca4724d1489f375730ffecc5, type: 2}
+  - {fileID: 11400000, guid: 16a4b0536c0064a1190b294516d6322a, type: 2}
+  moveEvents:
+  - {fileID: 11400000, guid: 8c6942bf3188e4696aa3d2bd3f7981c2, type: 2}
+  - {fileID: 11400000, guid: 16a4b0536c0064a1190b294516d6322a, type: 2}
   turnCue: {fileID: 11400000, guid: 63feea6627ea5450fa30a6c3a7dcd42d, type: 2}
-  wayPointCue: {fileID: 11400000, guid: a4f1d66e2802f442f849e2171b62da8d, type: 2}
   moveCue: {fileID: 11400000, guid: dd7cfedbfba594c8985b7408f847995a, type: 2}
   stillCue: {fileID: 11400000, guid: fc7e13cd992e44782bab57fc1c8ee6eb, type: 2}
   groundDistanceCheckAir: 0.01

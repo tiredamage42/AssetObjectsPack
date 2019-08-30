@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using AssetObjectsPacks;
 
-namespace Combat {
+namespace Game.Combat {
 
     /*
         characters, vehicles, barrels, etc...
@@ -35,8 +35,6 @@ namespace Combat {
 
         public delegate void OnDamageReceiveCallback (Vector3 origin, Transform damagedTransform, float baseDamage, int severity, float newHealth);
         public delegate float DamageAdjusterCallback (Vector3 origin, Transform damagedTransform, float baseDamage, int severity);
-
-
 
         public void SetDamageAdjuster (DamageAdjusterCallback damageAdjuster) {
             this.damageAdjuster = damageAdjuster;

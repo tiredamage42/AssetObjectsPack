@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Syd.AI {
+namespace Game.AI {
 
     [CreateAssetMenu(fileName = "New AI Behavior", menuName = "AI/Behavior", order = 2)]
     public class AIBehavior : ScriptableObject

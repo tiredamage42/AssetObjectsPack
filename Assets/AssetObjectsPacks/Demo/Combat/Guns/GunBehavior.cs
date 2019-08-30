@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Combat {
+
+using Game.FX;
+namespace Game.Combat {
 
     [CreateAssetMenu(fileName = "New Gun Behavior", menuName = "Combat/Gun Behavior", order = 2)]
     public class GunBehavior : ScriptableObject
@@ -15,6 +17,22 @@ namespace Combat {
         public LayerMask hitMask;
         public float maxDistance = 50;
         public AssetObjectsPacks.Event shootEvent, secondaryEvent;
+
+        public GunFX gunFX;
+
+        public float muzzleFlashSpeed = 1;
+        public float muzzleFlashSize = 1;
+
+        
+        public float impactSpeed = 1;
+        public float impactSize = 1;
+
+        public float tracerSpeed=1;
+        public float tracerSize=1;
+        public float shellEjectSpeed=1;
+        public float shellEjectSize=1;
+
+
         
     }
 }

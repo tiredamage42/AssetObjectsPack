@@ -4,7 +4,7 @@ using UnityEngine.AI;
 using System.Linq;
 using System;
 
-namespace Syd.AI {
+namespace Game.AI {
     public class NavigationManager : MonoBehaviour
     {
         static float totalNavArea;
@@ -92,7 +92,10 @@ namespace Syd.AI {
         static Vector3 GetRandomPointOnTriangle(Vector3[] vertices, int[] triangles, int idx)
         {
             Vector3[] v = new Vector3[3];
-            for (int i = 0; i < 3; i++) v[i] = vertices[triangles[3 * idx + i]];
+
+            for (int i = 0; i < 3; i++) 
+                v[i] = vertices[triangles[3 * idx + i]];
+            
             Vector3 a = v[1] - v[0];
             Vector3 b = v[2] - v[1];
             Vector3 c = v[2] - v[0];

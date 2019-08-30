@@ -15,19 +15,20 @@ namespace AssetObjectsPacks {
         [System.Serializable] public class Channel {
             public Cue[] cues;
             public CueBehavior cueBehavior;
-            public Event aoEvent;
+            public Event[] aoEvents;
 
             public bool useRandomChoice;
+            
+            public Channel(Event[] aoEvents) {
+                cues = null;
+                this.aoEvents = aoEvents;
+                cueBehavior = null;
+            }
             
             public Channel(CueBehavior cueBehavior) {
                 cues = null;
                 this.cueBehavior = cueBehavior;
-                aoEvent = null;
-            }
-            public Channel(Event aoEvent) {
-                cues = null;
-                this.aoEvent = aoEvent;
-                cueBehavior = null;
+                aoEvents = null;
             }
 
             public Channel(Cue parentCue, bool topLevel) {
@@ -48,7 +49,7 @@ namespace AssetObjectsPacks {
             }
         }
 
-        static bool CheckCounts (int channelCount, int playerCount) {
+        static bool CheckChannelCounts (int channelCount, int playerCount) {
             if (channelCount != playerCount) {
                 Debug.LogError("playlist/player coutn mismatch: playlists: " + channelCount + " players: " + playerCount);
                 return false;
@@ -57,11 +58,30 @@ namespace AssetObjectsPacks {
         }
 
 
+        //event plays cant be multi channel...
+        public static void InitializePerformance(string debugReason, Event playEvent, EventPlayer player, bool looped, int playerLayer, MiniTransform transforms, bool forceInterrupt = true, Action onEndPerformanceCallbacks = null) {
+            InitializePerformance(debugReason, new Event[] { playEvent }, player, looped, playerLayer, transforms, forceInterrupt, new Action[] { onEndPerformanceCallbacks });
+        }
+        public static void InitializePerformance(string debugReason, Event[] events, EventPlayer player, bool looped, int playerLayer, MiniTransform transforms, bool forceInterrupt = true, Action[] onEndPerformanceCallbacks = null) {
+        
+            Playlists.Performance.playlistPerformances.GetNewPerformance().InitializePerformance (
+                true, 
+                debugReason,
+                playerLayer,
+                new Channel[] { new Channel( events ) },
+                new EventPlayer[] { player },
+                transforms,
+                looped, 
+                forceInterrupt, 
+                onEndPerformanceCallbacks
+            );
+        }
+
         public static void InitializePerformance(string debugReason, CueBehavior playlists, EventPlayer players, bool looped, int playerLayer, MiniTransform transforms, bool forceInterrupt = true, Action onEndPerformanceCallbacks = null) {
             InitializePerformance(debugReason, new CueBehavior[] { playlists }, new EventPlayer[] { players }, looped, playerLayer, transforms, forceInterrupt, new Action[] { onEndPerformanceCallbacks });
         }
         public static void InitializePerformance(string debugReason, CueBehavior[] playlists, EventPlayer[] players, bool looped, int playerLayer, MiniTransform transforms, bool forceInterrupt = true, Action[] onEndPerformanceCallbacks = null) {
-            if (!CheckCounts(playlists.Length, players.Length)) {
+            if (!CheckChannelCounts(playlists.Length, players.Length)) {
                 return;
             }
             Playlists.Performance.playlistPerformances.GetNewPerformance().InitializePerformance (
@@ -79,31 +99,12 @@ namespace AssetObjectsPacks {
         }
 
         
-        public static void InitializePerformance(string debugReason, Event playlists, EventPlayer players, bool looped, int playerLayer, MiniTransform transforms, bool forceInterrupt = true, Action onEndPerformanceCallbacks = null) {
-            InitializePerformance(debugReason, new Event[] { playlists }, new EventPlayer[] { players }, looped, playerLayer, transforms, forceInterrupt, new Action[] { onEndPerformanceCallbacks });
-        }
-        public static void InitializePerformance(string debugReason, Event[] playlists, EventPlayer[] players, bool looped, int playerLayer, MiniTransform transforms, bool forceInterrupt = true, Action[] onEndPerformanceCallbacks = null) {
-            if (!CheckCounts(playlists.Length, players.Length)) {
-                return;
-            }
-            Playlists.Performance.playlistPerformances.GetNewPerformance().InitializePerformance (
-                true, 
-                debugReason,
-                playerLayer,
-                playlists.Generate( p => new Channel(p)).ToArray(),
-                players, 
-                transforms,
-                looped, 
-                forceInterrupt, 
-                onEndPerformanceCallbacks
-            );
-        }
 
         public static void InitializePerformance(string debugReason, Cue playlists, EventPlayer players, bool looped, int playerLayer, MiniTransform transforms, bool forceInterrupt = true, Action onEndPerformanceCallbacks = null) {
             InitializePerformance(debugReason, new Cue[] { playlists }, new EventPlayer[] { players }, looped, playerLayer, transforms, forceInterrupt, new Action[] { onEndPerformanceCallbacks });
         }
         public static void InitializePerformance(string debugReason, Cue[] playlists, EventPlayer[] players, bool looped, int playerLayer, MiniTransform transforms, bool forceInterrupt = true, Action[] onEndPerformanceCallbacks = null) {
-            if (!CheckCounts(playlists.Length, players.Length)) {
+            if (!CheckChannelCounts(playlists.Length, players.Length)) {
                 return;
             }
             Playlists.Performance.playlistPerformances.GetNewPerformance().InitializePerformance (
